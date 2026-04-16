@@ -20,6 +20,8 @@ model Profile {
   
   // Relations
   messages   Message[]
+
+  @@map("profiles")
 }
 
 model Message {
@@ -29,8 +31,9 @@ model Message {
   roomId     String
   
   // Foreign Key to Profile
-  authorId   String
+  authorId   String   @map("author_id") @db.Uuid
   author     Profile  @relation(fields: [authorId], references: [id])
 
   @@index([roomId]) // Faster querying for chat history
+  @@map("messages")
 }
