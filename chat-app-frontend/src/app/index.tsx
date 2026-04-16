@@ -1,3 +1,5 @@
+import { ChatRoom } from "../pages/ChatRoom";
+
 export function App() {
-  return <h1>chat app</h1>;
+  return <ChatRoom />;
 }
