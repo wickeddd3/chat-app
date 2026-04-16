@@ -1,0 +1,91 @@
+name: chat-app
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: chat-app-db
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: chat_app_db
+    ports:
+      - "5432:5432"
+    networks:
+      - chat-app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d chat_app_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command: postgres -c listen_addresses='*'
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: chat-app-pgadmin
+    depends_on:
+      - db
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: root@root.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+    networks:
+      - chat-app-network
+
+  chat-app-backend:
+    build: ./chat-app-backend
+    container_name: chat-app-backend
+    ports:
+      - "4000:4000"
+    networks:
+      - chat-app-network
+    env_file:
+      - ./chat-app-backend/.env
+    environment:
+      - DATABASE_URL=postgresql://root:root@db:5432/chat_app_db
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "export DATABASE_URL=postgresql://root:root@db:5432/chat_app_db && 
+            npx prisma migrate deploy &&
+            npx prisma generate && 
+            npx prisma db push &&
+            npm run dev"
+    volumes:
+      - ./chat-app-backend:/app
+      - /app/node_modules
+      - /app/dist
+
+  chat-app-frontend:
+    build: ./chat-app-frontend
+    container_name: chat-app-frontend
+    ports:
+      - "5173:5173"
+    networks:
+      - chat-app-network
+    env_file:
+      - ./chat-app-frontend/.env
+    environment:
+      - VITE_API_URL=http://localhost:4000
+    depends_on:
+      - chat-app-backend
+    volumes:
+      - ./chat-app-frontend:/app
+      - /app/node_modules
+      - /app/dist
+
+networks:
+  chat-app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
