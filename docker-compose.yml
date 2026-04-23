@@ -51,11 +51,13 @@ services:
       - ./chat-app-backend/.env
     environment:
       - DATABASE_URL=postgresql://root:root@db:5432/chat_app_db
+      - NODE_ENV=development
     depends_on:
       db:
         condition: service_healthy
     command: >
       sh -c "export DATABASE_URL=postgresql://root:root@db:5432/chat_app_db && 
+            export NODE_ENV=development &&
             npx prisma migrate deploy &&
             npx prisma generate && 
             npx prisma db push &&
