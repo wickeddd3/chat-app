@@ -1,5 +1,6 @@
-import { ChatRoom } from "../pages/ChatRoom";
+import { RouterProvider } from "react-router";
+import { router } from "@/app/router";
 
 export function App() {
-  return <ChatRoom />;
+  return <RouterProvider router={router} />;
 }
