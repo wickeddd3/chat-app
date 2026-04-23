@@ -4,6 +4,12 @@
     // File Layout
     "rootDirs": ["./src", "./prisma/generated"],
     "outDir": "./dist",
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["*"],
+      "@/prisma/*": ["../prisma/generated/*"]
+    },
+    "ignoreDeprecations": "6.0",
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
