@@ -81,7 +81,7 @@ export function ChatInbox() {
       <div className="border-b p-4">
         <h1 className="text-base font-medium text-foreground">Chat Inbox</h1>
       </div>
-      <div className="border-b overflow-y-auto">
+      <div className="flex-1 w-full overflow-y-auto">
         {chats.map((chat, index) => (
           <Link
             to={`/messages/${chat.email}`}
