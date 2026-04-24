@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import { AuthGuard } from "./AuthGuard";
 import { GuestGuard } from "./GuestGuard";
+import { AuthLayout } from "../layouts/auth-layout";
 
 export const router = createBrowserRouter([
   // --- PROTECTED ROUTES ---
@@ -38,18 +39,24 @@ export const router = createBrowserRouter([
     element: <GuestGuard />,
     children: [
       {
-        path: "sign-in",
-        lazy: async () => {
-          const module = await import("@/pages/SignInPage");
-          return { Component: module.default };
-        },
-      },
-      {
-        path: "sign-up",
-        lazy: async () => {
-          const module = await import("@/pages/SignUpPage");
-          return { Component: module.default };
-        },
+        path: "",
+        element: <AuthLayout />,
+        children: [
+          {
+            path: "sign-in",
+            lazy: async () => {
+              const module = await import("@/pages/SignInPage");
+              return { Component: module.default };
+            },
+          },
+          {
+            path: "sign-up",
+            lazy: async () => {
+              const module = await import("@/pages/SignUpPage");
+              return { Component: module.default };
+            },
+          },
+        ],
       },
     ],
   },
