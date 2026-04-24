@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import io from "socket.io-client";
-
-// Connect to the backend
-const socket = io("http://localhost:4000");
+import { authClient } from "@/shared/lib/better-auth.client";
+import { webSocketClient } from "@/shared/lib/socket-io.client";
 
 export function ChatRoom() {
+  const { data: session, isPending } = authClient.useSession();
+  console.log(session);
   const [room, setRoom] = useState("myRoom");
   const [username, setUsername] = useState("");
   const [message, setMessage] = useState("");
@@ -22,26 +22,44 @@ export function ChatRoom() {
           minute: "2-digit",
         }),
       };
-      await socket.emit("send_message", messageData);
+      await webSocketClient.emit("send_message", messageData);
       setMessage("");
     }
   };
 
   useEffect(() => {
     // Join room on mount
-    socket.emit("join_room", room);
+    webSocketClient.emit("join_room", room);
 
     // Listen for incoming messages
-    socket.on("receive_message", (data) => {
+    webSocketClient.on("receive_message", (data) => {
       console.log(data);
       setChatHistory((prev) => [...prev, data]);
     });
 
     // Cleanup to prevent duplicate listeners
     return () => {
-      socket.off("receive_message");
+      webSocketClient.off("receive_message");
     };
   }, [room]);
+
+  useEffect(() => {
+    // Only connect if the user is authenticated
+    if (session) {
+      webSocketClient.connect();
+
+      webSocketClient.on("connect_error", (err) => {
+        console.error("Auth failed on socket:", err.message);
+      });
+
+      return () => {
+        webSocketClient.disconnect();
+      };
+    }
+  }, [session]);
+
+  if (isPending) return <p>Loading session...</p>;
+  if (!session) return <p>Please log in to chat.</p>;
 
   return (
     <div className="w-full h-full flex flex-col justify-center items-center">
@@ -60,12 +78,12 @@ export function ChatRoom() {
           {chatHistory.map((content, i) => (
             <div
               key={i}
-              className={`flex ${content.author === username ? "justify-end" : "justify-start"}`}
+              className={`flex ${content.author?.name === username ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`p-2 rounded-lg ${content.author === username ? "bg-blue-500 text-white" : "bg-gray-200"}`}
+                className={`p-2 rounded-lg ${content.author?.name === username ? "bg-blue-500 text-white" : "bg-gray-200"}`}
               >
-                <p className="text-xs opacity-75">{content.author}</p>
+                <p className="text-xs opacity-75">{content.author?.name}</p>
                 <p>{content.text}</p>
               </div>
             </div>
