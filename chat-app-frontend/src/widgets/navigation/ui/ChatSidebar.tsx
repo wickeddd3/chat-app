@@ -30,7 +30,11 @@ export function ChatSidebar() {
         </div>
         <div className="flex flex-col gap-4">
           {navItems.map((nav) => (
-            <Link to={nav.url} className="flex justify-center items-center">
+            <Link
+              key={nav.url}
+              to={nav.url}
+              className="flex justify-center items-center"
+            >
               <button className="cursor-pointer">{<nav.icon />}</button>
             </Link>
           ))}
