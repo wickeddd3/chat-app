@@ -11,6 +11,7 @@ export function useSignUp() {
       email,
       password,
       name,
+      callbackURL: "/messages",
     });
     return response;
   };

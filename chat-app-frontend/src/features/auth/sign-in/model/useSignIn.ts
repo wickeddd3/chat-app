@@ -9,6 +9,7 @@ export function useSignIn() {
     const response = await authClient.signIn.email({
       email,
       password,
+      callbackURL: "/messages",
     });
     return response;
   };
