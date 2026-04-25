@@ -46,6 +46,19 @@ export const router = createBrowserRouter([
           },
         ],
       },
+      {
+        path: "people",
+        element: <ChatLayout />,
+        children: [
+          {
+            path: "",
+            lazy: async () => {
+              const module = await import("@/pages/UserListPage");
+              return { Component: module.default };
+            },
+          },
+        ],
+      },
     ],
   },
 
