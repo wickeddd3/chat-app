@@ -5,7 +5,7 @@ import { useMessages } from "./useMessages";
 export function useChatRoom(roomId: string) {
   const [chatHistory, setChatHistory] = useState<any[]>([]);
 
-  const { data: messages } = useMessages(roomId);
+  const { data: messages, isLoading } = useMessages(roomId);
 
   const handleIncomingMessage = (newMessage: any) => {
     setChatHistory((prev) => {
@@ -47,5 +47,5 @@ export function useChatRoom(roomId: string) {
     }
   }, [messages]);
 
-  return { chatHistory, setChatHistory };
+  return { chatHistory, setChatHistory, isLoading };
 }
