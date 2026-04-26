@@ -4,6 +4,8 @@ import { MessageInput } from "./MessageInput";
 import { useWebSocketConnect } from "../model/useWebSocketConnect";
 import { useChatRoom } from "../model/useChatRoom";
 import { useParams } from "react-router";
+import { LoadingPlaceholder } from "./LoadingPlaceholder";
+import { EmptyPlaceholder } from "./EmptyPlaceholder";
 
 export function ChatRoom() {
   // Get session and roomId from URL
@@ -14,25 +16,33 @@ export function ChatRoom() {
   useWebSocketConnect(!!session);
 
   // Manage chat history and real-time updates
-  const { chatHistory, setChatHistory } = useChatRoom(roomId || "");
+  const { chatHistory, setChatHistory, isLoading } = useChatRoom(roomId || "");
 
   if (isPending) return <p>Loading session...</p>;
 
   return (
-    <div className="flex-1 flex flex-col justify-center items-center pb-4">
+    <div className="flex-1 flex flex-col">
       <div className="w-full rounded-t-lg text-xs font-bold py-5 px-4">
         Live Chat: {roomId}
       </div>
-      <div className="flex-1 w-full overflow-y-auto space-y-4 p-4">
-        {chatHistory.map((message, i) => (
-          <MessageBubble
-            key={i}
-            message={message}
-            authId={session?.user?.id || ""}
-          />
-        ))}
+      <div className="flex-1 w-full overflow-y-auto flex flex-col justify-center items-center">
+        {isLoading && <LoadingPlaceholder />}
+
+        {!isLoading && !!chatHistory.length && (
+          <div className="w-full h-full flex flex-col gap-2 p-4">
+            {chatHistory.map((message, i) => (
+              <MessageBubble
+                key={i}
+                message={message}
+                authId={session?.user?.id || ""}
+              />
+            ))}
+          </div>
+        )}
+
+        {!isLoading && !!!chatHistory.length && <EmptyPlaceholder />}
       </div>
-      <div className="px-4 w-full">
+      <div className="w-full p-4">
         <MessageInput
           roomId={roomId || ""}
           author={session?.user}
