@@ -5,3 +5,14 @@ export interface Message {
   authorId: string;
   createdAt: string;
 }
+
+export interface InboxItem {
+  roomId: string;
+  lastMessage: string;
+  updatedAt: string;
+  otherUser: {
+    name: string;
+    image: string;
+    id: string;
+  };
+}
