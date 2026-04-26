@@ -35,10 +35,7 @@ export function MessageInput({
         name: author?.name,
         image: author?.image,
       },
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      createdAt: new Date().toISOString(),
       isSending: true,
     };
 

@@ -1,4 +1,5 @@
 import { AuthorAvatar } from "@/entities/message";
+import { dateToString } from "@/shared/utils/date-format";
 import { CheckCheck } from "lucide-react";
 
 export function MessageBubble({
@@ -10,7 +11,7 @@ export function MessageBubble({
 }) {
   const {
     content,
-    time,
+    createdAt,
     author: { id: authorId, name: authorName },
     isSending,
   } = message;
@@ -27,7 +28,7 @@ export function MessageBubble({
       >
         <div className="flex items-center gap-4">
           <p className="text-xs font-semibold opacity-75">{authorName}</p>
-          <span className="text-xs opacity-50">{time}</span>
+          <span className="text-xs opacity-50">{dateToString(createdAt)}</span>
         </div>
         <p className="text-sm">{content}</p>
         <CheckCheck

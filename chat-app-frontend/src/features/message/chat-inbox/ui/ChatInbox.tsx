@@ -2,6 +2,7 @@ import { AvatarWithBadge } from "@/entities/message";
 import { CheckCheck } from "lucide-react";
 import { Link } from "react-router";
 import { useInbox } from "../model/useInbox";
+import { dateToString } from "@/shared/utils/date-format";
 
 export function ChatInbox() {
   const { data: inbox } = useInbox();
@@ -29,7 +30,9 @@ export function ChatInbox() {
                   <span className="line-clamp-2 w-[70%] text-xs whitespace-break-spaces">
                     {lastMessage}
                   </span>
-                  <span className="ml-auto text-xs">{updatedAt}</span>
+                  <span className="ml-auto text-xs">
+                    {dateToString(updatedAt)}
+                  </span>
                 </div>
               </div>
             </Link>
