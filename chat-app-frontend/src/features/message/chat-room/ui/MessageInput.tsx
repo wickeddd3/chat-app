@@ -57,13 +57,15 @@ export function MessageInput({
   return (
     <form
       onSubmit={sendMessage}
-      className="w-full flex gap-2 bg-gray-100 rounded-lg"
+      className="w-full flex gap-2 bg-gray-100 rounded-full"
     >
       <input
-        className="flex-1 border p-4 rounded border-none outline-0"
+        id="message-input"
+        type="text"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type here..."
+        placeholder="Type here"
+        className="flex-1 border p-4 border-none outline-0 placeholder:text-sm"
       />
       <button
         type="submit"
