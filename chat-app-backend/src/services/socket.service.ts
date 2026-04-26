@@ -71,10 +71,7 @@ export class SocketService {
               name: savedMessage.author.name,
               image: savedMessage.author.image,
             },
-            time: new Date(savedMessage.createdAt).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
+            createdAt: savedMessage.createdAt,
           });
         } catch (error) {
           console.error("Failed to persist message:", error);
