@@ -1,17 +1,19 @@
 import { AuthorAvatar } from "@/entities/message";
+import { CheckCheck } from "lucide-react";
 
 export function MessageBubble({
-  content,
+  message,
   authId,
 }: {
-  content: any;
+  message: any;
   authId: string;
 }) {
   const {
-    text,
+    content,
     time,
     author: { id: authorId, name: authorName },
-  } = content;
+    isSending,
+  } = message;
 
   const isMessageAuthoredByCurrentUser = authorId === authId;
 
@@ -27,7 +29,11 @@ export function MessageBubble({
           <p className="text-xs font-semibold opacity-75">{authorName}</p>
           <span className="text-xs opacity-50">{time}</span>
         </div>
-        <p className="text-sm">{text}</p>
+        <p className="text-sm">{content}</p>
+        <CheckCheck
+          size={16}
+          className={`${isSending ? "opacity-30" : "opacity-100"} self-end`}
+        />
       </div>
     </div>
   );
