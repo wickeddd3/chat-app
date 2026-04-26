@@ -27,6 +27,31 @@ export class MessagesRepository {
     }
   }
 
+  public async getInbox(userId: string) {
+    const conversations = await this.db.message.findMany({
+      where: { roomId: { contains: userId } },
+      orderBy: { createdAt: "desc" },
+      distinct: ["roomId"],
+    });
+
+    return Promise.all(
+      conversations.map(async (msg) => {
+        const otherUserId = msg.roomId.split("--").find((id) => id !== userId);
+        const otherUser = await this.db.user.findUnique({
+          where: { id: otherUserId || "" },
+          select: { name: true, image: true, id: true },
+        });
+
+        return {
+          roomId: msg.roomId,
+          lastMessage: msg.content,
+          updatedAt: msg.createdAt,
+          otherUser,
+        };
+      }),
+    );
+  }
+
   public async create(data: {
     content: string;
     roomId: string;

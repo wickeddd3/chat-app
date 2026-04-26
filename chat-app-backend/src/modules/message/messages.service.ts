@@ -12,6 +12,14 @@ export class MessagesService {
     }
   }
 
+  public async getInbox(userId: string) {
+    try {
+      return await this.messagesRepository.getInbox(userId);
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to retrieve inbox");
+    }
+  }
+
   public async saveMessage(data: {
     content: string;
     roomId: string;
