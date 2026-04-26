@@ -1,9 +1,18 @@
 import { AvatarWithBadge } from "@/entities/message";
-import { Link } from "react-router";
+import { useNavigate } from "react-router";
 import { useUsers } from "../model/useUsers";
+import { authClient } from "@/shared/lib/better-auth.client";
+import { generatePrivateRoomId } from "@/shared/utils/generate-room-id";
 
 export function UserList() {
   const { data: users, isLoading, error } = useUsers();
+  const { data: session } = authClient.useSession();
+  const navigate = useNavigate();
+
+  const handleMessageUser = (targetUserId: string) => {
+    const roomId = generatePrivateRoomId(session?.user?.id || "", targetUserId);
+    navigate(`/messages/${roomId}`);
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -22,9 +31,8 @@ export function UserList() {
       </div>
       <div className="flex-1 w-full overflow-y-auto">
         {users?.map(({ id, email, name }: any) => (
-          <Link
+          <div
             key={id}
-            to={`/messages/${email}`}
             className="flex items-center gap-4 border-b p-4 text-sm leading-tight whitespace-nowrap last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           >
             <AvatarWithBadge />
@@ -32,10 +40,13 @@ export function UserList() {
               <span className="text-sm font-medium">{name}</span>
               <span className="text-xs">{email}</span>
             </div>
-            <button className="bg-blue-500 text-gray-50 text-sm font-medium rounded-lg p-3 cursor-pointer hover:bg-blue-600">
+            <button
+              onClick={() => handleMessageUser(id)}
+              className="bg-blue-500 text-gray-50 text-sm font-medium rounded-lg p-3 cursor-pointer hover:bg-blue-600"
+            >
               Message
             </button>
-          </Link>
+          </div>
         ))}
       </div>
     </div>
