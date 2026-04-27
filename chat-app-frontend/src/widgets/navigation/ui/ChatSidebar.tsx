@@ -32,7 +32,7 @@ export function ChatSidebar() {
   return (
     <div className="w-full h-full flex flex-col justify-between items-center gap-4 py-4">
       <div className="flex flex-col gap-8">
-        <div className="flex aspect-square size-12 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+        <div className="flex aspect-square size-12 items-center justify-center rounded-xl bg-blue-500 text-gray-50">
           <MessageCircleDashed />
         </div>
         <div className="flex flex-col gap-4">
