@@ -1,9 +1,8 @@
-import { Controller } from "@/interfaces/controller.interface";
+import { Controller, ControllerRequest } from "@/interfaces/controller.interface";
 import HttpException from "@/utils/http.exception";
 import { type NextFunction, type Request, type Response, Router } from "express";
 import { MessagesService } from "./messages.service";
 import { authMiddleware } from "@/middlewares/auth.middleware";
-import { User } from "@/prisma/client";
 
 export class MessagesController implements Controller {
   public path = "/messages";
@@ -19,7 +18,7 @@ export class MessagesController implements Controller {
     this.router.get(`${this.path}/inbox/:roomId`, [authMiddleware], this.getMessagesByRoomId);
   }
 
-  private getInbox = async (req: Request & { user?: User }, res: Response, next: NextFunction): Promise<void> => {
+  private getInbox = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req?.user?.id || "";
       const messages = await this.messagesService.getInbox(authUserId);
