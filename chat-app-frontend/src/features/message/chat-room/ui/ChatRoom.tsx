@@ -1,13 +1,14 @@
+import { useParams } from "react-router";
+import { useUserByUsername } from "@/entities/user";
 import { authClient } from "@/shared/lib/better-auth.client";
-import { MessageBubble } from "./MessageBubble";
-import { MessageInput } from "./MessageInput";
+import { generatePrivateRoomId } from "@/shared/utils/generate-room-id";
 import { useWebSocketConnect } from "../model/useWebSocketConnect";
 import { useChatRoom } from "../model/useChatRoom";
-import { useParams } from "react-router";
+import { MessageHeader } from "./MessageHeader";
+import { MessageBubble } from "./MessageBubble";
+import { MessageInput } from "./MessageInput";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
-import { useUserByUsername } from "@/entities/user";
-import { generatePrivateRoomId } from "@/shared/utils/generate-room-id";
 
 export function ChatRoom() {
   const { username } = useParams();
@@ -32,9 +33,7 @@ export function ChatRoom() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <div className="w-full rounded-t-lg text-xs font-bold py-5 px-4">
-        Live Chat: {roomId}
-      </div>
+      <MessageHeader user={targetUser} />
       <div className="flex-1 w-full overflow-y-auto flex flex-col justify-center items-center">
         {isLoading && <LoadingPlaceholder />}
 
