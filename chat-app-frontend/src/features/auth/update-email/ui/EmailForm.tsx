@@ -40,7 +40,7 @@ export function EmailForm({ email }: { email: string }) {
   }, [email]);
 
   return (
-    <form id="profile-form" onSubmit={form.handleSubmit(onSubmit)}>
+    <form id="email-form" onSubmit={form.handleSubmit(onSubmit)}>
       <div className="flex flex-col gap-6">
         <TextField
           control={form.control}
