@@ -11,47 +11,46 @@ export const router = createBrowserRouter([
     element: <AuthGuard />,
     children: [
       {
-        index: true,
-        lazy: async () => {
-          const module = await import("@/pages/HomePage");
-          return { Component: module.default };
-        },
-      },
-      {
-        path: "profile",
-        lazy: async () => {
-          const module = await import("@/pages/ProfilePage");
-          return { Component: module.default };
-        },
-      },
-      {
-        path: "messages",
+        path: "",
         element: <ChatLayout />,
         children: [
           {
-            path: "",
+            index: true,
             lazy: async () => {
-              const module = await import("@/pages/MessagesPage");
+              const module = await import("@/pages/HomePage");
               return { Component: module.default };
             },
+          },
+          {
+            path: "profile",
+            lazy: async () => {
+              const module = await import("@/pages/ProfilePage");
+              return { Component: module.default };
+            },
+          },
+          {
+            path: "messages",
             children: [
               {
-                path: ":username",
+                path: "",
                 lazy: async () => {
-                  const module = await import("@/pages/ChatRoomPage");
+                  const module = await import("@/pages/MessagesPage");
                   return { Component: module.default };
                 },
+                children: [
+                  {
+                    path: ":username",
+                    lazy: async () => {
+                      const module = await import("@/pages/ChatRoomPage");
+                      return { Component: module.default };
+                    },
+                  },
+                ],
               },
             ],
           },
-        ],
-      },
-      {
-        path: "people",
-        element: <ChatLayout />,
-        children: [
           {
-            path: "",
+            path: "people",
             lazy: async () => {
               const module = await import("@/pages/UserListPage");
               return { Component: module.default };
