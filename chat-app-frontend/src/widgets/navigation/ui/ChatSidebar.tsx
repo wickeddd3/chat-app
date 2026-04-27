@@ -1,13 +1,20 @@
 import {
-  CircleUser,
+  Home,
   MessageCircle,
   MessageCircleDashed,
   UsersRound,
 } from "lucide-react";
 import { Link } from "react-router";
+import { UserNav } from "./UserNav";
 
 export function ChatSidebar() {
   const navItems = [
+    {
+      title: "Home",
+      url: "/",
+      icon: Home,
+      isActive: true,
+    },
     {
       title: "Messages",
       url: "/messages",
@@ -40,11 +47,7 @@ export function ChatSidebar() {
           ))}
         </div>
       </div>
-      <div className="flex aspect-square size-12 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
-        <button className="cursor-pointer">
-          <CircleUser />
-        </button>
-      </div>
+      <UserNav />
     </div>
   );
 }
