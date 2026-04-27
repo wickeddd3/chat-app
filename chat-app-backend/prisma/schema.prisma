@@ -13,20 +13,24 @@ datasource db {
 }
 
 model User {
-  id            String    @id
+  id            String   @id
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean  @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  sessions      Session[]
-  accounts      Account[]
-  messages      Message[]
+  sessions Session[]
+  accounts Account[]
+  messages Message[]
+
+  username        String?
+  displayUsername String?
 
   @@unique([email])
   @@map("users")
+  @@unique([username])
 }
 
 model Session {
@@ -84,7 +88,7 @@ model Message {
   roomId    String
   // Foreign Key to User
   authorId  String   @map("author_id")
-  author    User  @relation(fields: [authorId], references: [id])
+  author    User     @relation(fields: [authorId], references: [id])
 
   // Faster querying for chat history
   @@index([roomId])
