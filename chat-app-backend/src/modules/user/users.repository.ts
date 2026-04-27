@@ -11,7 +11,7 @@ export class UsersRepository {
         select: {
           id: true,
           name: true,
-          email: true,
+          username: true,
           image: true,
         },
         orderBy: { createdAt: "asc" },
