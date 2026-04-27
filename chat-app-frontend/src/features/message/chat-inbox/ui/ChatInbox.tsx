@@ -14,10 +14,10 @@ export function ChatInbox() {
       </div>
       <div className="flex-1 w-full overflow-y-auto">
         {inbox?.map(
-          ({ roomId, lastMessage, updatedAt, otherUser: { name } }: any) => (
+          ({ lastMessage, updatedAt, otherUser: { name, username } }: any) => (
             <Link
-              to={`/messages/${roomId}`}
-              key={roomId}
+              to={`/messages/@${username}`}
+              key={`@${username}`}
               className="flex items-center gap-4 border-b p-4 text-sm leading-tight whitespace-nowrap last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             >
               <AvatarWithBadge />
