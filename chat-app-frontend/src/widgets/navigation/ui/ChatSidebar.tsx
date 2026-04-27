@@ -6,6 +6,11 @@ import {
 } from "lucide-react";
 import { Link } from "react-router";
 import { UserNav } from "./UserNav";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/shared/ui/shadcn/tooltip";
 
 export function ChatSidebar() {
   const navItems = [
@@ -37,13 +42,20 @@ export function ChatSidebar() {
         </div>
         <div className="flex flex-col gap-4">
           {navItems.map((nav) => (
-            <Link
-              key={nav.url}
-              to={nav.url}
-              className="flex justify-center items-center"
-            >
-              <button className="cursor-pointer">{<nav.icon />}</button>
-            </Link>
+            <Tooltip key={nav.title}>
+              <TooltipTrigger asChild>
+                <Link
+                  key={nav.url}
+                  to={nav.url}
+                  className="flex justify-center items-center"
+                >
+                  <button className="cursor-pointer">{<nav.icon />}</button>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>{nav.title}</p>
+              </TooltipContent>
+            </Tooltip>
           ))}
         </div>
       </div>
