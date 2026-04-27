@@ -11,4 +11,12 @@ export class UsersService {
       throw new Error(error?.message || "Failed to retrieve users");
     }
   }
+
+  public async getUserByUsername(username: string): Promise<Partial<User> | null> {
+    try {
+      return await this.usersRepository.getByUsername(username);
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to retrieve user");
+    }
+  }
 }

@@ -22,4 +22,20 @@ export class UsersRepository {
       throw new Error(error?.message || "Failed to retrieve users");
     }
   }
+
+  public async getByUsername(username: string): Promise<Partial<User> | null> {
+    try {
+      return await this.db.user.findUnique({
+        where: { username: username },
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          image: true,
+        },
+      });
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to retrieve user");
+    }
+  }
 }
