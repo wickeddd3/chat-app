@@ -36,7 +36,7 @@ export const router = createBrowserRouter([
             },
             children: [
               {
-                path: ":roomId",
+                path: ":username",
                 lazy: async () => {
                   const module = await import("@/pages/ChatRoomPage");
                   return { Component: module.default };
