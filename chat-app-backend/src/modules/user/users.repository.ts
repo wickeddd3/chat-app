@@ -4,9 +4,10 @@ import type { User } from "@/prisma/client";
 export class UsersRepository {
   private db = prisma;
 
-  public async list(): Promise<Partial<User[]>> {
+  public async list(authUserId: string): Promise<Partial<User[]>> {
     try {
       const users = await this.db.user.findMany({
+        where: { id: { not: authUserId } },
         select: {
           id: true,
           name: true,

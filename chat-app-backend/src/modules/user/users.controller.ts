@@ -1,6 +1,6 @@
-import { Controller } from "@/interfaces/controller.interface";
+import { Controller, ControllerRequest } from "@/interfaces/controller.interface";
 import HttpException from "@/utils/http.exception";
-import { type NextFunction, type Request, type Response, Router } from "express";
+import { type NextFunction, type Response, Router } from "express";
 import { UsersService } from "./users.service";
 import { authMiddleware } from "@/middlewares/auth.middleware";
 
@@ -17,9 +17,10 @@ export class UsersController implements Controller {
     this.router.get(`${this.path}`, [authMiddleware], this.getAllUsers);
   }
 
-  private getAllUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  private getAllUsers = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const users = await this.usersService.getAllUsers();
+      const authUserId = req?.user?.id || "";
+      const users = await this.usersService.getAllUsers(authUserId);
 
       res.status(200).json(users);
     } catch (error: any) {
