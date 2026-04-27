@@ -1,3 +1,4 @@
+import { Toaster } from "@/shared/ui/shadcn/sonner";
 import { ChatSidebar } from "@/widgets/navigation";
 import { Outlet } from "react-router";
 
@@ -10,6 +11,7 @@ export function ChatLayout() {
       <main className="flex flex-1 overflow-hidden">
         <Outlet />
       </main>
+      <Toaster theme="light" />
     </div>
   );
 }
