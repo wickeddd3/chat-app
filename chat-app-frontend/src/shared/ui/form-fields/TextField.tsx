@@ -21,7 +21,8 @@ interface TextInputFieldProps<T extends FieldValues> {
   type?: string;
   placeholder?: string;
   description?: string;
-  className?: string;
+  inputClassName?: string;
+  labelClassName?: string;
 }
 
 export function TextField<T extends FieldValues>({
@@ -32,15 +33,18 @@ export function TextField<T extends FieldValues>({
   type = "text",
   placeholder = "",
   description = "",
-  className = "",
+  inputClassName = "",
+  labelClassName = "",
 }: TextInputFieldProps<T>) {
   return (
     <Controller
       name={name}
       control={control}
       render={({ field, fieldState }) => (
-        <Field data-invalid={fieldState.invalid} className={cn("", className)}>
-          <FieldLabel htmlFor={id}>{label}</FieldLabel>
+        <Field data-invalid={fieldState.invalid}>
+          <FieldLabel htmlFor={id} className={cn("", labelClassName)}>
+            {label}
+          </FieldLabel>
           <Input
             {...field}
             type={type}
@@ -48,6 +52,7 @@ export function TextField<T extends FieldValues>({
             aria-invalid={fieldState.invalid}
             placeholder={placeholder}
             autoComplete={name}
+            className={cn("", inputClassName)}
           />
           {description && <FieldDescription>{description}</FieldDescription>}
           {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
