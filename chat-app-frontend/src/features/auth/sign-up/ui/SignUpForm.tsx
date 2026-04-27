@@ -30,6 +30,7 @@ export function SignUpForm({
     defaultValues: {
       name: "",
       email: "",
+      username: "",
       password: "",
       confirmPassword: "",
     },
@@ -88,6 +89,12 @@ export function SignUpForm({
                 name="email"
                 id="email"
                 label="Email"
+              />
+              <TextField
+                control={form.control}
+                name="username"
+                id="username"
+                label="Username"
               />
               <Field>
                 <Field className="grid grid-cols-2 gap-4">
