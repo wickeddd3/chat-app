@@ -1,5 +1,4 @@
 import { BadgeCheckIcon, BellIcon, CogIcon, LogOutIcon } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/shadcn/avatar";
 import { Button } from "@/shared/ui/shadcn/button";
 import {
   DropdownMenu,
@@ -11,8 +10,12 @@ import {
 } from "@/shared/ui/shadcn/dropdown-menu";
 import { Link } from "react-router";
 import { useSignOut } from "@/features/auth/sign-out";
+import { AuthorAvatar } from "@/entities/message";
+import { authClient } from "@/shared/lib/better-auth.client";
 
 export function UserNav() {
+  const { data: session } = authClient.useSession();
+
   const { logout } = useSignOut();
 
   return (
@@ -23,10 +26,7 @@ export function UserNav() {
           size="icon"
           className="rounded-full cursor-pointer"
         >
-          <Avatar size="lg">
-            <AvatarImage src="https://github.com/shadcn.png" alt="shadcn" />
-            <AvatarFallback>LR</AvatarFallback>
-          </Avatar>
+          <AuthorAvatar imageSrc={session?.user?.image || ""} size="lg" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" sideOffset={8} className="w-40">
