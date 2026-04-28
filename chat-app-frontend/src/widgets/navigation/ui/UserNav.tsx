@@ -10,7 +10,7 @@ import {
 } from "@/shared/ui/shadcn/dropdown-menu";
 import { Link } from "react-router";
 import { useSignOut } from "@/features/auth/sign-out";
-import { AuthorAvatar } from "@/entities/message";
+import { UserAvatar } from "@/entities/user";
 import { authClient } from "@/shared/lib/better-auth.client";
 
 export function UserNav() {
@@ -26,7 +26,7 @@ export function UserNav() {
           size="icon"
           className="rounded-full cursor-pointer"
         >
-          <AuthorAvatar imageSrc={session?.user?.image || ""} size="lg" />
+          <UserAvatar imageSrc={session?.user?.image || ""} size="lg" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" sideOffset={8} className="w-40">

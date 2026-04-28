@@ -1,4 +1,4 @@
-import { AuthorAvatar } from "@/entities/message";
+import { UserAvatar } from "@/entities/user";
 import { dateToString } from "@/shared/utils/date-format";
 import { CheckCheck } from "lucide-react";
 
@@ -12,7 +12,7 @@ export function MessageBubble({
   const {
     content,
     createdAt,
-    author: { id: authorId, name: authorName },
+    author: { id: authorId, name: authorName, image: authorImage },
     isSending,
   } = message;
 
@@ -22,7 +22,7 @@ export function MessageBubble({
     <div
       className={`flex justify-start gap-2  ${isMessageAuthoredByCurrentUser ? "flex-row-reverse ml-12" : "mr-12"}`}
     >
-      <AuthorAvatar />
+      <UserAvatar imageSrc={authorImage} />
       <div
         className={`flex flex-col gap-2 p-3 ${isMessageAuthoredByCurrentUser ? "bg-blue-500 text-white rounded-l-lg rounded-br-lg" : "bg-gray-200 rounded-r-lg rounded-bl-lg"}`}
       >

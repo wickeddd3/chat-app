@@ -21,12 +21,12 @@ export function UserList() {
         </h1>
       </div>
       <div className="flex-1 w-full overflow-y-auto">
-        {users?.map(({ id, username, name }: any) => (
+        {users?.map(({ id, username, name, image }: any) => (
           <div
             key={id}
             className="flex items-center gap-4 border-b p-4 text-sm leading-tight whitespace-nowrap last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           >
-            <AvatarWithBadge />
+            <AvatarWithBadge imageSrc={image} />
             <div className="flex-1 flex flex-col items-start gap-2">
               <span className="text-sm font-medium">{name}</span>
               <span className="text-xs">{`@${username}`}</span>
