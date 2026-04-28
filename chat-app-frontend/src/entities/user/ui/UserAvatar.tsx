@@ -10,7 +10,7 @@ export function UserAvatar({
   return (
     <Avatar size={size}>
       <AvatarImage
-        src={imageSrc || "./default-avatar.jpg"}
+        src={imageSrc || "/default-avatar.jpg"}
         alt="author-avatar"
       />
     </Avatar>

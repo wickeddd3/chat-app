@@ -10,7 +10,7 @@ export function AvatarWithBadge({
   return (
     <Avatar size={size}>
       <AvatarImage
-        src={imageSrc || "./default-avatar.jpg"}
+        src={imageSrc || "/default-avatar.jpg"}
         alt="avatar-with-badge"
       />
       <AvatarBadge className="bg-green-600 dark:bg-green-800" />
