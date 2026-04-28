@@ -1,4 +1,3 @@
-import { AvatarWithBadge } from "@/entities/message";
 import { Card } from "@/shared/ui/shadcn/card";
 import {
   Tabs,
@@ -7,6 +6,7 @@ import {
   TabsTrigger,
 } from "@/shared/ui/shadcn/tabs";
 import { useAuth } from "@/entities/auth";
+import { UserAvatar } from "@/entities/user";
 import { ProfileForm } from "@/features/auth/update-profile";
 import { EmailForm } from "@/features/auth/update-email";
 import { PasswordForm } from "@/features/auth/update-password";
@@ -23,9 +23,9 @@ export default function ProfilePage() {
     <div className="h-full w-full flex justify-center items-center p-4">
       <div className="h-full max-w-2xl w-2xl flex flex-col gap-8 rounded-lg p-4">
         {/* Profile Header */}
-        <div className="bg-gray-100 rounded-lg flex justify-between items-center p-4">
+        <div className="bg-gray-100 rounded-lg flex justify-between items-center px-4 py-6">
           <div className="flex items-center gap-4">
-            <AvatarWithBadge imageSrc={authUser?.image || ""} />
+            <UserAvatar imageSrc={authUser?.image || ""} size="lg" />
             <div className="flex flex-col">
               <h1 className="text-md font-medium">{authUser?.name}</h1>
               <h6 className="text-sm">{`@${authUser?.username}`}</h6>

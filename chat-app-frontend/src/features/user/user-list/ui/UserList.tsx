@@ -1,4 +1,4 @@
-import { AvatarWithBadge } from "@/entities/message";
+import { UserAvatar } from "@/entities/user";
 import { Link } from "react-router";
 import { useUsers } from "../model/useUsers";
 
@@ -26,7 +26,7 @@ export function UserList() {
             key={id}
             className="flex items-center gap-4 border-b p-4 text-sm leading-tight whitespace-nowrap last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           >
-            <AvatarWithBadge imageSrc={image} />
+            <UserAvatar imageSrc={image} size="lg" />
             <div className="flex-1 flex flex-col items-start gap-2">
               <span className="text-sm font-medium">{name}</span>
               <span className="text-xs">{`@${username}`}</span>
