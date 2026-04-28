@@ -1,6 +1,6 @@
 import { Avatar, AvatarImage } from "@/shared/ui/shadcn/avatar";
 
-export function AuthorAvatar({
+export function UserAvatar({
   imageSrc,
   size = "sm",
 }: {
