@@ -1,5 +1,4 @@
 import { AvatarWithBadge } from "@/entities/message";
-import { CameraIcon } from "lucide-react";
 import { Card } from "@/shared/ui/shadcn/card";
 import {
   Tabs,
@@ -10,6 +9,7 @@ import {
 import { ProfileForm } from "@/features/auth/update-profile";
 import { EmailForm } from "@/features/auth/update-email";
 import { PasswordForm } from "@/features/auth/update-password";
+import { UploadAvatar } from "@/features/auth/upload-avatar";
 import { authClient } from "@/shared/lib/better-auth.client";
 
 export default function ProfilePage() {
@@ -25,18 +25,13 @@ export default function ProfilePage() {
         {/* Profile Header */}
         <div className="bg-gray-100 rounded-lg flex justify-between items-center p-4">
           <div className="flex items-center gap-4">
-            <AvatarWithBadge />
+            <AvatarWithBadge imageSrc={session?.user?.image || ""} />
             <div className="flex flex-col">
               <h1 className="text-md font-medium">{session?.user?.name}</h1>
               <h6 className="text-sm">{`@${session?.user?.username}`}</h6>
             </div>
           </div>
-          <div className="flex flex-col justify-center items-center">
-            <button className="p-2 rounded-full cursor-pointer hover:bg-gray-200">
-              <CameraIcon size={22} className="text-blue-500" />
-            </button>
-            <span className="text-xs text-gray-500">Upload avatar</span>
-          </div>
+          {session?.user?.id && <UploadAvatar userId={session?.user?.id} />}
         </div>
 
         <div className="flex flex-col">
