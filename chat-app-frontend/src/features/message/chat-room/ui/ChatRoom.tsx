@@ -1,6 +1,6 @@
 import { useParams } from "react-router";
+import { useAuth } from "@/entities/auth";
 import { useUserByUsername } from "@/entities/user";
-import { authClient } from "@/shared/lib/better-auth.client";
 import { generatePrivateRoomId } from "@/shared/utils/generate-room-id";
 import { useWebSocketConnect } from "../model/useWebSocketConnect";
 import { useChatRoom } from "../model/useChatRoom";
@@ -12,16 +12,13 @@ import { EmptyPlaceholder } from "./EmptyPlaceholder";
 
 export function ChatRoom() {
   const { username } = useParams();
-
-  // Get session and roomId from URL
-  const { data: session, isPending } = authClient.useSession();
-  const authUserId = session?.user?.id || "";
+  const { authId, authUser, isAuthPending } = useAuth();
 
   // 1. Resolve the username to get the target user's ID
   const { data: targetUser } = useUserByUsername(username);
 
   // 2. Generate a private roomId based on targetUser ID and authUser ID
-  const roomId = generatePrivateRoomId(targetUser?.id || "", authUserId);
+  const roomId = generatePrivateRoomId(targetUser?.id || "", authId || "");
 
   // 3. Establish WebSocket connection when roomID is ready
   useWebSocketConnect(!!roomId);
@@ -29,7 +26,7 @@ export function ChatRoom() {
   // Manage chat history and real-time updates
   const { chatHistory, setChatHistory, isLoading } = useChatRoom(roomId || "");
 
-  if (isPending) return <p>Loading session...</p>;
+  if (isAuthPending) return <p>Loading session...</p>;
 
   return (
     <div className="flex-1 flex flex-col">
@@ -40,7 +37,7 @@ export function ChatRoom() {
         {!isLoading && !!chatHistory.length && (
           <div className="w-full h-full flex flex-col gap-2 p-4">
             {chatHistory.map((message, i) => (
-              <MessageBubble key={i} message={message} authId={authUserId} />
+              <MessageBubble key={i} message={message} authId={authId || ""} />
             ))}
           </div>
         )}
@@ -50,7 +47,7 @@ export function ChatRoom() {
       <div className="w-full p-4">
         <MessageInput
           roomId={roomId || ""}
-          author={session?.user}
+          author={authUser}
           onMessageSent={(message) =>
             setChatHistory((prev) => [...prev, message])
           }

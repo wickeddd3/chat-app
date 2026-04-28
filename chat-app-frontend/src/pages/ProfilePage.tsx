@@ -6,16 +6,16 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/shared/ui/shadcn/tabs";
+import { useAuth } from "@/entities/auth";
 import { ProfileForm } from "@/features/auth/update-profile";
 import { EmailForm } from "@/features/auth/update-email";
 import { PasswordForm } from "@/features/auth/update-password";
 import { UploadAvatar } from "@/features/auth/upload-avatar";
-import { authClient } from "@/shared/lib/better-auth.client";
 
 export default function ProfilePage() {
-  const { data: session, isPending } = authClient.useSession();
+  const { authId, authUser, isAuthPending } = useAuth();
 
-  if (isPending) {
+  if (isAuthPending) {
     return <p>Loading profile...</p>;
   }
 
@@ -25,13 +25,13 @@ export default function ProfilePage() {
         {/* Profile Header */}
         <div className="bg-gray-100 rounded-lg flex justify-between items-center p-4">
           <div className="flex items-center gap-4">
-            <AvatarWithBadge imageSrc={session?.user?.image || ""} />
+            <AvatarWithBadge imageSrc={authUser?.image || ""} />
             <div className="flex flex-col">
-              <h1 className="text-md font-medium">{session?.user?.name}</h1>
-              <h6 className="text-sm">{`@${session?.user?.username}`}</h6>
+              <h1 className="text-md font-medium">{authUser?.name}</h1>
+              <h6 className="text-sm">{`@${authUser?.username}`}</h6>
             </div>
           </div>
-          {session?.user?.id && <UploadAvatar userId={session?.user?.id} />}
+          {authId && <UploadAvatar userId={authId} />}
         </div>
 
         <div className="flex flex-col">
@@ -54,14 +54,14 @@ export default function ProfilePage() {
           <TabsContent value="profile">
             <Card className="py-10 px-6">
               <ProfileForm
-                name={session?.user?.name || ""}
-                username={session?.user?.username || ""}
+                name={authUser?.name || ""}
+                username={authUser?.username || ""}
               />
             </Card>
           </TabsContent>
           <TabsContent value="email">
             <Card className="py-10 px-6">
-              <EmailForm email={session?.user?.email || ""} />
+              <EmailForm email={authUser?.email || ""} />
             </Card>
           </TabsContent>
           <TabsContent value="password">
