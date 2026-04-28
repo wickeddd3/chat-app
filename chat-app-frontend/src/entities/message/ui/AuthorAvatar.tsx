@@ -1,9 +1,18 @@
 import { Avatar, AvatarImage } from "@/shared/ui/shadcn/avatar";
 
-export function AuthorAvatar() {
+export function AuthorAvatar({
+  imageSrc,
+  size = "sm",
+}: {
+  imageSrc: string;
+  size?: "sm" | "default" | "lg" | undefined;
+}) {
   return (
-    <Avatar size="sm">
-      <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+    <Avatar size={size}>
+      <AvatarImage
+        src={imageSrc || "./default-avatar.jpg"}
+        alt="author-avatar"
+      />
     </Avatar>
   );
 }
