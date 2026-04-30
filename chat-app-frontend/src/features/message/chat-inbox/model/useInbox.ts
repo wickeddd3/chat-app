@@ -3,12 +3,20 @@ import { getInbox } from "../api/messages.api";
 import type { InboxItem } from "@/entities/message";
 
 export function useInbox(): {
-  data: Partial<InboxItem[]> | undefined;
+  inbox: InboxItem[];
   isLoading: boolean;
+  isEmpty: boolean;
   error: unknown;
 } {
-  return useQuery({
+  const { data, isLoading, error } = useQuery<InboxItem[]>({
     queryKey: ["inbox"],
     queryFn: getInbox,
   });
+
+  return {
+    inbox: data ?? [],
+    isLoading,
+    isEmpty: !isLoading && !!!(data && data.length),
+    error,
+  };
 }

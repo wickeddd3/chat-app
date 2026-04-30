@@ -1,7 +1,7 @@
 import type { InboxItem } from "@/entities/message";
 import apiRequest from "@/shared/lib/axios.client";
 
-export async function getInbox(): Promise<Partial<InboxItem[]>> {
+export async function getInbox(): Promise<InboxItem[]> {
   try {
     const { data } = await apiRequest({
       url: "api/messages/inbox",
