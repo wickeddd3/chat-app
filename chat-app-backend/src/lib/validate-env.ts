@@ -7,6 +7,7 @@ export const validateEnv = (): void => {
     }),
     PORT: port({ default: 4000 }),
     DATABASE_URL: str(),
+    REDIS_URL: str(),
     APP_URL: str(),
     BETTER_AUTH_SECRET: str(),
   });
