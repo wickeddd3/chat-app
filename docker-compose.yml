@@ -20,11 +20,31 @@ services:
       retries: 5
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    command: postgres -c listen_addresses='*'
-    logging:
-      options:
-        max-size: "10m"
-        max-file: "3"
+
+  redis:
+    image: redis:7-alpine
+    container_name: chat-app-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - chat-app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: chat-app-redis-insight
+    restart: always
+    ports:
+      - "5540:5540"
+    networks:
+      - chat-app-network
+    depends_on:
+      - redis
 
   pgadmin:
     image: dpage/pgadmin4
@@ -40,7 +60,7 @@ services:
     networks:
       - chat-app-network
 
-  chat-app-backend:
+  backend:
     build: ./chat-app-backend
     container_name: chat-app-backend
     ports:
@@ -51,23 +71,22 @@ services:
       - ./chat-app-backend/.env
     environment:
       - DATABASE_URL=postgresql://root:root@db:5432/chat_app_db
+      - REDIS_URL=redis://redis:6379
       - NODE_ENV=development
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     command: >
-      sh -c "export DATABASE_URL=postgresql://root:root@db:5432/chat_app_db && 
-            export NODE_ENV=development &&
-            npx prisma migrate deploy &&
-            npx prisma generate && 
+      sh -c "npx prisma generate && 
             npx prisma db push &&
             npm run dev"
     volumes:
       - ./chat-app-backend:/app
       - /app/node_modules
-      - /app/dist
 
-  chat-app-frontend:
+  frontend:
     build: ./chat-app-frontend
     container_name: chat-app-frontend
     ports:
@@ -79,11 +98,10 @@ services:
     environment:
       - VITE_API_URL=http://localhost:4000
     depends_on:
-      - chat-app-backend
+      - backend
     volumes:
       - ./chat-app-frontend:/app
       - /app/node_modules
-      - /app/dist
 
 networks:
   chat-app-network:
