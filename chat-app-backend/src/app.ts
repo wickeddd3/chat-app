@@ -9,12 +9,14 @@ import { ALLOWED_ORIGINS } from "@/config/cors-origins";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "@/lib/better-auth";
 import { WebSocketService } from "@/web-socket/web-socket.service";
+import { RedisService } from "@/services/redis.service";
 
 export class App {
   public express: Application;
   public port: number;
   public server: HttpServer;
   private webSocketService: WebSocketService;
+  private redisService: RedisService;
 
   constructor(controllers: Controller[], port: number) {
     this.express = express();
@@ -24,6 +26,9 @@ export class App {
     this.initializeMiddlewares();
     this.initializeAuth();
     this.initializeControllers(controllers);
+
+    this.redisService = new RedisService();
+    this.redisService.start();
 
     this.webSocketService = new WebSocketService(this.server);
     this.webSocketService.start();
