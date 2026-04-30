@@ -1,15 +1,16 @@
-import { Server as WebSocketServer, type Socket } from "socket.io";
+import { Server as SocketServer, type Socket } from "socket.io";
 import type { Server as HttpServer } from "http";
 import { APP_URL } from "@/config/app.config";
-import { MessagesService } from "@/modules/message/messages.service";
 import { socketAuthMiddleware } from "@/middlewares/socket-auth.middleware";
+import { SendMessageEvent } from "./send-message.event";
+import type { Event } from "@/interfaces/event.interface";
 
 export class SocketService {
-  private io: WebSocketServer;
-  private messagesService = new MessagesService();
+  private webSocketServer: SocketServer;
+  private sendMessageEvent!: Event;
 
   constructor(server: HttpServer) {
-    this.io = new WebSocketServer(server, {
+    this.webSocketServer = new SocketServer(server, {
       cors: {
         origin: APP_URL,
         methods: ["GET", "POST"],
@@ -17,16 +18,21 @@ export class SocketService {
       },
     });
 
-    this.setupMiddleware();
-    this.setupEventListeners();
+    this.initializeMiddleware();
+    this.initializeEvents();
+    this.initializeEventListeners();
   }
 
-  private setupMiddleware(): void {
-    this.io.use(socketAuthMiddleware);
+  private initializeMiddleware(): void {
+    this.webSocketServer.use(socketAuthMiddleware);
   }
 
-  private setupEventListeners(): void {
-    this.io.on("connection", (socket: Socket) => {
+  private initializeEvents(): void {
+    this.sendMessageEvent = new SendMessageEvent(this.webSocketServer);
+  }
+
+  private initializeEventListeners(): void {
+    this.webSocketServer.on("connection", (socket: Socket) => {
       const user = socket.data.user;
       console.log(`Connected: ${user.name} (${socket.id})`);
 
@@ -34,32 +40,7 @@ export class SocketService {
         socket.join(roomId);
       });
 
-      socket.on("send_message", async (data) => {
-        try {
-          // 1. Persist to Database
-          const savedMessage = await this.messagesService.saveMessage({
-            content: data.content,
-            roomId: data.roomId,
-            authorId: user.id,
-          });
-          // 2. Broadcast the saved message to the room
-          this.io.to(data.roomId).emit("receive_message", {
-            clientId: data.clientId, // Echo back clientId for optimistic UI reconciliation
-            id: savedMessage.id,
-            content: savedMessage.content,
-            roomId: savedMessage.roomId,
-            author: {
-              id: savedMessage.author.id,
-              name: savedMessage.author.name,
-              image: savedMessage.author.image,
-            },
-            createdAt: savedMessage.createdAt,
-          });
-        } catch (error) {
-          console.error("Failed to persist message:", error);
-          socket.emit("error", { message: "Message could not be sent" });
-        }
-      });
+      socket.on("send_message", async (data) => this.sendMessageEvent.execute(socket, user, data));
 
       socket.on("disconnect", () => {
         console.log(`Disconnected: ${user.name}`);
