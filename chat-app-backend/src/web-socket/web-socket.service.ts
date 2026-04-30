@@ -2,10 +2,10 @@ import { Server as SocketServer, type Socket } from "socket.io";
 import type { Server as HttpServer } from "http";
 import { APP_URL } from "@/config/app.config";
 import { socketAuthMiddleware } from "@/middlewares/socket-auth.middleware";
-import { SendMessageEvent } from "./send-message.event";
 import type { Event } from "@/interfaces/event.interface";
+import { SendMessageEvent } from "./events/send-message.event";
 
-export class SocketService {
+export class WebSocketService {
   private webSocketServer: SocketServer;
   private sendMessageEvent!: Event;
 
@@ -20,7 +20,6 @@ export class SocketService {
 
     this.initializeMiddleware();
     this.initializeEvents();
-    this.initializeEventListeners();
   }
 
   private initializeMiddleware(): void {
@@ -31,7 +30,7 @@ export class SocketService {
     this.sendMessageEvent = new SendMessageEvent(this.webSocketServer);
   }
 
-  private initializeEventListeners(): void {
+  public start(): void {
     this.webSocketServer.on("connection", (socket: Socket) => {
       const user = socket.data.user;
       console.log(`Connected: ${user.name} (${socket.id})`);

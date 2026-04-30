@@ -8,13 +8,13 @@ import { Controller } from "@/interfaces/controller.interface";
 import { ALLOWED_ORIGINS } from "@/config/cors-origins";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "@/lib/better-auth";
-import { SocketService } from "@/services/socket.service";
+import { WebSocketService } from "@/web-socket/web-socket.service";
 
 export class App {
   public express: Application;
   public port: number;
   public server: HttpServer;
-  private socketService: SocketService;
+  private webSocketService: WebSocketService;
 
   constructor(controllers: Controller[], port: number) {
     this.express = express();
@@ -25,7 +25,8 @@ export class App {
     this.initializeAuth();
     this.initializeControllers(controllers);
 
-    this.socketService = new SocketService(this.server);
+    this.webSocketService = new WebSocketService(this.server);
+    this.webSocketService.start();
   }
 
   public start(): void {
