@@ -1,9 +1,8 @@
 import { Server as WebSocketServer, type Socket } from "socket.io";
 import type { Server as HttpServer } from "http";
-import { auth } from "@/lib/better-auth";
 import { APP_URL } from "@/config/app.config";
-import { fromNodeHeaders } from "better-auth/node";
 import { MessagesService } from "@/modules/message/messages.service";
+import { socketAuthMiddleware } from "@/middlewares/socket-auth.middleware";
 
 export class SocketService {
   private io: WebSocketServer;
@@ -23,24 +22,7 @@ export class SocketService {
   }
 
   private setupMiddleware(): void {
-    this.io.use(async (socket, next) => {
-      try {
-        // Better-Auth session verification via handshake headers
-        const session = await auth.api.getSession({
-          headers: fromNodeHeaders(socket.handshake.headers),
-        });
-
-        if (!session) {
-          return next(new Error("Authentication failed"));
-        }
-
-        // Attach user info to socket data
-        socket.data.user = session.user;
-        next();
-      } catch (error) {
-        next(new Error("Internal Server Error"));
-      }
-    });
+    this.io.use(socketAuthMiddleware);
   }
 
   private setupEventListeners(): void {
