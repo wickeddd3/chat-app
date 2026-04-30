@@ -14,5 +14,6 @@ export interface InboxItem {
     name: string;
     image: string;
     id: string;
+    username: string;
   };
 }
