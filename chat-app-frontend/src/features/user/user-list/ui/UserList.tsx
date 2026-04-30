@@ -1,17 +1,10 @@
-import { UserAvatar } from "@/entities/user";
-import { Link } from "react-router";
 import { useUsers } from "../model/useUsers";
+import { EmptyPlaceholder } from "./EmptyPlaceholder";
+import { LoadingPlaceholder } from "./LoadingPlaceholder";
+import { UserListItem } from "./UserListItem";
 
 export function UserList() {
-  const { data: users, isLoading, error } = useUsers();
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error loading users</div>;
-  }
+  const { users, isLoading, isEmpty } = useUsers();
 
   return (
     <div className="flex-1 flex flex-col border-r">
@@ -21,24 +14,13 @@ export function UserList() {
         </h1>
       </div>
       <div className="flex-1 w-full overflow-y-auto">
-        {users?.map(({ id, username, name, image }: any) => (
-          <div
-            key={id}
-            className="flex items-center gap-4 border-b p-4 text-sm leading-tight whitespace-nowrap last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          >
-            <UserAvatar imageSrc={image} size="lg" />
-            <div className="flex-1 flex flex-col items-start gap-2">
-              <span className="text-sm font-medium">{name}</span>
-              <span className="text-xs">{`@${username}`}</span>
-            </div>
-            <Link
-              to={`/messages/@${username}`}
-              className="bg-blue-500 text-gray-50 text-sm font-medium rounded-lg p-3 cursor-pointer hover:bg-blue-600"
-            >
-              Message
-            </Link>
-          </div>
+        {isLoading && <LoadingPlaceholder />}
+
+        {users?.map((user) => (
+          <UserListItem key={user.id} user={user} />
         ))}
+
+        {isEmpty && <EmptyPlaceholder />}
       </div>
     </div>
   );

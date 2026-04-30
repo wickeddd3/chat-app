@@ -3,12 +3,20 @@ import { getUsers } from "../api/users.api";
 import type { User } from "@/entities/user";
 
 export function useUsers(): {
-  data: Partial<User[]> | undefined;
+  users: User[];
   isLoading: boolean;
+  isEmpty: boolean;
   error: unknown;
 } {
-  return useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["users"],
     queryFn: getUsers,
   });
+
+  return {
+    users: data ?? [],
+    isLoading,
+    isEmpty: !isLoading && !!!(data && data.length),
+    error,
+  };
 }
