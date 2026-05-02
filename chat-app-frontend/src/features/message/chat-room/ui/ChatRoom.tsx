@@ -2,7 +2,6 @@ import { useParams } from "react-router";
 import { useAuth } from "@/entities/auth";
 import { useUserByUsername } from "@/entities/user";
 import { generatePrivateRoomId } from "@/shared/utils/generate-room-id";
-import { useWebSocketConnect } from "../model/useWebSocketConnect";
 import { useChatRoom } from "../model/useChatRoom";
 import { MessageHeader } from "./MessageHeader";
 import { MessageBubble } from "./MessageBubble";
@@ -19,9 +18,6 @@ export function ChatRoom() {
 
   // 2. Generate a private roomId based on targetUser ID and authUser ID
   const roomId = generatePrivateRoomId(targetUser?.id || "", authId || "");
-
-  // 3. Establish WebSocket connection when roomID is ready
-  useWebSocketConnect(!!roomId);
 
   // Manage chat history and real-time updates
   const { chatHistory, setChatHistory, isLoading } = useChatRoom(roomId || "");
