@@ -39,7 +39,7 @@ export class MessagesRepository {
         const otherUserId = msg.roomId.split("--").find((id) => id !== userId);
         const otherUser = await this.db.user.findUnique({
           where: { id: otherUserId || "" },
-          select: { name: true, image: true, username: true },
+          select: { id: true, name: true, image: true, username: true },
         });
 
         return {
