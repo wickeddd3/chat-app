@@ -4,6 +4,7 @@ import { APP_URL } from "@/config/app.config";
 import { socketAuthMiddleware } from "@/middlewares/socket-auth.middleware";
 import type { Event } from "@/interfaces/event.interface";
 import { SendMessageEvent } from "./events/send-message.event";
+import { redisClient } from "@/lib/redis";
 
 export class WebSocketService {
   private webSocketServer: SocketServer;
@@ -31,9 +32,19 @@ export class WebSocketService {
   }
 
   public start(): void {
-    this.webSocketServer.on("connection", (socket: Socket) => {
+    this.webSocketServer.on("connection", async (socket: Socket) => {
       const user = socket.data.user;
+      const userId = socket.data.user.id;
+
       console.log(`Connected: ${user.name} (${socket.id})`);
+
+      // Initial check-in
+      await this.refreshPresence(userId);
+
+      // Listen for the pulse from the frontend
+      socket.on("heartbeat", async () => {
+        await this.refreshPresence(userId);
+      });
 
       socket.on("join_room", (roomId: string) => {
         socket.join(roomId);
@@ -41,9 +52,32 @@ export class WebSocketService {
 
       socket.on("send_message", async (data) => this.sendMessageEvent.execute(socket, user, data));
 
-      socket.on("disconnect", () => {
+      socket.on("disconnect", async () => {
         console.log(`Disconnected: ${user.name}`);
+
+        // Try to clean up manually for speed
+        await this.removePresence(userId);
       });
     });
+  }
+
+  private async refreshPresence(userId: string): Promise<void> {
+    const ttlKey = `presence:active:${userId}`;
+    const onlineSetKey = "presence:online_users";
+
+    // Set/Update key with a 60-second expiration
+    await redisClient.set(ttlKey, "true", { EX: 60 });
+
+    // Add to searchable online set
+    await redisClient.sAdd(onlineSetKey, userId);
+
+    this.webSocketServer.emit("user_status_change", { userId, status: "online" });
+  }
+
+  private async removePresence(userId: string): Promise<void> {
+    await redisClient.del(`presence:active:${userId}`);
+    await redisClient.sRem("presence:online_users", userId);
+
+    this.webSocketServer.emit("user_status_change", { userId, status: "offline" });
   }
 }
