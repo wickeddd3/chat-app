@@ -38,10 +38,16 @@ export class WebSocketService {
 
       console.log(`Connected: ${user.name} (${socket.id})`);
 
-      // Initial check-in
+      // 1. Initial check-in
       await this.refreshPresence(userId);
 
-      // Listen for the pulse from the frontend
+      // 2. Fetch the full list of online users from Redis
+      const onlineUserIds = await redisClient.sMembers("presence:online_users");
+
+      // 3. Emit only to the connecting user (private message)
+      socket.emit("online_users_list", onlineUserIds);
+
+      // 4. Listen for the pulse from the frontend
       socket.on("heartbeat", async () => {
         await this.refreshPresence(userId);
       });
