@@ -1,10 +1,10 @@
 import { webSocketClient } from "@/shared/lib/socket-io.client";
 import { useEffect } from "react";
 
-export function useWebSocketConnect(roomId: boolean) {
+export function useWebSocketConnect(isAuthenticated: boolean) {
   useEffect(() => {
-    // Only connect if roomId is ready
-    if (roomId) {
+    // Only connect if authenticated
+    if (isAuthenticated) {
       webSocketClient.connect();
 
       webSocketClient.on("connect_error", (err) => {
@@ -15,5 +15,5 @@ export function useWebSocketConnect(roomId: boolean) {
         webSocketClient.disconnect();
       };
     }
-  }, [roomId]);
+  }, [isAuthenticated]);
 }
