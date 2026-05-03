@@ -4,54 +4,6 @@ import type { Message } from "@/prisma/client";
 export class MessagesRepository {
   private db = prisma;
 
-  public async getMessagesByRoomId(roomId: string): Promise<Partial<Message[]>> {
-    try {
-      const messages = await this.db.message.findMany({
-        where: { roomId },
-        include: {
-          author: {
-            select: {
-              id: true,
-              name: true,
-              image: true,
-            },
-          },
-        },
-        orderBy: { createdAt: "asc" },
-        take: 50,
-      });
-
-      return messages as Partial<Message[]>;
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve messages");
-    }
-  }
-
-  public async getInbox(userId: string) {
-    const conversations = await this.db.message.findMany({
-      where: { roomId: { contains: userId } },
-      orderBy: { createdAt: "desc" },
-      distinct: ["roomId"],
-    });
-
-    return Promise.all(
-      conversations.map(async (msg) => {
-        const otherUserId = msg.roomId.split("--").find((id) => id !== userId);
-        const otherUser = await this.db.user.findUnique({
-          where: { id: otherUserId || "" },
-          select: { id: true, name: true, image: true, username: true },
-        });
-
-        return {
-          roomId: msg.roomId,
-          lastMessage: msg.content,
-          updatedAt: msg.createdAt,
-          otherUser,
-        };
-      }),
-    );
-  }
-
   public async create(data: {
     content: string;
     channelId: number;
@@ -72,6 +24,29 @@ export class MessagesRepository {
       });
     } catch (error: any) {
       throw new Error(error?.message || "Failed to create message");
+    }
+  }
+
+  public async getMessages(channelId: number): Promise<Partial<Message[]>> {
+    try {
+      const messages = await this.db.message.findMany({
+        where: { channelId },
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "asc" },
+        take: 50,
+      });
+
+      return messages as Partial<Message[]>;
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to retrieve messages");
     }
   }
 }

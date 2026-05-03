@@ -4,22 +4,6 @@ import { MessagesRepository } from "./messages.repository";
 export class MessagesService {
   private messagesRepository = new MessagesRepository();
 
-  public async getMessagesByRoomId(roomId: string): Promise<Partial<Message[]>> {
-    try {
-      return await this.messagesRepository.getMessagesByRoomId(roomId);
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve messages");
-    }
-  }
-
-  public async getInbox(userId: string) {
-    try {
-      return await this.messagesRepository.getInbox(userId);
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve inbox");
-    }
-  }
-
   public async saveMessage(data: {
     content: string;
     channelId: number;
@@ -29,6 +13,14 @@ export class MessagesService {
       return await this.messagesRepository.create(data);
     } catch (error: any) {
       throw new Error(error?.message || "Failed to save message");
+    }
+  }
+
+  public async getMessages(channelId: number): Promise<Partial<Message[]>> {
+    try {
+      return await this.messagesRepository.getMessages(channelId);
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to retrieve messages");
     }
   }
 }

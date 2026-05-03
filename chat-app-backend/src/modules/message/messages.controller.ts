@@ -14,25 +14,13 @@ export class MessagesController implements Controller {
   }
 
   private initializeRoutes(): void {
-    this.router.get(`${this.path}/inbox`, [authMiddleware], this.getInbox);
-    this.router.get(`${this.path}/inbox/:roomId`, [authMiddleware], this.getMessagesByRoomId);
+    this.router.get(`${this.path}/:channelId`, [authMiddleware], this.getMessages);
   }
 
-  private getInbox = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+  private getMessages = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authUserId = req?.user?.id || "";
-      const messages = await this.messagesService.getInbox(authUserId);
-
-      res.status(200).json(messages);
-    } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to retrieve messages"));
-    }
-  };
-
-  private getMessagesByRoomId = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const roomId = req.params.roomId as string;
-      const messages = await this.messagesService.getMessagesByRoomId(roomId);
+      const channelId = req.params.channelId as string;
+      const messages = await this.messagesService.getMessages(parseInt(channelId));
 
       res.status(200).json(messages);
     } catch (error: any) {
