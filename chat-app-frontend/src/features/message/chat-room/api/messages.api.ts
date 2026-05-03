@@ -1,10 +1,10 @@
 import type { Message } from "@/entities/message";
 import apiRequest from "@/shared/lib/axios.client";
 
-export async function getMessages(roomId: string): Promise<Partial<Message[]>> {
+export async function getMessages(channelId: string): Promise<Message[]> {
   try {
     const { data } = await apiRequest({
-      url: `/api/messages/inbox/${roomId}`,
+      url: `/api/messages/${channelId}`,
     }).get();
     return data;
   } catch (error) {

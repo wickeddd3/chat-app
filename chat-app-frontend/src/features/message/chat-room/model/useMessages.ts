@@ -2,14 +2,22 @@ import { useQuery } from "@tanstack/react-query";
 import { getMessages } from "../api/messages.api";
 import type { Message } from "@/entities/message";
 
-export function useMessages(roomId: string): {
-  data: Partial<Message[]> | undefined;
+export function useMessages(channelId: string): {
+  messages: Message[];
   isLoading: boolean;
+  isEmpty: boolean;
   error: unknown;
 } {
-  return useQuery({
-    queryKey: ["messages", roomId],
-    queryFn: () => getMessages(roomId),
-    enabled: !!roomId,
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["messages", channelId],
+    queryFn: () => getMessages(channelId),
+    enabled: !!channelId,
   });
+
+  return {
+    messages: data ?? [],
+    isLoading,
+    isEmpty: !isLoading && !!!(data && data.length),
+    error,
+  };
 }
