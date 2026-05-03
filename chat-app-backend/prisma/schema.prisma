@@ -23,7 +23,10 @@ model User {
 
   sessions Session[]
   accounts Account[]
+  channels Channel[]
+  channelMembers ChannelMember[]
   messages Message[]
+  messageReceipts MessageReceipt[]
 
   username        String?
   displayUsername String?
@@ -83,18 +86,70 @@ model Verification {
   @@map("verifications")
 }
 
+enum ChannelType {
+  DIRECT
+  GROUP
+}
+
+model Channel {
+  id        Int       @id @default(autoincrement())
+  name      String
+  type      ChannelType
+  authorId  String
+  createdBy User      @relation(fields: [authorId], references: [id])
+  createdAt DateTime  @default(now())
+
+  channelMembers  ChannelMember[]
+  messages  Message[]
+
+  @@index([id])
+  @@map("channels")
+}
+
+enum ChannelRole {
+  ADMIN
+  MEMBER
+}
+
+model ChannelMember {
+  id          Int       @id @default(autoincrement())
+  channelId   Int
+  channel     Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        ChannelRole
+  joinedAt    DateTime  @default(now())
+
+  @@unique([channelId, userId]) // One channel member per user
+  @@map("channel_members")
+}
+
 model Message {
   id        Int      @id @default(autoincrement())
   content   String
   createdAt DateTime @default(now())
-  roomId    String
-  // Foreign Key to User
+  channelId Int
+  channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])
 
-  // Faster querying for chat history
-  @@index([roomId])
+  parentId  Int?
+  parent    Message?  @relation("MessageToMessage", fields: [parentId], references: [id])
+  replies   Message[] @relation("MessageToMessage")
+
+  readBy    MessageReceipt[]
+
   @@map("messages")
 }
 
+model MessageReceipt {
+  id        Int      @id @default(autoincrement())
+  messageId Int
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  readAt    DateTime @default(now())
 
+  @@unique([messageId, userId]) // One receipt per user per message
+  @@map("message_receipts")
+}
