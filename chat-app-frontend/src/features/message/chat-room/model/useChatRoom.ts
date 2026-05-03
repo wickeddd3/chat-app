@@ -1,11 +1,9 @@
 import { webSocketClient } from "@/shared/lib/socket-io.client";
 import { useEffect, useState } from "react";
-import { useMessages } from "./useMessages";
+import type { Message } from "@/entities/message";
 
-export function useChatRoom(channelId: string) {
+export function useChatRoom(channelId: string, messages: Message[]) {
   const [chatHistory, setChatHistory] = useState<any[]>([]);
-
-  const { data: messages, isLoading } = useMessages(channelId);
 
   const handleIncomingMessage = (newMessage: any) => {
     setChatHistory((prev) => {
@@ -47,5 +45,5 @@ export function useChatRoom(channelId: string) {
     }
   }, [messages]);
 
-  return { chatHistory, setChatHistory, isLoading };
+  return { chatHistory, setChatHistory };
 }
