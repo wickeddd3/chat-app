@@ -24,6 +24,7 @@ export const auth = betterAuth({
         type: "date",
         required: false,
         input: false,
+        defaultValue: null,
       },
     },
   },
