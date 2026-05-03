@@ -54,7 +54,7 @@ export class MessagesRepository {
 
   public async create(data: {
     content: string;
-    roomId: string;
+    channelId: number;
     authorId: string;
   }): Promise<Message & { author: { id: string; name: string; image: string | null } }> {
     try {

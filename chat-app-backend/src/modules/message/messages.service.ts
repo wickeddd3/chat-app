@@ -22,7 +22,7 @@ export class MessagesService {
 
   public async saveMessage(data: {
     content: string;
-    roomId: string;
+    channelId: number;
     authorId: string;
   }): Promise<Message & { author: { id: string; name: string; image: string | null } }> {
     try {

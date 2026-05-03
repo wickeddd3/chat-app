@@ -16,15 +16,15 @@ export class SendMessageEvent implements Event {
       // 1. Persist to Database
       const savedMessage = await this.messagesService.saveMessage({
         content: data.content,
-        roomId: data.roomId,
+        channelId: data.channelId,
         authorId: user.id,
       });
       // 2. Broadcast the saved message to the room
-      this.webSocketServer.to(data.roomId).emit("receive_message", {
+      this.webSocketServer.to(data.channelId).emit("receive_message", {
         clientId: data.clientId, // Echo back clientId for optimistic UI reconciliation
         id: savedMessage.id,
         content: savedMessage.content,
-        roomId: savedMessage.roomId,
+        channelId: savedMessage.channelId,
         author: {
           id: savedMessage.author.id,
           name: savedMessage.author.name,
