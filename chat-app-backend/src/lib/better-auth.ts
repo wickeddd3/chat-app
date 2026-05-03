@@ -19,6 +19,13 @@ export const auth = betterAuth({
       enabled: true,
       updateEmailWithoutVerification: true,
     },
+    additionalFields: {
+      lastSeen: {
+        type: "date",
+        required: false,
+        input: false,
+      },
+    },
   },
   plugins: [
     username({

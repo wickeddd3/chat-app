@@ -28,6 +28,8 @@ model User {
   username        String?
   displayUsername String?
 
+  lastSeen DateTime?
+
   @@unique([email])
   @@map("users")
   @@unique([username])
@@ -87,10 +89,12 @@ model Message {
   createdAt DateTime @default(now())
   roomId    String
   // Foreign Key to User
-  authorId  String   @map("author_id")
+  authorId  String
   author    User     @relation(fields: [authorId], references: [id])
 
   // Faster querying for chat history
   @@index([roomId])
   @@map("messages")
 }
+
+
