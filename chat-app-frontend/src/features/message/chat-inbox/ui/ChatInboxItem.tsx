@@ -2,21 +2,17 @@ import { AvatarWithBadge, type InboxItem } from "@/entities/message";
 import { Link } from "react-router";
 import { CheckCheck } from "lucide-react";
 import { dateToString } from "@/shared/utils/date-format";
-import { usePresence } from "@/app/store/PresenceContext";
 
 export function ChatInboxItem({
   inboxItem: {
     lastMessage,
     updatedAt,
-    otherUser: { id, name, username, image },
+    otherUser: { name, username, image },
+    online,
   },
 }: {
-  inboxItem: InboxItem;
+  inboxItem: InboxItem & { online: boolean };
 }) {
-  const { isOnline } = usePresence();
-  const targetUserId = id;
-  const online = isOnline(targetUserId);
-
   return (
     <Link
       to={`/messages/@${username}`}
