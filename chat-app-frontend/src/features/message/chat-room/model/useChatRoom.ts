@@ -2,10 +2,10 @@ import { webSocketClient } from "@/shared/lib/socket-io.client";
 import { useEffect, useState } from "react";
 import { useMessages } from "./useMessages";
 
-export function useChatRoom(roomId: string) {
+export function useChatRoom(channelId: string) {
   const [chatHistory, setChatHistory] = useState<any[]>([]);
 
-  const { data: messages, isLoading } = useMessages(roomId);
+  const { data: messages, isLoading } = useMessages(channelId);
 
   const handleIncomingMessage = (newMessage: any) => {
     setChatHistory((prev) => {
@@ -30,7 +30,7 @@ export function useChatRoom(roomId: string) {
 
   useEffect(() => {
     // Join room on mount
-    webSocketClient.emit("join_room", roomId);
+    webSocketClient.emit("join_room", channelId);
 
     // Listen for incoming messages
     webSocketClient.on("receive_message", handleIncomingMessage);
@@ -39,7 +39,7 @@ export function useChatRoom(roomId: string) {
     return () => {
       webSocketClient.off("receive_message");
     };
-  }, [roomId]);
+  }, [channelId]);
 
   useEffect(() => {
     if (messages) {

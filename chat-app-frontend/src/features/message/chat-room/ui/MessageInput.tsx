@@ -3,11 +3,11 @@ import { webSocketClient } from "@/shared/lib/socket-io.client";
 import { useState } from "react";
 
 export function MessageInput({
-  roomId,
+  channelId,
   author,
   onMessageSent,
 }: {
-  roomId: string;
+  channelId: string;
   author?: Partial<{
     id: string;
     name: string;
@@ -28,7 +28,7 @@ export function MessageInput({
     // 2. Create the message object with optimistic data
     const messageData = {
       clientId,
-      roomId,
+      channelId,
       content: message,
       author: {
         id: author?.id,
@@ -44,7 +44,7 @@ export function MessageInput({
 
     // 4. Send to server
     webSocketClient.emit("send_message", {
-      roomId,
+      channelId,
       content: message,
       clientId,
     });
