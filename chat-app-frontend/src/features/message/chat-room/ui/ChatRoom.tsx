@@ -1,26 +1,34 @@
 import { useParams } from "react-router";
 import { useAuth } from "@/entities/auth";
 import { useUserByUsername } from "@/entities/user";
-import { generatePrivateRoomId } from "@/shared/utils/generate-room-id";
 import { useChatRoom } from "../model/useChatRoom";
 import { MessageHeader } from "./MessageHeader";
 import { MessageBubble } from "./MessageBubble";
 import { MessageInput } from "./MessageInput";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
+import { useChannel } from "@/entities/channel";
+import { useMessages } from "../model/useMessages";
 
 export function ChatRoom() {
   const { username } = useParams();
   const { authId, authUser, isAuthPending } = useAuth();
 
-  // 1. Resolve the username to get the target user's ID
+  // 1. Fetch target user's data based on username param
   const { data: targetUser } = useUserByUsername(username);
 
-  // 2. Generate a private roomId based on targetUser ID and authUser ID
-  const roomId = generatePrivateRoomId(targetUser?.id || "", authId || "");
+  // 2. Check if auth user and target user has an existing channel.
+  // Backend will create a channel if no existing channel, otherwise proceed
+  const { data: channel } = useChannel(targetUser?.id || "");
 
-  // Manage chat history and real-time updates
-  const { chatHistory, setChatHistory, isLoading } = useChatRoom(roomId || "");
+  // 3. Fetch channel messages
+  const { messages, isLoading } = useMessages(channel?.id || "");
+
+  // 4. Manage chat history and real-time updates
+  const { chatHistory, setChatHistory } = useChatRoom(
+    channel?.id || "",
+    messages,
+  );
 
   if (isAuthPending) return <p>Loading session...</p>;
 
@@ -42,7 +50,7 @@ export function ChatRoom() {
       </div>
       <div className="w-full p-4">
         <MessageInput
-          roomId={roomId || ""}
+          channelId={channel?.id || ""}
           author={authUser}
           onMessageSent={(message) =>
             setChatHistory((prev) => [...prev, message])
