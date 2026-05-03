@@ -1,10 +1,10 @@
-import type { InboxItem } from "@/entities/message";
+import type { InboxChannel } from "@/entities/channel";
 import apiRequest from "@/shared/lib/axios.client";
 
-export async function getInbox(): Promise<InboxItem[]> {
+export async function getInbox(): Promise<InboxChannel[]> {
   try {
     const { data } = await apiRequest({
-      url: "api/messages/inbox",
+      url: "api/channels",
     }).get();
     return data;
   } catch (error) {
