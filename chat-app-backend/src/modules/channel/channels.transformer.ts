@@ -12,9 +12,9 @@ export function channelToInboxChannel(channel: InboxChannel, authUserId: string)
     id: channel.id,
     type: channel.type,
     name: channel.name,
+    channelMembers: channel.channelMembers,
     displayName: isDirect ? otherMember?.name : channel.name,
     displayImage: isDirect ? otherMember?.image : null,
-    recipient: otherMember,
     lastMessage,
   };
 }
