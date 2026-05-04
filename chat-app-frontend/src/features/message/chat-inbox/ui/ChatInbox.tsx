@@ -42,6 +42,10 @@ export function ChatInbox() {
     return allInbox.filter((item) => item.online?.());
   }, [allInbox]);
 
+  const filteredByUnread = useMemo(() => {
+    return allInbox.filter((item) => item?.unreadCount);
+  }, [allInbox]);
+
   return (
     <div className="flex-1 flex flex-col border-r">
       <div className="p-4">
@@ -88,9 +92,9 @@ export function ChatInbox() {
           </TabsContent>
           <TabsContent value="unread">
             <ChatInboxResults
-              results={[]}
+              results={filteredByUnread}
               isLoading={isLoading}
-              isEmpty={true}
+              isEmpty={!!!filteredByUnread.length}
             />
           </TabsContent>
           <TabsContent value="groups">
