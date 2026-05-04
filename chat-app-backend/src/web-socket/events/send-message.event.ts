@@ -19,6 +19,7 @@ export class SendMessageEvent implements Event {
         channelId: data.channelId,
         authorId: user.id,
       });
+
       // 2. Broadcast the saved message to the room
       this.webSocketServer.to(data.channelId).emit("receive_message", {
         clientId: data.clientId, // Echo back clientId for optimistic UI reconciliation
@@ -32,6 +33,8 @@ export class SendMessageEvent implements Event {
         },
         createdAt: savedMessage.createdAt,
       });
+
+      this.webSocketServer.to(data.channelId).emit("inbox_updated");
     } catch (error) {
       console.error("Failed to persist message:", error);
       socket.emit("error", { message: "Message could not be sent" });
