@@ -11,9 +11,16 @@ export interface ChannelRecipient {
   username: string;
 }
 
+export interface ChannelMember {
+  id: number;
+  role: string;
+  user: ChannelRecipient;
+}
+
 export interface InboxChannel extends Channel {
   displayName: string;
   displayImage: string;
+  channelMembers: ChannelMember[];
   lastMessage: {
     content: string;
     createdAt: string;
@@ -24,5 +31,5 @@ export interface InboxChannel extends Channel {
     createdAt: string;
   }[];
   recipient: ChannelRecipient | null;
-  online?: boolean;
+  online?: () => boolean;
 }
