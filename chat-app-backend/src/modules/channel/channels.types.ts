@@ -1,4 +1,4 @@
-import type { Channel, ChannelMember, User } from "@/prisma/client";
+import type { Channel, ChannelMember, Message, User } from "@/prisma/client";
 
 export interface InboxChannelMember extends ChannelMember {
   user: Partial<User>;
@@ -6,4 +6,5 @@ export interface InboxChannelMember extends ChannelMember {
 
 export interface InboxChannel extends Channel {
   channelMembers: InboxChannelMember[];
+  messages: Message[];
 }

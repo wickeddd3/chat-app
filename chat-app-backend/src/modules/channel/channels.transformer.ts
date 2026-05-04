@@ -3,11 +3,18 @@ import { InboxChannel } from "./channels.types";
 export function channelToInboxChannel(channel: InboxChannel, authUserId: string) {
   const isDirect = channel.type === "DIRECT";
   const otherMember = isDirect ? channel?.channelMembers.find((m) => m.userId !== authUserId)?.user : null;
+  const lastMessage = {
+    content: channel.messages[0]?.content || "",
+    createdAt: channel.messages[0]?.createdAt || "",
+  };
 
   return {
-    ...channel,
+    id: channel.id,
+    type: channel.type,
+    name: channel.name,
     displayName: isDirect ? otherMember?.name : channel.name,
     displayImage: isDirect ? otherMember?.image : null,
     recipient: otherMember,
+    lastMessage,
   };
 }
