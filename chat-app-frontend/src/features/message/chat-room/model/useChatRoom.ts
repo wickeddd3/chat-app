@@ -7,7 +7,7 @@ export function useChatRoom(channelId: string, messages: Message[]) {
 
   const handleIncomingMessage = (newMessage: any) => {
     // IMPORTANT: Only process if the message belongs to this specific channel
-    if (String(newMessage.channelId) !== String(channelId)) return;
+    // if (String(newMessage.channelId) !== String(channelId)) return;
 
     setChatHistory((prev) => {
       // Check if we already have this message (via clientId)
@@ -30,15 +30,19 @@ export function useChatRoom(channelId: string, messages: Message[]) {
   };
 
   useEffect(() => {
+    if (!channelId) return;
+
     // Join room on mount
     webSocketClient.emit("join_channel", channelId);
-
     // Listen for incoming messages
     webSocketClient.on("receive_message", handleIncomingMessage);
 
     // Cleanup to prevent duplicate listeners
     return () => {
-      webSocketClient.off("receive_message");
+      // Stop listening to events for this specific hook instance
+      webSocketClient.off("receive_message", handleIncomingMessage);
+      // Tell the server to stop sending messages for this channel to this socket
+      webSocketClient.emit("leave_channel", channelId);
     };
   }, [channelId]);
 
