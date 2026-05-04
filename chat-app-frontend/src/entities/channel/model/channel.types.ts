@@ -24,4 +24,5 @@ export interface InboxChannel extends Channel {
     createdAt: string;
   }[];
   recipient: ChannelRecipient | null;
+  online?: boolean;
 }
