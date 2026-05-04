@@ -46,6 +46,10 @@ export function ChatInbox() {
     return allInbox.filter((item) => item?.unreadCount);
   }, [allInbox]);
 
+  const filteredByGroup = useMemo(() => {
+    return allInbox.filter((item) => item.type === "GROUP");
+  }, [allInbox]);
+
   return (
     <div className="flex-1 flex flex-col border-r">
       <div className="p-4">
@@ -99,9 +103,9 @@ export function ChatInbox() {
           </TabsContent>
           <TabsContent value="groups">
             <ChatInboxResults
-              results={[]}
+              results={filteredByGroup}
               isLoading={isLoading}
-              isEmpty={true}
+              isEmpty={!!!filteredByGroup.length}
             />
           </TabsContent>
         </Tabs>
