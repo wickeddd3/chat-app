@@ -16,6 +16,7 @@ export function channelToInboxChannel(channel: InboxChannel, authUserId: string)
     displayName: isDirect ? otherMember?.name : channel.name,
     displayImage: isDirect ? otherMember?.image : null,
     lastMessage,
+    unreadCount: channel?._count?.messages || 0,
   };
 }
 
