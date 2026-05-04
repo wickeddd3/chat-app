@@ -1,6 +1,6 @@
 import { useParams } from "react-router";
 import { useAuth } from "@/entities/auth";
-import { useUserByUsername } from "@/entities/user";
+// import { useUserByUsername } from "@/entities/user";
 import { useChatRoom } from "../model/useChatRoom";
 import { MessageHeader } from "./MessageHeader";
 import { MessageBubble } from "./MessageBubble";
@@ -11,30 +11,24 @@ import { useChannel } from "@/entities/channel";
 import { useMessages } from "../model/useMessages";
 
 export function ChatRoom() {
-  const { username } = useParams();
-  const { authId, authUser, isAuthPending } = useAuth();
+  const { channelId } = useParams();
+  const { authId, authUser } = useAuth();
 
-  // 1. Fetch target user's data based on username param
-  const { data: targetUser } = useUserByUsername(username);
+  // 1. Fetch channel details based on channelId param
+  const { channel } = useChannel(channelId || "");
 
-  // 2. Check if auth user and target user has an existing channel.
-  // Backend will create a channel if no existing channel, otherwise proceed
-  const { data: channel } = useChannel(targetUser?.id || "");
-
-  // 3. Fetch channel messages
+  // 2. Fetch channel messages
   const { messages, isLoading } = useMessages(channel?.id || "");
 
-  // 4. Manage chat history and real-time updates
+  // 3. Manage chat history and real-time updates
   const { chatHistory, setChatHistory } = useChatRoom(
     channel?.id || "",
     messages,
   );
 
-  if (isAuthPending) return <p>Loading session...</p>;
-
   return (
     <div className="flex-1 flex flex-col">
-      <MessageHeader user={targetUser} />
+      <MessageHeader channel={channel} />
       <div className="flex-1 w-full overflow-y-auto flex flex-col justify-center items-center">
         {isLoading && <LoadingPlaceholder />}
 
