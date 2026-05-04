@@ -19,12 +19,12 @@ export function ChatInbox() {
   const allInbox = useMemo(() => {
     return inbox.map((item) => ({
       ...item,
-      online: isOnline(item.otherUser?.id),
+      online: isOnline(item?.recipient?.id || ""),
     }));
   }, [inbox, onlineUsers]);
 
   const filteredByOnline = useMemo(() => {
-    return allInbox.filter((item) => item.online);
+    return allInbox.filter((item) => item?.online);
   }, [allInbox]);
 
   return (
