@@ -3,12 +3,14 @@ import type { Server as HttpServer } from "http";
 import { APP_URL } from "@/config/app.config";
 import { socketAuthMiddleware } from "@/middlewares/socket-auth.middleware";
 import type { Event } from "@/interfaces/event.interface";
-import { SendMessageEvent } from "./events/send-message.event";
 import { redisClient } from "@/lib/redis";
+import { SendMessageEvent } from "./events/send-message.event";
+import { ReadMessageEvent } from "./events/read-message.event";
 
 export class WebSocketService {
   private webSocketServer: SocketServer;
   private sendMessageEvent!: Event;
+  private readMessageEvent!: Event;
 
   constructor(server: HttpServer) {
     this.webSocketServer = new SocketServer(server, {
@@ -29,6 +31,7 @@ export class WebSocketService {
 
   private initializeEvents(): void {
     this.sendMessageEvent = new SendMessageEvent(this.webSocketServer);
+    this.readMessageEvent = new ReadMessageEvent(this.webSocketServer);
   }
 
   public start(): void {
@@ -58,6 +61,7 @@ export class WebSocketService {
       });
 
       socket.on("send_message", async (data) => this.sendMessageEvent.execute(socket, user, data));
+      socket.on("mark_as_read", async (data) => this.readMessageEvent.execute(socket, user, data));
 
       socket.on("leave_channel", (channelId: string) => {
         console.log(`User ${user.id} left channel: ${channelId}`);
