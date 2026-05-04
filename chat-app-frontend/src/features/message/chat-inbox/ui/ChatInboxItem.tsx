@@ -7,7 +7,7 @@ import type { InboxChannel } from "@/entities/channel";
 export function ChatInboxItem({
   inboxItem: { id, displayName, displayImage, lastMessage },
 }: {
-  inboxItem: InboxChannel & { online: boolean };
+  inboxItem: InboxChannel;
 }) {
   return (
     <Link

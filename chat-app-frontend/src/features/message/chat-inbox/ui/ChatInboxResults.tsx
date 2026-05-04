@@ -10,7 +10,7 @@ export function ChatInboxResults({
 }: {
   isLoading?: boolean;
   isEmpty?: boolean;
-  results: (InboxChannel & { online: boolean })[];
+  results: InboxChannel[];
 }) {
   return (
     <div className="w-full h-full overflow-y-auto">
