@@ -28,7 +28,7 @@ export function useChatRoom(channelId: string, messages: Message[]) {
 
   useEffect(() => {
     // Join room on mount
-    webSocketClient.emit("join_room", channelId);
+    webSocketClient.emit("join_channel", channelId);
 
     // Listen for incoming messages
     webSocketClient.on("receive_message", handleIncomingMessage);
