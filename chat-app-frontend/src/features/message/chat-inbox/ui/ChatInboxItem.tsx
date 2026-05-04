@@ -5,7 +5,7 @@ import { dateToString } from "@/shared/utils/date-format";
 import type { InboxChannel } from "@/entities/channel";
 
 export function ChatInboxItem({
-  inboxItem: { id, displayName, displayImage, lastMessage },
+  inboxItem: { id, displayName, displayImage, lastMessage, online },
 }: {
   inboxItem: InboxChannel;
 }) {
@@ -14,7 +14,7 @@ export function ChatInboxItem({
       to={`/messages/${id}`}
       className="flex items-center gap-4 border-b p-4 text-sm leading-tight whitespace-nowrap last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
     >
-      <AvatarWithBadge imageSrc={displayImage} isOnline={false} />
+      <AvatarWithBadge imageSrc={displayImage} isOnline={online?.()} />
       <div className="flex-1 flex flex-col items-start gap-2">
         <div className="flex w-full items-center gap-2">
           <span>{displayName}</span>
