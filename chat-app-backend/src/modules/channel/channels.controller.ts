@@ -15,9 +15,22 @@ export class ChannelsController implements Controller {
   }
 
   private initializeRoutes(): void {
-    this.router.get(`${this.path}/:channelId`, [authMiddleware], this.getChannel);
     this.router.get(`${this.path}`, [authMiddleware], this.getChannels);
+    this.router.get(`${this.path}/:channelId`, [authMiddleware], this.getChannel);
+    this.router.get(`${this.path}/find/:targetUserId`, [authMiddleware], this.findChannelOrCreate);
   }
+
+  private getChannels = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const authUserId = req?.user?.id || "";
+      const channels = await this.channelsService.getChannels(authUserId);
+
+      const transformedChannels = channels.map((channel) => channelToInboxChannel(channel, authUserId));
+      res.status(200).json(transformedChannels);
+    } catch (error: any) {
+      next(new HttpException(500, error?.message || "Failed to retrieve channels"));
+    }
+  };
 
   private getChannel = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -32,13 +45,13 @@ export class ChannelsController implements Controller {
     }
   };
 
-  private getChannels = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+  private findChannelOrCreate = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authUserId = req?.user?.id || "";
-      const channels = await this.channelsService.getChannels(authUserId);
+      const authUserId = req.user?.id || "";
+      const targetUserId = req.params.targetUserId as string;
+      const channel = await this.channelsService.findChannelOrCreate(authUserId, targetUserId);
 
-      const transformedChannels = channels.map((channel) => channelToInboxChannel(channel, authUserId));
-      res.status(200).json(transformedChannels);
+      res.status(200).json(channel);
     } catch (error: any) {
       next(new HttpException(500, error?.message || "Failed to retrieve channels"));
     }
