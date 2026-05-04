@@ -37,7 +37,7 @@ export function ChatInbox() {
   }, [inbox, onlineUsers]);
 
   const filteredByOnline = useMemo(() => {
-    return allInbox.filter((item) => item?.online);
+    return allInbox.filter((item) => item.online?.());
   }, [allInbox]);
 
   return (
