@@ -5,6 +5,42 @@ import type { InboxChannel } from "./channels.types";
 export class ChannelsRepository {
   private db = prisma;
 
+  public async getChannel(userId: string, channelId: number): Promise<InboxChannel | null> {
+    try {
+      return await prisma.channel.findFirst({
+        where: {
+          id: channelId,
+          channelMembers: { some: { userId: userId } },
+        },
+        include: {
+          channelMembers: {
+            include: {
+              user: {
+                select: { id: true, name: true, image: true, username: true },
+              },
+            },
+          },
+          messages: {
+            orderBy: { createdAt: "desc" },
+            take: 1, // Get last message for the inbox
+          },
+          _count: {
+            select: {
+              messages: {
+                where: {
+                  authorId: { not: userId },
+                  readBy: { none: { userId } }, // Count messages where auth user have NO receipt
+                },
+              },
+            },
+          },
+        },
+      });
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to retrieve channel");
+    }
+  }
+
   public async findExistingDirectChannel(userId: string, targetUserId: string): Promise<Channel | null> {
     try {
       const existing = await prisma.channel.findFirst({
