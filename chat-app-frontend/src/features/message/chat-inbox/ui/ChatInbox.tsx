@@ -1,4 +1,3 @@
-import { useInbox } from "../model/useInbox";
 import {
   Tabs,
   TabsContent,
@@ -10,11 +9,14 @@ import { ChatInboxResults } from "./ChatInboxResults";
 import { useMemo, useState } from "react";
 import { usePresence } from "@/app/store/PresenceContext";
 import { useAuth } from "@/entities/auth";
+import { useInbox } from "../model/useInbox";
+import { useInboxUpdate } from "../model/useInboxUpdate";
 
 export function ChatInbox() {
   const { authId } = useAuth();
   const { inbox, isLoading, isEmpty } = useInbox();
   const { onlineUsers, isOnline } = usePresence();
+  useInboxUpdate();
 
   const [query, setQuery] = useState("");
 
