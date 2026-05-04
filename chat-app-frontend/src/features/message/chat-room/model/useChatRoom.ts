@@ -6,6 +6,9 @@ export function useChatRoom(channelId: string, messages: Message[]) {
   const [chatHistory, setChatHistory] = useState<any[]>([]);
 
   const handleIncomingMessage = (newMessage: any) => {
+    // IMPORTANT: Only process if the message belongs to this specific channel
+    if (String(newMessage.channelId) !== String(channelId)) return;
+
     setChatHistory((prev) => {
       // Check if we already have this message (via clientId)
       const exists = prev.find(
