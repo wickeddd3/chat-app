@@ -23,4 +23,12 @@ export class MessagesService {
       throw new Error(error?.message || "Failed to retrieve messages");
     }
   }
+
+  public async getUnreadMessages(channelId: number, userId: string): Promise<{ id: number }[]> {
+    try {
+      return await this.messagesRepository.getUnreadMessages(channelId, userId);
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to retrieve unread messages");
+    }
+  }
 }

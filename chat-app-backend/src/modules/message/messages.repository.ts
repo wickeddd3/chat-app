@@ -49,4 +49,21 @@ export class MessagesRepository {
       throw new Error(error?.message || "Failed to retrieve messages");
     }
   }
+
+  public async getUnreadMessages(channelId: number, userId: string): Promise<{ id: number }[]> {
+    try {
+      const messages = await this.db.message.findMany({
+        where: {
+          channelId: Number(channelId),
+          authorId: { not: userId },
+          readBy: { none: { userId } },
+        },
+        select: { id: true },
+      });
+
+      return messages;
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to retrieve unread messages");
+    }
+  }
 }
