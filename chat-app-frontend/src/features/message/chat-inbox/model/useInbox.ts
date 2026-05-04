@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import { getInbox } from "../api/messages.api";
-import type { InboxItem } from "@/entities/message";
+import { getInbox } from "../api/channels.api";
+import type { InboxChannel } from "@/entities/channel";
 
 export function useInbox(): {
-  inbox: InboxItem[];
+  inbox: InboxChannel[];
   isLoading: boolean;
   isEmpty: boolean;
   error: unknown;
 } {
-  const { data, isLoading, error } = useQuery<InboxItem[]>({
+  const { data, isLoading, error } = useQuery<InboxChannel[]>({
     queryKey: ["inbox"],
     queryFn: getInbox,
   });
