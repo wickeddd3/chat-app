@@ -52,8 +52,8 @@ export class WebSocketService {
         await this.refreshPresence(userId);
       });
 
-      socket.on("join_room", (roomId: string) => {
-        socket.join(roomId);
+      socket.on("join_channel", (channelId: string) => {
+        socket.join(channelId);
       });
 
       socket.on("send_message", async (data) => this.sendMessageEvent.execute(socket, user, data));
