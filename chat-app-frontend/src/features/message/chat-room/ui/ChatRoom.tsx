@@ -28,7 +28,7 @@ export function ChatRoom() {
 
   return (
     <div className="flex-1 flex flex-col">
-      <MessageHeader channel={channel} />
+      <MessageHeader channel={channel} authId={authId || ""} />
       <div className="flex-1 w-full overflow-y-auto flex flex-col justify-center items-center">
         {isLoading && <LoadingPlaceholder />}
 
