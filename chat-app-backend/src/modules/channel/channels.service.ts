@@ -5,15 +5,9 @@ import type { InboxChannel } from "./channels.types";
 export class ChannelsService {
   private channelsRepository = new ChannelsRepository();
 
-  public async getChannel(userId: string, targetUserId: string): Promise<Channel> {
+  public async getChannel(userId: string, channelId: number): Promise<InboxChannel | null> {
     try {
-      const existing = await this.channelsRepository.findExistingDirectChannel(userId, targetUserId);
-
-      if (existing) return existing;
-
-      const createdChannel = await this.channelsRepository.createDirectChannel(userId, targetUserId);
-
-      return createdChannel;
+      return await this.channelsRepository.getChannel(userId, channelId);
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve channel");
     }
