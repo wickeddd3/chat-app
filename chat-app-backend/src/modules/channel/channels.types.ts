@@ -7,4 +7,7 @@ export interface InboxChannelMember extends ChannelMember {
 export interface InboxChannel extends Channel {
   channelMembers: InboxChannelMember[];
   messages: Message[];
+  _count: {
+    messages: number;
+  };
 }
