@@ -34,6 +34,8 @@ export function useChatRoom(channelId: string, messages: Message[]) {
 
     // Join room on mount
     webSocketClient.emit("join_channel", channelId);
+    // Mark messages as read on mount
+    webSocketClient.emit("mark_as_read", { channelId });
     // Listen for incoming messages
     webSocketClient.on("receive_message", handleIncomingMessage);
 
