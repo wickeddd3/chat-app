@@ -1,11 +1,13 @@
 import { UserAvatar } from "@/entities/user";
-import { Link } from "react-router";
+import { useChatNavigation } from "../model/useChatNavigation";
 
 export function UserListItem({
   user: { id, username, name, image },
 }: {
   user: any;
 }) {
+  const { navigateToChannel } = useChatNavigation();
+
   return (
     <div
       key={id}
@@ -16,12 +18,12 @@ export function UserListItem({
         <span className="text-sm font-medium">{name}</span>
         <span className="text-xs">{`@${username}`}</span>
       </div>
-      <Link
-        to={`/messages/@${username}`}
+      <button
+        onClick={() => navigateToChannel(id)}
         className="bg-blue-500 text-gray-50 text-sm font-medium rounded-lg p-3 cursor-pointer hover:bg-blue-600"
       >
         Message
-      </Link>
+      </button>
     </div>
   );
 }
