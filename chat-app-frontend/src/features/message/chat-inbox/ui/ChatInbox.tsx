@@ -9,8 +9,10 @@ import { SearchField } from "@/shared/ui/SearchField";
 import { ChatInboxResults } from "./ChatInboxResults";
 import { useMemo, useState } from "react";
 import { usePresence } from "@/app/store/PresenceContext";
+import { useAuth } from "@/entities/auth";
 
 export function ChatInbox() {
+  const { authId } = useAuth();
   const { inbox, isLoading, isEmpty } = useInbox();
   const { onlineUsers, isOnline } = usePresence();
 
@@ -19,7 +21,18 @@ export function ChatInbox() {
   const allInbox = useMemo(() => {
     return inbox.map((item) => ({
       ...item,
-      online: isOnline(item?.recipient?.id || ""),
+      online: () => {
+        if (item.type === "GROUP") {
+          return item.channelMembers.some((member) => isOnline(member.user.id));
+        }
+        if (item.type === "DIRECT") {
+          const otherUser = item.channelMembers.find(
+            (member) => member.user.id !== authId && isOnline(member.user.id),
+          );
+          return !!otherUser;
+        }
+        return false;
+      },
     }));
   }, [inbox, onlineUsers]);
 
