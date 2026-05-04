@@ -1,10 +1,10 @@
 import apiRequest from "@/shared/lib/axios.client";
-import type { Channel } from "../model/channel.types";
+import type { InboxChannel } from "../model/channel.types";
 
-export async function getChannel(targetUserId: string): Promise<Channel> {
+export async function getChannel(channelId: string): Promise<InboxChannel> {
   try {
     const { data } = await apiRequest({
-      url: `/api/channels/${targetUserId}`,
+      url: `/api/channels/${channelId}`,
     }).get();
     return data;
   } catch (error) {
