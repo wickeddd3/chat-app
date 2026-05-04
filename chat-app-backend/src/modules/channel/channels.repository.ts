@@ -122,7 +122,10 @@ export class ChannelsRepository {
   public async getChannels(userId: string): Promise<InboxChannel[]> {
     try {
       return await this.db.channel.findMany({
-        where: { channelMembers: { some: { userId } } },
+        where: {
+          channelMembers: { some: { userId } },
+          messages: { some: {} }, // Only return channels that have at least one message
+        },
         include: {
           channelMembers: {
             include: {
