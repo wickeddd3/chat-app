@@ -1,10 +1,11 @@
 import type { Channel } from "@/prisma/client";
 import { ChannelsRepository } from "./channels.repository";
+import type { InboxChannel } from "./channels.types";
 
 export class ChannelsService {
   private channelsRepository = new ChannelsRepository();
 
-  public async getChannel(userId: string, targetUserId: string) {
+  public async getChannel(userId: string, targetUserId: string): Promise<Channel> {
     try {
       const existing = await this.channelsRepository.findExistingDirectChannel(userId, targetUserId);
 
@@ -18,7 +19,7 @@ export class ChannelsService {
     }
   }
 
-  public async getChannels(userId: string): Promise<Channel[]> {
+  public async getChannels(userId: string): Promise<InboxChannel[]> {
     try {
       return await this.channelsRepository.getChannels(userId);
     } catch (error: any) {

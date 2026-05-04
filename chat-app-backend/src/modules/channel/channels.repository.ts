@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { Channel } from "@/prisma/client";
+import type { InboxChannel } from "./channels.types";
 
 export class ChannelsRepository {
   private db = prisma;
@@ -82,7 +83,7 @@ export class ChannelsRepository {
     }
   }
 
-  public async getChannels(userId: string): Promise<Channel[]> {
+  public async getChannels(userId: string): Promise<InboxChannel[]> {
     try {
       return await this.db.channel.findMany({
         where: { channelMembers: { some: { userId } } },
