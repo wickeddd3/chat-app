@@ -53,10 +53,16 @@ export class WebSocketService {
       });
 
       socket.on("join_channel", (channelId: string) => {
+        console.log(`User ${user.id} join channel: ${channelId}`);
         socket.join(channelId);
       });
 
       socket.on("send_message", async (data) => this.sendMessageEvent.execute(socket, user, data));
+
+      socket.on("leave_channel", (channelId: string) => {
+        console.log(`User ${user.id} left channel: ${channelId}`);
+        socket.leave(channelId);
+      });
 
       socket.on("disconnect", async () => {
         console.log(`Disconnected: ${user.name}`);
