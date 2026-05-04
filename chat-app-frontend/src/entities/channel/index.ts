@@ -1,2 +1,2 @@
-export type { Channel } from "./model/channel.types";
+export type { Channel, InboxChannel } from "./model/channel.types";
 export { useChannel } from "./model/useChannel";
