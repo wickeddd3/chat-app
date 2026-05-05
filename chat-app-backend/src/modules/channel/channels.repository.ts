@@ -124,7 +124,15 @@ export class ChannelsRepository {
       return await this.db.channel.findMany({
         where: {
           channelMembers: { some: { userId } },
-          messages: { some: {} }, // Only return channels that have at least one message
+          OR: [
+            { type: "GROUP" }, // Groups are always visible
+            {
+              AND: [
+                { type: "DIRECT" },
+                { messages: { some: {} } }, // DMs only visible if messages exist
+              ],
+            },
+          ],
         },
         include: {
           channelMembers: {
