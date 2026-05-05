@@ -17,6 +17,11 @@ export function ChatInboxItem({
 }: {
   inboxItem: InboxChannel;
 }) {
+  const displayMessage =
+    unreadCount > 1
+      ? `${unreadCount} unread messages`
+      : `${lastMessage?.content} • ${dateToString(lastMessage?.createdAt)}`;
+
   return (
     <Link
       to={`/messages/${id}`}
@@ -26,23 +31,24 @@ export function ChatInboxItem({
       <div className="flex-1 flex flex-col items-start gap-2">
         <div className="flex w-full items-center gap-2">
           <span>{displayName}</span>
-          <CheckCheck
-            className={cn("ml-auto", `${unreadCount > 0 && "opacity-40"}`)}
-            size={16}
-          />
+          {lastMessage && (
+            <CheckCheck
+              className={cn("ml-auto", `${unreadCount > 0 && "opacity-40"}`)}
+              size={16}
+            />
+          )}
         </div>
         <div className="flex w-full items-center gap-2">
-          <span
-            className={cn(
-              "line-clamp-2 w-[70%] text-xs text-gray-800 whitespace-break-spaces",
-              `${unreadCount && "font-bold"}`,
-            )}
-          >
-            {unreadCount > 1
-              ? `${unreadCount} unread messages`
-              : lastMessage.content}{" "}
-            &#x2022; {dateToString(lastMessage.createdAt)}
-          </span>
+          {lastMessage && (
+            <span
+              className={cn(
+                "line-clamp-2 w-[70%] text-xs text-gray-800 whitespace-break-spaces",
+                `${unreadCount && "font-bold"}`,
+              )}
+            >
+              {displayMessage}
+            </span>
+          )}
           {unreadCount > 0 && (
             <span className="ml-auto text-md text-blue-500">&#x25CF;</span>
           )}
