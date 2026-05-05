@@ -1,4 +1,4 @@
-import { ChatInbox } from "@/features/message/chat-inbox";
+import { ChatInbox } from "@/features/channel/chat-inbox";
 import { Outlet } from "react-router";
 
 export default function MessagesPage() {
