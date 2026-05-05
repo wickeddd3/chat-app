@@ -18,6 +18,7 @@ export class ChannelsController implements Controller {
     this.router.get(`${this.path}`, [authMiddleware], this.getChannels);
     this.router.get(`${this.path}/:channelId`, [authMiddleware], this.getChannel);
     this.router.get(`${this.path}/find/:targetUserId`, [authMiddleware], this.findChannelOrCreate);
+    this.router.post(`${this.path}/group`, [authMiddleware], this.createGroupChannel);
   }
 
   private getChannels = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
@@ -50,6 +51,18 @@ export class ChannelsController implements Controller {
       const authUserId = req.user?.id || "";
       const targetUserId = req.params.targetUserId as string;
       const channel = await this.channelsService.findChannelOrCreate(authUserId, targetUserId);
+
+      res.status(200).json(channel);
+    } catch (error: any) {
+      next(new HttpException(500, error?.message || "Failed to retrieve channels"));
+    }
+  };
+
+  private createGroupChannel = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const authUserId = req.user?.id || "";
+      const { name, memberIds } = req.body;
+      const channel = await this.channelsService.createGroupChannel(authUserId, { name, memberIds });
 
       res.status(200).json(channel);
     } catch (error: any) {

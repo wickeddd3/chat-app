@@ -34,4 +34,15 @@ export class ChannelsService {
       throw new Error(error?.message || "Failed to retrieve channels");
     }
   }
+
+  public async createGroupChannel(
+    userId: string,
+    data: { name: string; memberIds: string[] },
+  ): Promise<Channel | null> {
+    try {
+      return await this.channelsRepository.createGroupChannel(userId, data);
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to create group channel");
+    }
+  }
 }

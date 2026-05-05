@@ -86,13 +86,13 @@ export class ChannelsRepository {
     }
   }
 
-  public async createGroupChannel(userId: string, name: string, memberIds: string[]): Promise<Channel> {
+  public async createGroupChannel(userId: string, data: { name: string; memberIds: string[] }): Promise<Channel> {
     try {
       return await prisma.$transaction(async (tx) => {
         // 1. Create the Channel
         const channel = await tx.channel.create({
           data: {
-            name,
+            name: data.name,
             type: "GROUP",
             authorId: userId,
           },
@@ -101,7 +101,7 @@ export class ChannelsRepository {
         // 2. Add members (including the creator as ADMIN)
         const membersData = [
           { channelId: channel.id, role: "ADMIN" as const, userId },
-          ...memberIds.map((id) => ({
+          ...data.memberIds.map((id) => ({
             channelId: channel.id,
             role: "MEMBER" as const,
             userId: id,
