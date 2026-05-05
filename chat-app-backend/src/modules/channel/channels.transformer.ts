@@ -3,10 +3,12 @@ import { InboxChannel } from "./channels.types";
 export function channelToInboxChannel(channel: InboxChannel, authUserId: string) {
   const isDirect = channel.type === "DIRECT";
   const otherMember = isDirect ? channel?.channelMembers.find((m) => m.userId !== authUserId)?.user : null;
-  const lastMessage = {
-    content: channel.messages[0]?.content || "",
-    createdAt: channel.messages[0]?.createdAt || "",
-  };
+  const lastMessage = channel.messages[0]
+    ? {
+        content: channel.messages[0]?.content || "",
+        createdAt: channel.messages[0]?.createdAt || "",
+      }
+    : null;
 
   return {
     id: channel.id,
