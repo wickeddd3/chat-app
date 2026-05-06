@@ -1,4 +1,4 @@
-import { UserAvatar } from "@/entities/user";
+import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { useChatNavigation } from "../model/useChatNavigation";
 
 export function UserListItem({
@@ -13,7 +13,7 @@ export function UserListItem({
       key={id}
       className="flex items-center gap-4 border-b p-4 text-sm leading-tight whitespace-nowrap last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
     >
-      <UserAvatar imageSrc={image} size="lg" />
+      <ProfileAvatar imageSrc={image} />
       <div className="flex-1 flex flex-col items-start gap-2">
         <span className="text-sm font-medium">{name}</span>
         <span className="text-xs">{`@${username}`}</span>

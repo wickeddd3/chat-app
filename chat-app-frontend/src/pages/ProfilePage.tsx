@@ -6,7 +6,7 @@ import {
   TabsTrigger,
 } from "@/shared/ui/shadcn/tabs";
 import { useAuth } from "@/entities/auth";
-import { UserAvatar } from "@/entities/user";
+import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { ProfileForm } from "@/features/auth/update-profile";
 import { EmailForm } from "@/features/auth/update-email";
 import { PasswordForm } from "@/features/auth/update-password";
@@ -25,7 +25,7 @@ export default function ProfilePage() {
         {/* Profile Header */}
         <div className="bg-gray-100 rounded-lg flex justify-between items-center px-4 py-6">
           <div className="flex items-center gap-4">
-            <UserAvatar imageSrc={authUser?.image || ""} size="lg" />
+            <ProfileAvatar imageSrc={authUser?.image || ""} />
             <div className="flex flex-col">
               <h1 className="text-md font-medium">{authUser?.name}</h1>
               <h6 className="text-sm">{`@${authUser?.username}`}</h6>

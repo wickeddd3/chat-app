@@ -1,4 +1,4 @@
-import { UserAvatar } from "@/entities/user";
+import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { dateToString } from "@/shared/utils/date-format";
 import { CheckCheck } from "lucide-react";
 
@@ -22,7 +22,7 @@ export function MessageBubble({
     <div
       className={`flex justify-start gap-2  ${isMessageAuthoredByCurrentUser ? "flex-row-reverse ml-12" : "mr-12"}`}
     >
-      <UserAvatar imageSrc={authorImage} />
+      <ProfileAvatar imageSrc={authorImage} size="sm" />
       <div
         className={`flex flex-col gap-2 p-3 ${isMessageAuthoredByCurrentUser ? "bg-blue-500 text-white rounded-l-lg rounded-br-lg" : "bg-gray-200 rounded-r-lg rounded-bl-lg"}`}
       >

@@ -4,7 +4,7 @@ import {
   type FieldValues,
   type Path,
 } from "react-hook-form";
-import { UserAvatar } from "@/entities/user";
+import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { Field, FieldLabel } from "@/shared/ui/shadcn/field";
 import { Input } from "@/shared/ui/shadcn/input";
 import { useState } from "react";
@@ -62,7 +62,7 @@ export function MemberListField<T extends FieldValues>({
                   onClick={() => toggleMember(user.id)}
                 >
                   <div className="flex-1 flex items-center gap-4">
-                    <UserAvatar imageSrc={user.image || ""} size="lg" />
+                    <ProfileAvatar imageSrc={user.image || ""} size="lg" />
                     <div className="flex flex-col">
                       <h6 className="font-medium text-sm">{user.name}</h6>
                     </div>

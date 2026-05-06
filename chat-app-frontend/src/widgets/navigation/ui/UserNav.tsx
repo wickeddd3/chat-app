@@ -11,7 +11,7 @@ import {
 import { Link } from "react-router";
 import { useSignOut } from "@/features/auth/sign-out";
 import { useAuth } from "@/entities/auth";
-import { UserAvatar } from "@/entities/user";
+import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 
 export function UserNav() {
   const { authUser } = useAuth();
@@ -25,7 +25,7 @@ export function UserNav() {
           size="icon"
           className="rounded-full cursor-pointer"
         >
-          <UserAvatar imageSrc={authUser?.image || ""} size="lg" />
+          <ProfileAvatar imageSrc={authUser?.image || ""} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" sideOffset={8} className="w-40">
