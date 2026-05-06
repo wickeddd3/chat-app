@@ -16,7 +16,7 @@ export function ProfileAvatar({
     <Avatar size={size}>
       <AvatarImage
         src={imageSrc || "/default-avatar.jpg"}
-        alt="avatar-with-badge"
+        alt="profile-avatar"
       />
       {badge && (
         <AvatarBadge
