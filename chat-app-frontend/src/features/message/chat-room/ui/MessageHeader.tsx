@@ -1,6 +1,6 @@
 import { usePresence } from "@/app/store/PresenceContext";
 import type { InboxChannel } from "@/entities/channel";
-import { AvatarWithBadge } from "@/shared/ui/AvatarWithBadge";
+import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { useMemo } from "react";
 
 export function MessageHeader({
@@ -30,9 +30,10 @@ export function MessageHeader({
   return (
     <div className="w-full py-5 px-4">
       <div className="flex items-center gap-4">
-        <AvatarWithBadge
+        <ProfileAvatar
           imageSrc={channel.displayImage || ""}
           isOnline={online}
+          badge={true}
         />
         <h1 className="text-md font-medium">{channel.displayName}</h1>
       </div>

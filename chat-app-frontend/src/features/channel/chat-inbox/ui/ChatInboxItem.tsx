@@ -1,4 +1,4 @@
-import { AvatarWithBadge } from "@/shared/ui/AvatarWithBadge";
+import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { Link } from "react-router";
 import { CheckCheck } from "lucide-react";
 import { dateToString } from "@/shared/utils/date-format";
@@ -27,7 +27,11 @@ export function ChatInboxItem({
       to={`/messages/${id}`}
       className="flex items-center gap-4 border-b p-4 text-sm leading-tight whitespace-nowrap last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
     >
-      <AvatarWithBadge imageSrc={displayImage} isOnline={online?.()} />
+      <ProfileAvatar
+        imageSrc={displayImage}
+        isOnline={online?.()}
+        badge={true}
+      />
       <div className="flex-1 flex flex-col items-start gap-2">
         <div className="flex w-full items-center gap-2">
           <span>{displayName}</span>
