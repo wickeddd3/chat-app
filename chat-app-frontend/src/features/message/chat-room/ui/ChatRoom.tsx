@@ -1,13 +1,12 @@
 import { useParams } from "react-router";
 import { useAuth } from "@/entities/auth";
-// import { useUserByUsername } from "@/entities/user";
-import { useChatRoom } from "../model/useChatRoom";
+import { MessageBubble } from "@/entities/message";
+import { useChannel } from "@/entities/channel";
 import { MessageHeader } from "./MessageHeader";
-import { MessageBubble } from "./MessageBubble";
 import { MessageInput } from "./MessageInput";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
-import { useChannel } from "@/entities/channel";
+import { useChatRoom } from "../model/useChatRoom";
 import { useMessages } from "../model/useMessages";
 
 export function ChatRoom() {
