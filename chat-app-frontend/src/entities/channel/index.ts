@@ -1,5 +1,9 @@
 export { ChannelHeader } from "./ui/ChannelHeader";
 
-export type { Channel, InboxChannel } from "./model/channel.types";
+export type {
+  Channel,
+  InboxChannel,
+  ChannelMember,
+} from "./model/channel.types";
 
 export { useChannel } from "./model/useChannel";
