@@ -1,4 +1,4 @@
-import { AvatarWithBadge } from "@/entities/message";
+import { AvatarWithBadge } from "@/shared/ui/AvatarWithBadge";
 import { Link } from "react-router";
 import { CheckCheck } from "lucide-react";
 import { dateToString } from "@/shared/utils/date-format";

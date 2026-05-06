@@ -1,6 +1,6 @@
 import { usePresence } from "@/app/store/PresenceContext";
 import type { InboxChannel } from "@/entities/channel";
-import { AvatarWithBadge } from "@/entities/message";
+import { AvatarWithBadge } from "@/shared/ui/AvatarWithBadge";
 import { useMemo } from "react";
 
 export function MessageHeader({
