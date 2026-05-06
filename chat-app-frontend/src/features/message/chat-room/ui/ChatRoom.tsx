@@ -1,34 +1,21 @@
-import { useParams } from "react-router";
 import { useAuth } from "@/entities/auth";
 import { MessageBubble } from "@/entities/message";
-import { useChannel } from "@/entities/channel";
-import { MessageHeader } from "./MessageHeader";
 import { MessageInput } from "./MessageInput";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { useChatRoom } from "../model/useChatRoom";
 import { useMessages } from "../model/useMessages";
 
-export function ChatRoom() {
-  const { channelId } = useParams();
+export function ChatRoom({ channelId }: { channelId: string }) {
   const { authId, authUser } = useAuth();
-
-  // 1. Fetch channel details based on channelId param
-  const { channel } = useChannel(channelId || "");
-
-  // 2. Fetch channel messages
-  const { messages, isLoading } = useMessages(channel?.id || "");
-
-  // 3. Manage chat history and real-time updates
-  const { chatHistory, setChatHistory } = useChatRoom(
-    channel?.id || "",
-    messages,
-  );
+  // Fetch channel messages
+  const { messages, isLoading } = useMessages(channelId);
+  // Manage chat history and real-time updates
+  const { chatHistory, setChatHistory } = useChatRoom(channelId, messages);
 
   return (
-    <div className="flex-1 flex flex-col">
-      <MessageHeader channel={channel} authId={authId || ""} />
-      <div className="flex-1 w-full overflow-y-auto flex flex-col justify-center items-center">
+    <>
+      <div className="flex-1 flex flex-col justify-center items-center overflow-y-auto">
         {isLoading && <LoadingPlaceholder />}
 
         {!isLoading && !!chatHistory.length && (
@@ -43,13 +30,13 @@ export function ChatRoom() {
       </div>
       <div className="w-full p-4">
         <MessageInput
-          channelId={channel?.id || ""}
+          channelId={channelId}
           author={authUser}
           onMessageSent={(message) =>
             setChatHistory((prev) => [...prev, message])
           }
         />
       </div>
-    </div>
+    </>
   );
 }
