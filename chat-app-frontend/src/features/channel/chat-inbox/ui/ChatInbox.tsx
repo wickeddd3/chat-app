@@ -25,7 +25,9 @@ export function ChatInbox() {
       ...item,
       online: () => {
         if (item.type === "GROUP") {
-          return item.channelMembers.some((member) => isOnline(member.user.id));
+          return item.channelMembers.some(
+            (member) => member.user.id !== authId && isOnline(member.user.id),
+          );
         }
         if (item.type === "DIRECT") {
           const otherUser = item.channelMembers.find(
