@@ -2,6 +2,7 @@ import { FieldGroup } from "@/shared/ui/shadcn/field";
 import { Button } from "@/shared/ui/shadcn/button";
 import { Spinner } from "@/shared/ui/shadcn/spinner";
 import { TextField } from "@/shared/ui/form-fields/TextField";
+import { MemberListField } from "./MemberListField";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -39,13 +40,17 @@ export function GroupChannelForm({ onSuccess }: { onSuccess?: () => void }) {
           id="name"
           label="Name"
           placeholder="Group Name"
-          inputClassName="rounded-2xl py-7 px-4 placeholder:font-medium"
           labelClassName="text-md"
+        />
+        <MemberListField
+          control={form.control}
+          name="memberIds"
+          label="Add Members"
         />
       </FieldGroup>
       <Button
         type="submit"
-        className="w-full font-semibold bg-blue-500 hover:bg-blue-600 cursor-pointer"
+        className="w-full font-semibold bg-blue-500 py-6 hover:bg-blue-600 cursor-pointer"
         disabled={isPending}
       >
         {isPending && <Spinner data-icon="inline-start" />}
