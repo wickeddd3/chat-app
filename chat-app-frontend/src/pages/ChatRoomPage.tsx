@@ -3,8 +3,8 @@ import { useMemo } from "react";
 import { ChannelHeader, useChannel } from "@/entities/channel";
 import { useAuth } from "@/entities/auth";
 import { ChatRoom } from "@/features/message/chat-room";
-import { ChannelDetails } from "@/features/channel/channel-details";
 import { usePresence } from "@/app/store/PresenceContext";
+import { ChannelDetailsDrawer } from "@/widgets/channel-details-drawer";
 
 export default function ChatRoomPage() {
   const { channelId } = useParams();
@@ -32,7 +32,7 @@ export default function ChatRoomPage() {
       <ChannelHeader
         channel={channel}
         isOnline={online}
-        optionSlot={<ChannelDetails channel={channel} />}
+        optionSlot={<ChannelDetailsDrawer channel={channel} />}
       />
       <ChatRoom channelId={channelId || ""} />
     </div>
