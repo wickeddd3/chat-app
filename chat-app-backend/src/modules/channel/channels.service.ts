@@ -31,7 +31,7 @@ export class ChannelsService {
 
       return createdChannel;
     } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve channels");
+      throw new Error(error?.message || "Failed to retrieve or create channel");
     }
   }
 
@@ -43,6 +43,18 @@ export class ChannelsService {
       return await this.channelsRepository.createGroupChannel(userId, data);
     } catch (error: any) {
       throw new Error(error?.message || "Failed to create group channel");
+    }
+  }
+
+  public async updateGroupChannel(
+    userId: string,
+    channelId: number,
+    data: { name: string; memberIds: string[] },
+  ): Promise<Channel | null> {
+    try {
+      return await this.channelsRepository.updateGroupChannel(userId, channelId, data);
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to update group channel");
     }
   }
 }

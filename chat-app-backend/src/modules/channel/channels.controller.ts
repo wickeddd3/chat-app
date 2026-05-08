@@ -19,6 +19,7 @@ export class ChannelsController implements Controller {
     this.router.get(`${this.path}/:channelId`, [authMiddleware], this.getChannel);
     this.router.get(`${this.path}/find/:targetUserId`, [authMiddleware], this.findChannelOrCreate);
     this.router.post(`${this.path}/group`, [authMiddleware], this.createGroupChannel);
+    this.router.post(`${this.path}/group/:channelId`, [authMiddleware], this.updateGroupChannel);
   }
 
   private getChannels = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
@@ -42,7 +43,7 @@ export class ChannelsController implements Controller {
       const transformedChannel = channel ? channelToChannelDetails(channel, authUserId) : null;
       res.status(200).json(transformedChannel);
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to retrieve channels"));
+      next(new HttpException(500, error?.message || "Failed to retrieve channel"));
     }
   };
 
@@ -54,7 +55,7 @@ export class ChannelsController implements Controller {
 
       res.status(200).json(channel);
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to retrieve channels"));
+      next(new HttpException(500, error?.message || "Failed to retrieve or create channel"));
     }
   };
 
@@ -66,7 +67,23 @@ export class ChannelsController implements Controller {
 
       res.status(200).json(channel);
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to retrieve channels"));
+      next(new HttpException(500, error?.message || "Failed to create group channel"));
+    }
+  };
+
+  private updateGroupChannel = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const authUserId = req.user?.id || "";
+      const channelId = req.params.channelId as string;
+      const { name, memberIds } = req.body;
+      const channel = await this.channelsService.updateGroupChannel(authUserId, parseInt(channelId), {
+        name,
+        memberIds,
+      });
+
+      res.status(200).json(channel);
+    } catch (error: any) {
+      next(new HttpException(500, error?.message || "Failed to update group channel"));
     }
   };
 }
