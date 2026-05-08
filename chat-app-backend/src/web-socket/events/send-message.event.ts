@@ -16,7 +16,7 @@ export class SendMessageEvent implements Event {
       // 1. Persist to Database
       const savedMessage = await this.messagesService.saveMessage({
         content: data.content,
-        channelId: data.channelId,
+        channelId: parseInt(data.channelId),
         authorId: user.id,
       });
 
