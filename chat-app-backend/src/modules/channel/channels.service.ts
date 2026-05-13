@@ -57,4 +57,12 @@ export class ChannelsService {
       throw new Error(error?.message || "Failed to update group channel");
     }
   }
+
+  public async updateChannel(channelId: number): Promise<Channel> {
+    try {
+      return await this.channelsRepository.updateChannel(channelId);
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to update channel");
+    }
+  }
 }

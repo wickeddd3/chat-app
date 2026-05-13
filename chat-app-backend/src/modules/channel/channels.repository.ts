@@ -221,4 +221,15 @@ export class ChannelsRepository {
       throw new Error(error?.message || "Failed to update group channel");
     }
   }
+
+  public async updateChannel(channelId: number): Promise<Channel> {
+    try {
+      return await this.db.channel.update({
+        where: { id: channelId },
+        data: { updatedAt: new Date() },
+      });
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to update channel");
+    }
+  }
 }
