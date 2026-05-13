@@ -1,10 +1,12 @@
 import { Event } from "@/interfaces/event.interface";
+import { ChannelsService } from "@/modules/channel/channels.service";
 import { MessagesService } from "@/modules/message/messages.service";
 import type { User } from "better-auth";
 import type { Socket } from "socket.io";
 
 export class SendMessageEvent implements Event {
   private messagesService = new MessagesService();
+  private channelsService = new ChannelsService();
   private webSocketServer;
 
   constructor(webSocketServer: any) {
@@ -20,7 +22,10 @@ export class SendMessageEvent implements Event {
         authorId: user.id,
       });
 
-      // 2. Broadcast the saved message to the room
+      // 2. Update Channel
+      await this.channelsService.updateChannel(parseInt(data.channelId));
+
+      // 3. Broadcast the saved message to the room
       this.webSocketServer.to(data.channelId).emit("receive_message", {
         clientId: data.clientId, // Echo back clientId for optimistic UI reconciliation
         id: savedMessage.id,
