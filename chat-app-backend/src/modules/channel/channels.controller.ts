@@ -25,7 +25,9 @@ export class ChannelsController implements Controller {
   private getChannels = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req?.user?.id || "";
-      const channels = await this.channelsService.getChannels(authUserId);
+      const limit = 20;
+      const cursor = req?.query?.cursor as string;
+      const channels = await this.channelsService.getChannels(authUserId, limit, cursor);
 
       const transformedChannels = channels.map((channel) => channelToInboxChannel(channel, authUserId));
       res.status(200).json(transformedChannels);

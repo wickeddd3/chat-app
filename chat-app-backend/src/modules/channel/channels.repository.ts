@@ -5,9 +5,10 @@ import type { InboxChannel } from "./channels.types";
 export class ChannelsRepository {
   private db = prisma;
 
-  public async getChannels(userId: string): Promise<InboxChannel[]> {
+  public async getChannels(userId: string, limit: number = 20, cursor?: string): Promise<InboxChannel[]> {
     try {
       return await this.db.channel.findMany({
+        take: limit + 1,
         where: {
           channelMembers: { some: { userId } },
           OR: [
@@ -19,7 +20,9 @@ export class ChannelsRepository {
               ],
             },
           ],
+          ...(cursor ? { updatedAt: { lt: new Date(cursor) } } : {}),
         },
+        orderBy: { updatedAt: "desc" },
         include: {
           channelMembers: {
             include: {
@@ -51,7 +54,7 @@ export class ChannelsRepository {
 
   public async getChannel(userId: string, channelId: number): Promise<InboxChannel | null> {
     try {
-      return await prisma.channel.findFirst({
+      return await this.db.channel.findFirst({
         where: {
           id: channelId,
           channelMembers: { some: { userId: userId } },
@@ -87,7 +90,7 @@ export class ChannelsRepository {
 
   public async findExistingDirectChannel(userId: string, targetUserId: string): Promise<Channel | null> {
     try {
-      const existing = await prisma.channel.findFirst({
+      const existing = await this.db.channel.findFirst({
         where: {
           type: "DIRECT",
           AND: [
@@ -105,7 +108,7 @@ export class ChannelsRepository {
 
   public async createDirectChannel(userId: string, targetUserId: string): Promise<Channel> {
     try {
-      return await prisma.$transaction(async (tx) => {
+      return await this.db.$transaction(async (tx) => {
         // 1. Create the Channel
         const channel = await tx.channel.create({
           data: {
@@ -132,7 +135,7 @@ export class ChannelsRepository {
 
   public async createGroupChannel(userId: string, data: { name: string; memberIds: string[] }): Promise<Channel> {
     try {
-      return await prisma.$transaction(async (tx) => {
+      return await this.db.$transaction(async (tx) => {
         // 1. Create the Channel
         const channel = await tx.channel.create({
           data: {
@@ -171,7 +174,7 @@ export class ChannelsRepository {
     data: { name: string; memberIds: string[] },
   ): Promise<Channel> {
     try {
-      return await prisma.$transaction(async (tx) => {
+      return await this.db.$transaction(async (tx) => {
         // 1. Authorization: Check if the user is an ADMIN of this channel
         const isAdmin = await tx.channelMember.findFirst({
           where: {

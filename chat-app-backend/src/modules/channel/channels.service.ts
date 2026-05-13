@@ -5,9 +5,9 @@ import type { Channel } from "@/prisma/client";
 export class ChannelsService {
   private channelsRepository = new ChannelsRepository();
 
-  public async getChannels(userId: string): Promise<InboxChannel[]> {
+  public async getChannels(userId: string, limit: number = 20, cursor?: string): Promise<InboxChannel[]> {
     try {
-      return await this.channelsRepository.getChannels(userId);
+      return await this.channelsRepository.getChannels(userId, limit, cursor);
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve channels");
     }
