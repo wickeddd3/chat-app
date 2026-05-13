@@ -98,11 +98,13 @@ model Channel {
   authorId  String
   createdBy User      @relation(fields: [authorId], references: [id])
   createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   channelMembers  ChannelMember[]
   messages  Message[]
 
   @@index([id])
+  @@index([updatedAt])
   @@map("channels")
 }
 
