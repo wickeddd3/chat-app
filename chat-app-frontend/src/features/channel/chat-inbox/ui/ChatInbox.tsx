@@ -14,7 +14,14 @@ import { useInboxUpdate } from "../model/useInboxUpdate";
 
 export function ChatInbox() {
   const { authId } = useAuth();
-  const { inbox, isLoading, isEmpty } = useInbox();
+  const {
+    inbox,
+    isLoading,
+    isEmpty,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInbox();
   const { onlineUsers, isOnline } = usePresence();
   useInboxUpdate();
 
@@ -53,15 +60,10 @@ export function ChatInbox() {
   }, [allInbox]);
 
   return (
-    <div className="w-full h-full">
-      <SearchField
-        value={query}
-        onChange={setQuery}
-        className="px-4 pb-6 pt-1"
-      />
-
-      <Tabs defaultValue="all" className="w-full h-full">
-        <TabsList className="w-fit px-4 bg-transparent">
+    <div className="flex-1 flex flex-col min-h-0">
+      <SearchField value={query} onChange={setQuery} className="p-4" />
+      <Tabs defaultValue="all" className="flex-1 flex flex-col min-h-0">
+        <TabsList className="w-fit px-4 bg-transparent shrink-0">
           <TabsTrigger value="all" className="px-8 cursor-pointer rounded-full">
             All
           </TabsTrigger>
@@ -75,32 +77,56 @@ export function ChatInbox() {
             Groups
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="all">
+        <TabsContent
+          value="all"
+          className="flex-1 min-h-0 data-[state=active]:flex flex-col m-0"
+        >
           <ChatInboxResults
             results={allInbox}
             isLoading={isLoading}
             isEmpty={isEmpty}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
           />
         </TabsContent>
-        <TabsContent value="online">
+        <TabsContent
+          value="online"
+          className="flex-1 min-h-0 data-[state=active]:flex flex-col m-0"
+        >
           <ChatInboxResults
             results={filteredByOnline}
             isLoading={isLoading}
             isEmpty={!!!filteredByOnline.length}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
           />
         </TabsContent>
-        <TabsContent value="unread">
+        <TabsContent
+          value="unread"
+          className="flex-1 min-h-0 data-[state=active]:flex flex-col m-0"
+        >
           <ChatInboxResults
             results={filteredByUnread}
             isLoading={isLoading}
             isEmpty={!!!filteredByUnread.length}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
           />
         </TabsContent>
-        <TabsContent value="groups">
+        <TabsContent
+          value="groups"
+          className="flex-1 min-h-0 data-[state=active]:flex flex-col m-0"
+        >
           <ChatInboxResults
             results={filteredByGroup}
             isLoading={isLoading}
             isEmpty={!!!filteredByGroup.length}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            fetchNextPage={fetchNextPage}
           />
         </TabsContent>
       </Tabs>
