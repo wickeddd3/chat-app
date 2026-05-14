@@ -1,11 +1,11 @@
 import { ChannelsRepository } from "./channels.repository";
-import type { InboxChannel } from "./channels.types";
+import type { InboxChannel, PaginatedChannels } from "./channels.types";
 import type { Channel } from "@/prisma/client";
 
 export class ChannelsService {
   private channelsRepository = new ChannelsRepository();
 
-  public async getChannels(userId: string, limit: number = 20, cursor?: string): Promise<InboxChannel[]> {
+  public async getChannels(userId: string, limit: number = 20, cursor?: string): Promise<PaginatedChannels> {
     try {
       return await this.channelsRepository.getChannels(userId, limit, cursor);
     } catch (error: any) {

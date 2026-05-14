@@ -1,14 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import type { Channel } from "@/prisma/client";
-import type { InboxChannel } from "./channels.types";
+import type { InboxChannel, PaginatedChannels } from "./channels.types";
 
 export class ChannelsRepository {
   private db = prisma;
 
-  public async getChannels(userId: string, limit: number = 20, cursor?: string): Promise<InboxChannel[]> {
+  public async getChannels(userId: string, limit: number = 20, cursor?: string): Promise<PaginatedChannels> {
     try {
-      return await this.db.channel.findMany({
-        take: limit + 1,
+      const channels = await this.db.channel.findMany({
+        take: limit,
         where: {
           channelMembers: { some: { userId } },
           OR: [
@@ -47,6 +47,15 @@ export class ChannelsRepository {
           },
         },
       });
+
+      const hasMore = channels.length === limit;
+      const nextCursor = hasMore ? channels[channels.length - 1]?.updatedAt?.toISOString() : null;
+
+      return {
+        channels,
+        hasMore,
+        nextCursor,
+      };
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve channels");
     }

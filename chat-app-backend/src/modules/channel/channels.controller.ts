@@ -27,10 +27,11 @@ export class ChannelsController implements Controller {
       const authUserId = req?.user?.id || "";
       const limit = 20;
       const cursor = req?.query?.cursor as string;
-      const channels = await this.channelsService.getChannels(authUserId, limit, cursor);
+      const data = await this.channelsService.getChannels(authUserId, limit, cursor);
 
-      const transformedChannels = channels.map((channel) => channelToInboxChannel(channel, authUserId));
-      res.status(200).json(transformedChannels);
+      const transformedChannels = data.channels.map((channel) => channelToInboxChannel(channel, authUserId));
+      const responseData = { ...data, channels: transformedChannels };
+      res.status(200).json(responseData);
     } catch (error: any) {
       next(new HttpException(500, error?.message || "Failed to retrieve channels"));
     }
