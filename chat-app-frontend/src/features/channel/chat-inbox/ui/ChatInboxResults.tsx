@@ -3,7 +3,7 @@ import { ChatInboxItem } from "./ChatInboxItem";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { Virtuoso } from "react-virtuoso";
-import { Spinner } from "@/shared/ui/shadcn/spinner";
+import { LoaderCircle } from "lucide-react";
 
 export function ChatInboxResults({
   isLoading = false,
@@ -21,7 +21,7 @@ export function ChatInboxResults({
   fetchNextPage: () => void;
 }) {
   return (
-    <div className="flex-1 h-full overflow-y-auto min-h-0 scrollbar-thin flex flex-col">
+    <div className="flex-1 h-full overflow-y-auto min-h-0 scrollbar-thin">
       {isLoading && <LoadingPlaceholder />}
 
       {!isEmpty && (
@@ -45,7 +45,10 @@ export function ChatInboxResults({
             Footer: () =>
               isFetchingNextPage ? (
                 <div className="py-4 flex justify-center">
-                  <Spinner />
+                  <LoaderCircle
+                    size={20}
+                    className="text-blue-500 animate-spin"
+                  />
                 </div>
               ) : null,
           }}
