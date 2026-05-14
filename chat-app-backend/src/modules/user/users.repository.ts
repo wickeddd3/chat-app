@@ -1,13 +1,18 @@
 import { prisma } from "@/lib/prisma";
 import type { User } from "@/prisma/client";
+import { PaginatedUsers } from "./users.types";
 
 export class UsersRepository {
   private db = prisma;
 
-  public async list(authUserId: string): Promise<Partial<User[]>> {
+  public async list(authUserId: string, limit: number = 20, cursor?: string): Promise<PaginatedUsers> {
     try {
       const users = await this.db.user.findMany({
-        where: { id: { not: authUserId } },
+        take: limit,
+        where: {
+          id: { not: authUserId },
+        },
+        ...(cursor && { cursor: { id: cursor }, skip: 1 }),
         select: {
           id: true,
           name: true,
@@ -17,7 +22,14 @@ export class UsersRepository {
         orderBy: { createdAt: "asc" },
       });
 
-      return users as Partial<User[]>;
+      const hasMore = users.length === limit;
+      const nextCursor = hasMore ? users[users.length - 1]?.id : null;
+
+      return {
+        users,
+        hasMore,
+        nextCursor,
+      };
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve users");
     }

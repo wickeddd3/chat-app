@@ -21,9 +21,11 @@ export class UsersController implements Controller {
   private getAllUsers = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req?.user?.id || "";
-      const users = await this.usersService.getAllUsers(authUserId);
+      const limit = 20;
+      const cursor = req?.query?.cursor as string;
+      const responseData = await this.usersService.getAllUsers(authUserId, limit, cursor);
 
-      res.status(200).json(users);
+      res.status(200).json(responseData);
     } catch (error: any) {
       next(new HttpException(500, error?.message || "Failed to retrieve users"));
     }
