@@ -34,3 +34,9 @@ export interface InboxChannel extends Channel {
   unreadCount?: number;
   online?: () => boolean;
 }
+
+export interface PaginatedInboxChannel {
+  channels: InboxChannel[];
+  hasMore: boolean;
+  nextCursor: string;
+}
