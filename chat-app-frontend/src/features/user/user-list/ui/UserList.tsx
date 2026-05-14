@@ -4,9 +4,18 @@ import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { UserListItem } from "./UserListItem";
 import { useState } from "react";
+import { Virtuoso } from "react-virtuoso";
+import { LoaderCircle } from "lucide-react";
 
 export function UserList() {
-  const { users, isLoading, isEmpty } = useUsers();
+  const {
+    users,
+    isLoading,
+    isEmpty,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useUsers();
   const [query, setQuery] = useState("");
 
   return (
@@ -24,9 +33,36 @@ export function UserList() {
       <div className="flex-1 w-full overflow-y-auto">
         {isLoading && <LoadingPlaceholder />}
 
-        {users?.map((user) => (
-          <UserListItem key={user.id} user={user} />
-        ))}
+        {!isEmpty && (
+          <Virtuoso
+            style={{
+              height: "100%",
+              width: "100%",
+            }}
+            totalCount={users.length}
+            data={users}
+            overscan={400}
+            endReached={() => {
+              if (hasNextPage && !isFetchingNextPage) {
+                fetchNextPage();
+              }
+            }}
+            itemContent={(_, user) => (
+              <UserListItem key={user.id} user={user} />
+            )}
+            components={{
+              Footer: () =>
+                isFetchingNextPage ? (
+                  <div className="py-4 flex justify-center">
+                    <LoaderCircle
+                      size={20}
+                      className="text-blue-500 animate-spin"
+                    />
+                  </div>
+                ) : null,
+            }}
+          />
+        )}
 
         {isEmpty && <EmptyPlaceholder />}
       </div>
