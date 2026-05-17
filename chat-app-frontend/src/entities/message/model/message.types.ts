@@ -17,3 +17,9 @@ export interface InboxItem {
     username: string;
   };
 }
+
+export interface PaginatedMessage {
+  messages: Message[];
+  hasMore: boolean;
+  nextCursor: string;
+}
