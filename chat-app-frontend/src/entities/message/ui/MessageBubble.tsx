@@ -4,27 +4,25 @@ import { CheckCheck } from "lucide-react";
 
 export function MessageBubble({
   message,
-  authId,
+  isAuthorsMessage,
 }: {
   message: any;
-  authId: string;
+  isAuthorsMessage: boolean;
 }) {
   const {
     content,
     createdAt,
-    author: { id: authorId, name: authorName, image: authorImage },
+    author: { name: authorName, image: authorImage },
     isSending,
   } = message;
 
-  const isMessageAuthoredByCurrentUser = authorId === authId;
-
   return (
     <div
-      className={`flex justify-start gap-2 px-4 py-1  ${isMessageAuthoredByCurrentUser ? "flex-row-reverse ml-12" : "mr-12"}`}
+      className={`flex justify-start gap-2 px-4 py-1  ${isAuthorsMessage ? "flex-row-reverse ml-12" : "mr-12"}`}
     >
       <ProfileAvatar imageSrc={authorImage} size="sm" />
       <div
-        className={`flex flex-col gap-2 p-3 ${isMessageAuthoredByCurrentUser ? "bg-blue-500 text-white rounded-l-lg rounded-br-lg" : "bg-gray-200 rounded-r-lg rounded-bl-lg"}`}
+        className={`flex flex-col gap-2 p-3 ${isAuthorsMessage ? "bg-blue-500 text-white rounded-l-lg rounded-br-lg" : "bg-gray-200 rounded-r-lg rounded-bl-lg"}`}
       >
         <div className="flex items-center gap-4">
           <p className="text-xs font-semibold opacity-75">{authorName}</p>

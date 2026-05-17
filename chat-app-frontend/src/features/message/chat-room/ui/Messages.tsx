@@ -52,7 +52,7 @@ export function Messages({
         <MessageBubble
           key={message.id}
           message={message}
-          authId={authId || ""}
+          isAuthorsMessage={message.author.id === authId}
         />
       )}
       components={{
