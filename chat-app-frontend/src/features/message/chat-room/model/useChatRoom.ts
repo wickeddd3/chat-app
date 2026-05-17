@@ -1,31 +1,47 @@
 import { webSocketClient } from "@/shared/lib/socket-io.client";
-import { useEffect, useState } from "react";
-import type { Message } from "@/entities/message";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import type { Message, PaginatedMessage } from "@/entities/message";
 
-export function useChatRoom(channelId: string, messages: Message[]) {
-  const [chatHistory, setChatHistory] = useState<any[]>([]);
+export interface QueryData {
+  pageParams: string[];
+  pages: PaginatedMessage[];
+}
 
-  const handleIncomingMessage = (newMessage: any) => {
-    // IMPORTANT: Only process if the message belongs to this specific channel
+export function useChatRoom(channelId: string) {
+  const queryClient = useQueryClient();
+
+  const handleIncomingMessage = (newMessage: Message) => {
     if (String(newMessage.channelId) !== String(channelId)) return;
 
-    setChatHistory((prev) => {
-      // Check if we already have this message (via clientId)
-      const exists = prev.find(
-        (message) => message.clientId === newMessage.clientId,
+    queryClient.setQueryData(["messages", channelId], (oldData: QueryData) => {
+      if (!oldData) return oldData;
+
+      const updatedPages = [...oldData.pages];
+
+      // First look for an optimistic version to replace across ALL pages
+      const pageIndex = updatedPages.findIndex((page: PaginatedMessage) =>
+        page.messages.some((m: Message) => m.clientId === newMessage.clientId),
       );
 
-      if (exists) {
-        // Replace the optimistic message with the permanent one from the server
-        return prev.map((message) =>
-          message.clientId === newMessage.clientId
-            ? { ...newMessage, isSending: false }
-            : message,
-        );
+      if (pageIndex !== -1) {
+        updatedPages[pageIndex] = {
+          ...updatedPages[pageIndex],
+          messages: updatedPages[pageIndex].messages.map((m: Message) =>
+            m.clientId === newMessage.clientId
+              ? { ...newMessage, isSending: false }
+              : m,
+          ),
+        };
+      } else {
+        // Append the new message to Page 0 (the absolute latest timeline block)
+        updatedPages[0] = {
+          ...updatedPages[0],
+          messages: [...updatedPages[0].messages, newMessage],
+        };
       }
 
-      // If it's a message from someone else, just append it
-      return [...prev, newMessage];
+      return { ...oldData, pages: updatedPages };
     });
   };
 
@@ -47,12 +63,4 @@ export function useChatRoom(channelId: string, messages: Message[]) {
       webSocketClient.emit("leave_channel", channelId);
     };
   }, [channelId]);
-
-  useEffect(() => {
-    if (messages) {
-      setChatHistory(messages);
-    }
-  }, [messages]);
-
-  return { chatHistory, setChatHistory };
 }
