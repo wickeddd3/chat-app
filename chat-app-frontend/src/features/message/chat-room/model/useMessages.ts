@@ -1,23 +1,42 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { getMessages } from "../api/messages.api";
-import type { Message } from "@/entities/message";
+import type { Message, PaginatedMessage } from "@/entities/message";
 
 export function useMessages(channelId: string): {
   messages: Message[];
   isLoading: boolean;
   isEmpty: boolean;
-  error: unknown;
+  error: Error | null;
+  fetchNextPage: () => void;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
 } {
-  const { data, isLoading, error } = useQuery({
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery<PaginatedMessage, Error, Message[]>({
     queryKey: ["messages", channelId],
-    queryFn: () => getMessages(channelId),
+    queryFn: ({ pageParam }) => getMessages({ channelId, cursor: pageParam }),
+    initialPageParam: null,
+    // The oldest message ID becomes the next cursor parameter
+    getNextPageParam: (lastPage) => lastPage.nextCursor,
+    select: (data) => {
+      return [...data.pages].reverse().flatMap((page) => page.messages);
+    },
     enabled: !!channelId,
   });
 
   return {
     messages: data ?? [],
     isLoading,
-    isEmpty: !isLoading && !!!(data && data.length),
+    isEmpty: !isLoading && !!!(data && data?.length),
     error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
   };
 }
