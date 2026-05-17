@@ -1,21 +1,27 @@
+export interface MessageAuthor {
+  id?: string;
+  name?: string;
+  image?: string | null;
+}
 export interface Message {
   id: string;
+  author: MessageAuthor;
   content: string;
-  roomId: string;
-  authorId: string;
   createdAt: string;
+  authorId: string;
+  channelId: number;
+  parentId: string;
+  clientId?: string;
 }
 
-export interface InboxItem {
-  roomId: string;
-  lastMessage: string;
-  updatedAt: string;
-  otherUser: {
-    name: string;
-    image: string;
-    id: string;
-    username: string;
-  };
+export interface NewMessage {
+  id?: string;
+  author: MessageAuthor;
+  content: string;
+  createdAt: string;
+  channelId: string;
+  clientId: string;
+  isSending: boolean;
 }
 
 export interface PaginatedMessage {

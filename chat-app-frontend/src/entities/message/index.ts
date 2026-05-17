@@ -1,6 +1,7 @@
 export { MessageBubble } from "./ui/MessageBubble";
 export type {
-  PaginatedMessage,
+  MessageAuthor,
   Message,
-  InboxItem,
+  NewMessage,
+  PaginatedMessage,
 } from "./model/message.types";
