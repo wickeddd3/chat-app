@@ -141,6 +141,7 @@ model Message {
 
   readBy    MessageReceipt[]
 
+  @@index([channelId, createdAt(sort: Asc)])
   @@map("messages")
 }
 
