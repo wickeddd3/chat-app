@@ -1,55 +1,8 @@
-import { Send } from "lucide-react";
-import { webSocketClient } from "@/shared/lib/socket-io.client";
-import { useState } from "react";
+import { SendIcon } from "lucide-react";
+import { useSendMessage } from "../model/useSendMessage";
 
-export function MessageInput({
-  channelId,
-  author,
-  onMessageSent,
-}: {
-  channelId: string;
-  author?: Partial<{
-    id: string;
-    name: string;
-    image: string | null;
-  }>;
-  onMessageSent: (message: any) => void;
-}) {
-  const [message, setMessage] = useState("");
-
-  const sendMessage = (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (message.trim() === "") return;
-
-    // 1. Generate a temporary unique ID
-    const clientId = window.crypto.randomUUID();
-
-    // 2. Create the message object with optimistic data
-    const messageData = {
-      clientId,
-      channelId,
-      content: message,
-      author: {
-        id: author?.id,
-        name: author?.name,
-        image: author?.image,
-      },
-      createdAt: new Date().toISOString(),
-      isSending: true,
-    };
-
-    // 3. Update UI immediately
-    onMessageSent(messageData);
-
-    // 4. Send to server
-    webSocketClient.emit("send_message", {
-      channelId,
-      content: message,
-      clientId,
-    });
-    setMessage("");
-  };
+export function MessageInput({ channelId }: { channelId: string }) {
+  const { message, setMessage, sendMessage } = useSendMessage({ channelId });
 
   return (
     <form
@@ -68,7 +21,7 @@ export function MessageInput({
         type="submit"
         className="text-blue-500 px-4 rounded-full cursor-pointer hover:text-blue-700"
       >
-        <Send />
+        <SendIcon />
       </button>
     </form>
   );
