@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { Message } from "@/prisma/client";
+import type { PaginatedMessages } from "./messages.types";
 
 export class MessagesRepository {
   private db = prisma;
@@ -27,7 +28,15 @@ export class MessagesRepository {
     }
   }
 
-  public async getMessages(channelId: number): Promise<Partial<Message[]>> {
+  public async getMessages({
+    channelId,
+    limit = 20,
+    cursor,
+  }: {
+    channelId: number;
+    limit?: number;
+    cursor?: number;
+  }): Promise<PaginatedMessages> {
     try {
       const messages = await this.db.message.findMany({
         where: { channelId },
@@ -41,10 +50,36 @@ export class MessagesRepository {
           },
         },
         orderBy: { createdAt: "asc" },
-        take: 50,
+        // Fetch one extra item if a cursor is present to act as our boundary check
+        take: cursor ? -(limit + 1) : -limit,
+        // Inclue cursor to query only if exist
+        ...(cursor && { cursor: { id: cursor } }),
       });
 
-      return messages as Partial<Message[]>;
+      let nextCursor: number | null = null;
+      let finalMessages = messages;
+
+      if (cursor) {
+        // If a cursor was passed, the last item in the returned array is
+        // actually the cursor item itself (the duplicate).
+        if (messages.length > limit) {
+          // Remove the duplicate boundary item from the end of the array
+          finalMessages = messages.slice(1);
+          // The very first item in the array is now our next oldest cursor
+          nextCursor = messages[0]?.id ?? null;
+        } else {
+          nextCursor = null;
+        }
+      } else {
+        // Initial load (no cursor)
+        nextCursor = (messages.length === limit ? messages[0]?.id : null) || null;
+      }
+
+      return {
+        messages: finalMessages,
+        hasMore: nextCursor !== null,
+        nextCursor,
+      };
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve messages");
     }

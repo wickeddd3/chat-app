@@ -20,7 +20,13 @@ export class MessagesController implements Controller {
   private getMessages = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const channelId = req.params.channelId as string;
-      const messages = await this.messagesService.getMessages(parseInt(channelId));
+      const limit = 20;
+      const cursor = req?.query?.cursor as string;
+      const messages = await this.messagesService.getMessages({
+        channelId: parseInt(channelId),
+        limit,
+        cursor: parseInt(cursor),
+      });
 
       res.status(200).json(messages);
     } catch (error: any) {

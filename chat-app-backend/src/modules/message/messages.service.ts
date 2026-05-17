@@ -1,5 +1,6 @@
 import type { Message } from "@/prisma/client";
 import { MessagesRepository } from "./messages.repository";
+import type { PaginatedMessages } from "./messages.types";
 
 export class MessagesService {
   private messagesRepository = new MessagesRepository();
@@ -16,9 +17,21 @@ export class MessagesService {
     }
   }
 
-  public async getMessages(channelId: number): Promise<Partial<Message[]>> {
+  public async getMessages({
+    channelId,
+    limit = 20,
+    cursor,
+  }: {
+    channelId: number;
+    limit?: number;
+    cursor?: number;
+  }): Promise<PaginatedMessages> {
     try {
-      return await this.messagesRepository.getMessages(channelId);
+      return await this.messagesRepository.getMessages({
+        channelId,
+        limit,
+        ...(cursor !== undefined ? { cursor } : {}),
+      });
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve messages");
     }
