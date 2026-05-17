@@ -20,7 +20,7 @@ export function MessageBubble({
 
   return (
     <div
-      className={`flex justify-start gap-2  ${isMessageAuthoredByCurrentUser ? "flex-row-reverse ml-12" : "mr-12"}`}
+      className={`flex justify-start gap-2 px-4 py-1  ${isMessageAuthoredByCurrentUser ? "flex-row-reverse ml-12" : "mr-12"}`}
     >
       <ProfileAvatar imageSrc={authorImage} size="sm" />
       <div
