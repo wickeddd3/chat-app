@@ -4,11 +4,13 @@ import { APP_URL } from "@/config/app.config";
 import { socketAuthMiddleware } from "@/middlewares/socket-auth.middleware";
 import type { Event } from "@/interfaces/event.interface";
 import { redisClient } from "@/lib/redis";
+import { JoinChannelEvent } from "./events/join-channel.event";
 import { SendMessageEvent } from "./events/send-message.event";
 import { ReadMessageEvent } from "./events/read-message.event";
 
 export class WebSocketService {
   private webSocketServer: SocketServer;
+  private joinChannelEvent!: Event;
   private sendMessageEvent!: Event;
   private readMessageEvent!: Event;
 
@@ -30,6 +32,7 @@ export class WebSocketService {
   }
 
   private initializeEvents(): void {
+    this.joinChannelEvent = new JoinChannelEvent();
     this.sendMessageEvent = new SendMessageEvent(this.webSocketServer);
     this.readMessageEvent = new ReadMessageEvent(this.webSocketServer);
   }
@@ -55,11 +58,7 @@ export class WebSocketService {
         await this.refreshPresence(userId);
       });
 
-      socket.on("join_channel", (channelId: string) => {
-        console.log(`User ${user.id} join channel: ${channelId}`);
-        socket.join(channelId);
-      });
-
+      socket.on("join_channel", async (data) => this.joinChannelEvent.execute(socket, user, data));
       socket.on("send_message", async (data) => this.sendMessageEvent.execute(socket, user, data));
       socket.on("mark_as_read", async (data) => this.readMessageEvent.execute(socket, user, data));
 

@@ -49,7 +49,7 @@ export function useChatRoom(channelId: string) {
     if (!channelId) return;
 
     // Join room on mount
-    webSocketClient.emit("join_channel", channelId);
+    webSocketClient.emit("join_channel", { channelId });
     // Mark messages as read on mount
     webSocketClient.emit("mark_as_read", { channelId });
     // Listen for incoming messages
