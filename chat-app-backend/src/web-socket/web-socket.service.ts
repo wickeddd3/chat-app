@@ -8,11 +8,13 @@ import { JoinChannelEvent } from "./events/join-channel.event";
 import { SendMessageEvent } from "./events/send-message.event";
 import { ReadMessageEvent } from "./events/read-message.event";
 import { LeaveChannelEvent } from "./events/leave-channel.event";
+import { DisconnectEvent } from "./events/disconnect.event";
 
 export class WebSocketService {
   private webSocketServer: SocketServer;
   private joinChannelEvent!: Event;
   private leaveChannelEvent!: Event;
+  private disconnectEvent!: Event;
   private sendMessageEvent!: Event;
   private readMessageEvent!: Event;
 
@@ -36,6 +38,7 @@ export class WebSocketService {
   private initializeEvents(): void {
     this.joinChannelEvent = new JoinChannelEvent();
     this.leaveChannelEvent = new LeaveChannelEvent();
+    this.disconnectEvent = new DisconnectEvent(this.webSocketServer);
     this.sendMessageEvent = new SendMessageEvent(this.webSocketServer);
     this.readMessageEvent = new ReadMessageEvent(this.webSocketServer);
   }
@@ -48,7 +51,7 @@ export class WebSocketService {
       console.log(`Connected: ${user.name} (${socket.id})`);
 
       // 1. Initial check-in
-      await this.refreshPresence(userId);
+      // await this.refreshPresence(userId);
 
       // 2. Fetch the full list of online users from Redis
       const onlineUserIds = await redisClient.sMembers("presence:online_users");
@@ -65,13 +68,7 @@ export class WebSocketService {
       socket.on("send_message", async (data) => this.sendMessageEvent.execute(socket, user, data));
       socket.on("mark_as_read", async (data) => this.readMessageEvent.execute(socket, user, data));
       socket.on("leave_channel", async (data) => this.leaveChannelEvent.execute(socket, user, data));
-
-      socket.on("disconnect", async () => {
-        console.log(`Disconnected: ${user.name}`);
-
-        // Try to clean up manually for speed
-        await this.removePresence(userId);
-      });
+      socket.on("disconnect", async (data) => this.disconnectEvent.execute(socket, user, data));
     });
   }
 
@@ -86,12 +83,5 @@ export class WebSocketService {
     await redisClient.sAdd(onlineSetKey, userId);
 
     this.webSocketServer.emit("user_status_change", { userId, status: "online" });
-  }
-
-  private async removePresence(userId: string): Promise<void> {
-    await redisClient.del(`presence:active:${userId}`);
-    await redisClient.sRem("presence:online_users", userId);
-
-    this.webSocketServer.emit("user_status_change", { userId, status: "offline" });
   }
 }
