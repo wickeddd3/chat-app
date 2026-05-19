@@ -30,7 +30,6 @@ export function ChatInboxResults({
             height: "100%",
             width: "100%",
           }}
-          totalCount={results.length}
           data={results}
           overscan={400}
           endReached={() => {

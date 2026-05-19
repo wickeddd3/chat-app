@@ -39,7 +39,6 @@ export function UserList() {
               height: "100%",
               width: "100%",
             }}
-            totalCount={users.length}
             data={users}
             overscan={400}
             endReached={() => {
