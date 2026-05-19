@@ -60,7 +60,7 @@ export function useChatRoom(channelId: string) {
       // Stop listening to events for this specific hook instance
       webSocketClient.off("receive_message", handleIncomingMessage);
       // Tell the server to stop sending messages for this channel to this socket
-      webSocketClient.emit("leave_channel", channelId);
+      webSocketClient.emit("leave_channel", { channelId });
     };
   }, [channelId]);
 }
