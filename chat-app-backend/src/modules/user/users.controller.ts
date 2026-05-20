@@ -20,10 +20,11 @@ export class UsersController implements Controller {
 
   private getAllUsers = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authUserId = req?.user?.id || "";
+      const authUserId = req.user?.id || "";
       const limit = 20;
-      const cursor = req?.query?.cursor as string;
-      const responseData = await this.usersService.getAllUsers(authUserId, limit, cursor);
+      const cursor = (req.query["cursor"] as string) || "";
+      const query = (req.query["query"] as string) || "";
+      const responseData = await this.usersService.getAllUsers({ authUserId, limit, cursor, query });
 
       res.status(200).json(responseData);
     } catch (error: any) {

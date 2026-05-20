@@ -5,12 +5,26 @@ import { PaginatedUsers } from "./users.types";
 export class UsersRepository {
   private db = prisma;
 
-  public async list(authUserId: string, limit: number = 20, cursor?: string): Promise<PaginatedUsers> {
+  public async list({
+    authUserId,
+    limit = 20,
+    cursor,
+    query = "",
+  }: {
+    authUserId: string;
+    limit?: number;
+    cursor?: string;
+    query?: string;
+  }): Promise<PaginatedUsers> {
     try {
       const users = await this.db.user.findMany({
         take: limit,
         where: {
           id: { not: authUserId },
+          name: {
+            contains: query,
+            mode: "insensitive",
+          },
         },
         ...(cursor && { cursor: { id: cursor }, skip: 1 }),
         select: {
