@@ -26,8 +26,9 @@ export class ChannelsController implements Controller {
     try {
       const authUserId = req?.user?.id || "";
       const limit = 20;
-      const cursor = req?.query?.cursor as string;
-      const data = await this.channelsService.getChannels(authUserId, limit, cursor);
+      const cursor = (req.query["cursor"] as string) || "";
+      const query = (req.query["query"] as string) || "";
+      const data = await this.channelsService.getChannels({ authUserId, limit, cursor, query });
 
       const transformedChannels = data.channels.map((channel) => channelToInboxChannel(channel, authUserId));
       const responseData = { ...data, channels: transformedChannels };

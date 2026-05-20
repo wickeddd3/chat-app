@@ -5,18 +5,47 @@ import type { InboxChannel, PaginatedChannels } from "./channels.types";
 export class ChannelsRepository {
   private db = prisma;
 
-  public async getChannels(userId: string, limit: number = 20, cursor?: string): Promise<PaginatedChannels> {
+  public async getChannels({
+    authUserId,
+    limit = 20,
+    cursor,
+    query = "",
+  }: {
+    authUserId: string;
+    limit?: number;
+    cursor?: string;
+    query?: string;
+  }): Promise<PaginatedChannels> {
     try {
       const channels = await this.db.channel.findMany({
         take: limit,
         where: {
-          channelMembers: { some: { userId } },
+          channelMembers: { some: { userId: authUserId } },
           OR: [
-            { type: "GROUP" }, // Groups are always visible
+            {
+              type: "GROUP", // If it's a group channel, search by the channel name
+              name: {
+                contains: query,
+                mode: "insensitive",
+              },
+            }, // Groups are always visible
             {
               AND: [
                 { type: "DIRECT" },
-                { messages: { some: {} } }, // DMs only visible if messages exist
+                {
+                  messages: { some: {} }, // If it's a direct message, search by the names of the OTHER members in that channel
+                  channelMembers: {
+                    some: {
+                      userId: { not: authUserId }, // Exclude current user from name matching
+                      user: {
+                        name: {
+                          contains: query,
+                          mode: "insensitive",
+                        },
+                      },
+                    },
+                  },
+                }, // DMs only visible if messages exist
               ],
             },
           ],
@@ -39,8 +68,8 @@ export class ChannelsRepository {
             select: {
               messages: {
                 where: {
-                  authorId: { not: userId },
-                  readBy: { none: { userId } }, // Count messages where auth user have NO receipt
+                  authorId: { not: authUserId },
+                  readBy: { none: { userId: authUserId } }, // Count messages where auth user have NO receipt
                 },
               },
             },

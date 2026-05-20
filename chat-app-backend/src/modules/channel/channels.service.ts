@@ -5,9 +5,19 @@ import type { Channel } from "@/prisma/client";
 export class ChannelsService {
   private channelsRepository = new ChannelsRepository();
 
-  public async getChannels(userId: string, limit: number = 20, cursor?: string): Promise<PaginatedChannels> {
+  public async getChannels({
+    authUserId,
+    limit = 20,
+    cursor = "",
+    query = "",
+  }: {
+    authUserId: string;
+    limit?: number;
+    cursor?: string;
+    query?: string;
+  }): Promise<PaginatedChannels> {
     try {
-      return await this.channelsRepository.getChannels(userId, limit, cursor);
+      return await this.channelsRepository.getChannels({ authUserId, limit, cursor, query });
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve channels");
     }
