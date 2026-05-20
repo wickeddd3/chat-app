@@ -1,9 +1,14 @@
 import type { PaginatedUsers } from "@/entities/user";
 import apiRequest from "@/shared/lib/axios.client";
+import { toQueryParams } from "@/shared/utils/query-params";
 
-export async function getUsers<T>(cursor: T): Promise<PaginatedUsers> {
+export async function getUsers({
+  params,
+}: {
+  params: Record<string, any>;
+}): Promise<PaginatedUsers> {
   try {
-    const queryParams = cursor ? `?cursor=${cursor}` : "";
+    const queryParams = toQueryParams(params);
     const { data } = await apiRequest({
       url: `/api/users${queryParams}`,
     }).get();

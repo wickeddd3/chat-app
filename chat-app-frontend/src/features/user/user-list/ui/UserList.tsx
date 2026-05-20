@@ -8,6 +8,8 @@ import { Virtuoso } from "react-virtuoso";
 import { LoaderCircle } from "lucide-react";
 
 export function UserList() {
+  const [query, setQuery] = useState("");
+
   const {
     users,
     isLoading,
@@ -15,22 +17,23 @@ export function UserList() {
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useUsers();
-  const [query, setQuery] = useState("");
+  } = useUsers(query);
 
   return (
-    <div className="flex-1 flex flex-col border-r">
-      <div className="p-4">
+    <div className="flex-1 flex flex-col border-r h-full min-h-0">
+      <div className="p-4 shrink-0">
         <h1 className="text-base font-medium text-foreground">
           People you can message
         </h1>
       </div>
-      <SearchField
-        value={query}
-        onChange={setQuery}
-        className="px-4 pb-6 pt-1"
-      />
-      <div className="flex-1 w-full overflow-y-auto">
+      <div className="shrink-0">
+        <SearchField
+          value={query}
+          onChange={setQuery}
+          className="px-4 pb-6 pt-1"
+        />
+      </div>
+      <div className="flex-1 w-full overflow-hidden relative">
         {isLoading && <LoadingPlaceholder />}
 
         {!isEmpty && (
