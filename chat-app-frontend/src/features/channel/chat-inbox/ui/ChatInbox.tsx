@@ -14,6 +14,9 @@ import { useInboxUpdate } from "../model/useInboxUpdate";
 
 export function ChatInbox() {
   const { authId } = useAuth();
+
+  const [query, setQuery] = useState("");
+
   const {
     inbox,
     isLoading,
@@ -21,11 +24,10 @@ export function ChatInbox() {
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useInbox();
+  } = useInbox(query);
+
   const { onlineUsers, isOnline } = usePresence();
   useInboxUpdate();
-
-  const [query, setQuery] = useState("");
 
   const allInbox = useMemo(() => {
     return inbox.map((item) => ({

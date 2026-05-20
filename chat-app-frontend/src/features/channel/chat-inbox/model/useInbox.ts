@@ -1,8 +1,10 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getInbox } from "../api/channels.api";
 import type { InboxChannel, PaginatedInboxChannel } from "@/entities/channel";
+import { useEffect, useMemo, useState } from "react";
+import { debounce } from "@/shared/utils/debounce";
 
-export function useInbox(): {
+export function useInbox(query: string): {
   inbox: InboxChannel[];
   isLoading: boolean;
   isEmpty: boolean;
@@ -11,6 +13,17 @@ export function useInbox(): {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
 } {
+  const [debouncedQuery, setDebouncedQuery] = useState(query);
+
+  const debouncedSetQuery = useMemo(
+    () => debounce((value: string) => setDebouncedQuery(value), 500),
+    [],
+  );
+
+  useEffect(() => {
+    debouncedSetQuery(query);
+  }, [query, debouncedSetQuery]);
+
   const {
     data,
     isLoading,
@@ -19,17 +32,25 @@ export function useInbox(): {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<PaginatedInboxChannel, unknown, InboxChannel[]>({
-    queryKey: ["inbox"],
-    queryFn: ({ pageParam }) => getInbox(pageParam),
+    queryKey: ["inbox", debouncedQuery],
+    queryFn: ({ pageParam }) =>
+      getInbox({
+        params: {
+          cursor: pageParam,
+          ...(debouncedQuery && { query: debouncedQuery }),
+        },
+      }),
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     select: (data) => data.pages.flatMap((page) => page.channels),
   });
 
+  const inbox = data ?? [];
+
   return {
-    inbox: data ?? [],
+    inbox,
     isLoading,
-    isEmpty: !isLoading && !!!(data && data?.length),
+    isEmpty: !isLoading && inbox.length === 0,
     error,
     fetchNextPage,
     hasNextPage,
