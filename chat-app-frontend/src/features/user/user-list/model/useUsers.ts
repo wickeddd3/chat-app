@@ -48,7 +48,7 @@ export function useUsers(query: string): {
   const users = data ?? [];
 
   return {
-    users: data ?? [],
+    users,
     isLoading,
     isEmpty: !isLoading && users.length === 0,
     error,
