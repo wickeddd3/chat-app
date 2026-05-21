@@ -1,8 +1,11 @@
 import {
-  Home,
-  MessageCircle,
-  MessageCircleDashed,
-  UsersRound,
+  MessageCircleDashedIcon,
+  HomeIcon,
+  MessageCircleIcon,
+  BookUserIcon,
+  UsersRoundIcon,
+  HandshakeIcon,
+  BellIcon,
 } from "lucide-react";
 import { Link } from "react-router";
 import { UserNav } from "./UserNav";
@@ -17,19 +20,37 @@ export function ChatSidebar() {
     {
       title: "Home",
       url: "/",
-      icon: Home,
+      icon: HomeIcon,
       isActive: true,
     },
     {
       title: "Messages",
       url: "/messages",
-      icon: MessageCircle,
+      icon: MessageCircleIcon,
       isActive: true,
+    },
+    {
+      title: "Contacts",
+      url: "/contacts",
+      icon: BookUserIcon,
+      isActive: false,
     },
     {
       title: "People",
       url: "/people",
-      icon: UsersRound,
+      icon: UsersRoundIcon,
+      isActive: false,
+    },
+    {
+      title: "Connection Requests",
+      url: "/connection-requests",
+      icon: HandshakeIcon,
+      isActive: false,
+    },
+    {
+      title: "Notifications",
+      url: "/notifications",
+      icon: BellIcon,
       isActive: false,
     },
   ];
@@ -38,7 +59,7 @@ export function ChatSidebar() {
     <div className="w-full h-full flex flex-col justify-between items-center gap-4 py-4">
       <div className="flex flex-col gap-8">
         <div className="flex aspect-square size-12 items-center justify-center rounded-xl bg-blue-500 text-gray-50">
-          <MessageCircleDashed />
+          <MessageCircleDashedIcon />
         </div>
         <div className="flex flex-col gap-4">
           {navItems.map((nav) => (
