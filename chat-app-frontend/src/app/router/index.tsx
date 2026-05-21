@@ -56,6 +56,27 @@ export const router = createBrowserRouter([
               return { Component: module.default };
             },
           },
+          {
+            path: "contacts",
+            lazy: async () => {
+              const module = await import("@/pages/ConnectionsPage");
+              return { Component: module.default };
+            },
+          },
+          {
+            path: "connection-requests",
+            lazy: async () => {
+              const module = await import("@/pages/ConnectionRequestsPage");
+              return { Component: module.default };
+            },
+          },
+          {
+            path: "notifications",
+            lazy: async () => {
+              const module = await import("@/pages/NotificationsPage");
+              return { Component: module.default };
+            },
+          },
         ],
       },
     ],
