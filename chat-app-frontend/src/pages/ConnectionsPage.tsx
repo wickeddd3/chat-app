@@ -1,4 +1,5 @@
 import { ContactList } from "@/features/connection/contacts";
+import { MessageButton } from "@/features/channel/redirect-to-direct-channel";
 
 export default function ConnectionsPage() {
   return (
@@ -7,7 +8,7 @@ export default function ConnectionsPage() {
         <h1 className="text-base font-medium text-foreground">Contacts</h1>
       </div>
       <div className="flex-1 flex flex-col overflow-hidden">
-        <ContactList />
+        <ContactList messageButton={MessageButton} />
       </div>
     </div>
   );
