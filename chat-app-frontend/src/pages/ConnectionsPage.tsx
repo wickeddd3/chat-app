@@ -1,8 +1,14 @@
+import { ContactList } from "@/features/connection/contacts";
+
 export default function ConnectionsPage() {
   return (
-    <div className="w-full h-full flex flex-col justify-center items-center">
-      <h1 className="text-3xl font-bold text-gray-400">Contacts Page</h1>
-      <h6 className="text-lg font-normal text-gray-400">Coming Soon</h6>
+    <div className="flex-1 flex flex-col max-h-full border-r">
+      <div className="flex justify-between items-center p-4">
+        <h1 className="text-base font-medium text-foreground">Contacts</h1>
+      </div>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <ContactList />
+      </div>
     </div>
   );
 }
