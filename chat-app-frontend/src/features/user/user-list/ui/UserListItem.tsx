@@ -1,11 +1,13 @@
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import type { User } from "@/entities/user";
-import { SendConnectionButton } from "@/features/connection/send-connection";
+import type { ReactNode } from "react";
 
 export function UserListItem({
   user: { id, username, name, image },
+  optionSlot,
 }: {
   user: User;
+  optionSlot?: ReactNode;
 }) {
   return (
     <div
@@ -17,8 +19,7 @@ export function UserListItem({
         <span className="text-sm font-medium">{name}</span>
         <span className="text-xs">{`@${username}`}</span>
       </div>
-
-      <SendConnectionButton text="Add Contact" receiverId={id} />
+      {optionSlot}
     </div>
   );
 }

@@ -7,7 +7,14 @@ import { useState } from "react";
 import { Virtuoso } from "react-virtuoso";
 import { LoaderCircle } from "lucide-react";
 
-export function UserList() {
+export function UserList({
+  sendConnectionButton: SendConnectionButton,
+}: {
+  sendConnectionButton: React.ComponentType<{
+    text: string;
+    receiverId: string;
+  }>;
+}) {
   const [query, setQuery] = useState("");
 
   const {
@@ -50,7 +57,16 @@ export function UserList() {
               }
             }}
             itemContent={(_, user) => (
-              <UserListItem key={user.id} user={user} />
+              <UserListItem
+                key={user.id}
+                user={user}
+                optionSlot={
+                  <SendConnectionButton
+                    text="Add Contact"
+                    receiverId={user.id}
+                  />
+                }
+              />
             )}
             components={{
               Footer: () =>
