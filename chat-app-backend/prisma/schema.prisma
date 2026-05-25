@@ -12,6 +12,23 @@ datasource db {
   provider = "postgresql"
 }
 
+enum ConnectionStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum NotificationType {
+  CONNECTION_REQUEST
+  CONNECTION_ACCEPTED
+  CHANNEL_INVITE
+}
+
+enum ChannelType {
+  DIRECT
+  GROUP
+}
+
 model User {
   id            String   @id
   name          String
@@ -21,17 +38,25 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  username        String?
+  displayUsername String?
+  lastSeen DateTime?
+
   sessions Session[]
   accounts Account[]
+
   channels Channel[]
   channelMembers ChannelMember[]
+
   messages Message[]
   messageReceipts MessageReceipt[]
 
-  username        String?
-  displayUsername String?
-
-  lastSeen DateTime?
+  // Connections initiated by this user
+  sentConnections     Connection[] @relation("SentConnections")
+  // Connections targeting this user
+  receivedConnections Connection[] @relation("ReceivedConnections")
+  // Notifications for this user
+  notifications       Notification[]
 
   @@unique([email])
   @@map("users")
@@ -86,9 +111,38 @@ model Verification {
   @@map("verifications")
 }
 
-enum ChannelType {
-  DIRECT
-  GROUP
+model Connection {
+  id          String           @id @default(uuid())
+  senderId    String
+  receiverId  String
+  status      ConnectionStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  sender      User             @relation("SentConnections", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver    User             @relation("ReceivedConnections", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  // Ensure unique pair records to avoid double requesting
+  @@unique([senderId, receiverId])
+  @@index([senderId, status])
+  @@index([receiverId, status])
+  @@map("connections")
+}
+
+model Notification {
+  id          String           @id @default(uuid())
+  userId      String           // Receiver of the notification
+  type        NotificationType
+  title       String
+  content     String
+  isRead      Boolean          @default(false)
+  referenceId String?          // Optional: Store Connection ID or Channel ID for client linking
+  createdAt   DateTime         @default(now())
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@map("notifications")
 }
 
 model Channel {
