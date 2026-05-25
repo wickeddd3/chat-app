@@ -64,7 +64,7 @@ export const router = createBrowserRouter([
             },
           },
           {
-            path: "connection-requests",
+            path: "contact-requests",
             lazy: async () => {
               const module = await import("@/pages/ConnectionRequestsPage");
               return { Component: module.default };

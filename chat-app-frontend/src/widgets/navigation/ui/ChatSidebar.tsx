@@ -42,8 +42,8 @@ export function ChatSidebar() {
       isActive: false,
     },
     {
-      title: "Connection Requests",
-      url: "/connection-requests",
+      title: "Contact Requests",
+      url: "/contact-requests",
       icon: HandshakeIcon,
       isActive: false,
     },
