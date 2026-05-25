@@ -1,14 +1,12 @@
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
-import { useChatNavigation } from "../model/useChatNavigation";
 import type { User } from "@/entities/user";
+import { SendConnectionButton } from "@/features/connection/send-connection";
 
 export function UserListItem({
   user: { id, username, name, image },
 }: {
   user: User;
 }) {
-  const { navigateToChannel } = useChatNavigation();
-
   return (
     <div
       key={id}
@@ -19,12 +17,8 @@ export function UserListItem({
         <span className="text-sm font-medium">{name}</span>
         <span className="text-xs">{`@${username}`}</span>
       </div>
-      <button
-        onClick={() => navigateToChannel(id)}
-        className="bg-blue-500 text-gray-50 text-sm font-medium rounded-lg p-3 cursor-pointer hover:bg-blue-600"
-      >
-        Message
-      </button>
+
+      <SendConnectionButton text="Add Contact" receiverId={id} />
     </div>
   );
 }
