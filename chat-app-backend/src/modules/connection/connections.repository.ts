@@ -32,8 +32,8 @@ export class ConnectionsRepository {
           ...(cursor ? { updatedAt: { lt: new Date(cursor) } } : {}),
         },
         include: {
-          sender: { select: { id: true, name: true, image: true } },
-          receiver: { select: { id: true, name: true, image: true } },
+          sender: { select: { id: true, name: true, username: true, image: true } },
+          receiver: { select: { id: true, name: true, username: true, image: true } },
         },
         take: limit,
       });
@@ -84,6 +84,7 @@ export class ConnectionsRepository {
             select: {
               id: true,
               name: true,
+              username: true,
               image: true,
             },
           },
@@ -141,6 +142,7 @@ export class ConnectionsRepository {
             select: {
               id: true,
               name: true,
+              username: true,
               image: true,
             },
           },
