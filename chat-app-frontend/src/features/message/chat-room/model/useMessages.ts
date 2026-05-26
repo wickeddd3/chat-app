@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { getMessages } from "../api/messages.api";
+import { getMessagesApi } from "../api/messages.api";
 import type { Message, PaginatedMessage } from "@/entities/message";
 
 export function useMessages(channelId: string): {
@@ -20,7 +20,8 @@ export function useMessages(channelId: string): {
     isFetchingNextPage,
   } = useInfiniteQuery<PaginatedMessage, Error, Message[]>({
     queryKey: ["messages", channelId],
-    queryFn: ({ pageParam }) => getMessages({ channelId, cursor: pageParam }),
+    queryFn: ({ pageParam }) =>
+      getMessagesApi({ channelId, cursor: pageParam }),
     initialPageParam: null,
     // The oldest message ID becomes the next cursor parameter
     getNextPageParam: (lastPage) => lastPage.nextCursor,

@@ -1,5 +1,5 @@
 import { useMutation, type UseMutateFunction } from "@tanstack/react-query";
-import { updateGroupChannel } from "../api/channels.api";
+import { updateGroupChannelApi } from "../api/channels.api";
 import type { Channel } from "@/entities/channel";
 import { toast } from "sonner";
 import type { GroupChannelFormSchemaType } from "./schema";
@@ -16,7 +16,7 @@ export function useUpdateGroupChannel(channelId: string): {
 } {
   const { mutate, isPending, error } = useMutation({
     mutationFn: (formData: GroupChannelFormSchemaType) =>
-      updateGroupChannel(channelId, formData),
+      updateGroupChannelApi(channelId, formData),
     onSuccess: () => {
       toast.success("Group updated successfully", {
         position: "bottom-right",

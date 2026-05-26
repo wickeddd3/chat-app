@@ -10,15 +10,15 @@ interface GetMessagesApiResponse {
   data: PaginatedMessage;
 }
 
-export async function getMessages({
+export async function getMessagesApi({
   channelId,
   cursor,
 }: GetMessagesParams): Promise<PaginatedMessage> {
   try {
     const queryParams: string = cursor ? `?cursor=${cursor}` : "";
-    const { data }: GetMessagesApiResponse = await apiRequest({
-      url: `/api/messages/${channelId}${queryParams}`,
-    }).get();
+    const url = `/api/messages/${channelId}${queryParams}`;
+    const { data }: GetMessagesApiResponse = await apiRequest({ url }).get();
+
     return data;
   } catch (error: unknown) {
     console.error("Error fetching messages:", error);

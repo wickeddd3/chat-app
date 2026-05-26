@@ -1,5 +1,5 @@
 import { useMutation, type UseMutateFunction } from "@tanstack/react-query";
-import { getUserChannel } from "../api/channels.api";
+import { getUserChannelApi } from "../api/channels.api";
 import type { Channel } from "@/entities/channel";
 import { useNavigate } from "react-router";
 
@@ -11,7 +11,7 @@ export function useChatNavigation(): {
   const navigate = useNavigate();
 
   const { mutate, isPending, error } = useMutation({
-    mutationFn: (targetUserId: string) => getUserChannel(targetUserId),
+    mutationFn: (targetUserId: string) => getUserChannelApi(targetUserId),
     onSuccess: (channel: Channel) => {
       navigate(`/messages/${channel.id}`);
     },

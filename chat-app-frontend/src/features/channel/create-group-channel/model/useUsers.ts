@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { getUsers } from "../api/users.api";
+import { getUsersApi } from "../api/users.api";
 import type { PaginatedUsers, User } from "@/entities/user";
 
 export function useUsers(): {
@@ -20,7 +20,7 @@ export function useUsers(): {
     isFetchingNextPage,
   } = useInfiniteQuery<PaginatedUsers, unknown, User[]>({
     queryKey: ["users"],
-    queryFn: ({ pageParam }) => getUsers(pageParam),
+    queryFn: ({ pageParam }) => getUsersApi(pageParam),
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     select: (data) => data.pages.flatMap((page) => page.users),

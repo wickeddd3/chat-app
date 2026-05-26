@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { getInbox } from "../api/channels.api";
+import { getInboxApi } from "../api/channels.api";
 import type { InboxChannel, PaginatedInboxChannel } from "@/entities/channel";
 import { useEffect, useMemo, useState } from "react";
 import { debounce } from "@/shared/utils/debounce";
@@ -34,7 +34,7 @@ export function useInbox(query: string): {
   } = useInfiniteQuery<PaginatedInboxChannel, unknown, InboxChannel[]>({
     queryKey: ["inbox", debouncedQuery],
     queryFn: ({ pageParam }) =>
-      getInbox({
+      getInboxApi({
         params: {
           cursor: pageParam,
           ...(debouncedQuery && { query: debouncedQuery }),

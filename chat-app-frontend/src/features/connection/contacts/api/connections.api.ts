@@ -3,9 +3,9 @@ import apiRequest from "@/shared/lib/axios.client";
 
 export async function getContactsApi(): Promise<ConnectionUser[]> {
   try {
-    const { data } = await apiRequest({
-      url: `/api/connections/contacts`,
-    }).get();
+    const url = `/api/connections/contacts`;
+    const { data } = await apiRequest({ url }).get();
+
     return data;
   } catch (error) {
     console.error("Error fetching contacts:", error);

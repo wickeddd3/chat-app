@@ -1,5 +1,5 @@
 import { useMutation, type UseMutateFunction } from "@tanstack/react-query";
-import { createGroupChannel } from "../api/channels.api";
+import { createGroupChannelApi } from "../api/channels.api";
 import type { Channel } from "@/entities/channel";
 import { toast } from "sonner";
 import type { GroupChannelFormSchemaType } from "./schema";
@@ -16,7 +16,7 @@ export function useCreateGroupChannel(): {
 } {
   const { mutate, isPending, error } = useMutation({
     mutationFn: (formData: GroupChannelFormSchemaType) =>
-      createGroupChannel(formData),
+      createGroupChannelApi(formData),
     onSuccess: () => {
       toast.success("Group created successfully", {
         position: "bottom-right",

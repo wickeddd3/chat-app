@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { getUsers } from "../api/users.api";
+import { getUsersApi } from "../api/users.api";
 import type { PaginatedUsers, User } from "@/entities/user";
 import { useEffect, useMemo, useState } from "react";
 import { debounce } from "@/shared/utils/debounce";
@@ -34,7 +34,7 @@ export function useUsers(query: string): {
   } = useInfiniteQuery<PaginatedUsers, unknown, User[]>({
     queryKey: ["users", debouncedQuery],
     queryFn: ({ pageParam }) =>
-      getUsers({
+      getUsersApi({
         params: {
           cursor: pageParam,
           ...(debouncedQuery && { query: debouncedQuery }),
