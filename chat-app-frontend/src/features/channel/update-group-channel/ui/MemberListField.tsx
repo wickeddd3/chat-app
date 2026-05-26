@@ -7,7 +7,7 @@ import {
 import { Field, FieldLabel } from "@/shared/ui/shadcn/field";
 import { Input } from "@/shared/ui/shadcn/input";
 import { useState } from "react";
-import { useUsers } from "../model/useUsers";
+import { useContacts } from "../model/useContacts";
 import { MemberList } from "./MemberList";
 
 interface MemberListFieldProps<T extends FieldValues> {
@@ -21,13 +21,10 @@ export function MemberListField<T extends FieldValues>({
   name,
   label,
 }: MemberListFieldProps<T>) {
-  const { users, hasNextPage, isFetchingNextPage, fetchNextPage } = useUsers();
-
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const { contacts, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useContacts(searchQuery);
 
   return (
     <Controller
@@ -57,7 +54,7 @@ export function MemberListField<T extends FieldValues>({
             />
             <div className="w-full flex flex-col h-64 overflow-y-auto mt-2 border rounded-md divide-y">
               <MemberList
-                users={filteredUsers}
+                users={contacts}
                 hasNextPage={hasNextPage}
                 isFetchingNextPage={isFetchingNextPage}
                 fetchNextPage={fetchNextPage}

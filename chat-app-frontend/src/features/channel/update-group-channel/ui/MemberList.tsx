@@ -1,4 +1,4 @@
-import type { User } from "@/entities/user";
+import type { ConnectionUser } from "@/entities/connection";
 import { Virtuoso } from "react-virtuoso";
 import { LoaderCircle } from "lucide-react";
 import { MemberListItem } from "./MemberListItem";
@@ -11,7 +11,7 @@ export function MemberList({
   onToggleMember,
   selectedIds,
 }: {
-  users: User[];
+  users: ConnectionUser[];
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   fetchNextPage: () => void;

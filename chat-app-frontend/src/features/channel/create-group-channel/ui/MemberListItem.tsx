@@ -1,4 +1,4 @@
-import type { User } from "@/entities/user";
+import type { ConnectionUser } from "@/entities/connection";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 
 export function MemberListItem({
@@ -6,7 +6,7 @@ export function MemberListItem({
   onToggleMember,
   selectedIds,
 }: {
-  user: User;
+  user: ConnectionUser;
   onToggleMember: (value: string) => void;
   selectedIds: string[];
 }) {
@@ -18,8 +18,9 @@ export function MemberListItem({
     >
       <div className="flex-1 flex items-center gap-4">
         <ProfileAvatar imageSrc={user.image || ""} size="lg" />
-        <div className="flex flex-col">
-          <h6 className="font-medium text-sm">{user.name}</h6>
+        <div className="flex-1 flex flex-col items-start gap-1">
+          <span className="text-sm font-medium">{user.name}</span>
+          <span className="text-xs">{`@${user.username}`}</span>
         </div>
       </div>
       <input
