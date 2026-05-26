@@ -5,8 +5,10 @@ import { cn } from "@/shared/lib/utils";
 
 export function NotificationItem({
   notification,
+  onClick,
 }: {
   notification: Notification;
+  onClick: () => void;
 }) {
   const Icon = iconType[notification.type];
 
@@ -16,6 +18,7 @@ export function NotificationItem({
         "flex justify-between items-center gap-4 px-4 py-2 border-b hover:bg-sidebar-accent cursor-pointer",
         notification.isRead ? "" : "bg-sidebar-accent/50",
       )}
+      onClick={onClick}
     >
       <Icon
         size={22}

@@ -5,7 +5,11 @@ import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { LoaderCircle } from "lucide-react";
 
-export function NotificationList() {
+export function NotificationList({
+  onClick,
+}: {
+  onClick: (notificationIds: string[]) => void;
+}) {
   const {
     notifications,
     isLoading,
@@ -33,6 +37,7 @@ export function NotificationList() {
             <NotificationItem
               key={notification.id}
               notification={notification}
+              onClick={() => onClick([notification.id])}
             />
           )}
           components={{
