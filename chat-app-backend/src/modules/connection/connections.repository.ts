@@ -1,28 +1,56 @@
 import { prisma } from "@/lib/prisma";
 import type { ConnectionStatus } from "@/prisma/enums";
-import type { PaginatedConnections } from "./connections.types";
+import type { PaginatedConnections, PaginatedContacts } from "./connections.types";
 
 export class ConnectionsRepository {
   private db = prisma;
 
-  public async getUserContacts(userId: string) {
+  public async getUserContacts({
+    authUserId,
+    limit = 20,
+    cursor = "",
+    query = "",
+  }: {
+    authUserId: string;
+    limit?: number;
+    cursor?: string;
+    query?: string;
+  }): Promise<PaginatedContacts> {
     try {
       // Fetch all accepted connections where the user is either sender or receiver
       const connections = await this.db.connection.findMany({
         where: {
           status: "ACCEPTED",
-          OR: [{ senderId: userId }, { receiverId: userId }],
+          AND: [
+            {
+              OR: [
+                { senderId: authUserId, receiver: { name: { contains: query, mode: "insensitive" } } },
+                { receiverId: authUserId, sender: { name: { contains: query, mode: "insensitive" } } },
+              ],
+            },
+          ],
+          ...(cursor ? { updatedAt: { lt: new Date(cursor) } } : {}),
         },
         include: {
           sender: { select: { id: true, name: true, image: true } },
           receiver: { select: { id: true, name: true, image: true } },
         },
+        take: limit,
       });
 
       // Map the connection payload down to just the opposing User profile object
-      return connections.map((conn) => {
-        return conn.senderId === userId ? conn.receiver : conn.sender;
+      const contacts = connections.map((conn) => {
+        return conn.senderId === authUserId ? conn.receiver : conn.sender;
       });
+
+      const hasMore = connections.length === limit;
+      const nextCursor = hasMore ? connections[connections.length - 1]?.updatedAt?.toISOString() : null;
+
+      return {
+        contacts: contacts,
+        hasMore,
+        nextCursor,
+      };
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve connection contacts");
     }

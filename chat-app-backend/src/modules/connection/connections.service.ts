@@ -1,13 +1,23 @@
 import { ConnectionStatus } from "@/prisma/client";
 import { ConnectionsRepository } from "./connections.repository";
-import type { PaginatedConnections } from "./connections.types";
+import type { PaginatedConnections, PaginatedContacts } from "./connections.types";
 
 export class ConnectionsService {
   private connectionsRepository = new ConnectionsRepository();
 
-  public async getUserContacts(userId: string) {
+  public async getUserContacts({
+    authUserId,
+    limit = 20,
+    cursor = "",
+    query = "",
+  }: {
+    authUserId: string;
+    limit?: number;
+    cursor?: string;
+    query?: string;
+  }): Promise<PaginatedContacts> {
     try {
-      return await this.connectionsRepository.getUserContacts(userId);
+      return await this.connectionsRepository.getUserContacts({ authUserId, limit, cursor, query });
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve connection contacts");
     }
