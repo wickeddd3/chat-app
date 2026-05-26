@@ -1,5 +1,6 @@
 import { ConnectionStatus } from "@/prisma/client";
 import { ConnectionsRepository } from "./connections.repository";
+import type { PaginatedConnections } from "./connections.types";
 
 export class ConnectionsService {
   private connectionsRepository = new ConnectionsRepository();
@@ -12,17 +13,37 @@ export class ConnectionsService {
     }
   }
 
-  public async getSentConnections(userId: string) {
+  public async getSentConnections({
+    authUserId,
+    limit = 20,
+    cursor = "",
+    status = "PENDING",
+  }: {
+    authUserId: string;
+    limit?: number;
+    cursor?: string;
+    status?: ConnectionStatus;
+  }): Promise<PaginatedConnections> {
     try {
-      return await this.connectionsRepository.getSentConnections(userId);
+      return await this.connectionsRepository.getSentConnections({ authUserId, limit, cursor, status });
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve sent connection requests");
     }
   }
 
-  public async getReceivedConnections(userId: string, status?: ConnectionStatus) {
+  public async getReceivedConnections({
+    authUserId,
+    limit = 20,
+    cursor = "",
+    status = "PENDING",
+  }: {
+    authUserId: string;
+    limit?: number;
+    cursor?: string;
+    status?: ConnectionStatus;
+  }): Promise<PaginatedConnections> {
     try {
-      return await this.connectionsRepository.getReceivedConnections(userId, status);
+      return await this.connectionsRepository.getReceivedConnections({ authUserId, limit, cursor, status });
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve received connection requests");
     }

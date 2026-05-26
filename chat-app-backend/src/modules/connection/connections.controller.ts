@@ -35,9 +35,16 @@ export class ConnectionsController implements Controller {
   private getSentConnections = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = req.user?.id || "";
-      const contacts = await this.connectionsService.getSentConnections(userId);
+      const limit = 20;
+      const cursor = (req.query?.cursor as string) || "";
+      const sentConnections = await this.connectionsService.getSentConnections({
+        authUserId: userId,
+        limit,
+        cursor,
+        status: "PENDING",
+      });
 
-      res.status(200).json(contacts);
+      res.status(200).json(sentConnections);
     } catch (error: any) {
       next(new HttpException(500, error?.message || "Failed to retrieve sent connection requests"));
     }
@@ -46,9 +53,16 @@ export class ConnectionsController implements Controller {
   private getReceivedConnections = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = req.user?.id || "";
-      const contacts = await this.connectionsService.getReceivedConnections(userId, "PENDING");
+      const limit = 20;
+      const cursor = (req.query?.cursor as string) || "";
+      const receivedConnections = await this.connectionsService.getReceivedConnections({
+        authUserId: userId,
+        limit,
+        cursor,
+        status: "PENDING",
+      });
 
-      res.status(200).json(contacts);
+      res.status(200).json(receivedConnections);
     } catch (error: any) {
       next(new HttpException(500, error?.message || "Failed to retrieve received connection requests"));
     }

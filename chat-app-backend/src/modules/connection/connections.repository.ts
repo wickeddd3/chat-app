@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { ConnectionStatus } from "@/prisma/enums";
+import type { PaginatedConnections } from "./connections.types";
 
 export class ConnectionsRepository {
   private db = prisma;
@@ -32,12 +33,23 @@ export class ConnectionsRepository {
    * Maps data so the frontend receives the profile details of the Target Receiver.
    */
 
-  public async getSentConnections(userId: string, status?: ConnectionStatus) {
+  public async getSentConnections({
+    authUserId,
+    limit = 20,
+    cursor = "",
+    status = "PENDING",
+  }: {
+    authUserId: string;
+    limit?: number;
+    cursor?: string;
+    status?: ConnectionStatus;
+  }): Promise<PaginatedConnections> {
     try {
       const connections = await this.db.connection.findMany({
         where: {
-          senderId: userId,
+          senderId: authUserId,
           ...(status && { status }), // Optional status filter (e.g., PENDING or ACCEPTED)
+          ...(cursor ? { updatedAt: { lt: new Date(cursor) } } : {}),
         },
         include: {
           receiver: {
@@ -48,17 +60,27 @@ export class ConnectionsRepository {
             },
           },
         },
+        take: limit,
         orderBy: { updatedAt: "desc" },
       });
 
       // Flatten payload so it yields cleanly: { connectionId, status, user: receiverProfile }
-      return connections.map((conn) => ({
+      const sentConnections = connections.map((conn) => ({
         id: conn.id,
         status: conn.status,
         createdAt: conn.createdAt,
         updatedAt: conn.updatedAt,
         user: conn.receiver,
       }));
+
+      const hasMore = connections.length === limit;
+      const nextCursor = hasMore ? connections[connections.length - 1]?.updatedAt?.toISOString() : null;
+
+      return {
+        connections: sentConnections,
+        hasMore,
+        nextCursor,
+      };
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve sent connection requests");
     }
@@ -68,12 +90,23 @@ export class ConnectionsRepository {
    * Fetch all connections RECEIVED BY the current user.
    * Maps data so the frontend receives the profile details of the Target Sender.
    */
-  public async getReceivedConnections(userId: string, status?: ConnectionStatus) {
+  public async getReceivedConnections({
+    authUserId,
+    limit = 20,
+    cursor = "",
+    status = "PENDING",
+  }: {
+    authUserId: string;
+    limit?: number;
+    cursor?: string;
+    status?: ConnectionStatus;
+  }): Promise<PaginatedConnections> {
     try {
       const connections = await this.db.connection.findMany({
         where: {
-          receiverId: userId,
+          receiverId: authUserId,
           ...(status && { status }),
+          ...(cursor ? { updatedAt: { lt: new Date(cursor) } } : {}),
         },
         include: {
           sender: {
@@ -84,17 +117,27 @@ export class ConnectionsRepository {
             },
           },
         },
+        take: limit,
         orderBy: { updatedAt: "desc" },
       });
 
       // Flatten payload so it yields cleanly: { connectionId, status, user: senderProfile }
-      return connections.map((conn) => ({
+      const receivedConnections = connections.map((conn) => ({
         id: conn.id,
         status: conn.status,
         createdAt: conn.createdAt,
         updatedAt: conn.updatedAt,
         user: conn.sender,
       }));
+
+      const hasMore = connections.length === limit;
+      const nextCursor = hasMore ? connections[connections.length - 1]?.updatedAt?.toISOString() : null;
+
+      return {
+        connections: receivedConnections,
+        hasMore,
+        nextCursor,
+      };
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve received connection requests");
     }
