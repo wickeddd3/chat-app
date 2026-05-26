@@ -1,6 +1,7 @@
 export interface ConnectionUser {
   id: string;
   name: string;
+  username: string;
   image?: string | null;
 }
 
