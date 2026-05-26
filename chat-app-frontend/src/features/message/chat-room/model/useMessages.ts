@@ -21,9 +21,8 @@ export function useMessages(channelId: string): {
   } = useInfiniteQuery<PaginatedMessage, Error, Message[]>({
     queryKey: ["messages", channelId],
     queryFn: ({ pageParam }) =>
-      getMessagesApi({ channelId, cursor: pageParam }),
+      getMessagesApi({ channelId, params: { cursor: pageParam } }),
     initialPageParam: null,
-    // The oldest message ID becomes the next cursor parameter
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     select: (data) => {
       return [...data.pages].reverse().flatMap((page) => page.messages);
