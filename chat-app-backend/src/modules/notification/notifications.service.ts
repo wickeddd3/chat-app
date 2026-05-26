@@ -1,5 +1,5 @@
 import { NotificationsRepository } from "./notifications.repository";
-import type { PaginatedNotifications } from "./notification.types";
+import type { PaginatedNotifications } from "./notifications.types";
 
 export class NotificationsService {
   private notificationsRepository = new NotificationsRepository();

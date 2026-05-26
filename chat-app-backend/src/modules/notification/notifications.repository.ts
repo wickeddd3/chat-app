@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { PaginatedNotifications } from "./notification.types";
+import type { PaginatedNotifications } from "./notifications.types";
 
 export class NotificationsRepository {
   private db = prisma;
