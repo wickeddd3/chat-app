@@ -1,5 +1,9 @@
 import { ConnectionItem } from "@/entities/connection";
 import { useReceivedConnectionRequests } from "../model/useReceivedConnectionRequests";
+import { LoaderCircleIcon } from "lucide-react";
+import { LoadingPlaceholder } from "./LoadingPlaceholder";
+import { EmptyPlaceholder } from "./EmptyPlaceholder";
+import { Virtuoso } from "react-virtuoso";
 
 export function ReceivedConnectionRequests({
   acceptButton: AcceptButton,
@@ -9,19 +13,56 @@ export function ReceivedConnectionRequests({
     connectionRequestId: string;
   }>;
 }) {
-  const { receivedRequests } = useReceivedConnectionRequests();
+  const {
+    receivedRequests,
+    isLoading,
+    isEmpty,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useReceivedConnectionRequests();
 
   return (
-    <>
-      {receivedRequests.map((request) => (
-        <ConnectionItem
-          key={request.id}
-          user={request.user}
-          optionSlot={
-            <AcceptButton text="Accept" connectionRequestId={request.id} />
-          }
+    <div className="flex-1 h-full overflow-y-auto min-h-0 scrollbar-thin">
+      {isLoading && <LoadingPlaceholder />}
+
+      {!isEmpty && (
+        <Virtuoso
+          style={{
+            height: "100%",
+            width: "100%",
+          }}
+          data={receivedRequests}
+          overscan={400}
+          endReached={() => {
+            if (hasNextPage && !isFetchingNextPage) {
+              fetchNextPage();
+            }
+          }}
+          itemContent={(_, request) => (
+            <ConnectionItem
+              key={request.id}
+              user={request.user}
+              optionSlot={
+                <AcceptButton text="Accept" connectionRequestId={request.id} />
+              }
+            />
+          )}
+          components={{
+            Footer: () =>
+              isFetchingNextPage ? (
+                <div className="py-4 flex justify-center">
+                  <LoaderCircleIcon
+                    size={20}
+                    className="text-blue-500 animate-spin"
+                  />
+                </div>
+              ) : null,
+          }}
         />
-      ))}
-    </>
+      )}
+
+      {isEmpty && <EmptyPlaceholder />}
+    </div>
   );
 }
