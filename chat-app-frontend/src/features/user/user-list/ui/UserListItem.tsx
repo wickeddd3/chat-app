@@ -10,9 +10,9 @@ export function UserListItem({
   optionSlot?: ReactNode;
 }) {
   return (
-    <div
+    <article
       key={id}
-      className="flex items-center gap-4 border-b p-4 text-sm leading-tight whitespace-nowrap last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+      className="flex items-center gap-4 border-b px-4 py-3 text-sm leading-tight whitespace-nowrap last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
     >
       <ProfileAvatar imageSrc={image || ""} />
       <div className="flex-1 flex flex-col items-start gap-2">
@@ -20,6 +20,6 @@ export function UserListItem({
         <span className="text-xs">{`@${username}`}</span>
       </div>
       {optionSlot}
-    </div>
+    </article>
   );
 }

@@ -48,7 +48,11 @@ export function ContactList({
             itemContent={(_, contact) => (
               <ConnectionItem
                 key={contact.id}
-                user={{ name: contact.name, image: contact.image }}
+                user={{
+                  name: contact.name,
+                  username: contact.username,
+                  image: contact.image,
+                }}
                 optionSlot={
                   <MessageButton text="Message" targetUserId={contact.id} />
                 }

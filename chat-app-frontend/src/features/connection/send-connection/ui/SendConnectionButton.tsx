@@ -12,7 +12,10 @@ export function SendConnectionButton({
   return (
     <button
       onClick={() => sendConnectionRequest({ receiverId })}
-      className="bg-blue-500 text-gray-50 text-sm font-medium rounded-lg p-3 cursor-pointer hover:bg-blue-600"
+      className="bg-blue-500 text-gray-50 text-xs font-medium rounded-lg px-3 py-2 cursor-pointer hover:bg-blue-600"
+      aria-label="Send connection request"
+      role="button"
+      title="Send connection request"
     >
       {text}
     </button>

@@ -44,7 +44,10 @@ export function ReceivedConnectionRequests({
               key={request.id}
               user={request.user}
               optionSlot={
-                <AcceptButton text="Accept" connectionRequestId={request.id} />
+                <AcceptButton
+                  text="Accept Request"
+                  connectionRequestId={request.id}
+                />
               }
             />
           )}
