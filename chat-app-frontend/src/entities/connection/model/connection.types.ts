@@ -13,3 +13,9 @@ export interface Connection {
   updatedAt: string;
   user: ConnectionUser;
 }
+
+export interface PaginatedConnections {
+  connections: Connection[];
+  hasMore: boolean;
+  nextCursor: string | null | undefined;
+}
