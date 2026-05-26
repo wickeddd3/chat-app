@@ -24,7 +24,7 @@ export class ConnectionsController implements Controller {
   private getUserContacts = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = req.user?.id || "";
-      const limit = 10;
+      const limit = 20;
       const cursor = (req.query["cursor"] as string) || "";
       const query = (req.query["query"] as string) || "";
       const contacts = await this.connectionsService.getUserContacts({ authUserId: userId, limit, cursor, query });
