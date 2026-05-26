@@ -19,3 +19,9 @@ export interface PaginatedConnections {
   hasMore: boolean;
   nextCursor: string | null | undefined;
 }
+
+export interface PaginatedContacts {
+  contacts: ConnectionUser[];
+  hasMore: boolean;
+  nextCursor: string | null | undefined;
+}
