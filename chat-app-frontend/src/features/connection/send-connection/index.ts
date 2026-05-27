@@ -1,1 +1,1 @@
-export { SendConnectionButton } from "./ui/SendConnectionButton";
+export { SendButton } from "./ui/SendButton";

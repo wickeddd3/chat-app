@@ -8,9 +8,9 @@ import { Virtuoso } from "react-virtuoso";
 import { LoaderCircle } from "lucide-react";
 
 export function UserList({
-  sendConnectionButton: SendConnectionButton,
+  sendButton: SendButton,
 }: {
-  sendConnectionButton: React.ComponentType<{
+  sendButton: React.ComponentType<{
     text: string;
     receiverId: string;
   }>;
@@ -61,10 +61,7 @@ export function UserList({
                 key={user.id}
                 user={user}
                 optionSlot={
-                  <SendConnectionButton
-                    text="Add Contact"
-                    receiverId={user.id}
-                  />
+                  <SendButton text="Add Contact" receiverId={user.id} />
                 }
               />
             )}

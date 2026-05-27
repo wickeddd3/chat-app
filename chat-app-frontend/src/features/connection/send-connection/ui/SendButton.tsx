@@ -1,6 +1,6 @@
 import { useSendConnection } from "../model/useSendConnection";
 
-export function SendConnectionButton({
+export function SendButton({
   text,
   receiverId,
 }: {
