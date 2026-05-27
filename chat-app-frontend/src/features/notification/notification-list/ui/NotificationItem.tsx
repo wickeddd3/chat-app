@@ -1,6 +1,6 @@
 import type { Notification } from "@/entities/notification";
 import { iconType } from "../model/notification-icons";
-import { dateToString } from "@/shared/utils/date-format";
+import { dateToNow } from "@/shared/utils/date-format";
 import { cn } from "@/shared/lib/utils";
 
 export function NotificationItem({
@@ -29,14 +29,14 @@ export function NotificationItem({
       />
       <div className="flex-1 flex justify-between items-center">
         <div className="flex flex-col gap-1">
-          <p
+          <h1
             className={cn(
               "text-sm text-muted-foreground",
               notification.isRead ? "" : "font-medium text-gray-900",
             )}
           >
             {notification.title}
-          </p>
+          </h1>
           <p
             className={cn(
               "text-xs text-muted-foreground",
@@ -46,7 +46,7 @@ export function NotificationItem({
             {notification.content}
           </p>
         </div>
-        <span className="text-xs">{dateToString(notification.createdAt)}</span>
+        <span className="text-xs">{dateToNow(notification.createdAt)}</span>
       </div>
     </article>
   );

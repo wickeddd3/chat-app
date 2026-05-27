@@ -4,6 +4,7 @@ import { LoaderCircleIcon } from "lucide-react";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { Virtuoso } from "react-virtuoso";
+import { dateToNow } from "@/shared/utils/date-format";
 
 export function SentConnectionRequests() {
   const {
@@ -33,7 +34,11 @@ export function SentConnectionRequests() {
             }
           }}
           itemContent={(_, request) => (
-            <ConnectionItem key={request.id} user={request.user} />
+            <ConnectionItem
+              key={request.id}
+              user={request.user}
+              date={dateToNow(request.createdAt)}
+            />
           )}
           components={{
             Footer: () =>
