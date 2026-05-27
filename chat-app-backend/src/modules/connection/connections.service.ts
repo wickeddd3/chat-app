@@ -74,4 +74,12 @@ export class ConnectionsService {
       throw new Error(error?.message || "Failed to accept connection request");
     }
   }
+
+  public async declineRequest(receiverId: string, connectionId: string) {
+    try {
+      return await this.connectionsRepository.declineRequest(receiverId, connectionId);
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to decline connection request");
+    }
+  }
 }

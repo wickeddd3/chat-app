@@ -262,4 +262,49 @@ export class ConnectionsRepository {
       throw new Error(error?.message || "Failed to accept connection request");
     }
   }
+
+  /**
+   * DECLINE: Run by the recipient of an incoming request.
+   * Target connection must be directed to the active user and currently be 'PENDING'.
+   */
+  public async declineRequest(receiverId: string, connectionId: string): Promise<void> {
+    try {
+      // 1. Find the target record to verify authorization and status rules
+      const connection = await this.db.connection.findUnique({
+        where: { id: connectionId },
+      });
+
+      if (!connection) {
+        throw new Error("Connection request not found");
+      }
+
+      // Security check: Verify that the current user is actually the receiver
+      if (connection.receiverId !== receiverId) {
+        throw new Error("Unauthorized: You cannot decline a request sent to someone else");
+      }
+
+      // Business logic check: You can only decline pending requests
+      if (connection.status !== "PENDING") {
+        throw new Error(`Cannot decline request with status: ${connection.status}`);
+      }
+
+      // 2. Perform cleanup across the database atomically
+      await this.db.$transaction([
+        // Delete the connection relation record
+        this.db.connection.delete({
+          where: { id: connectionId },
+        }),
+        // Clean up the related unread connection request notification
+        this.db.notification.deleteMany({
+          where: {
+            referenceId: connectionId,
+            userId: receiverId,
+            type: "CONNECTION_REQUEST",
+          },
+        }),
+      ]);
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to decline connection request");
+    }
+  }
 }
