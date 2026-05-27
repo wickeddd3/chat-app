@@ -1,11 +1,12 @@
-import { ConnectionItem } from "@/entities/connection";
 import { useContacts } from "../model/useContacts";
 import { LoaderCircleIcon } from "lucide-react";
+import { ContactItem } from "./ContactItem";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { SearchField } from "@/shared/ui/SearchField";
 import { Virtuoso } from "react-virtuoso";
 import { useState } from "react";
+import { isLessThanADayOld } from "@/shared/utils/date-format";
 
 export function ContactList({
   messageButton: MessageButton,
@@ -46,13 +47,14 @@ export function ContactList({
               }
             }}
             itemContent={(_, contact) => (
-              <ConnectionItem
+              <ContactItem
                 key={contact.id}
                 user={{
                   name: contact.name,
                   username: contact.username,
                   image: contact.image,
                 }}
+                isNew={isLessThanADayOld(contact?.updatedAt || "")}
                 optionSlot={
                   <MessageButton text="Message" targetUserId={contact.id} />
                 }
