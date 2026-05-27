@@ -307,4 +307,48 @@ export class ConnectionsRepository {
       throw new Error(error?.message || "Failed to decline connection request");
     }
   }
+
+  /**
+   * CANCEL: Run by the author of an outbound request.
+   * Target connection must originate from the active user and still be 'PENDING'.
+   */
+  public async cancelRequest(senderId: string, connectionId: string): Promise<void> {
+    try {
+      // 1. Find the target record to verify authorization and status rules
+      const connection = await this.db.connection.findUnique({
+        where: { id: connectionId },
+      });
+
+      if (!connection) {
+        throw new Error("Connection request not found");
+      }
+
+      // Security check: Verify that the current user is the original sender
+      if (connection.senderId !== senderId) {
+        throw new Error("Unauthorized: You cannot cancel a request sent by someone else");
+      }
+
+      // Business logic check: Once accepted, a request must be unfriended, not cancelled
+      if (connection.status !== "PENDING") {
+        throw new Error("Cannot cancel a request that has already been accepted or handled");
+      }
+
+      // 2. Perform cleanup across tables atomically
+      await this.db.$transaction([
+        this.db.connection.delete({
+          where: { id: connectionId },
+        }),
+        // Clean up the notification from the recipient's inbox so it disappears
+        this.db.notification.deleteMany({
+          where: {
+            referenceId: connectionId,
+            userId: connection.receiverId,
+            type: "CONNECTION_REQUEST",
+          },
+        }),
+      ]);
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to cancel connection request");
+    }
+  }
 }

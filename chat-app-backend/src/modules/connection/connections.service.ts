@@ -82,4 +82,12 @@ export class ConnectionsService {
       throw new Error(error?.message || "Failed to decline connection request");
     }
   }
+
+  public async cancelRequest(senderId: string, connectionId: string) {
+    try {
+      return await this.connectionsRepository.cancelRequest(senderId, connectionId);
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to cancel connection request");
+    }
+  }
 }

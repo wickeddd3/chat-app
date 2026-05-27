@@ -20,6 +20,7 @@ export class ConnectionsController implements Controller {
     this.router.post(`${this.path}/request`, [authMiddleware], this.sendConnectionRequest);
     this.router.post(`${this.path}/request/:id/accept`, [authMiddleware], this.acceptConnectionRequest);
     this.router.post(`${this.path}/request/:id/decline`, [authMiddleware], this.declineRequest);
+    this.router.post(`${this.path}/request/:id/cancel`, [authMiddleware], this.cancelRequest);
   }
 
   private getUserContacts = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
@@ -77,9 +78,9 @@ export class ConnectionsController implements Controller {
       const userId = req.user?.id || "";
       const senderId = userId;
       const receiverId = req.body.receiverId;
-      const contacts = await this.connectionsService.sendConnectionRequest(senderId, receiverId);
+      const request = await this.connectionsService.sendConnectionRequest(senderId, receiverId);
 
-      res.status(200).json(contacts);
+      res.status(200).json(request);
     } catch (error: any) {
       next(new HttpException(500, error?.message || "Failed to send connection request"));
     }
@@ -94,9 +95,9 @@ export class ConnectionsController implements Controller {
       const userId = req.user?.id || "";
       const receiverId = userId;
       const connectionId = (req.params?.id as string) || "";
-      const contacts = await this.connectionsService.acceptConnectionRequest(receiverId, connectionId);
+      const request = await this.connectionsService.acceptConnectionRequest(receiverId, connectionId);
 
-      res.status(200).json(contacts);
+      res.status(200).json(request);
     } catch (error: any) {
       next(new HttpException(500, error?.message || "Failed to accept connection request"));
     }
@@ -107,11 +108,24 @@ export class ConnectionsController implements Controller {
       const userId = req.user?.id || "";
       const receiverId = userId;
       const connectionId = (req.params?.id as string) || "";
-      const contacts = await this.connectionsService.declineRequest(receiverId, connectionId);
+      const request = await this.connectionsService.declineRequest(receiverId, connectionId);
 
-      res.status(200).json(contacts);
+      res.status(200).json(request);
     } catch (error: any) {
       next(new HttpException(500, error?.message || "Failed to decline connection request"));
+    }
+  };
+
+  private cancelRequest = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.id || "";
+      const senderId = userId;
+      const connectionId = (req.params?.id as string) || "";
+      const request = await this.connectionsService.cancelRequest(senderId, connectionId);
+
+      res.status(200).json(request);
+    } catch (error: any) {
+      next(new HttpException(500, error?.message || "Failed to cancel connection request"));
     }
   };
 }
