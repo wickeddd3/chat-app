@@ -1,1 +1,1 @@
-export { ReceivedConnectionRequests } from "./ui/ReceivedConnectionRequests";
+export { ReceivedRequests } from "./ui/ReceivedRequests";

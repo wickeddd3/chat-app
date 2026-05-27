@@ -6,7 +6,7 @@ import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { Virtuoso } from "react-virtuoso";
 import { dateToNow } from "@/shared/utils/date-format";
 
-export function ReceivedConnectionRequests({
+export function ReceivedRequests({
   acceptButton: AcceptButton,
   declineButton: DeclineButton,
 }: {

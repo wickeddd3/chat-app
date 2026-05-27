@@ -6,7 +6,7 @@ import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { Virtuoso } from "react-virtuoso";
 import { dateToNow } from "@/shared/utils/date-format";
 
-export function SentConnectionRequests({
+export function SentRequests({
   cancelButton: CancelButton,
 }: {
   cancelButton: React.ComponentType<{

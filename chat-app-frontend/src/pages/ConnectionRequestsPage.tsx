@@ -4,8 +4,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/shared/ui/shadcn/tabs";
-import { SentConnectionRequests } from "@/features/connection/sent-connection";
-import { ReceivedConnectionRequests } from "@/features/connection/received-connection";
+import { SentRequests } from "@/features/connection/sent-connection";
+import { ReceivedRequests } from "@/features/connection/received-connection";
 import { AcceptButton } from "@/features/connection/accept-connection";
 import { DeclineButton } from "@/features/connection/decline-connection";
 import { CancelButton } from "@/features/connection/cancel-connection";
@@ -38,7 +38,7 @@ export default function ConnectionRequestsPage() {
             value="received"
             className="flex-1 min-h-0 data-[state=active]:flex flex-col m-0"
           >
-            <ReceivedConnectionRequests
+            <ReceivedRequests
               acceptButton={AcceptButton}
               declineButton={DeclineButton}
             />
@@ -47,7 +47,7 @@ export default function ConnectionRequestsPage() {
             value="sent"
             className="flex-1 min-h-0 data-[state=active]:flex flex-col m-0"
           >
-            <SentConnectionRequests cancelButton={CancelButton} />
+            <SentRequests cancelButton={CancelButton} />
           </TabsContent>
         </Tabs>
       </div>

@@ -1,1 +1,1 @@
-export { SentConnectionRequests } from "./ui/SentConnectionRequests";
+export { SentRequests } from "./ui/SentRequests";
