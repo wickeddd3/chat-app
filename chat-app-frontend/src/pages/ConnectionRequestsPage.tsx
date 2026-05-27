@@ -7,6 +7,7 @@ import {
 import { SentConnectionRequests } from "@/features/connection/sent-connection";
 import { ReceivedConnectionRequests } from "@/features/connection/received-connection";
 import { AcceptConnectionButton } from "@/features/connection/accept-connection";
+import { DeclineButton } from "@/features/connection/decline-connection";
 
 export default function ConnectionRequestsPage() {
   return (
@@ -36,7 +37,10 @@ export default function ConnectionRequestsPage() {
             value="received"
             className="flex-1 min-h-0 data-[state=active]:flex flex-col m-0"
           >
-            <ReceivedConnectionRequests acceptButton={AcceptConnectionButton} />
+            <ReceivedConnectionRequests
+              acceptButton={AcceptConnectionButton}
+              declineButton={DeclineButton}
+            />
           </TabsContent>
           <TabsContent
             value="sent"

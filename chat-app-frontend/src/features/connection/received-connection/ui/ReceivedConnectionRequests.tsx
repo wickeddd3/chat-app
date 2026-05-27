@@ -8,8 +8,13 @@ import { dateToNow } from "@/shared/utils/date-format";
 
 export function ReceivedConnectionRequests({
   acceptButton: AcceptButton,
+  declineButton: DeclineButton,
 }: {
   acceptButton: React.ComponentType<{
+    text: string;
+    connectionRequestId: string;
+  }>;
+  declineButton: React.ComponentType<{
     text: string;
     connectionRequestId: string;
   }>;
@@ -46,10 +51,16 @@ export function ReceivedConnectionRequests({
               user={request.user}
               date={dateToNow(request.createdAt)}
               optionSlot={
-                <AcceptButton
-                  text="Accept Request"
-                  connectionRequestId={request.id}
-                />
+                <>
+                  <DeclineButton
+                    text="Decline Request"
+                    connectionRequestId={request.id}
+                  />
+                  <AcceptButton
+                    text="Accept Request"
+                    connectionRequestId={request.id}
+                  />
+                </>
               }
             />
           )}
