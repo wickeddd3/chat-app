@@ -6,7 +6,14 @@ import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { Virtuoso } from "react-virtuoso";
 import { dateToNow } from "@/shared/utils/date-format";
 
-export function SentConnectionRequests() {
+export function SentConnectionRequests({
+  cancelButton: CancelButton,
+}: {
+  cancelButton: React.ComponentType<{
+    text: string;
+    connectionRequestId: string;
+  }>;
+}) {
   const {
     sentRequests,
     isLoading,
@@ -38,6 +45,12 @@ export function SentConnectionRequests() {
               key={request.id}
               user={request.user}
               date={dateToNow(request.createdAt)}
+              optionSlot={
+                <CancelButton
+                  text="Cancel Request"
+                  connectionRequestId={request.id}
+                />
+              }
             />
           )}
           components={{
