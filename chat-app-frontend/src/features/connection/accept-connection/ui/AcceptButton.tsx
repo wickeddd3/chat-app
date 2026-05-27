@@ -1,6 +1,6 @@
 import { useAcceptConnection } from "../model/useAcceptConnection";
 
-export function AcceptConnectionButton({
+export function AcceptButton({
   text,
   connectionRequestId,
 }: {

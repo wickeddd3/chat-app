@@ -1,1 +1,1 @@
-export { AcceptConnectionButton } from "./ui/AcceptConnectionButton";
+export { AcceptButton } from "./ui/AcceptButton";
