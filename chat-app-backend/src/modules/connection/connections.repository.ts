@@ -179,7 +179,7 @@ export class ConnectionsRepository {
     }
   }
 
-  public async sendConnectionRequest(senderId: string, receiverId: string) {
+  public async sendRequest(senderId: string, receiverId: string) {
     try {
       if (senderId === receiverId) throw new Error("You cannot connect with yourself");
 
@@ -222,7 +222,7 @@ export class ConnectionsRepository {
     }
   }
 
-  public async acceptConnectionRequest(receiverId: string, connectionId: string) {
+  public async acceptRequest(receiverId: string, connectionId: string) {
     try {
       return await this.db.$transaction(async (tx) => {
         const connection = await tx.connection.findUnique({

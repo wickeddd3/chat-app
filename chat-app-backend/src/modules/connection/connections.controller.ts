@@ -17,8 +17,8 @@ export class ConnectionsController implements Controller {
     this.router.get(`${this.path}/contacts`, [authMiddleware], this.getUserContacts);
     this.router.get(`${this.path}/sent`, [authMiddleware], this.getSentConnections);
     this.router.get(`${this.path}/received`, [authMiddleware], this.getReceivedConnections);
-    this.router.post(`${this.path}/request`, [authMiddleware], this.sendConnectionRequest);
-    this.router.post(`${this.path}/request/:id/accept`, [authMiddleware], this.acceptConnectionRequest);
+    this.router.post(`${this.path}/request`, [authMiddleware], this.sendRequest);
+    this.router.post(`${this.path}/request/:id/accept`, [authMiddleware], this.acceptRequest);
     this.router.post(`${this.path}/request/:id/decline`, [authMiddleware], this.declineRequest);
     this.router.post(`${this.path}/request/:id/cancel`, [authMiddleware], this.cancelRequest);
   }
@@ -73,12 +73,12 @@ export class ConnectionsController implements Controller {
     }
   };
 
-  private sendConnectionRequest = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+  private sendRequest = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = req.user?.id || "";
       const senderId = userId;
       const receiverId = req.body.receiverId;
-      const request = await this.connectionsService.sendConnectionRequest(senderId, receiverId);
+      const request = await this.connectionsService.sendRequest(senderId, receiverId);
 
       res.status(200).json(request);
     } catch (error: any) {
@@ -86,16 +86,12 @@ export class ConnectionsController implements Controller {
     }
   };
 
-  private acceptConnectionRequest = async (
-    req: ControllerRequest,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> => {
+  private acceptRequest = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = req.user?.id || "";
       const receiverId = userId;
       const connectionId = (req.params?.id as string) || "";
-      const request = await this.connectionsService.acceptConnectionRequest(receiverId, connectionId);
+      const request = await this.connectionsService.acceptRequest(receiverId, connectionId);
 
       res.status(200).json(request);
     } catch (error: any) {

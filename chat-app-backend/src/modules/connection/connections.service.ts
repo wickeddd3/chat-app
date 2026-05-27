@@ -59,17 +59,17 @@ export class ConnectionsService {
     }
   }
 
-  public async sendConnectionRequest(senderId: string, receiverId: string) {
+  public async sendRequest(senderId: string, receiverId: string) {
     try {
-      return await this.connectionsRepository.sendConnectionRequest(senderId, receiverId);
+      return await this.connectionsRepository.sendRequest(senderId, receiverId);
     } catch (error: any) {
       throw new Error(error?.message || "Failed to send connection request");
     }
   }
 
-  public async acceptConnectionRequest(receiverId: string, connectionId: string) {
+  public async acceptRequest(receiverId: string, connectionId: string) {
     try {
-      return await this.connectionsRepository.acceptConnectionRequest(receiverId, connectionId);
+      return await this.connectionsRepository.acceptRequest(receiverId, connectionId);
     } catch (error: any) {
       throw new Error(error?.message || "Failed to accept connection request");
     }
