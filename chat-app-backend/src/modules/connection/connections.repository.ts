@@ -31,7 +31,10 @@ export class ConnectionsRepository {
           ],
           ...(cursor ? { updatedAt: { lt: new Date(cursor) } } : {}),
         },
-        include: {
+        select: {
+          updatedAt: true,
+          senderId: true,
+          receiverId: true,
           sender: { select: { id: true, name: true, username: true, image: true } },
           receiver: { select: { id: true, name: true, username: true, image: true } },
         },
@@ -40,7 +43,10 @@ export class ConnectionsRepository {
 
       // Map the connection payload down to just the opposing User profile object
       const contacts = connections.map((conn) => {
-        return conn.senderId === authUserId ? conn.receiver : conn.sender;
+        return {
+          ...(conn.senderId === authUserId ? conn.receiver : conn.sender),
+          updatedAt: conn.updatedAt,
+        };
       });
 
       const hasMore = connections.length === limit;
