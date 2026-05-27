@@ -3,6 +3,7 @@ export interface ConnectionUser {
   name: string;
   username: string;
   image?: string | null;
+  updatedAt?: string;
 }
 
 export type ConnectionStatus = "PENDING" | "ACCEPTED" | "REJECTED";
