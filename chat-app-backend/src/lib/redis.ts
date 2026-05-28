@@ -1,17 +1,21 @@
 import { REDIS_URL } from "@/config/app.config";
-import { createClient } from "redis";
+import { Redis } from "ioredis";
 
-if (!REDIS_URL) {
-  throw new Error("REDIS_URL is not defined");
-}
+const redisUrl = REDIS_URL || "";
 
-export const redisClient = createClient({ url: REDIS_URL });
+// Existing presence/caching client
+export const redisClient = new Redis(redisUrl, { maxRetriesPerRequest: null });
 
-redisClient.on("error", (err) => console.error("Redis Client Error", err));
+// New isolated clients dedicated to horizontal WebSockets scaling
+export const pubClient = redisClient.duplicate();
+export const subClient = redisClient.duplicate();
 
-export const connectRedis = async () => {
-  if (!redisClient.isOpen) {
-    await redisClient.connect();
-    console.log("Redis connected");
+export const connectRedis = async (): Promise<void> => {
+  try {
+    // Await primary service connections smoothly
+    await Promise.all([redisClient.connect(), pubClient.connect(), subClient.connect()]);
+    console.log("Redis cluster connection pools initialized successfully.");
+  } catch (error) {
+    console.error("Failed to connect to Redis infrastructure:", error);
   }
 };

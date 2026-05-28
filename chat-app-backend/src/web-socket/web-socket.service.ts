@@ -3,7 +3,8 @@ import type { Server as HttpServer } from "http";
 import { APP_URL } from "@/config/app.config";
 import { socketAuthMiddleware } from "@/middlewares/socket-auth.middleware";
 import type { Event } from "@/interfaces/event.interface";
-import { redisClient } from "@/lib/redis";
+import { createAdapter } from "@socket.io/redis-adapter";
+import { redisClient, pubClient, subClient } from "@/lib/redis";
 import { JoinChannelEvent } from "./events/join-channel.event";
 import { LeaveChannelEvent } from "./events/leave-channel.event";
 import { DisconnectEvent } from "./events/disconnect.event";
@@ -27,6 +28,7 @@ export class WebSocketService {
         methods: ["GET", "POST"],
         credentials: true,
       },
+      adapter: createAdapter(pubClient, subClient),
     });
 
     this.initializeMiddleware();
@@ -52,7 +54,7 @@ export class WebSocketService {
       console.log(`Connected: ${user.name} (${socket.id})`);
 
       // Fetch the full list of online users from Redis
-      const onlineUserIds = await redisClient.sMembers("presence:online_users");
+      const onlineUserIds = await redisClient.smembers("presence:online_users");
       // Emit only to the connecting user (private message)
       socket.emit("online_users_list", onlineUserIds);
 
