@@ -10,7 +10,7 @@ export function useDeclineConnection(): {
   isPending: boolean;
   error: unknown;
 } {
-  const queryKey = REACT_QUERY_KEYS["RECEIVED_CONNECTION_REQUEST"];
+  const queryKey = REACT_QUERY_KEYS["RECEIVED_CONNECTION_REQUESTS"];
 
   const { mutate, isPending, error } = useMutation({
     mutationFn: (connectionId: string) =>

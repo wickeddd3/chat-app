@@ -20,7 +20,7 @@ export function useReceivedConnectionRequests(): {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<PaginatedConnections, unknown, Connection[]>({
-    queryKey: REACT_QUERY_KEYS["RECEIVED_CONNECTION_REQUEST"],
+    queryKey: REACT_QUERY_KEYS["RECEIVED_CONNECTION_REQUESTS"],
     queryFn: ({ pageParam }) =>
       receivedConnectionRequestsApi({
         params: {

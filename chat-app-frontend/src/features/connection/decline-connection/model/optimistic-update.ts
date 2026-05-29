@@ -6,7 +6,7 @@ export async function optimisticUpdate(
   connectionId: string,
   context: any,
 ): Promise<{ previousRequests: any } | void> {
-  const queryKey = REACT_QUERY_KEYS["RECEIVED_CONNECTION_REQUEST"];
+  const queryKey = REACT_QUERY_KEYS["RECEIVED_CONNECTION_REQUESTS"];
 
   // 1. Cancel outbound refetches so they don't overwrite our optimistic state
   await context.client.cancelQueries({ queryKey });
