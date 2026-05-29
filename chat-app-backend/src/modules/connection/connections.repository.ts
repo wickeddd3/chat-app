@@ -199,7 +199,10 @@ export class ConnectionsRepository {
       const result = await this.db.$transaction(async (tx) => {
         const connection = await tx.connection.create({
           data: { senderId, receiverId, status: "PENDING" },
-          include: { sender: true },
+          include: {
+            receiver: { select: { id: true, name: true, username: true, image: true } },
+            sender: { select: { id: true, name: true, username: true, image: true } },
+          },
         });
 
         const notification = await tx.notification.create({
@@ -212,7 +215,16 @@ export class ConnectionsRepository {
           },
         });
 
-        return { connection, notification };
+        return {
+          connection: {
+            id: connection.id,
+            status: connection.status,
+            createdAt: connection.createdAt,
+            updatedAt: connection.updatedAt,
+            user: connection.receiver,
+          },
+          notification,
+        };
       });
 
       return result;
