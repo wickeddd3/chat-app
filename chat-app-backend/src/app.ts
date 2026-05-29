@@ -10,6 +10,7 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "@/lib/better-auth";
 import { WebSocketService } from "@/web-socket/web-socket.service";
 import { connectRedis } from "@/lib/redis";
+import { registerWebSocketHandlers } from "@/web-socket/handlers";
 
 export class App {
   public express: Application;
@@ -26,8 +27,11 @@ export class App {
     this.initializeAuth();
     this.initializeControllers(controllers);
 
+    // Establish Redis connection before starting the WebSocket server
     connectRedis();
-
+    // Register WebSocket event handlers before starting the WebSocket server
+    registerWebSocketHandlers();
+    // Initialize and start the WebSocket server
     this.webSocketService = new WebSocketService(this.server);
     this.webSocketService.start();
   }
@@ -52,7 +56,8 @@ export class App {
   }
 
   private initializeAuth(): void {
-    this.express.all("/api/auth/*splat", toNodeHandler(auth)); // Better-auth route for authentication
+    // Better-auth route for authentication
+    this.express.all("/api/auth/*splat", toNodeHandler(auth));
   }
 
   private initializeControllers(controllers: Controller[]): void {
