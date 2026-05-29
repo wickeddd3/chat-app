@@ -245,7 +245,7 @@ export class ConnectionsRepository {
         });
 
         // Alert the sender that their request was accepted
-        await tx.notification.create({
+        const notification = await tx.notification.create({
           data: {
             userId: connection.senderId,
             type: "CONNECTION_ACCEPTED",
@@ -255,7 +255,7 @@ export class ConnectionsRepository {
           },
         });
 
-        return updatedConnection;
+        return { connection: updatedConnection, notification };
       });
     } catch (error: any) {
       throw new Error(error?.message || "Failed to accept connection request");

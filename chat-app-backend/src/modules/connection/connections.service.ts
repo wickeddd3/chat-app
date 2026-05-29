@@ -74,7 +74,11 @@ export class ConnectionsService {
 
   public async acceptRequest(receiverId: string, connectionId: string) {
     try {
-      return await this.connectionsRepository.acceptRequest(receiverId, connectionId);
+      const result = await this.connectionsRepository.acceptRequest(receiverId, connectionId);
+
+      eventDispatcher.emit("notification:created", result.notification);
+
+      return result;
     } catch (error: any) {
       throw new Error(error?.message || "Failed to accept connection request");
     }
