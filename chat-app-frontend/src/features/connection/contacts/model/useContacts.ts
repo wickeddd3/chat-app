@@ -3,6 +3,7 @@ import { getContactsApi } from "../api/connections.api";
 import type { ConnectionUser, PaginatedContacts } from "@/entities/connection";
 import { useEffect, useMemo, useState } from "react";
 import { debounce } from "@/shared/utils/debounce";
+import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
 
 export function useContacts(query: string): {
   contacts: ConnectionUser[];
@@ -32,7 +33,7 @@ export function useContacts(query: string): {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<PaginatedContacts, unknown, ConnectionUser[]>({
-    queryKey: ["contacts", debouncedQuery],
+    queryKey: REACT_QUERY_KEYS["CONTACTS"],
     queryFn: ({ pageParam }) =>
       getContactsApi({
         params: {
