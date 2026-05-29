@@ -33,7 +33,7 @@ export function useContacts(query: string): {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<PaginatedContacts, unknown, ConnectionUser[]>({
-    queryKey: REACT_QUERY_KEYS["CONTACTS"],
+    queryKey: [...REACT_QUERY_KEYS["CONTACTS"], debouncedQuery],
     queryFn: ({ pageParam }) =>
       getContactsApi({
         params: {
