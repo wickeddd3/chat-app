@@ -28,7 +28,7 @@ export class WebSocketService {
         methods: ["GET", "POST"],
         credentials: true,
       },
-      adapter: createAdapter(pubClient, subClient),
+      adapter: createAdapter(pubClient, subClient, { key: "socket.io" }),
     });
 
     this.initializeMiddleware();
@@ -52,6 +52,7 @@ export class WebSocketService {
     this.webSocketServer.on("connection", async (socket: Socket) => {
       const user = socket.data.user;
       console.log(`Connected: ${user.name} (${socket.id})`);
+      socket.join(`user:${user.id}`);
 
       // Fetch the full list of online users from Redis
       const onlineUserIds = await redisClient.smembers("presence:online_users");
