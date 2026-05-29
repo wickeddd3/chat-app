@@ -1,6 +1,7 @@
 import { ConnectionStatus } from "@/prisma/client";
 import { ConnectionsRepository } from "./connections.repository";
 import type { PaginatedConnections, PaginatedContacts } from "./connections.types";
+import { eventDispatcher } from "@/lib/event-dispatcher";
 
 export class ConnectionsService {
   private connectionsRepository = new ConnectionsRepository();
@@ -61,7 +62,11 @@ export class ConnectionsService {
 
   public async sendRequest(senderId: string, receiverId: string) {
     try {
-      return await this.connectionsRepository.sendRequest(senderId, receiverId);
+      const result = await this.connectionsRepository.sendRequest(senderId, receiverId);
+
+      eventDispatcher.emit("notification:created", result.notification);
+
+      return result;
     } catch (error: any) {
       throw new Error(error?.message || "Failed to send connection request");
     }

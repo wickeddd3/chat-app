@@ -196,13 +196,13 @@ export class ConnectionsRepository {
       if (existing) throw new Error("Connection request already exists or you are connected");
 
       // Create connection and notification together in a transaction
-      return await this.db.$transaction(async (tx) => {
+      const result = await this.db.$transaction(async (tx) => {
         const connection = await tx.connection.create({
           data: { senderId, receiverId, status: "PENDING" },
           include: { sender: true },
         });
 
-        await tx.notification.create({
+        const notification = await tx.notification.create({
           data: {
             userId: receiverId,
             type: "CONNECTION_REQUEST",
@@ -212,11 +212,10 @@ export class ConnectionsRepository {
           },
         });
 
-        // Real-time step: Emit a WebSocket event to the receiverId room here!
-        // io.to(receiverId).emit("new_notification", ...);
-
-        return connection;
+        return { connection, notification };
       });
+
+      return result;
     } catch (error: any) {
       throw new Error(error?.message || "Failed to send connection request");
     }
