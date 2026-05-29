@@ -4,11 +4,13 @@ import { ChatSidebar } from "@/widgets/navigation";
 import { Outlet } from "react-router";
 import { useWebSocketConnect } from "@/features/message/websocket-connection";
 import { useHeartbeat } from "@/features/message/online-presence";
+import { useRealTimeNotifications } from "@/features/notification/realtime-notification";
 
 export function ChatLayout() {
   const { authSession } = useAuth();
   useWebSocketConnect(!!authSession);
   useHeartbeat(!!authSession);
+  useRealTimeNotifications();
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
