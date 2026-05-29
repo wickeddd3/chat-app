@@ -80,7 +80,7 @@ export class ConnectionsController implements Controller {
       const receiverId = req.body.receiverId;
       const request = await this.connectionsService.sendRequest(senderId, receiverId);
 
-      res.status(200).json(request);
+      res.status(200).json(request.connection);
     } catch (error: any) {
       next(new HttpException(500, error?.message || "Failed to send connection request"));
     }
@@ -93,7 +93,7 @@ export class ConnectionsController implements Controller {
       const connectionId = (req.params?.id as string) || "";
       const request = await this.connectionsService.acceptRequest(receiverId, connectionId);
 
-      res.status(200).json(request);
+      res.status(200).json(request.connection);
     } catch (error: any) {
       next(new HttpException(500, error?.message || "Failed to accept connection request"));
     }

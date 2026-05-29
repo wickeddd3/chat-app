@@ -235,7 +235,10 @@ export class ConnectionsRepository {
         const updatedConnection = await tx.connection.update({
           where: { id: connectionId },
           data: { status: "ACCEPTED" },
-          include: { receiver: true },
+          include: {
+            receiver: { select: { id: true, name: true, username: true, image: true } },
+            sender: { select: { id: true, name: true, username: true, image: true } },
+          },
         });
 
         // Mark the original incoming request notification as read
@@ -255,7 +258,16 @@ export class ConnectionsRepository {
           },
         });
 
-        return { connection: updatedConnection, notification };
+        return {
+          connection: {
+            id: updatedConnection.id,
+            status: updatedConnection.status,
+            createdAt: updatedConnection.createdAt,
+            updatedAt: updatedConnection.updatedAt,
+            user: updatedConnection.sender,
+          },
+          notification,
+        };
       });
     } catch (error: any) {
       throw new Error(error?.message || "Failed to accept connection request");
