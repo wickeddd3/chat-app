@@ -16,7 +16,7 @@ export function useAcceptConnection(): {
   error: unknown;
 } {
   const queryKey = REACT_QUERY_KEYS["RECEIVED_CONNECTION_REQUESTS"];
-  const contactQueryKey = REACT_QUERY_KEYS["CONTACTS"];
+  const contactQueryKey = [...REACT_QUERY_KEYS["CONTACTS"], ""];
 
   const { mutate, isPending, error } = useMutation({
     mutationFn: (connectionId: string) =>
