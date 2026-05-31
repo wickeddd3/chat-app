@@ -12,9 +12,21 @@ export const subClient = pubClient.duplicate();
 
 export const connectRedis = async (): Promise<void> => {
   try {
-    // Await primary service connections smoothly
-    await Promise.all([redisClient.connect(), pubClient.connect(), subClient.connect()]);
-    console.log("Redis cluster connection pools initialized successfully.");
+    const clients = [
+      { name: "Main Client", instance: redisClient },
+      { name: "Pub Client", instance: pubClient },
+      { name: "Sub Client", instance: subClient },
+    ];
+
+    for (const client of clients) {
+      // Only call .connect() if the specific instance state is 'wait'
+      if (client.instance.status === "wait") {
+        await client.instance.connect();
+        console.log(`📡 [Redis] ${client.name} successfully connected`);
+      } else {
+        console.log(`ℹ️ [Redis] ${client.name} bypasses manual trigger (Status: ${client.instance.status})`);
+      }
+    }
   } catch (error) {
     console.error("Failed to connect to Redis infrastructure:", error);
   }
