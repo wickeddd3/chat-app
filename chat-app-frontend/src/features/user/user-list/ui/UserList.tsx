@@ -7,11 +7,31 @@ import { useState } from "react";
 import { Virtuoso } from "react-virtuoso";
 
 export function UserList({
+  messageButton: MessageButton,
   sendButton: SendButton,
+  cancelButton: CancelButton,
+  declineButton: DeclineButton,
+  acceptButton: AcceptButton,
 }: {
+  messageButton: React.ComponentType<{
+    text: string;
+    targetUserId: string;
+  }>;
   sendButton: React.ComponentType<{
     text: string;
     receiverId: string;
+  }>;
+  cancelButton: React.ComponentType<{
+    text: string;
+    connectionRequestId: string;
+  }>;
+  declineButton: React.ComponentType<{
+    text: string;
+    connectionRequestId: string;
+  }>;
+  acceptButton: React.ComponentType<{
+    text: string;
+    connectionRequestId: string;
   }>;
 }) {
   const [query, setQuery] = useState("");
@@ -47,7 +67,34 @@ export function UserList({
                 key={user.id}
                 user={user}
                 optionSlot={
-                  <SendButton text="Add Contact" receiverId={user.id} />
+                  <>
+                    {user.connectionStatus === "STRANGER" && (
+                      <SendButton text="Add Contact" receiverId={user.id} />
+                    )}
+                    {user.connectionStatus === "CONTACT" && (
+                      <MessageButton text="Message" targetUserId={user.id} />
+                    )}
+                    {user.connectionStatus === "PENDING_SENT" &&
+                      user.connectionId && (
+                        <CancelButton
+                          text="Cancel Request"
+                          connectionRequestId={user.connectionId}
+                        />
+                      )}
+                    {user.connectionStatus === "PENDING_RECEIVED" &&
+                      user.connectionId && (
+                        <>
+                          <DeclineButton
+                            text="Decline Request"
+                            connectionRequestId={user.connectionId}
+                          />
+                          <AcceptButton
+                            text="Accept Request"
+                            connectionRequestId={user.connectionId}
+                          />
+                        </>
+                      )}
+                  </>
                 }
               />
             )}
