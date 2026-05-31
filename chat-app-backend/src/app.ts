@@ -11,12 +11,13 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "@/lib/better-auth";
 
 import { connectRedis } from "@/lib/redis";
-import { registerWebSocketHandlers } from "@/web-socket/handlers";
 
 import { container } from "@/config/inversify.config";
 import { TYPES } from "@/config/types";
 import { SocketServerProvider } from "@/web-socket/socket-server.provider";
 import { WebSocketService } from "@/web-socket/web-socket.service";
+
+import { NotificationSubscriber } from "@/web-socket/handlers/notification.subscriber";
 
 export class App {
   public express: Application;
@@ -34,8 +35,9 @@ export class App {
 
     // Establish Redis connection before starting the WebSocket server
     connectRedis();
+
     // Register WebSocket event handlers before starting the WebSocket server
-    registerWebSocketHandlers();
+    this.initializeEventSubscribers();
 
     // Initialize and start the WebSocket server
     // Fetch the provider and pass the server instance to it
@@ -75,5 +77,16 @@ export class App {
     controllers.forEach((controller: Controller) => {
       this.express.use("/api", controller.router);
     });
+  }
+
+  private initializeEventSubscribers(): void {
+    // Extract the dispatcher instance and subscriber class from the DI environment
+    const dispatcher = container.get<any>(TYPES.EventDispatcher);
+    const notificationSubscriber = container.get<NotificationSubscriber>(TYPES.NotificationSubscriber);
+
+    // Register the handler using injectable class context instance
+    dispatcher.on("notification:created", notificationSubscriber.handleNotificationCreated);
+
+    console.log("🔔 [App] Successfully registered domain event subscribers");
   }
 }
