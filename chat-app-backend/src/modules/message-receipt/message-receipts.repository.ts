@@ -1,7 +1,10 @@
-import { prisma } from "@/lib/prisma";
+import { injectable, inject } from "inversify";
+import { TYPES } from "@/config/types";
+import { PrismaClient } from "@/prisma/client";
 
+@injectable()
 export class MessageReceiptsRepository {
-  private db = prisma;
+  constructor(@inject(TYPES.PrismaClient) private db: PrismaClient) {}
 
   public async createMessageReceipts(userId: string, ids: number[]) {
     try {

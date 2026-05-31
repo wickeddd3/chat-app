@@ -17,6 +17,9 @@ import { MessagesController } from "@/modules/message/messages.controller";
 import { MessagesService } from "@/modules/message/messages.service";
 import { MessagesRepository } from "@/modules/message/messages.repository";
 
+import { MessageReceiptsService } from "@/modules/message-receipt/message-receipts.service";
+import { MessageReceiptsRepository } from "@/modules/message-receipt/message-receipts.repository";
+
 import { ConnectionsController } from "@/modules/connection/connections.controller";
 import { ConnectionsService } from "@/modules/connection/connections.service";
 import { ConnectionsRepository } from "@/modules/connection/connections.repository";
@@ -42,6 +45,9 @@ container.bind<ChannelsRepository>(TYPES.ChannelsRepository).to(ChannelsReposito
 container.bind<MessagesController>(TYPES.MessagesController).to(MessagesController);
 container.bind<MessagesService>(TYPES.MessagesService).to(MessagesService);
 container.bind<MessagesRepository>(TYPES.MessagesRepository).to(MessagesRepository);
+
+container.bind<MessageReceiptsService>(TYPES.MessageReceiptsService).to(MessageReceiptsService);
+container.bind<MessageReceiptsRepository>(TYPES.MessageReceiptsRepository).to(MessageReceiptsRepository);
 
 container.bind<ConnectionsController>(TYPES.ConnectionsController).to(ConnectionsController);
 container.bind<ConnectionsService>(TYPES.ConnectionsService).to(ConnectionsService);

@@ -13,6 +13,9 @@ export const TYPES = {
   MessagesService: Symbol.for("MessagesService"),
   MessagesRepository: Symbol.for("MessagesRepository"),
 
+  MessageReceiptsService: Symbol.for("MessageReceiptsService"),
+  MessageReceiptsRepository: Symbol.for("MessageReceiptsRepository"),
+
   ConnectionsController: Symbol.for("ConnectionsController"),
   ConnectionsService: Symbol.for("ConnectionsService"),
   ConnectionsRepository: Symbol.for("ConnectionsRepository"),
