@@ -41,12 +41,10 @@ export class UsersRepository {
   public async search({
     userId,
     limit = 20,
-    cursor,
     query = "",
   }: {
     userId: string;
     limit?: number;
-    cursor?: string;
     query?: string;
   }): Promise<UserWithConnections[]> {
     const results = await this.db.user.findMany({
@@ -56,15 +54,13 @@ export class UsersRepository {
         ...(query && {
           name: { contains: query, mode: "insensitive" },
         }),
-        ...(!query &&
-          !cursor && {
-            NOT: [
-              { sentConnections: { some: { receiverId: userId, status: "ACCEPTED" } } },
-              { receivedConnections: { some: { senderId: userId, status: "ACCEPTED" } } },
-            ],
-          }),
+        ...(!query && {
+          NOT: [
+            { sentConnections: { some: { receiverId: userId, status: "ACCEPTED" } } },
+            { receivedConnections: { some: { senderId: userId, status: "ACCEPTED" } } },
+          ],
+        }),
       },
-      ...(cursor && { cursor: { id: cursor }, skip: 1 }),
       select: {
         id: true,
         name: true,

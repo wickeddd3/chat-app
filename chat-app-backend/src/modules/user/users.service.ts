@@ -1,6 +1,6 @@
 import type { User } from "@/prisma/client";
 import { UsersRepository } from "./users.repository";
-import { PaginatedUsers, SuggestedUser } from "./users.types";
+import type { SuggestedUser } from "./users.types";
 import {
   getSuggestedUserIdsFromContacts,
   sortSuggestedUsersByMutualConnections,
@@ -13,16 +13,14 @@ export class UsersService {
   public async getSuggestedUsers({
     authUserId,
     limit = 20,
-    cursor = "",
     query = "",
   }: {
     authUserId: string;
     limit?: number;
-    cursor?: string;
     query?: string;
-  }): Promise<PaginatedUsers> {
+  }): Promise<SuggestedUser[]> {
     try {
-      const isInitialLoad = !cursor && !query;
+      const isInitialLoad = !query;
       let suggestedUserIds: string[] = [];
 
       // 1. Calculate Mutual Connections for Suggestions on initial load
@@ -42,10 +40,10 @@ export class UsersService {
       }
 
       // 2. Search for users matching query and pagination, excluding self and leveraging connections for status flags
-      const users = await this.usersRepository.search({ userId: authUserId, limit, cursor, query });
+      const users = await this.usersRepository.search({ userId: authUserId, limit, query });
 
       // 3. Transform and Enrich with Status Flag State Data
-      let mappedUsers: SuggestedUser[] = transformUsersIntoSuggestedUsers({
+      let suggestedUsers: SuggestedUser[] = transformUsersIntoSuggestedUsers({
         users,
         authUserId,
         isInitialLoad,
@@ -54,17 +52,10 @@ export class UsersService {
 
       // 4. Sort local payload if suggested IDs list exists
       if (isInitialLoad && suggestedUserIds.length > 0) {
-        mappedUsers = sortSuggestedUsersByMutualConnections(mappedUsers, suggestedUserIds);
+        suggestedUsers = sortSuggestedUsersByMutualConnections(suggestedUsers, suggestedUserIds);
       }
 
-      const hasMore = mappedUsers.length === limit;
-      const nextCursor = hasMore ? mappedUsers[mappedUsers.length - 1]?.id : null;
-
-      return {
-        users: mappedUsers,
-        hasMore,
-        nextCursor,
-      };
+      return suggestedUsers;
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve suggested users");
     }

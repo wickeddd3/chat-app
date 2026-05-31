@@ -9,12 +9,6 @@ export interface SuggestedUser {
   mutualConnectionsCount: number;
 }
 
-export interface PaginatedUsers {
-  users: SuggestedUser[];
-  hasMore: boolean;
-  nextCursor: string | null | undefined;
-}
-
 export interface UserWithConnections {
   id: string;
   name: string;

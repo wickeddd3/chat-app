@@ -22,9 +22,8 @@ export class UsersController implements Controller {
     try {
       const authUserId = req.user?.id || "";
       const limit = 20;
-      const cursor = (req.query["cursor"] as string) || "";
       const query = (req.query["query"] as string) || "";
-      const responseData = await this.usersService.getSuggestedUsers({ authUserId, limit, cursor, query });
+      const responseData = await this.usersService.getSuggestedUsers({ authUserId, limit, query });
 
       res.status(200).json(responseData);
     } catch (error: any) {
