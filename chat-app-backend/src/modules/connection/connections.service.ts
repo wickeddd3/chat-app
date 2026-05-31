@@ -3,11 +3,13 @@ import { TYPES } from "@/config/types";
 import { ConnectionsRepository } from "./connections.repository";
 import type { ConnectionStatus } from "@/prisma/client";
 import type { PaginatedConnections, PaginatedContacts } from "./connections.types";
-import { eventDispatcher } from "@/lib/event-dispatcher";
 
 @injectable()
 export class ConnectionsService {
-  constructor(@inject(TYPES.ConnectionsRepository) private connectionsRepository: ConnectionsRepository) {}
+  constructor(
+    @inject(TYPES.ConnectionsRepository) private connectionsRepository: ConnectionsRepository,
+    @inject(TYPES.EventDispatcher) private dispatcher: any,
+  ) {}
 
   public async getUserContacts({
     authUserId,
@@ -67,7 +69,7 @@ export class ConnectionsService {
     try {
       const result = await this.connectionsRepository.sendRequest(senderId, receiverId);
 
-      eventDispatcher.emit("notification:created", result.notification);
+      this.dispatcher.emit("notification:created", result.notification);
 
       return result;
     } catch (error: any) {
@@ -79,7 +81,7 @@ export class ConnectionsService {
     try {
       const result = await this.connectionsRepository.acceptRequest(receiverId, connectionId);
 
-      eventDispatcher.emit("notification:created", result.notification);
+      this.dispatcher.emit("notification:created", result.notification);
 
       return result;
     } catch (error: any) {
