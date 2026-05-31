@@ -3,10 +3,9 @@ export interface User {
   name: string;
   username: string;
   image?: string;
-}
-
-export interface PaginatedUsers {
-  users: User[];
-  hasMore: boolean;
-  nextCursor: string;
+  connectionStatus:
+    | "STRANGER"
+    | "CONTACT"
+    | "PENDING_SENT"
+    | "PENDING_RECEIVED";
 }
