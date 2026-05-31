@@ -39,6 +39,7 @@ export class ConnectionsRepository {
           receiver: { select: { id: true, name: true, username: true, image: true } },
         },
         take: limit,
+        orderBy: { updatedAt: "desc" },
       });
 
       // Map the connection payload down to just the opposing User profile object
