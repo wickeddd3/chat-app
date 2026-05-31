@@ -1,52 +1,87 @@
 import { prisma } from "@/lib/prisma";
-import type { User } from "@/prisma/client";
-import { PaginatedUsers } from "./users.types";
+import type { User, Connection } from "@/prisma/client";
+import type { UserWithConnections } from "./users.types";
 
 export class UsersRepository {
   private db = prisma;
 
-  public async list({
-    authUserId,
+  public async getContactIds(userId: string): Promise<string[]> {
+    try {
+      const contacts = await this.db.connection.findMany({
+        where: {
+          status: "ACCEPTED",
+          OR: [{ senderId: userId }, { receiverId: userId }],
+        },
+      });
+
+      const contactIds = contacts.map((c) => (c.senderId === userId ? c.receiverId : c.senderId));
+
+      return contactIds;
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to retrieve contact IDs");
+    }
+  }
+
+  public async getContactIdsContacts(userId: string, contactIds: string[]): Promise<Connection[]> {
+    try {
+      const contacts = await this.db.connection.findMany({
+        where: {
+          status: "ACCEPTED",
+          OR: [{ senderId: { in: contactIds } }, { receiverId: { in: contactIds } }],
+          NOT: [{ senderId: userId }, { receiverId: userId }],
+        },
+      });
+
+      return contacts;
+    } catch (error: any) {
+      throw new Error(error?.message || "Failed to retrieve contact of contacts");
+    }
+  }
+
+  public async search({
+    userId,
     limit = 20,
     cursor,
     query = "",
   }: {
-    authUserId: string;
+    userId: string;
     limit?: number;
     cursor?: string;
     query?: string;
-  }): Promise<PaginatedUsers> {
-    try {
-      const users = await this.db.user.findMany({
-        take: limit,
-        where: {
-          id: { not: authUserId },
-          name: {
-            contains: query,
-            mode: "insensitive",
-          },
+  }): Promise<UserWithConnections[]> {
+    const results = await this.db.user.findMany({
+      take: limit,
+      where: {
+        id: { not: userId },
+        ...(query && {
+          name: { contains: query, mode: "insensitive" },
+        }),
+        ...(!query &&
+          !cursor && {
+            NOT: [
+              { sentConnections: { some: { receiverId: userId, status: "ACCEPTED" } } },
+              { receivedConnections: { some: { senderId: userId, status: "ACCEPTED" } } },
+            ],
+          }),
+      },
+      ...(cursor && { cursor: { id: cursor }, skip: 1 }),
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        image: true,
+        // Fetch relationship intersections to compute relation badges on the fly
+        sentConnections: {
+          where: { OR: [{ senderId: userId }, { receiverId: userId }] },
         },
-        ...(cursor && { cursor: { id: cursor }, skip: 1 }),
-        select: {
-          id: true,
-          name: true,
-          username: true,
-          image: true,
+        receivedConnections: {
+          where: { OR: [{ senderId: userId }, { receiverId: userId }] },
         },
-        orderBy: { createdAt: "asc" },
-      });
+      },
+      orderBy: { createdAt: "asc" },
+    });
 
-      const hasMore = users.length === limit;
-      const nextCursor = hasMore ? users[users.length - 1]?.id : null;
-
-      return {
-        users,
-        hasMore,
-        nextCursor,
-      };
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve users");
-    }
+    return results;
   }
 
   public async getByUsername(username: string): Promise<Partial<User> | null> {

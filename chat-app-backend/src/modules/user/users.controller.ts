@@ -14,17 +14,17 @@ export class UsersController implements Controller {
   }
 
   private initializeRoutes(): void {
-    this.router.get(`${this.path}`, [authMiddleware], this.getAllUsers);
+    this.router.get(`${this.path}`, [authMiddleware], this.getSuggestedUsers);
     this.router.get(`${this.path}/profile/:username`, [authMiddleware], this.getUserByUsername);
   }
 
-  private getAllUsers = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+  private getSuggestedUsers = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.user?.id || "";
       const limit = 20;
       const cursor = (req.query["cursor"] as string) || "";
       const query = (req.query["query"] as string) || "";
-      const responseData = await this.usersService.getAllUsers({ authUserId, limit, cursor, query });
+      const responseData = await this.usersService.getSuggestedUsers({ authUserId, limit, cursor, query });
 
       res.status(200).json(responseData);
     } catch (error: any) {
