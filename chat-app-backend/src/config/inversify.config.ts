@@ -4,6 +4,7 @@ import { TYPES } from "./types";
 
 import { prisma } from "@/lib/prisma";
 import { PrismaClient } from "@/prisma/client";
+import { redisClient } from "@/lib/redis";
 
 import { UsersRepository } from "@/modules/user/users.repository";
 import { UsersService } from "@/modules/user/users.service";
@@ -27,11 +28,14 @@ import { ConnectionsRepository } from "@/modules/connection/connections.reposito
 import { NotificationsRepository } from "@/modules/notification/notifications.repository";
 import { NotificationsService } from "@/modules/notification/notifications.service";
 import { NotificationsController } from "@/modules/notification/notifications.controller";
+import { PresenceService } from "@/web-socket/services/presence.service";
+
 
 const container = new Container();
 
 // Bind Prisma Client as a structural constant value singleton
 container.bind<PrismaClient>(TYPES.PrismaClient).toConstantValue(prisma);
+container.bind(TYPES.RedisClient).toConstantValue(redisClient);
 
 // Bind domain layers
 container.bind<UsersController>(TYPES.UsersController).to(UsersController);

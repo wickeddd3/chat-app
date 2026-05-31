@@ -1,14 +1,15 @@
-import { redisClient } from "@/lib/redis";
+import { injectable, inject } from "inversify";
+import { TYPES } from "@/config/types";
 
+@injectable()
 export class PresenceService {
-  private cacheDb = redisClient;
+  constructor(@inject(TYPES.RedisClient) private cacheDb: any) {}
 
   public async refreshPresence(userId: string): Promise<void> {
     const ttlKey = `presence:active:${userId}`;
     const onlineSetKey = "presence:online_users";
-    // Set/Update key with a 60-second expiration
+
     await this.cacheDb.set(ttlKey, "true", "EX", 60);
-    // Add to searchable online set
     await this.cacheDb.sadd(onlineSetKey, userId);
   }
 

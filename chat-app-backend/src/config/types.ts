@@ -23,4 +23,6 @@ export const TYPES = {
   NotificationsController: Symbol.for("NotificationsController"),
   NotificationsService: Symbol.for("NotificationsService"),
   NotificationsRepository: Symbol.for("NotificationsRepository"),
+  RedisClient: Symbol.for("RedisClient"),
+  PresenceService: Symbol.for("PresenceService"),
 };
