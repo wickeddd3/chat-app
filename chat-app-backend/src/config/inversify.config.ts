@@ -28,8 +28,19 @@ import { ConnectionsRepository } from "@/modules/connection/connections.reposito
 import { NotificationsRepository } from "@/modules/notification/notifications.repository";
 import { NotificationsService } from "@/modules/notification/notifications.service";
 import { NotificationsController } from "@/modules/notification/notifications.controller";
+
+import { Server as SocketServer } from "socket.io";
+import { SocketServerProvider } from "@/web-socket/socket-server.provider";
+import { WebSocketService } from "@/web-socket/web-socket.service";
 import { PresenceService } from "@/web-socket/services/presence.service";
 
+import { WebSocketCommand } from "@/interfaces/ws-command.interface";
+import { SendMessageCommand } from "@/web-socket/commands/send-message.command";
+import { ReadMessageCommand } from "@/web-socket/commands/read-message.command";
+import { JoinChannelCommand } from "@/web-socket/commands/join-channel.command";
+import { LeaveChannelCommand } from "@/web-socket/commands/leave-channel.command";
+import { DisconnectCommand } from "@/web-socket/commands/disconnect.command";
+import { HeartbeatCommand } from "@/web-socket/commands/heartbeat.command";
 
 const container = new Container();
 
@@ -60,5 +71,24 @@ container.bind<ConnectionsRepository>(TYPES.ConnectionsRepository).to(Connection
 container.bind<NotificationsController>(TYPES.NotificationsController).to(NotificationsController);
 container.bind<NotificationsService>(TYPES.NotificationsService).to(NotificationsService);
 container.bind<NotificationsRepository>(TYPES.NotificationsRepository).to(NotificationsRepository);
+
+container.bind<SocketServerProvider>(TYPES.SocketServerProvider).to(SocketServerProvider).inSingletonScope();
+container.bind<PresenceService>(TYPES.PresenceService).to(PresenceService).inSingletonScope();
+
+// Bind the actual SocketServer token using a dynamic Inversify Factory Provider resolution lookup
+container.bind<SocketServer>(TYPES.SocketServer).toDynamicValue((context) => {
+  return context.get<SocketServerProvider>(TYPES.SocketServerProvider).getInstance();
+});
+
+// Multi-bind Strategy Event Commands
+container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(SendMessageCommand);
+container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(ReadMessageCommand);
+container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(JoinChannelCommand);
+container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(LeaveChannelCommand);
+container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(DisconnectCommand);
+container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(HeartbeatCommand);
+
+// Bind main service orchestration driver engine
+container.bind<WebSocketService>(TYPES.WebSocketService).to(WebSocketService);
 
 export { container };
