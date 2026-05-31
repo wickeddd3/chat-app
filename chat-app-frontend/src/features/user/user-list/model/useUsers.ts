@@ -1,6 +1,6 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getUsersApi } from "../api/users.api";
-import type { PaginatedUsers, User } from "@/entities/user";
+import type { User } from "@/entities/user";
 import { useEffect, useMemo, useState } from "react";
 import { debounce } from "@/shared/utils/debounce";
 
@@ -9,9 +9,6 @@ export function useUsers(query: string): {
   isLoading: boolean;
   isEmpty: boolean;
   error: unknown;
-  fetchNextPage: () => void;
-  hasNextPage: boolean;
-  isFetchingNextPage: boolean;
 } {
   const [debouncedQuery, setDebouncedQuery] = useState(query);
 
@@ -24,14 +21,7 @@ export function useUsers(query: string): {
     debouncedSetQuery(query);
   }, [query, debouncedSetQuery]);
 
-  const {
-    data,
-    isLoading,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery<PaginatedUsers, unknown, User[]>({
+  const { data, isLoading, error } = useQuery<User[], unknown, User[]>({
     queryKey: ["users", debouncedQuery],
     queryFn: ({ pageParam }) =>
       getUsersApi({
@@ -40,9 +30,6 @@ export function useUsers(query: string): {
           ...(debouncedQuery && { query: debouncedQuery }),
         },
       }),
-    initialPageParam: null,
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
-    select: (data) => data.pages.flatMap((page) => page.users),
   });
 
   const users = data ?? [];
@@ -52,8 +39,5 @@ export function useUsers(query: string): {
     isLoading,
     isEmpty: !isLoading && users.length === 0,
     error,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
   };
 }

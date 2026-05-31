@@ -5,7 +5,6 @@ import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { UserListItem } from "./UserListItem";
 import { useState } from "react";
 import { Virtuoso } from "react-virtuoso";
-import { LoaderCircle } from "lucide-react";
 
 export function UserList({
   sendButton: SendButton,
@@ -17,14 +16,7 @@ export function UserList({
 }) {
   const [query, setQuery] = useState("");
 
-  const {
-    users,
-    isLoading,
-    isEmpty,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-  } = useUsers(query);
+  const { users, isLoading, isEmpty } = useUsers(query);
 
   return (
     <div className="flex-1 flex flex-col border-r h-full min-h-0">
@@ -50,12 +42,6 @@ export function UserList({
               width: "100%",
             }}
             data={users}
-            overscan={400}
-            endReached={() => {
-              if (hasNextPage && !isFetchingNextPage) {
-                fetchNextPage();
-              }
-            }}
             itemContent={(_, user) => (
               <UserListItem
                 key={user.id}
@@ -65,17 +51,6 @@ export function UserList({
                 }
               />
             )}
-            components={{
-              Footer: () =>
-                isFetchingNextPage ? (
-                  <div className="py-4 flex justify-center">
-                    <LoaderCircle
-                      size={20}
-                      className="text-blue-500 animate-spin"
-                    />
-                  </div>
-                ) : null,
-            }}
           />
         )}
 
