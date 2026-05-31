@@ -74,6 +74,7 @@ export function transformUsersIntoSuggestedUsers({
       username: user.username,
       image: user.image,
       connectionStatus,
+      connectionId: combined?.id || null,
       mutualConnectionsCount: mutualCount,
     };
   });

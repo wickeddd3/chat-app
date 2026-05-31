@@ -6,6 +6,7 @@ export interface SuggestedUser {
   username: string | null;
   image: string | null;
   connectionStatus: "STRANGER" | "CONTACT" | "PENDING_SENT" | "PENDING_RECEIVED";
+  connectionId: string | null;
   mutualConnectionsCount: number;
 }
 
