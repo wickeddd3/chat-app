@@ -5,6 +5,7 @@ import { TYPES } from "./types";
 import { prisma } from "@/lib/prisma";
 import { PrismaClient } from "@/prisma/client";
 import { redisClient } from "@/lib/redis";
+import { eventDispatcher } from "@/lib/event-dispatcher";
 
 import { UsersRepository } from "@/modules/user/users.repository";
 import { UsersService } from "@/modules/user/users.service";
@@ -42,11 +43,14 @@ import { LeaveChannelCommand } from "@/web-socket/commands/leave-channel.command
 import { DisconnectCommand } from "@/web-socket/commands/disconnect.command";
 import { HeartbeatCommand } from "@/web-socket/commands/heartbeat.command";
 
+import { NotificationSubscriber } from "@/web-socket/handlers/notification.subscriber";
+
 const container = new Container();
 
 // Bind Prisma Client as a structural constant value singleton
 container.bind<PrismaClient>(TYPES.PrismaClient).toConstantValue(prisma);
 container.bind(TYPES.RedisClient).toConstantValue(redisClient);
+container.bind(TYPES.EventDispatcher).toConstantValue(eventDispatcher);
 
 // Bind domain layers
 container.bind<UsersController>(TYPES.UsersController).to(UsersController);
@@ -74,6 +78,9 @@ container.bind<NotificationsRepository>(TYPES.NotificationsRepository).to(Notifi
 
 container.bind<SocketServerProvider>(TYPES.SocketServerProvider).to(SocketServerProvider).inSingletonScope();
 container.bind<PresenceService>(TYPES.PresenceService).to(PresenceService).inSingletonScope();
+
+// Bind subscriber class handler
+container.bind<NotificationSubscriber>(TYPES.NotificationSubscriber).to(NotificationSubscriber).inSingletonScope();
 
 // Bind the actual SocketServer token using a dynamic Inversify Factory Provider resolution lookup
 container.bind<SocketServer>(TYPES.SocketServer).toDynamicValue((context) => {

@@ -31,4 +31,7 @@ export const TYPES = {
 
   RedisClient: Symbol.for("RedisClient"),
   PresenceService: Symbol.for("PresenceService"),
+
+  EventDispatcher: Symbol.for("EventDispatcher"),
+  NotificationSubscriber: Symbol.for("NotificationSubscriber"),
 };
