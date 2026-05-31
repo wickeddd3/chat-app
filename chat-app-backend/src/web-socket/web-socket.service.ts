@@ -24,7 +24,7 @@ export class WebSocketService {
    */
   public start(): void {
     this.webSocketServer.on("connection", (socket: Socket) => {
-      // User payload context established by your socketAuthMiddleware guard
+      // User payload context established by socketAuthMiddleware guard
       const user = socket.data.user;
       console.log(`🟩 Connected: ${user.name} (${socket.id})`);
 
@@ -48,11 +48,6 @@ export class WebSocketService {
           }
         });
       }
-
-      // Handle structural cleanup hooks on client disconnect
-      socket.on("disconnect", () => {
-        console.log(`🟥 Disconnected: ${user.name} (${socket.id})`);
-      });
     });
   }
 

@@ -12,7 +12,7 @@ export class DisconnectCommand implements WebSocketCommand {
   constructor(@inject(TYPES.PresenceService) private presenceService: PresenceService) {}
 
   public async execute(socket: Socket, user: User, data: any): Promise<void> {
-    console.log(`Disconnected: ${user.name}`);
+    console.log(`🟥 Disconnected: ${user.name} (${socket.id})`);
     await this.presenceService.removePresence(user.id);
     socket.emit("user_status_change", { userId: user.id, status: "offline" });
   }
