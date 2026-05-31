@@ -16,7 +16,7 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "target": "ES2020",
-    "types": [],
+    "types": ["reflect-metadata"],
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
@@ -47,7 +47,11 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+
+    // Decorators
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": ["src/**/*", "prisma/seed/*"],
   "exclude": ["node_modules", "dist"]
