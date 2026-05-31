@@ -6,17 +6,22 @@ import morgan from "morgan";
 import compression from "compression";
 import { Controller } from "@/interfaces/controller.interface";
 import { ALLOWED_ORIGINS } from "@/config/cors-origins";
+
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "@/lib/better-auth";
-import { WebSocketService } from "@/web-socket/web-socket.service";
+
 import { connectRedis } from "@/lib/redis";
 import { registerWebSocketHandlers } from "@/web-socket/handlers";
+
+import { container } from "@/config/inversify.config";
+import { TYPES } from "@/config/types";
+import { SocketServerProvider } from "@/web-socket/socket-server.provider";
+import { WebSocketService } from "@/web-socket/web-socket.service";
 
 export class App {
   public express: Application;
   public port: number;
   public server: HttpServer;
-  private webSocketService: WebSocketService;
 
   constructor(controllers: Controller[], port: number) {
     this.express = express();
@@ -31,9 +36,15 @@ export class App {
     connectRedis();
     // Register WebSocket event handlers before starting the WebSocket server
     registerWebSocketHandlers();
+
     // Initialize and start the WebSocket server
-    this.webSocketService = new WebSocketService(this.server);
-    this.webSocketService.start();
+    // Fetch the provider and pass the server instance to it
+    const serverProvider = container.get<SocketServerProvider>(TYPES.SocketServerProvider);
+    serverProvider.create(this.server);
+
+    // Resolve and start the WebSocket service wrapper cleanly
+    const webSocketService = container.get<WebSocketService>(TYPES.WebSocketService);
+    webSocketService.start();
   }
 
   public start(): void {
