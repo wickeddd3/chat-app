@@ -1,16 +1,18 @@
-import { Controller, ControllerRequest } from "@/interfaces/controller.interface";
-import { type NextFunction, type Response, Router } from "express";
+import { injectable, inject } from "inversify";
+import { TYPES } from "@/config/types";
 import { ChannelsService } from "./channels.service";
-import { authMiddleware } from "@/middlewares/auth.middleware";
+import { Controller, ControllerRequest } from "@/interfaces/controller.interface";
 import HttpException from "@/utils/http.exception";
+import { type NextFunction, type Response, Router } from "express";
+import { authMiddleware } from "@/middlewares/auth.middleware";
 import { channelToChannelDetails, channelToInboxChannel } from "./channels.transformer";
 
+@injectable()
 export class ChannelsController implements Controller {
   public path = "/channels";
   public router = Router();
-  private channelsService = new ChannelsService();
 
-  constructor() {
+  constructor(@inject(TYPES.ChannelsService) private channelsService: ChannelsService) {
     this.initializeRoutes();
   }
 

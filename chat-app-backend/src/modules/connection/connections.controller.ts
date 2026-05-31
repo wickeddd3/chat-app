@@ -1,15 +1,17 @@
-import { Controller, ControllerRequest } from "@/interfaces/controller.interface";
-import { type NextFunction, type Response, Router } from "express";
+import { injectable, inject } from "inversify";
+import { TYPES } from "@/config/types";
 import { ConnectionsService } from "./connections.service";
-import { authMiddleware } from "@/middlewares/auth.middleware";
+import { Controller, ControllerRequest } from "@/interfaces/controller.interface";
 import HttpException from "@/utils/http.exception";
+import { type NextFunction, type Response, Router } from "express";
+import { authMiddleware } from "@/middlewares/auth.middleware";
 
+@injectable()
 export class ConnectionsController implements Controller {
   public path = "/connections";
   public router = Router();
-  private connectionsService = new ConnectionsService();
 
-  constructor() {
+  constructor(@inject(TYPES.ConnectionsService) private connectionsService: ConnectionsService) {
     this.initializeRoutes();
   }
 

@@ -1,8 +1,11 @@
-import { prisma } from "@/lib/prisma";
+import { injectable, inject } from "inversify";
+import { TYPES } from "@/config/types";
+import { PrismaClient } from "@/prisma/client";
 import type { PaginatedNotifications } from "./notifications.types";
 
+@injectable()
 export class NotificationsRepository {
-  private db = prisma;
+  constructor(@inject(TYPES.PrismaClient) private db: PrismaClient) {}
 
   /**
    * Retrieves a list of notifications for the current user.

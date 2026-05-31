@@ -1,8 +1,11 @@
+import { injectable, inject } from "inversify";
+import { TYPES } from "@/config/types";
 import { NotificationsRepository } from "./notifications.repository";
 import type { PaginatedNotifications } from "./notifications.types";
 
+@injectable()
 export class NotificationsService {
-  private notificationsRepository = new NotificationsRepository();
+  constructor(@inject(TYPES.NotificationsRepository) private notificationsRepository: NotificationsRepository) {}
 
   public async getByUserId({
     userId,

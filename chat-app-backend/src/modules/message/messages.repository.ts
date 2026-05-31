@@ -1,9 +1,12 @@
-import { prisma } from "@/lib/prisma";
+import { injectable, inject } from "inversify";
+import { TYPES } from "@/config/types";
+import { PrismaClient } from "@/prisma/client";
 import type { Message } from "@/prisma/client";
 import type { PaginatedMessages } from "./messages.types";
 
+@injectable()
 export class MessagesRepository {
-  private db = prisma;
+  constructor(@inject(TYPES.PrismaClient) private db: PrismaClient) {}
 
   public async create(data: {
     content: string;

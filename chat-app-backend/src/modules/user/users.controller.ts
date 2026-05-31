@@ -1,15 +1,17 @@
+import { injectable, inject } from "inversify";
+import { TYPES } from "@/config/types";
+import { UsersService } from "./users.service";
 import { Controller, ControllerRequest } from "@/interfaces/controller.interface";
 import HttpException from "@/utils/http.exception";
-import { type NextFunction, type Request, type Response, Router } from "express";
-import { UsersService } from "./users.service";
+import { type NextFunction, type Response, Router } from "express";
 import { authMiddleware } from "@/middlewares/auth.middleware";
 
+@injectable()
 export class UsersController implements Controller {
   public path = "/users";
   public router = Router();
-  private usersService = new UsersService();
 
-  constructor() {
+  constructor(@inject(TYPES.UsersService) private usersService: UsersService) {
     this.initializeRoutes();
   }
 
@@ -31,7 +33,7 @@ export class UsersController implements Controller {
     }
   };
 
-  private getUserByUsername = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  private getUserByUsername = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
       const username = req.params.username as string;
       const user = await this.usersService.getUserByUsername(username);

@@ -1,9 +1,12 @@
-import { prisma } from "@/lib/prisma";
+import { injectable, inject } from "inversify";
+import { TYPES } from "@/config/types";
+import { PrismaClient } from "@/prisma/client";
 import type { User, Connection } from "@/prisma/client";
 import type { UserWithConnections } from "./users.types";
 
+@injectable()
 export class UsersRepository {
-  private db = prisma;
+  constructor(@inject(TYPES.PrismaClient) private db: PrismaClient) {}
 
   public async getContactIds(userId: string): Promise<string[]> {
     try {

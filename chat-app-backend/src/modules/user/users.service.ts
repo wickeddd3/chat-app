@@ -1,5 +1,7 @@
-import type { User } from "@/prisma/client";
+import { injectable, inject } from "inversify";
+import { TYPES } from "@/config/types";
 import { UsersRepository } from "./users.repository";
+import type { User } from "@/prisma/client";
 import type { SuggestedUser } from "./users.types";
 import {
   getSuggestedUserIdsFromContacts,
@@ -7,8 +9,9 @@ import {
   transformUsersIntoSuggestedUsers,
 } from "./users.utils";
 
+@injectable()
 export class UsersService {
-  private usersRepository = new UsersRepository();
+  constructor(@inject(TYPES.UsersRepository) private usersRepository: UsersRepository) {}
 
   public async getSuggestedUsers({
     authUserId,

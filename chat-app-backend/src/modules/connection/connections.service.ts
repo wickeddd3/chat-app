@@ -1,10 +1,13 @@
-import { ConnectionStatus } from "@/prisma/client";
+import { injectable, inject } from "inversify";
+import { TYPES } from "@/config/types";
 import { ConnectionsRepository } from "./connections.repository";
+import type { ConnectionStatus } from "@/prisma/client";
 import type { PaginatedConnections, PaginatedContacts } from "./connections.types";
 import { eventDispatcher } from "@/lib/event-dispatcher";
 
+@injectable()
 export class ConnectionsService {
-  private connectionsRepository = new ConnectionsRepository();
+  constructor(@inject(TYPES.ConnectionsRepository) private connectionsRepository: ConnectionsRepository) {}
 
   public async getUserContacts({
     authUserId,

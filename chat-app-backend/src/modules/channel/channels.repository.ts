@@ -1,9 +1,12 @@
-import { prisma } from "@/lib/prisma";
+import { injectable, inject } from "inversify";
+import { TYPES } from "@/config/types";
+import { PrismaClient } from "@/prisma/client";
 import type { Channel } from "@/prisma/client";
 import type { InboxChannel, PaginatedChannels } from "./channels.types";
 
+@injectable()
 export class ChannelsRepository {
-  private db = prisma;
+  constructor(@inject(TYPES.PrismaClient) private db: PrismaClient) {}
 
   public async getChannels({
     authUserId,

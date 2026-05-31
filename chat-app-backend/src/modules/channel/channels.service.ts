@@ -1,9 +1,12 @@
+import { injectable, inject } from "inversify";
+import { TYPES } from "@/config/types";
 import { ChannelsRepository } from "./channels.repository";
 import type { InboxChannel, PaginatedChannels } from "./channels.types";
 import type { Channel } from "@/prisma/client";
 
+@injectable()
 export class ChannelsService {
-  private channelsRepository = new ChannelsRepository();
+  constructor(@inject(TYPES.ChannelsRepository) private channelsRepository: ChannelsRepository) {}
 
   public async getChannels({
     authUserId,

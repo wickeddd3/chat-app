@@ -1,15 +1,17 @@
+import { injectable, inject } from "inversify";
+import { TYPES } from "@/config/types";
+import { NotificationsService } from "./notifications.service";
 import { Controller, ControllerRequest } from "@/interfaces/controller.interface";
 import HttpException from "@/utils/http.exception";
 import { type NextFunction, type Response, Router } from "express";
-import { NotificationsService } from "./notifications.service";
 import { authMiddleware } from "@/middlewares/auth.middleware";
 
+@injectable()
 export class NotificationsController implements Controller {
   public path = "/notifications";
   public router = Router();
-  private notificationsService = new NotificationsService();
 
-  constructor() {
+  constructor(@inject(TYPES.NotificationsService) private notificationsService: NotificationsService) {
     this.initializeRoutes();
   }
 

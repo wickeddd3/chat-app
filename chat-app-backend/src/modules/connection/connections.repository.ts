@@ -1,9 +1,12 @@
-import { prisma } from "@/lib/prisma";
+import { injectable, inject } from "inversify";
+import { TYPES } from "@/config/types";
+import { PrismaClient } from "@/prisma/client";
 import type { ConnectionStatus } from "@/prisma/enums";
 import type { PaginatedConnections, PaginatedContacts } from "./connections.types";
 
+@injectable()
 export class ConnectionsRepository {
-  private db = prisma;
+  constructor(@inject(TYPES.PrismaClient) private db: PrismaClient) {}
 
   public async getUserContacts({
     authUserId,
