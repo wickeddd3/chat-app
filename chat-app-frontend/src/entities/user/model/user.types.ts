@@ -8,4 +8,5 @@ export interface User {
     | "CONTACT"
     | "PENDING_SENT"
     | "PENDING_RECEIVED";
+  connectionId: string | null;
 }
