@@ -1,70 +1,70 @@
+import { injectable, inject, multiInject } from "inversify";
+import { TYPES } from "@/config/types";
 import { Server as SocketServer, type Socket } from "socket.io";
-import type { Server as HttpServer } from "http";
-import { APP_URL } from "@/config/app.config";
-import { socketAuthMiddleware } from "@/middlewares/socket-auth.middleware";
-import type { Event } from "@/interfaces/event.interface";
-import { createAdapter } from "@socket.io/redis-adapter";
-import { redisClient, pubClient, subClient } from "@/lib/redis";
-import { JoinChannelEvent } from "./events/join-channel.event";
-import { LeaveChannelEvent } from "./events/leave-channel.event";
-import { DisconnectEvent } from "./events/disconnect.event";
-import { HeartbeatEvent } from "./events/heartbeat.event";
-import { SendMessageEvent } from "./events/send-message.event";
-import { ReadMessageEvent } from "./events/read-message.event";
+import { WebSocketCommand } from "@/interfaces/ws-command.interface";
+import { redisClient } from "@/lib/redis";
 
+@injectable()
 export class WebSocketService {
-  private webSocketServer: SocketServer;
-  private joinChannelEvent!: Event;
-  private leaveChannelEvent!: Event;
-  private disconnectEvent!: Event;
-  private heartbeatEvent!: Event;
-  private sendMessageEvent!: Event;
-  private readMessageEvent!: Event;
+  private commandRegistry = new Map<string, WebSocketCommand>();
 
-  constructor(server: HttpServer) {
-    this.webSocketServer = new SocketServer(server, {
-      cors: {
-        origin: APP_URL,
-        methods: ["GET", "POST"],
-        credentials: true,
-      },
-      adapter: createAdapter(pubClient, subClient, { key: "socket.io" }),
+  constructor(
+    @inject(TYPES.SocketServer) private webSocketServer: SocketServer,
+    @multiInject(TYPES.WebSocketCommand) commands: WebSocketCommand[],
+  ) {
+    // Build the dynamic command routing index map automatically
+    commands.forEach((command) => {
+      this.commandRegistry.set(command.eventName, command);
+      console.log(`📡 [WebSocketService] Registered Strategy Router for: [${command.eventName}]`);
     });
-
-    this.initializeMiddleware();
-    this.initializeEvents();
   }
 
-  private initializeMiddleware(): void {
-    this.webSocketServer.use(socketAuthMiddleware);
-  }
-
-  private initializeEvents(): void {
-    this.joinChannelEvent = new JoinChannelEvent();
-    this.leaveChannelEvent = new LeaveChannelEvent();
-    this.disconnectEvent = new DisconnectEvent(this.webSocketServer);
-    this.heartbeatEvent = new HeartbeatEvent(this.webSocketServer);
-    this.sendMessageEvent = new SendMessageEvent(this.webSocketServer);
-    this.readMessageEvent = new ReadMessageEvent(this.webSocketServer);
-  }
-
+  /**
+   * Initializes the core connection listener and mounts the dynamic dispatch routine
+   */
   public start(): void {
-    this.webSocketServer.on("connection", async (socket: Socket) => {
+    this.webSocketServer.on("connection", (socket: Socket) => {
+      // User payload context established by your socketAuthMiddleware guard
       const user = socket.data.user;
-      console.log(`Connected: ${user.name} (${socket.id})`);
+      console.log(`🟩 Connected: ${user.name} (${socket.id})`);
+
+      // Join a private notification room unique to this specific user profile instance
       socket.join(`user:${user.id}`);
 
-      // Fetch the full list of online users from Redis
-      const onlineUserIds = await redisClient.smembers("presence:online_users");
-      // Emit only to the connecting user (private message)
-      socket.emit("online_users_list", onlineUserIds);
+      // Emit the current list of online users directly to this newly connected client
+      this.syncOnlinePresence(socket);
 
-      socket.on("join_channel", async (data) => this.joinChannelEvent.execute(socket, user, data));
-      socket.on("leave_channel", async (data) => this.leaveChannelEvent.execute(socket, user, data));
-      socket.on("disconnect", async (data) => this.disconnectEvent.execute(socket, user, data));
-      socket.on("heartbeat", async (data) => this.heartbeatEvent.execute(socket, user, data));
-      socket.on("send_message", async (data) => this.sendMessageEvent.execute(socket, user, data));
-      socket.on("mark_as_read", async (data) => this.readMessageEvent.execute(socket, user, data));
+      // DYNAMIC COMMAND ROUTER LOOP
+      // Listen for incoming triggers from the registry map dynamically
+      for (const [eventName, command] of this.commandRegistry.entries()) {
+        socket.on(eventName, async (data) => {
+          try {
+            await command.execute(socket, user, data);
+          } catch (error) {
+            console.error(`❌ Command runtime crash on event [${eventName}]:`, error);
+            socket.emit("error", {
+              message: `Internal server failure handling action: ${eventName}`,
+            });
+          }
+        });
+      }
+
+      // Handle structural cleanup hooks on client disconnect
+      socket.on("disconnect", () => {
+        console.log(`🟥 Disconnected: ${user.name} (${socket.id})`);
+      });
     });
+  }
+
+  /**
+   * Private helper routine to fetch presence lists from Redis
+   */
+  private async syncOnlinePresence(socket: Socket): Promise<void> {
+    try {
+      const onlineUserIds = await redisClient.smembers("presence:online_users");
+      socket.emit("online_users_list", onlineUserIds);
+    } catch (error) {
+      console.error("Failed to synchronize socket online presence matrix:", error);
+    }
   }
 }
