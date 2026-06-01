@@ -3,7 +3,9 @@
  * Filters out null/undefined values and encodes components.
  */
 
-export function toQueryParams<T extends Record<string, any>>(obj: T): string {
+export function toQueryParams<
+  T extends Record<string, string | number | null | undefined>,
+>(obj: T): string {
   const searchParams = new URLSearchParams();
 
   Object.entries(obj).forEach(([key, value]) => {
