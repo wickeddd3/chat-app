@@ -18,7 +18,7 @@ export async function sentConnectionRequestsApi({
     return {
       connections: responseData.data,
       hasMore: responseData.meta?.hasMore || false,
-      nextCursor: responseData.meta?.nextCursor || "",
+      nextCursor: responseData.meta?.nextCursor || null,
     };
   } catch (error) {
     console.error("Error fetching sent connection requests:", error);
