@@ -19,7 +19,12 @@ export class NotificationsService {
     cursor?: string;
   }): Promise<PaginatedNotifications> {
     try {
-      return await this.notificationsRepository.getByUserId({ userId, ...(isRead && { isRead }), limit, cursor });
+      return await this.notificationsRepository.getByUserId({
+        userId,
+        ...(typeof isRead === "boolean" && { isRead }),
+        limit,
+        cursor,
+      });
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve notifications");
     }
