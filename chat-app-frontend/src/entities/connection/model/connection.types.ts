@@ -19,11 +19,11 @@ export interface Connection {
 export interface PaginatedConnections {
   connections: Connection[];
   hasMore: boolean;
-  nextCursor: string | null | undefined;
+  nextCursor: string | null;
 }
 
 export interface PaginatedContacts {
   contacts: ConnectionUser[];
   hasMore: boolean;
-  nextCursor: string | null | undefined;
+  nextCursor: string | null;
 }
