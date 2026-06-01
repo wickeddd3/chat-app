@@ -81,7 +81,7 @@ export class MessagesRepository {
       return {
         messages: finalMessages,
         hasMore: nextCursor !== null,
-        nextCursor,
+        nextCursor: nextCursor || null,
       };
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve messages");

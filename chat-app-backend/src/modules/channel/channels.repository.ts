@@ -86,7 +86,7 @@ export class ChannelsRepository {
       return {
         channels,
         hasMore,
-        nextCursor,
+        nextCursor: nextCursor || null,
       };
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve channels");

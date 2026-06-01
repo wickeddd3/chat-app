@@ -59,7 +59,7 @@ export class ConnectionsRepository {
       return {
         contacts: contacts,
         hasMore,
-        nextCursor,
+        nextCursor: nextCursor || null,
       };
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve connection contacts");
@@ -118,7 +118,7 @@ export class ConnectionsRepository {
       return {
         connections: sentConnections,
         hasMore,
-        nextCursor,
+        nextCursor: nextCursor || null,
       };
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve sent connection requests");
@@ -176,7 +176,7 @@ export class ConnectionsRepository {
       return {
         connections: receivedConnections,
         hasMore,
-        nextCursor,
+        nextCursor: nextCursor || null,
       };
     } catch (error: any) {
       throw new Error(error?.message || "Failed to retrieve received connection requests");
