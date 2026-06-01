@@ -8,6 +8,7 @@ import {
   sortSuggestedUsersByMutualConnections,
   transformUsersIntoSuggestedUsers,
 } from "./users.utils";
+import { HttpException } from "@/utils/http.exception";
 
 @injectable()
 export class UsersService {
@@ -59,16 +60,16 @@ export class UsersService {
       }
 
       return suggestedUsers;
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve suggested users");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve suggested users.");
     }
   }
 
   public async getUserByUsername(username: string): Promise<Partial<User> | null> {
     try {
       return await this.usersRepository.getByUsername(username);
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve user");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve user.");
     }
   }
 }

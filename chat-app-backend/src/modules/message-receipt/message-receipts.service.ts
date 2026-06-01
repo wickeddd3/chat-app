@@ -1,6 +1,7 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { MessageReceiptsRepository } from "./message-receipts.repository";
+import { HttpException } from "@/utils/http.exception";
 
 @injectable()
 export class MessageReceiptsService {
@@ -9,8 +10,8 @@ export class MessageReceiptsService {
   public async createMessageReceipts(userId: string, ids: number[]) {
     try {
       return await this.messageReceiptsRepository.createMessageReceipts(userId, ids);
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to create batch message receipts");
+    } catch (error) {
+      throw new HttpException(500, "Failed to create batch message receipts.");
     }
   }
 }

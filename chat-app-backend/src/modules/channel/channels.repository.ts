@@ -3,6 +3,7 @@ import { TYPES } from "@/config/types";
 import { PrismaClient } from "@/prisma/client";
 import type { Channel } from "@/prisma/client";
 import type { InboxChannel, PaginatedChannels } from "./channels.types";
+import { HttpException } from "@/utils/http.exception";
 
 @injectable()
 export class ChannelsRepository {
@@ -88,8 +89,8 @@ export class ChannelsRepository {
         hasMore,
         nextCursor: nextCursor || null,
       };
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve channels");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve channels.");
     }
   }
 
@@ -124,8 +125,8 @@ export class ChannelsRepository {
           },
         },
       });
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve channel");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve channel.");
     }
   }
 
@@ -142,8 +143,8 @@ export class ChannelsRepository {
       });
 
       return existing;
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to check direct channel");
+    } catch (error) {
+      throw new HttpException(500, "Failed to find direct channel.");
     }
   }
 
@@ -169,8 +170,8 @@ export class ChannelsRepository {
 
         return channel;
       });
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to create direct channel");
+    } catch (error) {
+      throw new HttpException(500, "Failed to create direct channel.");
     }
   }
 
@@ -204,8 +205,8 @@ export class ChannelsRepository {
 
         return channel;
       });
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to create group channel");
+    } catch (error) {
+      throw new HttpException(500, "Failed to create group channel.");
     }
   }
 
@@ -261,8 +262,8 @@ export class ChannelsRepository {
 
         return updatedChannel;
       });
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to update group channel");
+    } catch (error) {
+      throw new HttpException(500, "Failed to update group channel.");
     }
   }
 
@@ -272,8 +273,8 @@ export class ChannelsRepository {
         where: { id: channelId },
         data: { updatedAt: new Date() },
       });
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to update channel");
+    } catch (error) {
+      throw new HttpException(500, "Failed to update channel.");
     }
   }
 }

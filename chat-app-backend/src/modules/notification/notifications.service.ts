@@ -2,6 +2,7 @@ import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { NotificationsRepository } from "./notifications.repository";
 import type { PaginatedNotifications } from "./notifications.types";
+import { HttpException } from "@/utils/http.exception";
 
 @injectable()
 export class NotificationsService {
@@ -25,8 +26,8 @@ export class NotificationsService {
         limit,
         cursor,
       });
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve notifications");
+    } catch (error) {
+      throw new HttpException(500, "An error occurred while compiling your notification timeline feed.");
     }
   }
 
@@ -39,8 +40,8 @@ export class NotificationsService {
   }): Promise<{ count: number }> {
     try {
       return await this.notificationsRepository.markAsRead({ userId, notificationIds });
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to mark notifications as read");
+    } catch (error) {
+      throw new HttpException(500, "Failed to update notification read statuses. Please try again.");
     }
   }
 }

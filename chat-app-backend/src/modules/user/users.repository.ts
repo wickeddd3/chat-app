@@ -3,6 +3,7 @@ import { TYPES } from "@/config/types";
 import { PrismaClient } from "@/prisma/client";
 import type { User, Connection } from "@/prisma/client";
 import type { UserWithConnections } from "./users.types";
+import { HttpException } from "@/utils/http.exception";
 
 @injectable()
 export class UsersRepository {
@@ -20,8 +21,8 @@ export class UsersRepository {
       const contactIds = contacts.map((c) => (c.senderId === userId ? c.receiverId : c.senderId));
 
       return contactIds;
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve contact IDs");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve contact IDs.");
     }
   }
 
@@ -36,8 +37,8 @@ export class UsersRepository {
       });
 
       return contacts;
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve contact of contacts");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve contact of contacts");
     }
   }
 
@@ -50,37 +51,41 @@ export class UsersRepository {
     limit?: number;
     query?: string;
   }): Promise<UserWithConnections[]> {
-    const results = await this.db.user.findMany({
-      take: limit,
-      where: {
-        id: { not: userId },
-        ...(query && {
-          name: { contains: query, mode: "insensitive" },
-        }),
-        ...(!query && {
-          NOT: [
-            { sentConnections: { some: { receiverId: userId, status: "ACCEPTED" } } },
-            { receivedConnections: { some: { senderId: userId, status: "ACCEPTED" } } },
-          ],
-        }),
-      },
-      select: {
-        id: true,
-        name: true,
-        username: true,
-        image: true,
-        // Fetch relationship intersections to compute relation badges on the fly
-        sentConnections: {
-          where: { OR: [{ senderId: userId }, { receiverId: userId }] },
+    try {
+      const results = await this.db.user.findMany({
+        take: limit,
+        where: {
+          id: { not: userId },
+          ...(query && {
+            name: { contains: query, mode: "insensitive" },
+          }),
+          ...(!query && {
+            NOT: [
+              { sentConnections: { some: { receiverId: userId, status: "ACCEPTED" } } },
+              { receivedConnections: { some: { senderId: userId, status: "ACCEPTED" } } },
+            ],
+          }),
         },
-        receivedConnections: {
-          where: { OR: [{ senderId: userId }, { receiverId: userId }] },
+        select: {
+          id: true,
+          name: true,
+          username: true,
+          image: true,
+          // Fetch relationship intersections to compute relation badges on the fly
+          sentConnections: {
+            where: { OR: [{ senderId: userId }, { receiverId: userId }] },
+          },
+          receivedConnections: {
+            where: { OR: [{ senderId: userId }, { receiverId: userId }] },
+          },
         },
-      },
-      orderBy: { createdAt: "asc" },
-    });
+        orderBy: { createdAt: "asc" },
+      });
 
-    return results;
+      return results;
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve search results.");
+    }
   }
 
   public async getByUsername(username: string): Promise<Partial<User> | null> {
@@ -94,8 +99,8 @@ export class UsersRepository {
           image: true,
         },
       });
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve user");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve user.");
     }
   }
 }

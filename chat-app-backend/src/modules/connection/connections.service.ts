@@ -3,6 +3,7 @@ import { TYPES } from "@/config/types";
 import { ConnectionsRepository } from "./connections.repository";
 import type { ConnectionStatus } from "@/prisma/client";
 import type { ConnectionRequestResponse, PaginatedConnections, PaginatedContacts } from "./connections.types";
+import { HttpException } from "@/utils/http.exception";
 
 @injectable()
 export class ConnectionsService {
@@ -24,8 +25,8 @@ export class ConnectionsService {
   }): Promise<PaginatedContacts> {
     try {
       return await this.connectionsRepository.getUserContacts({ authUserId, limit, cursor, query });
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve connection contacts");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve connection contacts.");
     }
   }
 
@@ -42,8 +43,8 @@ export class ConnectionsService {
   }): Promise<PaginatedConnections> {
     try {
       return await this.connectionsRepository.getSentConnections({ authUserId, limit, cursor, status });
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve sent connection requests");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve sent connection requests.");
     }
   }
 
@@ -60,8 +61,8 @@ export class ConnectionsService {
   }): Promise<PaginatedConnections> {
     try {
       return await this.connectionsRepository.getReceivedConnections({ authUserId, limit, cursor, status });
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve received connection requests");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve received connection requests.");
     }
   }
 
@@ -72,8 +73,8 @@ export class ConnectionsService {
       this.dispatcher.emit("notification:created", result.notification);
 
       return result;
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to send connection request");
+    } catch (error) {
+      throw new HttpException(500, "Failed to send connection request.");
     }
   }
 
@@ -84,24 +85,24 @@ export class ConnectionsService {
       this.dispatcher.emit("notification:created", result.notification);
 
       return result;
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to accept connection request");
+    } catch (error) {
+      throw new HttpException(500, "Failed to accept connection request.");
     }
   }
 
   public async declineRequest(receiverId: string, connectionId: string): Promise<void> {
     try {
       return await this.connectionsRepository.declineRequest(receiverId, connectionId);
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to decline connection request");
+    } catch (error) {
+      throw new HttpException(500, "Failed to decline connection request.");
     }
   }
 
   public async cancelRequest(senderId: string, connectionId: string): Promise<void> {
     try {
       return await this.connectionsRepository.cancelRequest(senderId, connectionId);
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to cancel connection request");
+    } catch (error) {
+      throw new HttpException(500, "Failed to cancel connection request.");
     }
   }
 }

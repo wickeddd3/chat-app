@@ -3,6 +3,7 @@ import { TYPES } from "@/config/types";
 import { PrismaClient } from "@/prisma/client";
 import type { ConnectionStatus } from "@/prisma/enums";
 import type { ConnectionRequestResponse, PaginatedConnections, PaginatedContacts } from "./connections.types";
+import { HttpException } from "@/utils/http.exception";
 
 @injectable()
 export class ConnectionsRepository {
@@ -61,8 +62,8 @@ export class ConnectionsRepository {
         hasMore,
         nextCursor: nextCursor || null,
       };
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve connection contacts");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve connection contacts.");
     }
   }
 
@@ -120,8 +121,8 @@ export class ConnectionsRepository {
         hasMore,
         nextCursor: nextCursor || null,
       };
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve sent connection requests");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve sent connection requests.");
     }
   }
 
@@ -178,8 +179,8 @@ export class ConnectionsRepository {
         hasMore,
         nextCursor: nextCursor || null,
       };
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve received connection requests");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve received connection requests.");
     }
   }
 
@@ -232,8 +233,8 @@ export class ConnectionsRepository {
       });
 
       return result;
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to send connection request");
+    } catch (error) {
+      throw new HttpException(500, "Failed to send connection request.");
     }
   }
 
@@ -285,8 +286,8 @@ export class ConnectionsRepository {
           notification,
         };
       });
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to accept connection request");
+    } catch (error) {
+      throw new HttpException(500, "Failed to accept connection request.");
     }
   }
 
@@ -330,8 +331,8 @@ export class ConnectionsRepository {
           },
         }),
       ]);
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to decline connection request");
+    } catch (error) {
+      throw new HttpException(500, "Failed to decline connection request.");
     }
   }
 
@@ -374,8 +375,8 @@ export class ConnectionsRepository {
           },
         }),
       ]);
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to cancel connection request");
+    } catch (error) {
+      throw new HttpException(500, "Failed to cancel connection request.");
     }
   }
 }

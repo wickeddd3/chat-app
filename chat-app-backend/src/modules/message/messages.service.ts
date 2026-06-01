@@ -2,6 +2,7 @@ import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { MessagesRepository } from "./messages.repository";
 import type { MessageWithAuthor, PaginatedMessages, UnreadMessage } from "./messages.types";
+import { HttpException } from "@/utils/http.exception";
 
 @injectable()
 export class MessagesService {
@@ -10,8 +11,8 @@ export class MessagesService {
   public async saveMessage(data: { content: string; channelId: number; authorId: string }): Promise<MessageWithAuthor> {
     try {
       return await this.messagesRepository.create(data);
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to save message");
+    } catch (error) {
+      throw new HttpException(500, "Failed to save message.");
     }
   }
 
@@ -30,16 +31,16 @@ export class MessagesService {
         limit,
         ...(cursor !== undefined ? { cursor } : {}),
       });
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve messages");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve messages.");
     }
   }
 
   public async getUnreadMessages(channelId: number, userId: string): Promise<UnreadMessage[]> {
     try {
       return await this.messagesRepository.getUnreadMessages(channelId, userId);
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve unread messages");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve unread messages.");
     }
   }
 }

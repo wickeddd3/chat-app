@@ -2,6 +2,7 @@ import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { PrismaClient } from "@/prisma/client";
 import type { MessageWithAuthor, PaginatedMessages, UnreadMessage } from "./messages.types";
+import { HttpException } from "@/utils/http.exception";
 
 @injectable()
 export class MessagesRepository {
@@ -21,8 +22,8 @@ export class MessagesRepository {
           },
         },
       });
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to create message");
+    } catch (error) {
+      throw new HttpException(500, "Failed to create message.");
     }
   }
 
@@ -78,8 +79,8 @@ export class MessagesRepository {
         hasMore: nextCursor !== null,
         nextCursor: nextCursor || null,
       };
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve messages");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve messages.");
     }
   }
 
@@ -95,8 +96,8 @@ export class MessagesRepository {
       });
 
       return messages;
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve unread messages");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve unread messages.");
     }
   }
 }

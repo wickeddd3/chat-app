@@ -2,6 +2,7 @@ import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { PrismaClient } from "@/prisma/client";
 import type { PaginatedNotifications } from "./notifications.types";
+import { HttpException } from "@/utils/http.exception";
 
 @injectable()
 export class NotificationsRepository {
@@ -79,13 +80,13 @@ export class NotificationsRepository {
         nextCursor,
         hasMore,
       };
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to retrieve notifications");
+    } catch (error) {
+      throw new HttpException(500, "An error occurred while compiling your notification timeline feed.");
     }
   }
 
   /**
-   * Utility Method: Marks a list of specific notifications as read.
+   *  Marks a list of specific notifications as read.
    */
   public async markAsRead({
     userId,
@@ -104,8 +105,8 @@ export class NotificationsRepository {
           isRead: true,
         },
       });
-    } catch (error: any) {
-      throw new Error(error?.message || "Failed to mark notifications as read");
+    } catch (error) {
+      throw new HttpException(500, "Failed to update notification read statuses. Please try again.");
     }
   }
 }
