@@ -25,7 +25,13 @@ export class NotificationsService {
     }
   }
 
-  public async markAsRead({ userId, notificationIds }: { userId: string; notificationIds: string[] }) {
+  public async markAsRead({
+    userId,
+    notificationIds,
+  }: {
+    userId: string;
+    notificationIds: string[];
+  }): Promise<{ count: number }> {
     try {
       return await this.notificationsRepository.markAsRead({ userId, notificationIds });
     } catch (error: any) {

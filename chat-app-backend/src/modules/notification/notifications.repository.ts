@@ -87,7 +87,13 @@ export class NotificationsRepository {
   /**
    * Utility Method: Marks a list of specific notifications as read.
    */
-  public async markAsRead({ userId, notificationIds }: { userId: string; notificationIds: string[] }) {
+  public async markAsRead({
+    userId,
+    notificationIds,
+  }: {
+    userId: string;
+    notificationIds: string[];
+  }): Promise<{ count: number }> {
     try {
       return await this.db.notification.updateMany({
         where: {
