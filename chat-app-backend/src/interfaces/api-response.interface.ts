@@ -4,9 +4,9 @@ export interface ApiResponse<T = any> {
   data?: T; // The main payload (array or object), omitted if empty
   meta?: {
     // Optional pagination metrics block
-    limit?: number;
-    nextCursor?: string | null;
-    hasMore?: boolean;
+    limit: number;
+    nextCursor: string | number | null;
+    hasMore: boolean;
   };
   timestamp: string; // ISO string useful for client-side caching/debugging
 }
