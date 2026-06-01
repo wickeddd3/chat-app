@@ -2,7 +2,7 @@ import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { ConnectionsRepository } from "./connections.repository";
 import type { ConnectionStatus } from "@/prisma/client";
-import type { PaginatedConnections, PaginatedContacts } from "./connections.types";
+import type { ConnectionRequestResponse, PaginatedConnections, PaginatedContacts } from "./connections.types";
 
 @injectable()
 export class ConnectionsService {
@@ -65,7 +65,7 @@ export class ConnectionsService {
     }
   }
 
-  public async sendRequest(senderId: string, receiverId: string) {
+  public async sendRequest(senderId: string, receiverId: string): Promise<ConnectionRequestResponse> {
     try {
       const result = await this.connectionsRepository.sendRequest(senderId, receiverId);
 
@@ -77,7 +77,7 @@ export class ConnectionsService {
     }
   }
 
-  public async acceptRequest(receiverId: string, connectionId: string) {
+  public async acceptRequest(receiverId: string, connectionId: string): Promise<ConnectionRequestResponse> {
     try {
       const result = await this.connectionsRepository.acceptRequest(receiverId, connectionId);
 
@@ -89,7 +89,7 @@ export class ConnectionsService {
     }
   }
 
-  public async declineRequest(receiverId: string, connectionId: string) {
+  public async declineRequest(receiverId: string, connectionId: string): Promise<void> {
     try {
       return await this.connectionsRepository.declineRequest(receiverId, connectionId);
     } catch (error: any) {
@@ -97,7 +97,7 @@ export class ConnectionsService {
     }
   }
 
-  public async cancelRequest(senderId: string, connectionId: string) {
+  public async cancelRequest(senderId: string, connectionId: string): Promise<void> {
     try {
       return await this.connectionsRepository.cancelRequest(senderId, connectionId);
     } catch (error: any) {

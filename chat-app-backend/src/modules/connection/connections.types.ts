@@ -1,4 +1,4 @@
-import type { Connection, User } from "@/prisma/client";
+import type { Connection, ConnectionStatus, User } from "@/prisma/client";
 
 export interface PaginatedConnections {
   connections: Partial<Connection>[];
@@ -10,4 +10,24 @@ export interface PaginatedContacts {
   contacts: Partial<User>[];
   hasMore: boolean;
   nextCursor: string | null;
+}
+
+export interface ConnectionUser {
+  name: string;
+  id: string;
+  image: string | null;
+  username: string | null;
+}
+
+export interface ConnectionRequest {
+  id: string;
+  status: ConnectionStatus;
+  createdAt: Date;
+  updatedAt: Date;
+  user: ConnectionUser;
+}
+
+export interface ConnectionRequestResponse {
+  connection: ConnectionRequest;
+  notification: Partial<Notification>;
 }

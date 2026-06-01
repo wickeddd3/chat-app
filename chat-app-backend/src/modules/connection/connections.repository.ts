@@ -2,7 +2,7 @@ import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { PrismaClient } from "@/prisma/client";
 import type { ConnectionStatus } from "@/prisma/enums";
-import type { PaginatedConnections, PaginatedContacts } from "./connections.types";
+import type { ConnectionRequestResponse, PaginatedConnections, PaginatedContacts } from "./connections.types";
 
 @injectable()
 export class ConnectionsRepository {
@@ -183,7 +183,7 @@ export class ConnectionsRepository {
     }
   }
 
-  public async sendRequest(senderId: string, receiverId: string) {
+  public async sendRequest(senderId: string, receiverId: string): Promise<ConnectionRequestResponse> {
     try {
       if (senderId === receiverId) throw new Error("You cannot connect with yourself");
 
@@ -237,7 +237,7 @@ export class ConnectionsRepository {
     }
   }
 
-  public async acceptRequest(receiverId: string, connectionId: string) {
+  public async acceptRequest(receiverId: string, connectionId: string): Promise<ConnectionRequestResponse> {
     try {
       return await this.db.$transaction(async (tx) => {
         const connection = await tx.connection.findUnique({
