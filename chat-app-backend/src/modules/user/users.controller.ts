@@ -1,17 +1,19 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
-import { UsersService } from "./users.service";
+import { BaseController } from "@/utils/base.controller";
 import { Controller, ControllerRequest } from "@/interfaces/controller.interface";
-import HttpException from "@/utils/http.exception";
+import { UsersService } from "./users.service";
 import { type NextFunction, type Response, Router } from "express";
 import { authMiddleware } from "@/middlewares/auth.middleware";
+import { NotFoundException } from "@/utils/http.exception";
 
 @injectable()
-export class UsersController implements Controller {
+export class UsersController extends BaseController implements Controller {
   public path = "/users";
   public router = Router();
 
   constructor(@inject(TYPES.UsersService) private usersService: UsersService) {
+    super();
     this.initializeRoutes();
   }
 
@@ -27,9 +29,10 @@ export class UsersController implements Controller {
       const query = (req.query["query"] as string) || "";
       const responseData = await this.usersService.getSuggestedUsers({ authUserId, limit, query });
 
-      res.status(200).json(responseData);
+      this.sendSuccess(res, responseData, "Suggested users fetched successfully");
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to retrieve users"));
+      // Directly triggers errorMiddleware instantly
+      next(error);
     }
   };
 
@@ -38,11 +41,13 @@ export class UsersController implements Controller {
       const username = req.params.username as string;
       const user = await this.usersService.getUserByUsername(username);
 
-      if (!user) return next(new HttpException(404, "User not found"));
+      if (!user) {
+        throw new NotFoundException(`User profile '@${username}' could not be found`);
+      }
 
-      res.status(200).json(user);
+      this.sendSuccess(res, user, "User profile retrieved successfully");
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to retrieve user"));
+      next(error);
     }
   };
 }

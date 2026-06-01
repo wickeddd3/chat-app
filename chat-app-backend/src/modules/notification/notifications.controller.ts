@@ -1,17 +1,18 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
-import { NotificationsService } from "./notifications.service";
+import { BaseController } from "@/utils/base.controller";
 import { Controller, ControllerRequest } from "@/interfaces/controller.interface";
-import HttpException from "@/utils/http.exception";
+import { NotificationsService } from "./notifications.service";
 import { type NextFunction, type Response, Router } from "express";
 import { authMiddleware } from "@/middlewares/auth.middleware";
 
 @injectable()
-export class NotificationsController implements Controller {
+export class NotificationsController extends BaseController implements Controller {
   public path = "/notifications";
   public router = Router();
 
   constructor(@inject(TYPES.NotificationsService) private notificationsService: NotificationsService) {
+    super();
     this.initializeRoutes();
   }
 
@@ -25,15 +26,20 @@ export class NotificationsController implements Controller {
       const authUserId = (req.user?.id as string) || "";
       const limit = 20;
       const cursor = req?.query?.cursor as string;
-      const notifications = await this.notificationsService.getByUserId({
+
+      const { notifications, nextCursor, hasMore } = await this.notificationsService.getByUserId({
         userId: authUserId,
         limit,
         cursor,
       });
 
-      res.status(200).json(notifications);
+      this.sendSuccess(res, notifications, "Notifications fetched successfully", 200, {
+        limit,
+        nextCursor,
+        hasMore,
+      });
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to retrieve notifications"));
+      next(error);
     }
   };
 
@@ -46,9 +52,9 @@ export class NotificationsController implements Controller {
         notificationIds,
       });
 
-      res.status(200).json(notifications);
+      this.sendSuccess(res, notifications, "Notifications mark as read successfully");
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to mark notifications as read"));
+      next(error);
     }
   };
 }
