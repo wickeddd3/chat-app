@@ -1,4 +1,5 @@
 export { ChannelHeader } from "./ui/ChannelHeader";
+export { BackButton } from "./ui/BackButton";
 
 export type {
   Channel,
