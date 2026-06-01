@@ -20,7 +20,7 @@ export async function getMessagesApi({
     return {
       messages: responseData.data,
       hasMore: responseData.meta?.hasMore || false,
-      nextCursor: responseData.meta?.nextCursor || "",
+      nextCursor: responseData.meta?.nextCursor || null,
     };
   } catch (error: unknown) {
     console.error("Error fetching messages:", error);
