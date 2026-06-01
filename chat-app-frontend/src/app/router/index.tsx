@@ -3,6 +3,7 @@ import { AuthGuard } from "./AuthGuard";
 import { GuestGuard } from "./GuestGuard";
 import { AuthLayout } from "../layouts/auth-layout";
 import { ChatLayout } from "../layouts/chat-layout";
+import { ContentPlaceholder } from "@/features/message/chat-room";
 
 export const router = createBrowserRouter([
   // --- PROTECTED ROUTES ---
@@ -30,22 +31,21 @@ export const router = createBrowserRouter([
           },
           {
             path: "messages",
+            lazy: async () => {
+              const module = await import("@/pages/MessagesPage");
+              return { Component: module.default };
+            },
             children: [
               {
-                path: "",
+                index: true,
+                element: <ContentPlaceholder />,
+              },
+              {
+                path: ":channelId",
                 lazy: async () => {
-                  const module = await import("@/pages/MessagesPage");
+                  const module = await import("@/pages/ChatRoomPage");
                   return { Component: module.default };
                 },
-                children: [
-                  {
-                    path: ":channelId",
-                    lazy: async () => {
-                      const module = await import("@/pages/ChatRoomPage");
-                      return { Component: module.default };
-                    },
-                  },
-                ],
               },
             ],
           },
