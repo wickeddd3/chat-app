@@ -8,39 +8,31 @@ import { authClient } from "./better-auth.client";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
-type ApiRequestOptions = {
-  url?: string;
-  config?: AxiosRequestConfig;
-};
-
 type RequestData = Record<string, unknown> | FormData | null;
 
-export const apiRequest = ({ url = "", config = {} }: ApiRequestOptions) => {
-  const headers = {
+// Singleton Instance Configuration (Created once, shared everywhere)
+const http: AxiosInstance = axios.create({
+  baseURL: API_URL,
+  headers: {
     Accept: "application/json",
-  };
+  },
+  withCredentials: true, // Crucial for Better-Auth session cookies
+});
 
-  const http: AxiosInstance = axios.create({
-    ...config,
-    baseURL: API_URL,
-    headers,
-    withCredentials: true, // Crucial for Better-Auth session cookies
-  });
+// Request Interceptor
+http.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => config,
+  (error) => Promise.reject(error),
+);
 
-  // Request interceptor
-  http.interceptors.request.use(
-    async (config: InternalAxiosRequestConfig) => {
-      return config;
-    },
-    (error) => Promise.reject(error),
-  );
-
-  // Response interceptor
-  http.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-      const { response } = error;
-      if (response?.status === 401) {
+// Response Interceptor
+http.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const { response } = error;
+    if (response?.status === 401) {
+      // Prevent redirect loops if signOut itself gets a 401
+      if (!window.location.pathname.startsWith("/auth/sign-in")) {
         authClient.signOut({
           fetchOptions: {
             onSuccess: () => {
@@ -49,54 +41,43 @@ export const apiRequest = ({ url = "", config = {} }: ApiRequestOptions) => {
           },
         });
       }
-      return Promise.reject(error);
-    },
-  );
+    }
+    return Promise.reject(error);
+  },
+);
 
-  const httpRequest = (
-    requestConfig: AxiosRequestConfig = {},
-  ): Promise<AxiosResponse> => {
-    return http({
-      url,
-      ...config,
-      ...requestConfig,
-    });
-  };
+/**
+ * Production-Grade API Wrapper
+ * Exposes generic HTTP methods that forward structural type matrices to Axios.
+ */
+export const apiRequest = {
+  get: <T = any>(
+    url: string,
+    config: AxiosRequestConfig = {},
+  ): Promise<AxiosResponse<T>> => http.get<T>(url, config),
 
-  const get = (
-    requestConfig: AxiosRequestConfig = {},
-  ): Promise<AxiosResponse> => httpRequest({ method: "get", ...requestConfig });
+  post: <T = any>(
+    url: string,
+    data?: RequestData,
+    config: AxiosRequestConfig = {},
+  ): Promise<AxiosResponse<T>> => http.post<T>(url, data, config),
 
-  const post = (
-    data: RequestData,
-    requestConfig: AxiosRequestConfig = {},
-  ): Promise<AxiosResponse> =>
-    httpRequest({ method: "post", data, ...requestConfig });
+  put: <T = any>(
+    url: string,
+    data?: RequestData,
+    config: AxiosRequestConfig = {},
+  ): Promise<AxiosResponse<T>> => http.put<T>(url, data, config),
 
-  const put = (
-    data: RequestData,
-    requestConfig: AxiosRequestConfig = {},
-  ): Promise<AxiosResponse> =>
-    httpRequest({ method: "put", data, ...requestConfig });
+  patch: <T = any>(
+    url: string,
+    data?: RequestData,
+    config: AxiosRequestConfig = {},
+  ): Promise<AxiosResponse<T>> => http.patch<T>(url, data, config),
 
-  const patch = (
-    data: RequestData,
-    requestConfig: AxiosRequestConfig = {},
-  ): Promise<AxiosResponse> =>
-    httpRequest({ method: "patch", data, ...requestConfig });
-
-  const remove = (
-    requestConfig: AxiosRequestConfig = {},
-  ): Promise<AxiosResponse> =>
-    httpRequest({ method: "delete", ...requestConfig });
-
-  return {
-    get,
-    post,
-    put,
-    patch,
-    delete: remove,
-  };
+  delete: <T = any>(
+    url: string,
+    config: AxiosRequestConfig = {},
+  ): Promise<AxiosResponse<T>> => http.delete<T>(url, config),
 };
 
 export default apiRequest;
