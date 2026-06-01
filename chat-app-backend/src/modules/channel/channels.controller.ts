@@ -1,18 +1,19 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
-import { ChannelsService } from "./channels.service";
+import { BaseController } from "@/utils/base.controller";
 import { Controller, ControllerRequest } from "@/interfaces/controller.interface";
-import HttpException from "@/utils/http.exception";
+import { ChannelsService } from "./channels.service";
 import { type NextFunction, type Response, Router } from "express";
 import { authMiddleware } from "@/middlewares/auth.middleware";
 import { channelToChannelDetails, channelToInboxChannel } from "./channels.transformer";
 
 @injectable()
-export class ChannelsController implements Controller {
+export class ChannelsController extends BaseController implements Controller {
   public path = "/channels";
   public router = Router();
 
   constructor(@inject(TYPES.ChannelsService) private channelsService: ChannelsService) {
+    super();
     this.initializeRoutes();
   }
 
@@ -30,13 +31,19 @@ export class ChannelsController implements Controller {
       const limit = 20;
       const cursor = (req.query["cursor"] as string) || "";
       const query = (req.query["query"] as string) || "";
+
       const data = await this.channelsService.getChannels({ authUserId, limit, cursor, query });
 
       const transformedChannels = data.channels.map((channel) => channelToInboxChannel(channel, authUserId));
-      const responseData = { ...data, channels: transformedChannels };
-      res.status(200).json(responseData);
+      const { channels, nextCursor, hasMore } = { ...data, channels: transformedChannels };
+
+      this.sendSuccess(res, channels, "Channels fetched successfully", 200, {
+        limit,
+        nextCursor,
+        hasMore,
+      });
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to retrieve channels"));
+      next(error);
     }
   };
 
@@ -47,9 +54,10 @@ export class ChannelsController implements Controller {
       const channel = await this.channelsService.getChannel(authUserId, parseInt(channelId));
 
       const transformedChannel = channel ? channelToChannelDetails(channel, authUserId) : null;
-      res.status(200).json(transformedChannel);
+
+      this.sendSuccess(res, transformedChannel, "Channel retrieved successfully");
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to retrieve channel"));
+      next(error);
     }
   };
 
@@ -57,11 +65,12 @@ export class ChannelsController implements Controller {
     try {
       const authUserId = req.user?.id || "";
       const targetUserId = req.params.targetUserId as string;
+
       const channel = await this.channelsService.findChannelOrCreate(authUserId, targetUserId);
 
-      res.status(200).json(channel);
+      this.sendSuccess(res, channel, "Channel retrieved successfully");
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to retrieve or create channel"));
+      next(error);
     }
   };
 
@@ -69,11 +78,12 @@ export class ChannelsController implements Controller {
     try {
       const authUserId = req.user?.id || "";
       const { name, memberIds } = req.body;
+
       const channel = await this.channelsService.createGroupChannel(authUserId, { name, memberIds });
 
-      res.status(200).json(channel);
+      this.sendSuccess(res, channel, "Group channel created successfully");
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to create group channel"));
+      next(error);
     }
   };
 
@@ -82,14 +92,15 @@ export class ChannelsController implements Controller {
       const authUserId = req.user?.id || "";
       const channelId = req.params.channelId as string;
       const { name, memberIds } = req.body;
+
       const channel = await this.channelsService.updateGroupChannel(authUserId, parseInt(channelId), {
         name,
         memberIds,
       });
 
-      res.status(200).json(channel);
+      this.sendSuccess(res, channel, "Group channel updated successfully");
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to update group channel"));
+      next(error);
     }
   };
 }

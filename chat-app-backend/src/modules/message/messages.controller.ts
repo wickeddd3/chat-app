@@ -1,17 +1,18 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
-import { MessagesService } from "./messages.service";
+import { BaseController } from "@/utils/base.controller";
 import { Controller, ControllerRequest } from "@/interfaces/controller.interface";
-import HttpException from "@/utils/http.exception";
+import { MessagesService } from "./messages.service";
 import { type NextFunction, type Response, Router } from "express";
 import { authMiddleware } from "@/middlewares/auth.middleware";
 
 @injectable()
-export class MessagesController implements Controller {
+export class MessagesController extends BaseController implements Controller {
   public path = "/messages";
   public router = Router();
 
   constructor(@inject(TYPES.MessagesService) private messagesService: MessagesService) {
+    super();
     this.initializeRoutes();
   }
 
@@ -24,15 +25,20 @@ export class MessagesController implements Controller {
       const channelId = req.params.channelId as string;
       const limit = 20;
       const cursor = req?.query?.cursor as string;
-      const messages = await this.messagesService.getMessages({
+
+      const { messages, nextCursor, hasMore } = await this.messagesService.getMessages({
         channelId: parseInt(channelId),
         limit,
         cursor: parseInt(cursor),
       });
 
-      res.status(200).json(messages);
+      this.sendSuccess(res, messages, "Messages fetched successfully", 200, {
+        limit,
+        nextCursor,
+        hasMore,
+      });
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to retrieve messages"));
+      next(error);
     }
   };
 }

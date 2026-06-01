@@ -1,17 +1,18 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
-import { ConnectionsService } from "./connections.service";
+import { BaseController } from "@/utils/base.controller";
 import { Controller, ControllerRequest } from "@/interfaces/controller.interface";
-import HttpException from "@/utils/http.exception";
+import { ConnectionsService } from "./connections.service";
 import { type NextFunction, type Response, Router } from "express";
 import { authMiddleware } from "@/middlewares/auth.middleware";
 
 @injectable()
-export class ConnectionsController implements Controller {
+export class ConnectionsController extends BaseController implements Controller {
   public path = "/connections";
   public router = Router();
 
   constructor(@inject(TYPES.ConnectionsService) private connectionsService: ConnectionsService) {
+    super();
     this.initializeRoutes();
   }
 
@@ -31,11 +32,21 @@ export class ConnectionsController implements Controller {
       const limit = 20;
       const cursor = (req.query["cursor"] as string) || "";
       const query = (req.query["query"] as string) || "";
-      const contacts = await this.connectionsService.getUserContacts({ authUserId: userId, limit, cursor, query });
 
-      res.status(200).json(contacts);
+      const { contacts, nextCursor, hasMore } = await this.connectionsService.getUserContacts({
+        authUserId: userId,
+        limit,
+        cursor,
+        query,
+      });
+
+      this.sendSuccess(res, contacts, "Contacts fetched successfully", 200, {
+        limit,
+        nextCursor,
+        hasMore,
+      });
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to retrieve connection contacts"));
+      next(error);
     }
   };
 
@@ -44,16 +55,21 @@ export class ConnectionsController implements Controller {
       const userId = req.user?.id || "";
       const limit = 20;
       const cursor = (req.query?.cursor as string) || "";
-      const sentConnections = await this.connectionsService.getSentConnections({
+
+      const { connections, nextCursor, hasMore } = await this.connectionsService.getSentConnections({
         authUserId: userId,
         limit,
         cursor,
         status: "PENDING",
       });
 
-      res.status(200).json(sentConnections);
+      this.sendSuccess(res, connections, "Sent connection requests fetched successfully", 200, {
+        limit,
+        nextCursor,
+        hasMore,
+      });
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to retrieve sent connection requests"));
+      next(error);
     }
   };
 
@@ -62,16 +78,20 @@ export class ConnectionsController implements Controller {
       const userId = req.user?.id || "";
       const limit = 20;
       const cursor = (req.query?.cursor as string) || "";
-      const receivedConnections = await this.connectionsService.getReceivedConnections({
+      const { connections, nextCursor, hasMore } = await this.connectionsService.getReceivedConnections({
         authUserId: userId,
         limit,
         cursor,
         status: "PENDING",
       });
 
-      res.status(200).json(receivedConnections);
+      this.sendSuccess(res, connections, "Received connection requests fetched successfully", 200, {
+        limit,
+        nextCursor,
+        hasMore,
+      });
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to retrieve received connection requests"));
+      next(error);
     }
   };
 
@@ -80,11 +100,12 @@ export class ConnectionsController implements Controller {
       const userId = req.user?.id || "";
       const senderId = userId;
       const receiverId = req.body.receiverId;
+
       const request = await this.connectionsService.sendRequest(senderId, receiverId);
 
-      res.status(200).json(request.connection);
+      this.sendSuccess(res, request, "Connection request sent successfully");
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to send connection request"));
+      next(error);
     }
   };
 
@@ -93,11 +114,12 @@ export class ConnectionsController implements Controller {
       const userId = req.user?.id || "";
       const receiverId = userId;
       const connectionId = (req.params?.id as string) || "";
+
       const request = await this.connectionsService.acceptRequest(receiverId, connectionId);
 
-      res.status(200).json(request.connection);
+      this.sendSuccess(res, request, "Connection request accepted successfully");
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to accept connection request"));
+      next(error);
     }
   };
 
@@ -106,11 +128,12 @@ export class ConnectionsController implements Controller {
       const userId = req.user?.id || "";
       const receiverId = userId;
       const connectionId = (req.params?.id as string) || "";
+
       const request = await this.connectionsService.declineRequest(receiverId, connectionId);
 
-      res.status(200).json(request);
+      this.sendSuccess(res, request, "Connection request declined successfully");
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to decline connection request"));
+      next(error);
     }
   };
 
@@ -119,11 +142,12 @@ export class ConnectionsController implements Controller {
       const userId = req.user?.id || "";
       const senderId = userId;
       const connectionId = (req.params?.id as string) || "";
+
       const request = await this.connectionsService.cancelRequest(senderId, connectionId);
 
-      res.status(200).json(request);
+      this.sendSuccess(res, request, "Connection request canceled successfully");
     } catch (error: any) {
-      next(new HttpException(500, error?.message || "Failed to cancel connection request"));
+      next(error);
     }
   };
 }
