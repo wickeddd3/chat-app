@@ -15,7 +15,8 @@ export function NotificationItem({
   return (
     <article
       className={cn(
-        "flex justify-between items-center gap-4 px-4 py-2 border-b hover:bg-sidebar-accent cursor-pointer",
+        `flex justify-between items-center gap-4 px-4 py-2 border-b 
+        hover:bg-sidebar-accent cursor-pointer w-full overflow-hidden`,
         notification.isRead ? "" : "bg-sidebar-accent/50",
       )}
       onClick={onClick}
@@ -23,15 +24,15 @@ export function NotificationItem({
       <Icon
         size={22}
         className={cn(
-          "text-blue-400",
+          "text-blue-400 shrink-0",
           notification.isRead ? "" : "text-blue-500",
         )}
       />
-      <div className="flex-1 flex justify-between items-center">
-        <div className="flex flex-col gap-1">
+      <div className="flex-1 flex justify-between items-center min-w-0 gap-2">
+        <div className="flex flex-col gap-1 flex-1 min-w-0">
           <h1
             className={cn(
-              "text-sm text-muted-foreground",
+              "text-sm text-muted-foreground truncate w-full",
               notification.isRead ? "" : "font-medium text-gray-900",
             )}
           >
@@ -39,14 +40,17 @@ export function NotificationItem({
           </h1>
           <p
             className={cn(
-              "text-xs text-muted-foreground",
+              "text-xs text-muted-foreground truncate w-full",
               notification.isRead ? "" : "font-medium text-gray-900",
             )}
           >
             {notification.content}
           </p>
         </div>
-        <span className="text-xs">{dateToNow(notification.createdAt)}</span>
+
+        <span className="text-xs text-muted-foreground shrink-0 whitespace-nowrap self-start pt-0.5">
+          {dateToNow(notification.createdAt)}
+        </span>
       </div>
     </article>
   );

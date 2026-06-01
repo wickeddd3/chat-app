@@ -11,21 +11,39 @@ export function ContactItem({
   optionSlot?: ReactNode;
 }) {
   return (
-    <article className="flex items-center gap-4 border-b px-4 py-3 text-sm leading-tight whitespace-nowrap last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
-      <ProfileAvatar imageSrc={image || ""} />
-      <div className="flex-1 flex flex-col items-start gap-2">
-        <div className="flex items-center gap-4">
-          <h1 className="text-sm font-medium">{name}</h1>
+    <article
+      className={`
+        flex items-center gap-4 border-b px-4 py-3 text-sm leading-tight last:border-b-0 
+        hover:bg-sidebar-accent hover:text-sidebar-accent-foreground w-full overflow-hidden
+      `}
+    >
+      <div className="shrink-0">
+        <ProfileAvatar imageSrc={image || ""} />
+      </div>
+
+      <div className="flex-1 flex flex-col items-start min-w-0 gap-1">
+        <div className="flex items-center gap-2 w-full min-w-0">
+          <h1 className="text-sm font-medium truncate flex-1">{name}</h1>
           {isNew && (
-            <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-sm">
+            <span
+              className={`
+              bg-blue-100 text-blue-800 text-[10px] font-medium px-1.5 
+                py-0.5 rounded-sm shrink-0 whitespace-nowrap
+              `}
+            >
               New
             </span>
           )}
         </div>
 
-        <h2 className="text-xs">{`@${username}`}</h2>
+        <h2 className="text-xs text-muted-foreground truncate w-full">{`@${username}`}</h2>
       </div>
-      {optionSlot}
+
+      {optionSlot && (
+        <div className="shrink-0 flex items-center justify-end">
+          {optionSlot}
+        </div>
+      )}
     </article>
   );
 }

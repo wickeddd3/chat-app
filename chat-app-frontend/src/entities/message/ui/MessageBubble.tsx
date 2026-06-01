@@ -1,5 +1,5 @@
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
-import { dateToString } from "@/shared/utils/date-format";
+import { dateToNow } from "@/shared/utils/date-format";
 import { CheckCheck } from "lucide-react";
 
 export function MessageBubble({
@@ -18,21 +18,46 @@ export function MessageBubble({
 
   return (
     <div
-      className={`flex justify-start gap-2 px-4 py-1  ${isAuthorsMessage ? "flex-row-reverse ml-12" : "mr-12"}`}
+      className={`
+        flex justify-start gap-2 px-4 py-1 w-full min-w-0
+        ${isAuthorsMessage ? "flex-row-reverse pl-12" : "pr-12"}
+      `}
     >
-      <ProfileAvatar imageSrc={authorImage} size="sm" />
+      <div className="shrink-0 mt-0.5">
+        <ProfileAvatar imageSrc={authorImage} size="sm" />
+      </div>
+
       <div
-        className={`flex flex-col gap-2 p-3 ${isAuthorsMessage ? "bg-blue-500 text-white rounded-l-lg rounded-br-lg" : "bg-gray-200 rounded-r-lg rounded-bl-lg"}`}
+        className={`
+          flex flex-col gap-1.5 p-3 min-w-0 max-w-[85%] sm:max-w-[75%] md:max-w-[70%]
+          ${
+            isAuthorsMessage
+              ? "bg-blue-500 text-white rounded-l-lg rounded-br-lg"
+              : "bg-muted rounded-r-lg rounded-bl-lg text-foreground"
+          }
+        `}
       >
-        <div className="flex items-center gap-4">
-          <p className="text-xs font-semibold opacity-75">{authorName}</p>
-          <span className="text-xs opacity-50">{dateToString(createdAt)}</span>
+        <div className="flex items-center justify-between gap-4 w-full min-w-0 text-[11px]">
+          <span className="font-semibold opacity-85 truncate flex-1 min-w-0">
+            {authorName}
+          </span>
+          <span className="opacity-60 shrink-0 whitespace-nowrap">
+            {dateToNow(createdAt)}
+          </span>
         </div>
-        <p className="text-sm">{content}</p>
-        <CheckCheck
-          size={16}
-          className={`${isSending ? "opacity-30" : "opacity-100"} self-end`}
-        />
+
+        <p className="text-sm leading-relaxed wrap-break-word whitespace-pre-wrap select-text">
+          {content}
+        </p>
+
+        {isAuthorsMessage && (
+          <div className="flex justify-end w-full mt-0.5 shrink-0">
+            <CheckCheck
+              size={14}
+              className={isSending ? "opacity-40 animate-pulse" : "opacity-90"}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
