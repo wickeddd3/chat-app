@@ -1,18 +1,13 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { MessagesRepository } from "./messages.repository";
-import type { Message } from "@/prisma/client";
-import type { PaginatedMessages } from "./messages.types";
+import type { MessageWithAuthor, PaginatedMessages, UnreadMessage } from "./messages.types";
 
 @injectable()
 export class MessagesService {
   constructor(@inject(TYPES.MessagesRepository) private messagesRepository: MessagesRepository) {}
 
-  public async saveMessage(data: {
-    content: string;
-    channelId: number;
-    authorId: string;
-  }): Promise<Message & { author: { id: string; name: string; image: string | null } }> {
+  public async saveMessage(data: { content: string; channelId: number; authorId: string }): Promise<MessageWithAuthor> {
     try {
       return await this.messagesRepository.create(data);
     } catch (error: any) {
@@ -40,7 +35,7 @@ export class MessagesService {
     }
   }
 
-  public async getUnreadMessages(channelId: number, userId: string): Promise<{ id: number }[]> {
+  public async getUnreadMessages(channelId: number, userId: string): Promise<UnreadMessage[]> {
     try {
       return await this.messagesRepository.getUnreadMessages(channelId, userId);
     } catch (error: any) {
