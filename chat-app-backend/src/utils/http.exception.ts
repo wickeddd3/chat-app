@@ -1,12 +1,23 @@
-class HttpException extends Error {
-  public status: number;
-  public message: string;
-
-  constructor(status: number, message: string) {
+export class HttpException extends Error {
+  constructor(
+    public readonly statusCode: number,
+    message: string,
+    public readonly details: any = null,
+  ) {
     super(message);
-    this.status = status;
-    this.message = message;
+    Object.setPrototypeOf(this, new.target.prototype); // Restore prototype chain
   }
 }
 
-export default HttpException;
+// Custom Helpers for common codes
+export class NotFoundException extends HttpException {
+  constructor(message = "Resource not found") {
+    super(404, message);
+  }
+}
+
+export class BadRequestException extends HttpException {
+  constructor(message = "Bad Request", details?: any) {
+    super(400, message, details);
+  }
+}

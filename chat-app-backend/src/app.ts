@@ -18,6 +18,7 @@ import { SocketServerProvider } from "@/web-socket/socket-server.provider";
 import { WebSocketService } from "@/web-socket/web-socket.service";
 
 import { NotificationSubscriber } from "@/web-socket/handlers/notification.subscriber";
+import { errorMiddleware } from "@/middlewares/error.middleware";
 
 export class App {
   public express: Application;
@@ -32,6 +33,8 @@ export class App {
     this.initializeMiddlewares();
     this.initializeAuth();
     this.initializeControllers(controllers);
+    // Error middleware MUST be loaded LAST in the express chain to capture bubble-ups
+    this.express.use(errorMiddleware);
 
     // Establish Redis connection before starting the WebSocket server
     connectRedis();
