@@ -21,7 +21,7 @@ export function SidebarLink({
           key={url}
           to={url}
           className={cn(
-            "flex justify-center items-center px-2 py-3 rounded-xl transition-colors duration-200",
+            "flex justify-center items-center p-2 rounded-lg transition-colors duration-200",
             isActive && "bg-gray-200 text-blue-500",
           )}
         >

@@ -1,6 +1,6 @@
 import { useParams } from "react-router";
 import { useMemo } from "react";
-import { ChannelHeader, useChannel } from "@/entities/channel";
+import { BackButton, ChannelHeader, useChannel } from "@/entities/channel";
 import { useAuth } from "@/entities/auth";
 import { ChatRoom } from "@/features/message/chat-room";
 import { usePresence } from "@/app/store/PresenceContext";
@@ -28,12 +28,19 @@ export default function ChatRoomPage() {
   }, [channel, authId, onlineUsers]);
 
   return (
-    <div className="flex-1 flex flex-col">
-      <ChannelHeader
-        channel={channel}
-        isOnline={online}
-        optionSlot={<ChannelDetailsDrawer channel={channel} />}
-      />
+    <div className="flex-1 flex flex-col h-full w-full bg-background">
+      <div className="flex items-center w-full">
+        <BackButton />
+
+        <div className="flex-1">
+          <ChannelHeader
+            channel={channel}
+            isOnline={online}
+            optionSlot={<ChannelDetailsDrawer channel={channel} />}
+          />
+        </div>
+      </div>
+
       <ChatRoom channelId={channelId || ""} />
     </div>
   );

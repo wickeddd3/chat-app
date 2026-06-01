@@ -1,11 +1,19 @@
 import { ChatInbox } from "@/features/channel/chat-inbox";
 import { CreateGroupChannel } from "@/features/channel/create-group-channel";
-import { Outlet } from "react-router";
+import { Outlet, useParams } from "react-router";
 
 export default function MessagesPage() {
+  const { channelId } = useParams();
+  const isInsideChatRoom = !!channelId;
+
   return (
-    <div className="flex-1 flex">
-      <div className="flex-1 flex flex-col max-h-full border-r">
+    <div className="flex-1 flex w-full h-full overflow-hidden">
+      <div
+        className={`
+          flex-col max-h-full border-r w-full md:w-80 lg:w-96 shrink-0
+          ${isInsideChatRoom ? "hidden md:flex" : "flex-1 flex"}
+        `}
+      >
         <div className="flex justify-between items-center p-4">
           <h1 className="text-base font-medium text-foreground">Chat Inbox</h1>
           <CreateGroupChannel />
@@ -14,7 +22,11 @@ export default function MessagesPage() {
           <ChatInbox />
         </div>
       </div>
-      <Outlet />
+      <div
+        className={`flex-1 ${!isInsideChatRoom ? "hidden md:flex" : "flex"}`}
+      >
+        <Outlet />
+      </div>
     </div>
   );
 }

@@ -13,13 +13,20 @@ export function ChatLayout() {
   useRealTimeNotifications();
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background">
-      <aside className="flex w-20 flex-col border-r bg-muted/30">
+    <div className="flex flex-col-reverse md:flex-row h-screen w-full overflow-hidden bg-background">
+      <aside
+        className={`
+          flex w-full h-16 border-t flex-col bg-muted/30 shrink-0
+          md:border-r md:border-t-0 md:h-full md:w-20
+        `}
+      >
         <ChatSidebar />
       </aside>
-      <main className="flex flex-1 overflow-hidden">
+
+      <main className="flex flex-1 w-full min-w-0 overflow-hidden">
         <Outlet />
       </main>
+
       <Toaster theme="light" />
     </div>
   );

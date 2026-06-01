@@ -23,8 +23,13 @@ export function ChannelDetailsDrawer({
   return (
     <Drawer direction="right">
       <DrawerTrigger asChild>
-        <button className="cursor-pointer">
-          <InfoIcon size={22} className="text-gray-600" />
+        <button
+          className="p-2 rounded-lg cursor-pointer hover:bg-muted"
+          aria-label="Channel info"
+          role="button"
+          title="Channel info"
+        >
+          <InfoIcon className="h-6 w-6 text-muted-foreground" />
         </button>
       </DrawerTrigger>
       <DrawerContent>
