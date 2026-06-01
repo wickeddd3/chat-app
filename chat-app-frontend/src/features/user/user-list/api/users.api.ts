@@ -8,16 +8,14 @@ export async function getUsersApi({
 }: {
   params: Record<string, any>;
 }): Promise<User[]> {
-  try {
-    const queryParams = toQueryParams(params);
-    const url = `/api/users${queryParams}`;
+  const queryParams = toQueryParams(params);
+  const url = `/api/users${queryParams}`;
 
-    const response = await apiRequest({ url }).get();
-    const responseData: ApiResponse = response.data;
+  const response = await apiRequest.get<ApiResponse<User[]>>(url);
 
-    return responseData.data;
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    throw error;
-  }
+  const {
+    data: { data },
+  } = response;
+
+  return data;
 }

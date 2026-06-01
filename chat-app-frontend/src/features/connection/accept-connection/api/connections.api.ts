@@ -1,16 +1,18 @@
-import type { Connection } from "@/entities/connection";
 import apiRequest from "@/shared/lib/axios.client";
+import type { Connection } from "@/entities/connection";
+import type { ApiResponse } from "@/shared/types/api-response.type";
 
 export async function acceptConnectionRequestApi(
   connectionId: string,
 ): Promise<Connection> {
-  try {
-    const url = `/api/connections/request/${connectionId}/accept`;
-    const { data } = await apiRequest({ url }).post({});
+  const safeConnectionId = encodeURIComponent(connectionId);
+  const url = `/api/connections/request/${safeConnectionId}/accept`;
 
-    return data;
-  } catch (error) {
-    console.error("Error accepting connection request:", error);
-    throw error;
-  }
+  const response = await apiRequest.post<ApiResponse<Connection>>(url, {});
+
+  const {
+    data: { data },
+  } = response;
+
+  return data;
 }

@@ -3,15 +3,14 @@ import type { ApiResponse } from "@/shared/types/api-response.type";
 import type { InboxChannel } from "../model/channel.types";
 
 export async function getChannel(channelId: string): Promise<InboxChannel> {
-  try {
-    const url = `/api/channels/${channelId}`;
+  const safeChannelId = encodeURIComponent(channelId);
+  const url = `/api/channels/${safeChannelId}`;
 
-    const response = await apiRequest({ url }).get();
-    const responseData: ApiResponse = response.data;
+  const response = await apiRequest.get<ApiResponse<InboxChannel>>(url);
 
-    return responseData.data;
-  } catch (error) {
-    console.error("Error fetching channel:", error);
-    throw error;
-  }
+  const {
+    data: { data },
+  } = response;
+
+  return data;
 }

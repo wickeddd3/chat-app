@@ -1,4 +1,7 @@
-import type { PaginatedNotifications } from "@/entities/notification";
+import type {
+  PaginatedNotifications,
+  Notification,
+} from "@/entities/notification";
 import apiRequest from "@/shared/lib/axios.client";
 import type { ApiResponse } from "@/shared/types/api-response.type";
 import { toQueryParams } from "@/shared/utils/query-params";
@@ -8,20 +11,21 @@ export async function getNotificationsApi({
 }: {
   params: Record<string, any>;
 }): Promise<PaginatedNotifications> {
-  try {
-    const queryParams = toQueryParams(params);
-    const url = `/api/notifications${queryParams}`;
+  const queryParams = toQueryParams(params);
+  const url = `/api/notifications${queryParams}`;
 
-    const response = await apiRequest({ url }).get();
-    const responseData: ApiResponse = response.data;
+  const response = await apiRequest.get<ApiResponse<Notification[]>>(url);
 
-    return {
-      notifications: responseData.data,
-      hasMore: responseData.meta?.hasMore || false,
-      nextCursor: responseData.meta?.nextCursor || null,
-    };
-  } catch (error: unknown) {
-    console.error("Error fetching notifications:", error);
-    throw error;
-  }
+  const {
+    data: {
+      data,
+      meta: { hasMore, nextCursor } = { hasMore: false, nextCursor: null },
+    },
+  } = response;
+
+  return {
+    notifications: data,
+    hasMore,
+    nextCursor,
+  };
 }

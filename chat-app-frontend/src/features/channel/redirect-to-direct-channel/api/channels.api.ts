@@ -5,15 +5,14 @@ import type { Channel } from "@/entities/channel";
 export async function getUserChannelApi(
   targetUserId: string,
 ): Promise<Channel> {
-  try {
-    const url = `/api/channels/find/${targetUserId}`;
+  const safeTargetUserId = encodeURIComponent(targetUserId);
+  const url = `/api/channels/find/${safeTargetUserId}`;
 
-    const response = await apiRequest({ url }).get();
-    const responseData: ApiResponse = response.data;
+  const response = await apiRequest.get<ApiResponse<Channel>>(url);
 
-    return responseData.data;
-  } catch (error) {
-    console.error("Error fetching channel:", error);
-    throw error;
-  }
+  const {
+    data: { data },
+  } = response;
+
+  return data;
 }

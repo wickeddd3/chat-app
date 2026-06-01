@@ -1,15 +1,18 @@
 import apiRequest from "@/shared/lib/axios.client";
+import type { ApiResponse } from "@/shared/types/api-response.type";
 
 export async function markNotificationAsReadApi(
   notificationIds: string[],
 ): Promise<{ count: number }> {
-  try {
-    const url = `/api/notifications/mark-as-read`;
-    const { data } = await apiRequest({ url }).post({ notificationIds });
+  const url = `/api/notifications/mark-as-read`;
 
-    return data;
-  } catch (error) {
-    console.error("Error marking notification as read:", error);
-    throw error;
-  }
+  const response = await apiRequest.post<ApiResponse<{ count: number }>>(url, {
+    notificationIds,
+  });
+
+  const {
+    data: { data },
+  } = response;
+
+  return data;
 }

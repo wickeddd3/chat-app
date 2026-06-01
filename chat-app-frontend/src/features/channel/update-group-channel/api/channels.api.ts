@@ -1,5 +1,6 @@
-import type { Channel } from "@/entities/channel";
 import apiRequest from "@/shared/lib/axios.client";
+import type { Channel } from "@/entities/channel";
+import type { ApiResponse } from "@/shared/types/api-response.type";
 
 export async function updateGroupChannelApi(
   channelId: string,
@@ -8,13 +9,14 @@ export async function updateGroupChannelApi(
     memberIds: string[];
   },
 ): Promise<Channel> {
-  try {
-    const url = `/api/channels/group/${channelId}`;
-    const { data } = await apiRequest({ url }).post(formData);
+  const safeChannelId = encodeURIComponent(channelId);
+  const url = `/api/channels/group/${safeChannelId}`;
 
-    return data;
-  } catch (error) {
-    console.error("Error updating group channel:", error);
-    throw error;
-  }
+  const response = await apiRequest.post<ApiResponse<Channel>>(url, formData);
+
+  const {
+    data: { data },
+  } = response;
+
+  return data;
 }

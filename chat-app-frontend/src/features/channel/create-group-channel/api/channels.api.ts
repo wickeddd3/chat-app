@@ -1,17 +1,18 @@
-import type { Channel } from "@/entities/channel";
 import apiRequest from "@/shared/lib/axios.client";
+import type { Channel } from "@/entities/channel";
+import type { ApiResponse } from "@/shared/types/api-response.type";
 
 export async function createGroupChannelApi(formData: {
   name: string;
   memberIds: string[];
 }): Promise<Channel> {
-  try {
-    const url = "/api/channels/group";
-    const { data } = await apiRequest({ url }).post(formData);
+  const url = "/api/channels/group";
 
-    return data;
-  } catch (error) {
-    console.error("Error creating group channel:", error);
-    throw error;
-  }
+  const response = await apiRequest.post<ApiResponse<Channel>>(url, formData);
+
+  const {
+    data: { data },
+  } = response;
+
+  return data;
 }
