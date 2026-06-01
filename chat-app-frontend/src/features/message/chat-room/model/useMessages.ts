@@ -33,7 +33,7 @@ export function useMessages(channelId: string): {
   return {
     messages: data ?? [],
     isLoading,
-    isEmpty: !isLoading && !!!(data && data?.length),
+    isEmpty: !isLoading && !(data && data?.length),
     error,
     fetchNextPage,
     hasNextPage,

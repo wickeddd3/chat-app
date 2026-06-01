@@ -108,7 +108,7 @@ export function ChatInbox() {
           <ChatInboxResults
             results={filteredByOnline}
             isLoading={isLoading}
-            isEmpty={!!!filteredByOnline.length}
+            isEmpty={!filteredByOnline.length}
             hasNextPage={hasNextPage}
             isFetchingNextPage={isFetchingNextPage}
             fetchNextPage={fetchNextPage}
@@ -121,7 +121,7 @@ export function ChatInbox() {
           <ChatInboxResults
             results={filteredByUnread}
             isLoading={isLoading}
-            isEmpty={!!!filteredByUnread.length}
+            isEmpty={!filteredByUnread.length}
             hasNextPage={hasNextPage}
             isFetchingNextPage={isFetchingNextPage}
             fetchNextPage={fetchNextPage}
@@ -134,7 +134,7 @@ export function ChatInbox() {
           <ChatInboxResults
             results={filteredByGroup}
             isLoading={isLoading}
-            isEmpty={!!!filteredByGroup.length}
+            isEmpty={!filteredByGroup.length}
             hasNextPage={hasNextPage}
             isFetchingNextPage={isFetchingNextPage}
             fetchNextPage={fetchNextPage}

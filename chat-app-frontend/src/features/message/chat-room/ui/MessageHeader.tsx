@@ -10,15 +10,13 @@ export function MessageHeader({
   channel: InboxChannel | null;
   authId: string;
 }) {
-  if (!channel) return;
-
   const { onlineUsers, isOnline } = usePresence();
 
   const online = useMemo(() => {
-    if (channel.type === "GROUP") {
+    if (channel?.type === "GROUP") {
       return channel.channelMembers.some((member) => isOnline(member.user.id));
     }
-    if (channel.type === "DIRECT") {
+    if (channel?.type === "DIRECT") {
       const otherUser = channel.channelMembers.find(
         (member) => member.user.id !== authId && isOnline(member.user.id),
       );
@@ -31,11 +29,11 @@ export function MessageHeader({
     <div className="w-full py-5 px-4">
       <div className="flex items-center gap-4">
         <ProfileAvatar
-          imageSrc={channel.displayImage || ""}
+          imageSrc={channel?.displayImage || ""}
           isOnline={online}
           badge={true}
         />
-        <h1 className="text-md font-medium">{channel.displayName}</h1>
+        <h1 className="text-md font-medium">{channel?.displayName}</h1>
       </div>
     </div>
   );
