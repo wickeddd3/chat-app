@@ -27,5 +27,5 @@ export interface NewMessage {
 export interface PaginatedMessage {
   messages: Message[];
   hasMore: boolean;
-  nextCursor: string;
+  nextCursor: string | null;
 }

@@ -15,5 +15,5 @@ export interface Notification {
 export interface PaginatedNotifications {
   notifications: Notification[];
   hasMore: boolean;
-  nextCursor: string;
+  nextCursor: string | null;
 }
