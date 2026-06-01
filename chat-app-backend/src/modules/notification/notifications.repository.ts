@@ -8,21 +8,36 @@ export class NotificationsRepository {
   constructor(@inject(TYPES.PrismaClient) private db: PrismaClient) {}
 
   /**
-   * Retrieves a list of notifications for the current user.
+   * Retrieves a list of notifications based on userId.
    * Ordered chronologically descending (newest alerts first).
    */
   public async getByUserId({
     userId,
     isRead,
     limit = 20,
-    cursor,
+    cursor = "",
   }: {
     userId: string;
     isRead?: boolean;
     limit?: number;
-    cursor?: string;
+    cursor?: string | undefined; // Format expected: "ISOString_id"
   }): Promise<PaginatedNotifications> {
     try {
+      let cursorFilter = undefined;
+
+      // 1. If a composite cursor is supplied, unpack its properties
+      if (cursor) {
+        const [cursorCreatedAt, cursorId] = cursor.split("_");
+
+        if (cursorCreatedAt && cursorId) {
+          cursorFilter = {
+            createdAt: new Date(cursorCreatedAt),
+            id: cursorId,
+          };
+        }
+      }
+
+      // 2. Fetch notifications matching filters
       const notifications = await this.db.notification.findMany({
         where: {
           userId,
@@ -30,25 +45,33 @@ export class NotificationsRepository {
           // Otherwise, fetch both read and unread records.
           ...(typeof isRead === "boolean" && { isRead }),
         },
-        orderBy: {
-          createdAt: "desc",
-        },
+        // We order by createdAt first, then fall back to ID for deterministic tie-breaking
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         take: limit + 1,
-        ...(cursor && {
-          cursor: { id: cursor },
-          skip: 1, // Skip the cursor item itself to avoid duplication
+        // Apply the Prisma compound cursor strategy
+        ...(cursorFilter && {
+          cursor: {
+            // Ensure your schema has an index supporting this compound criteria
+            createdAt_id: cursorFilter,
+          },
+          skip: 1, // Skip the exact cursor item boundary to yield new rows
         }),
       });
 
       let nextCursor: string | null = null;
       let hasMore = false;
 
+      // 3. Evaluate page truncation boundary conditions
       // If we returned limit + 1 items, it means there are older records to fetch
       if (notifications.length > limit) {
         hasMore = true;
         // Pop the extra item off the array and use its ID as the next cursor boundary
         const nextItem = notifications.pop();
-        nextCursor = nextItem?.id ?? null;
+
+        if (nextItem) {
+          // Serialize the compound properties together to build the next cursor token string
+          nextCursor = `${nextItem.createdAt.toISOString()}_${nextItem.id}`;
+        }
       }
 
       return {
