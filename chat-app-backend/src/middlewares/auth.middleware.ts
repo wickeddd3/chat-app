@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { auth } from "@/lib/better-auth"; // Your better-auth server instance
 import { fromNodeHeaders } from "better-auth/node";
-import HttpException from "@/utils/http.exception";
+import { HttpException } from "@/utils/http.exception";
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
