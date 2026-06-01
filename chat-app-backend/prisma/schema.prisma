@@ -142,6 +142,9 @@ model Notification {
   user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, isRead])
+  // Allow efficient compound cursor execution layouts
+  @@index([createdAt, id])
+  @@unique([createdAt, id])
   @@map("notifications")
 }
 
