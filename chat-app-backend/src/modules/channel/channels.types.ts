@@ -15,5 +15,5 @@ export interface InboxChannel extends Channel {
 export interface PaginatedChannels {
   channels: InboxChannel[];
   hasMore: boolean;
-  nextCursor: string | null | undefined;
+  nextCursor: string | null;
 }
