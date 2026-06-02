@@ -7,18 +7,18 @@ export abstract class BaseController {
   /**
    * Standardized 200 OK / 201 Created Success Wrapper
    */
-  protected sendSuccess<T>(
+  protected sendSuccess(
     res: Response,
-    data: T,
+    data: unknown,
     message = "Operation completed successfully",
     statusCode = 200,
     meta?: ApiResponse["meta"],
   ): void {
-    const responseBody: ApiResponse<T> = {
+    const responseBody: ApiResponse = {
       success: true,
       message,
       data,
-      ...(meta && { meta }),
+      ...(meta !== undefined ? { meta } : {}),
       timestamp: new Date().toISOString(),
     };
 

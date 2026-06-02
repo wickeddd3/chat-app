@@ -1,6 +1,7 @@
 import type { ExtendedError, Socket } from "socket.io";
 import { auth } from "@/lib/better-auth";
 import { fromNodeHeaders } from "better-auth/node";
+import type { User } from "better-auth";
 
 export const socketAuthMiddleware = async (socket: Socket, next: (err?: ExtendedError) => void) => {
   try {
@@ -15,9 +16,11 @@ export const socketAuthMiddleware = async (socket: Socket, next: (err?: Extended
     }
 
     // Attach user info to socket data
-    socket.data.user = session.user;
+    const socketData = socket.data as { user: User };
+    socketData.user = session.user;
+
     next();
-  } catch (error) {
+  } catch {
     next(new Error("Authentication failed"));
   }
 };

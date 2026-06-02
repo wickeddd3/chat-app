@@ -1,4 +1,4 @@
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean; // Always true for success, false for errors
   message: string; // A clear summary of the execution outcome
   data?: T; // The main payload (array or object), omitted if empty

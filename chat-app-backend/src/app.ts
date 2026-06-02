@@ -11,6 +11,7 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "@/lib/better-auth";
 
 import { connectRedis } from "@/lib/redis";
+import { EventEmitter } from "events";
 
 import { container } from "@/config/inversify.config";
 import { TYPES } from "@/config/types";
@@ -37,7 +38,7 @@ export class App {
     this.express.use(errorMiddleware);
 
     // Establish Redis connection before starting the WebSocket server
-    connectRedis();
+    void connectRedis();
 
     // Register WebSocket event handlers before starting the WebSocket server
     this.initializeEventSubscribers();
@@ -54,7 +55,7 @@ export class App {
 
   public start(): void {
     this.server.listen(this.port, () => {
-      console.log(`Server running on port ${this.port}`);
+      console.log(`Server running on port ${String(this.port)}`);
     });
   }
 
@@ -84,7 +85,7 @@ export class App {
 
   private initializeEventSubscribers(): void {
     // Extract the dispatcher instance and subscriber class from the DI environment
-    const dispatcher = container.get<any>(TYPES.EventDispatcher);
+    const dispatcher = container.get<EventEmitter>(TYPES.EventDispatcher);
     const notificationSubscriber = container.get<NotificationSubscriber>(TYPES.NotificationSubscriber);
 
     // Register the handler using injectable class context instance

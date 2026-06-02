@@ -7,7 +7,7 @@ export async function usersSeeder() {
   const password = "password123";
   const hashed = await hashPassword(password);
 
-  console.log(`Seeding ${count} users...`);
+  console.log(`Seeding ${String(count)} users...`);
 
   for (let i = 0; i < count; i++) {
     const firstName = faker.person.firstName();
@@ -28,7 +28,7 @@ export async function usersSeeder() {
         },
       });
 
-      const account = await tx.account.create({
+      await tx.account.create({
         data: {
           id: faker.string.uuid(),
           accountId: user.id,
