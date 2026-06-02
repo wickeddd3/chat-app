@@ -60,7 +60,7 @@ export class UsersService {
       }
 
       return suggestedUsers;
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve suggested users.");
     }
   }
@@ -68,7 +68,7 @@ export class UsersService {
   public async getUserByUsername(username: string): Promise<Partial<User> | null> {
     try {
       return await this.usersRepository.getByUsername(username);
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve user.");
     }
   }

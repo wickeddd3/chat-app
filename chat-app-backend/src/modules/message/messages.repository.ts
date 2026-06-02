@@ -22,7 +22,7 @@ export class MessagesRepository {
           },
         },
       });
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to create message.");
     }
   }
@@ -71,15 +71,15 @@ export class MessagesRepository {
         }
       } else {
         // Initial load (no cursor)
-        nextCursor = (messages.length === limit ? messages[0]?.id : null) || null;
+        nextCursor = (messages.length === limit ? messages[0]?.id : null) ?? null;
       }
 
       return {
         messages: finalMessages,
         hasMore: nextCursor !== null,
-        nextCursor: nextCursor || null,
+        nextCursor: nextCursor ?? null,
       };
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve messages.");
     }
   }
@@ -96,7 +96,7 @@ export class MessagesRepository {
       });
 
       return messages;
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve unread messages.");
     }
   }

@@ -11,7 +11,7 @@ export class HeartbeatCommand implements WebSocketCommand {
 
   constructor(@inject(TYPES.PresenceService) private presenceService: PresenceService) {}
 
-  public async execute(socket: Socket, user: User, data: any): Promise<void> {
+  public async execute(socket: Socket, user: User, _data: unknown): Promise<void> {
     await this.presenceService.refreshPresence(user.id);
     socket.emit("user_status_change", { userId: user.id, status: "online" });
   }

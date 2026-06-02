@@ -2,7 +2,7 @@ export class HttpException extends Error {
   constructor(
     public readonly statusCode: number,
     message: string,
-    public readonly details: any = null,
+    public readonly details: unknown = null,
   ) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype); // Restore prototype chain
@@ -17,7 +17,7 @@ export class NotFoundException extends HttpException {
 }
 
 export class BadRequestException extends HttpException {
-  constructor(message = "Bad Request", details?: any) {
+  constructor(message = "Bad Request", details?: unknown) {
     super(400, message, details);
   }
 }

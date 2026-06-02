@@ -6,6 +6,10 @@ import { MessageReceiptsService } from "@/modules/message-receipt/message-receip
 import type { Socket } from "socket.io";
 import type { User } from "@/prisma/client";
 
+interface ReadMessagePayload {
+  channelId: string;
+}
+
 @injectable()
 export class ReadMessageCommand implements WebSocketCommand {
   public readonly eventName = "mark_as_read";
@@ -15,13 +19,13 @@ export class ReadMessageCommand implements WebSocketCommand {
     @inject(TYPES.MessageReceiptsService) private messageReceiptsService: MessageReceiptsService,
   ) {}
 
-  public async execute(socket: Socket, user: User, data: any): Promise<void> {
+  public async execute(socket: Socket, user: User, data: ReadMessagePayload): Promise<void> {
     const userId = user.id;
-    const channelId = data.channelId;
+    const targetChannelId = parseInt(data.channelId, 10);
 
     // 1. Find all messages in this channel NOT authored by the user
     // and NOT already read by the user
-    const unreadMessages = await this.messagesService.getUnreadMessages(channelId, userId);
+    const unreadMessages = await this.messagesService.getUnreadMessages(targetChannelId, userId);
     const unreadMessagesIds = unreadMessages.map((m) => m.id);
 
     if (unreadMessages.length > 0) {

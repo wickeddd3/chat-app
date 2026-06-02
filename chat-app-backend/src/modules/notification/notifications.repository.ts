@@ -80,7 +80,7 @@ export class NotificationsRepository {
         nextCursor,
         hasMore,
       };
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "An error occurred while compiling your notification timeline feed.");
     }
   }
@@ -105,7 +105,7 @@ export class NotificationsRepository {
           isRead: true,
         },
       });
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to update notification read statuses. Please try again.");
     }
   }

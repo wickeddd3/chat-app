@@ -37,7 +37,7 @@ export class MessagesController extends BaseController implements Controller {
         nextCursor,
         hasMore,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error);
     }
   };

@@ -22,7 +22,7 @@ export class ChannelsService {
   }): Promise<PaginatedChannels> {
     try {
       return await this.channelsRepository.getChannels({ authUserId, limit, cursor, query });
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve channels.");
     }
   }
@@ -30,7 +30,7 @@ export class ChannelsService {
   public async getChannel(userId: string, channelId: number): Promise<InboxChannel | null> {
     try {
       return await this.channelsRepository.getChannel(userId, channelId);
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve channel.");
     }
   }
@@ -44,7 +44,7 @@ export class ChannelsService {
       const createdChannel = await this.channelsRepository.createDirectChannel(userId, targetUserId);
 
       return createdChannel;
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve or create channel");
     }
   }
@@ -55,7 +55,7 @@ export class ChannelsService {
   ): Promise<Channel | null> {
     try {
       return await this.channelsRepository.createGroupChannel(userId, data);
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to create group channel.");
     }
   }
@@ -67,7 +67,7 @@ export class ChannelsService {
   ): Promise<Channel | null> {
     try {
       return await this.channelsRepository.updateGroupChannel(userId, channelId, data);
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to update group channel.");
     }
   }
@@ -75,7 +75,7 @@ export class ChannelsService {
   public async updateChannel(channelId: number): Promise<Channel> {
     try {
       return await this.channelsRepository.updateChannel(channelId);
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to update channel.");
     }
   }

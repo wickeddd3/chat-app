@@ -21,7 +21,7 @@ export class UsersRepository {
       const contactIds = contacts.map((c) => (c.senderId === userId ? c.receiverId : c.senderId));
 
       return contactIds;
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve contact IDs.");
     }
   }
@@ -37,7 +37,7 @@ export class UsersRepository {
       });
 
       return contacts;
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve contact of contacts");
     }
   }
@@ -83,7 +83,7 @@ export class UsersRepository {
       });
 
       return results;
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve search results.");
     }
   }
@@ -99,7 +99,7 @@ export class UsersRepository {
           image: true,
         },
       });
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve user.");
     }
   }

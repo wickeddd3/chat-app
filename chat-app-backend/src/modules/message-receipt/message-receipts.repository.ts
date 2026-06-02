@@ -16,7 +16,7 @@ export class MessageReceiptsRepository {
         })),
         skipDuplicates: true,
       });
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to create batch message receipts.");
     }
   }

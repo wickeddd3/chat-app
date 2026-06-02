@@ -26,7 +26,7 @@ export class NotificationsService {
         limit,
         cursor,
       });
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "An error occurred while compiling your notification timeline feed.");
     }
   }
@@ -40,7 +40,7 @@ export class NotificationsService {
   }): Promise<{ count: number }> {
     try {
       return await this.notificationsRepository.markAsRead({ userId, notificationIds });
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to update notification read statuses. Please try again.");
     }
   }

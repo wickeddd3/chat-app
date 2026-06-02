@@ -10,7 +10,7 @@ export class MessageReceiptsService {
   public async createMessageReceipts(userId: string, ids: number[]) {
     try {
       return await this.messageReceiptsRepository.createMessageReceipts(userId, ids);
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to create batch message receipts.");
     }
   }

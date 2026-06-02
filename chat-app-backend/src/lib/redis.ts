@@ -1,7 +1,7 @@
 import { REDIS_URL } from "@/config/app.config";
 import { Redis } from "ioredis";
 
-const redisUrl = REDIS_URL || "";
+const redisUrl = REDIS_URL ?? "redis://localhost:6379";
 
 // Existing presence/caching client
 export const redisClient = new Redis(redisUrl);

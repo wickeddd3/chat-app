@@ -87,9 +87,9 @@ export class ChannelsRepository {
       return {
         channels,
         hasMore,
-        nextCursor: nextCursor || null,
+        nextCursor: nextCursor ?? null,
       };
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve channels.");
     }
   }
@@ -125,7 +125,7 @@ export class ChannelsRepository {
           },
         },
       });
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve channel.");
     }
   }
@@ -143,7 +143,7 @@ export class ChannelsRepository {
       });
 
       return existing;
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to find direct channel.");
     }
   }
@@ -170,7 +170,7 @@ export class ChannelsRepository {
 
         return channel;
       });
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to create direct channel.");
     }
   }
@@ -205,7 +205,7 @@ export class ChannelsRepository {
 
         return channel;
       });
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to create group channel.");
     }
   }
@@ -262,7 +262,7 @@ export class ChannelsRepository {
 
         return updatedChannel;
       });
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to update group channel.");
     }
   }
@@ -273,7 +273,7 @@ export class ChannelsRepository {
         where: { id: channelId },
         data: { updatedAt: new Date() },
       });
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to update channel.");
     }
   }

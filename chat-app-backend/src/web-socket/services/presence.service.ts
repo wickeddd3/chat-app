@@ -1,9 +1,10 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
+import type { Redis } from "ioredis";
 
 @injectable()
 export class PresenceService {
-  constructor(@inject(TYPES.RedisClient) private cacheDb: any) {}
+  constructor(@inject(TYPES.RedisClient) private cacheDb: Redis) {}
 
   public async refreshPresence(userId: string): Promise<void> {
     const ttlKey = `presence:active:${userId}`;

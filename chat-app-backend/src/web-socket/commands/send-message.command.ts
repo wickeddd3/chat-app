@@ -6,6 +6,12 @@ import { ChannelsService } from "@/modules/channel/channels.service";
 import type { Socket } from "socket.io";
 import type { User } from "@/prisma/client";
 
+interface SendMessagePayload {
+  content: string;
+  channelId: string;
+  clientId: string;
+}
+
 @injectable()
 export class SendMessageCommand implements WebSocketCommand {
   public readonly eventName = "send_message";
@@ -15,16 +21,18 @@ export class SendMessageCommand implements WebSocketCommand {
     @inject(TYPES.ChannelsService) private channelsService: ChannelsService,
   ) {}
 
-  public async execute(socket: Socket, user: User, data: any): Promise<void> {
+  public async execute(socket: Socket, user: User, data: SendMessagePayload): Promise<void> {
+    const targetChannelId = parseInt(data.channelId, 10);
+
     // 1. Persist to Database
     const savedMessage = await this.messagesService.saveMessage({
       content: data.content,
-      channelId: parseInt(data.channelId),
+      channelId: targetChannelId,
       authorId: user.id,
     });
 
     // 2. Update Channel
-    await this.channelsService.updateChannel(parseInt(data.channelId));
+    await this.channelsService.updateChannel(targetChannelId);
 
     // 3. Broadcast the saved message to the room
     socket.to(data.channelId).emit("receive_message", {

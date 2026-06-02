@@ -3,13 +3,17 @@ import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import type { Socket } from "socket.io";
 import type { User } from "@/prisma/client";
 
+interface JoinChannelPayload {
+  channelId: string;
+}
+
 @injectable()
 export class JoinChannelCommand implements WebSocketCommand {
   public readonly eventName = "join_channel";
 
-  public async execute(socket: Socket, user: User, data: any): Promise<void> {
+  public async execute(socket: Socket, user: User, data: JoinChannelPayload): Promise<void> {
     const { channelId } = data;
     console.log(`User ${user.id} join channel: ${channelId}`);
-    socket.join(channelId);
+    await socket.join(channelId);
   }
 }

@@ -20,10 +20,10 @@ export function getSuggestedUserIdsFromContacts({
 
     // Increment count if it's a friend-of-a-friend and not me or my direct friend
     if (!directFriendsSet.has(potentialId1) && potentialId1 !== userId) {
-      mutualCounts[potentialId1] = (mutualCounts[potentialId1] || 0) + 1;
+      mutualCounts[potentialId1] = (mutualCounts[potentialId1] ?? 0) + 1;
     }
     if (!directFriendsSet.has(potentialId2) && potentialId2 !== userId) {
-      mutualCounts[potentialId2] = (mutualCounts[potentialId2] || 0) + 1;
+      mutualCounts[potentialId2] = (mutualCounts[potentialId2] ?? 0) + 1;
     }
   });
 
@@ -49,7 +49,7 @@ export function transformUsersIntoSuggestedUsers({
     // Evaluate intersection vectors across inbound/outbound records
     const outbound = user.receivedConnections?.find((c) => c.senderId === authUserId);
     const inbound = user.sentConnections?.find((c) => c.receiverId === authUserId);
-    const combined = outbound || inbound;
+    const combined = outbound ?? inbound;
 
     if (combined) {
       if (combined.status === "ACCEPTED") {
@@ -74,7 +74,7 @@ export function transformUsersIntoSuggestedUsers({
       username: user.username,
       image: user.image,
       connectionStatus,
-      connectionId: combined?.id || null,
+      connectionId: combined?.id ?? null,
       mutualConnectionsCount: mutualCount,
     };
   });

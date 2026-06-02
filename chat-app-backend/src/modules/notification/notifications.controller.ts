@@ -38,7 +38,7 @@ export class NotificationsController extends BaseController implements Controlle
         nextCursor,
         hasMore,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error);
     }
   };
@@ -53,7 +53,7 @@ export class NotificationsController extends BaseController implements Controlle
       });
 
       this.sendSuccess(res, notifications, "Notifications mark as read successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error);
     }
   };

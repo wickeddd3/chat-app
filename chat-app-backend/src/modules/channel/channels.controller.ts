@@ -42,7 +42,7 @@ export class ChannelsController extends BaseController implements Controller {
         nextCursor,
         hasMore,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error);
     }
   };
@@ -56,7 +56,7 @@ export class ChannelsController extends BaseController implements Controller {
       const transformedChannel = channel ? channelToChannelDetails(channel, authUserId) : null;
 
       this.sendSuccess(res, transformedChannel, "Channel retrieved successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error);
     }
   };
@@ -69,7 +69,7 @@ export class ChannelsController extends BaseController implements Controller {
       const channel = await this.channelsService.findChannelOrCreate(authUserId, targetUserId);
 
       this.sendSuccess(res, channel, "Channel retrieved successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error);
     }
   };
@@ -82,7 +82,7 @@ export class ChannelsController extends BaseController implements Controller {
       const channel = await this.channelsService.createGroupChannel(authUserId, { name, memberIds });
 
       this.sendSuccess(res, channel, "Group channel created successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error);
     }
   };
@@ -99,7 +99,7 @@ export class ChannelsController extends BaseController implements Controller {
       });
 
       this.sendSuccess(res, channel, "Group channel updated successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error);
     }
   };

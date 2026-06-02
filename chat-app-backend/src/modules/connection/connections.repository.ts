@@ -55,14 +55,15 @@ export class ConnectionsRepository {
       });
 
       const hasMore = connections.length === limit;
-      const nextCursor = hasMore ? connections[connections.length - 1]?.updatedAt?.toISOString() : null;
+      const lastItem = connections[connections.length - 1];
+      const nextCursor = hasMore && lastItem ? lastItem.updatedAt.toISOString() : null;
 
       return {
         contacts: contacts,
         hasMore,
-        nextCursor: nextCursor || null,
+        nextCursor: nextCursor ?? null,
       };
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve connection contacts.");
     }
   }
@@ -87,7 +88,7 @@ export class ConnectionsRepository {
       const connections = await this.db.connection.findMany({
         where: {
           senderId: authUserId,
-          ...(status && { status }), // Optional status filter (e.g., PENDING or ACCEPTED)
+          status,
           ...(cursor ? { updatedAt: { lt: new Date(cursor) } } : {}),
         },
         include: {
@@ -114,14 +115,15 @@ export class ConnectionsRepository {
       }));
 
       const hasMore = connections.length === limit;
-      const nextCursor = hasMore ? connections[connections.length - 1]?.updatedAt?.toISOString() : null;
+      const lastItem = connections[connections.length - 1];
+      const nextCursor = hasMore && lastItem ? lastItem.updatedAt.toISOString() : null;
 
       return {
         connections: sentConnections,
         hasMore,
-        nextCursor: nextCursor || null,
+        nextCursor: nextCursor ?? null,
       };
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve sent connection requests.");
     }
   }
@@ -145,7 +147,7 @@ export class ConnectionsRepository {
       const connections = await this.db.connection.findMany({
         where: {
           receiverId: authUserId,
-          ...(status && { status }),
+          status,
           ...(cursor ? { updatedAt: { lt: new Date(cursor) } } : {}),
         },
         include: {
@@ -172,14 +174,15 @@ export class ConnectionsRepository {
       }));
 
       const hasMore = connections.length === limit;
-      const nextCursor = hasMore ? connections[connections.length - 1]?.updatedAt?.toISOString() : null;
+      const lastItem = connections[connections.length - 1];
+      const nextCursor = hasMore && lastItem ? lastItem.updatedAt.toISOString() : null;
 
       return {
         connections: receivedConnections,
         hasMore,
-        nextCursor: nextCursor || null,
+        nextCursor: nextCursor ?? null,
       };
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve received connection requests.");
     }
   }
@@ -233,7 +236,7 @@ export class ConnectionsRepository {
       });
 
       return result;
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to send connection request.");
     }
   }
@@ -286,7 +289,7 @@ export class ConnectionsRepository {
           notification,
         };
       });
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to accept connection request.");
     }
   }
@@ -331,7 +334,7 @@ export class ConnectionsRepository {
           },
         }),
       ]);
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to decline connection request.");
     }
   }
@@ -375,7 +378,7 @@ export class ConnectionsRepository {
           },
         }),
       ]);
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to cancel connection request.");
     }
   }

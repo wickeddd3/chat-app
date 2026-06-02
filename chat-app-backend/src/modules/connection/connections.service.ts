@@ -25,7 +25,7 @@ export class ConnectionsService {
   }): Promise<PaginatedContacts> {
     try {
       return await this.connectionsRepository.getUserContacts({ authUserId, limit, cursor, query });
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve connection contacts.");
     }
   }
@@ -43,7 +43,7 @@ export class ConnectionsService {
   }): Promise<PaginatedConnections> {
     try {
       return await this.connectionsRepository.getSentConnections({ authUserId, limit, cursor, status });
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve sent connection requests.");
     }
   }
@@ -61,7 +61,7 @@ export class ConnectionsService {
   }): Promise<PaginatedConnections> {
     try {
       return await this.connectionsRepository.getReceivedConnections({ authUserId, limit, cursor, status });
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to retrieve received connection requests.");
     }
   }
@@ -73,7 +73,7 @@ export class ConnectionsService {
       this.dispatcher.emit("notification:created", result.notification);
 
       return result;
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to send connection request.");
     }
   }
@@ -85,25 +85,25 @@ export class ConnectionsService {
       this.dispatcher.emit("notification:created", result.notification);
 
       return result;
-    } catch (error) {
+    } catch {
       throw new HttpException(500, "Failed to accept connection request.");
     }
   }
 
-  public async declineRequest(receiverId: string, connectionId: string): Promise<void> {
+  public async declineRequest(receiverId: string, connectionId: string): Promise<string> {
     try {
       await this.connectionsRepository.declineRequest(receiverId, connectionId);
-      return;
-    } catch (error) {
+      return connectionId;
+    } catch {
       throw new HttpException(500, "Failed to decline connection request.");
     }
   }
 
-  public async cancelRequest(senderId: string, connectionId: string): Promise<void> {
+  public async cancelRequest(senderId: string, connectionId: string): Promise<string> {
     try {
       await this.connectionsRepository.cancelRequest(senderId, connectionId);
-      return;
-    } catch (error) {
+      return connectionId;
+    } catch {
       throw new HttpException(500, "Failed to cancel connection request.");
     }
   }

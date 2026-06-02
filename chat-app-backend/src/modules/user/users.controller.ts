@@ -24,13 +24,13 @@ export class UsersController extends BaseController implements Controller {
 
   private getSuggestedUsers = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authUserId = req.user?.id || "";
+      const authUserId = req.user?.id ?? "";
       const limit = 20;
       const query = (req.query.query as string) || "";
       const responseData = await this.usersService.getSuggestedUsers({ authUserId, limit, query });
 
       this.sendSuccess(res, responseData, "Suggested users fetched successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Directly triggers errorMiddleware instantly
       next(error);
     }
@@ -46,7 +46,7 @@ export class UsersController extends BaseController implements Controller {
       }
 
       this.sendSuccess(res, user, "User profile retrieved successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       next(error);
     }
   };

@@ -1,8 +1,8 @@
-import { Socket } from "socket.io";
+import type { Socket } from "socket.io";
 import type { User } from "@/prisma/client";
 
-export interface WebSocketCommand {
+export interface WebSocketCommand<TPayload = any> {
   readonly eventName: string;
 
-  execute(socket: Socket, user: User, data: any): Promise<void> | void;
+  execute(socket: Socket, user: User, data: TPayload): Promise<void> | void;
 }
