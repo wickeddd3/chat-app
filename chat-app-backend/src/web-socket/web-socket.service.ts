@@ -3,6 +3,7 @@ import { TYPES } from "@/config/types";
 import { Server as SocketServer, type Socket } from "socket.io";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import { redisClient } from "@/lib/redis";
+import type { User } from "@/prisma/client";
 
 @injectable()
 export class WebSocketService {
@@ -25,19 +26,20 @@ export class WebSocketService {
   public start(): void {
     this.webSocketServer.on("connection", (socket: Socket) => {
       // User payload context established by socketAuthMiddleware guard
-      const user = socket.data.user;
+      const socketData = socket.data as { user: User };
+      const user = socketData.user;
       console.log(`🟩 Connected: ${user.name} (${socket.id})`);
 
       // Join a private notification room unique to this specific user profile instance
-      socket.join(`user:${user.id}`);
+      void socket.join(`user:${user.id}`);
 
       // Emit the current list of online users directly to this newly connected client
-      this.syncOnlinePresence(socket);
+      void this.syncOnlinePresence(socket);
 
       // DYNAMIC COMMAND ROUTER LOOP
       // Listen for incoming triggers from the registry map dynamically
       for (const [eventName, command] of this.commandRegistry.entries()) {
-        socket.on(eventName, async (data) => {
+        socket.on(eventName, async (data: unknown) => {
           try {
             await command.execute(socket, user, data);
           } catch (error) {

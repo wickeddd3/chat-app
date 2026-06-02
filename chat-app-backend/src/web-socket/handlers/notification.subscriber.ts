@@ -2,10 +2,11 @@ import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import type { Notification } from "@/prisma/client";
 import notepack from "notepack.io";
+import type { Redis } from "ioredis";
 
 @injectable()
 export class NotificationSubscriber {
-  constructor(@inject(TYPES.RedisClient) private pubClient: any) {}
+  constructor(@inject(TYPES.RedisClient) private pubClient: Redis) {}
 
   /**
    * Orchestrates the direct serialization into the raw Socket.io Redis adapter format
@@ -29,7 +30,7 @@ export class NotificationSubscriber {
       ];
 
       // Encode the protocol mapping package structure to binary MessagePack format
-      const binaryPayload = notepack.encode(packet);
+      const binaryPayload = notepack.encode(packet) as Buffer;
 
       // Publish directly into the Socket.io adapter cluster bus channel
       await this.pubClient.publish("socket.io#/#", binaryPayload);
