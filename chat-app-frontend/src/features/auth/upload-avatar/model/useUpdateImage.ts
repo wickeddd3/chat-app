@@ -1,11 +1,20 @@
 import { authClient } from "@/shared/lib/better-auth.client";
 
 export function useUpdateImage() {
-  const updateImage = async ({ image }: { image: string }): Promise<any> => {
-    const response = await authClient.updateUser({
+  const updateImage = async ({
+    image,
+  }: {
+    image: string;
+  }): Promise<{ success: boolean; error?: string }> => {
+    const { error } = await authClient.updateUser({
       image,
     });
-    return response;
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
   };
 
   return { updateImage };
