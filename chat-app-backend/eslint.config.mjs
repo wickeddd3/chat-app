@@ -6,7 +6,7 @@ import eslintConfigPrettier from "eslint-config-prettier";
 export default tseslint.config(
   { ignores: ["node_modules", "dist", "prisma/generated"] },
   {
-    files: ["**/*.ts"],
+    files: ["**/*.ts"], // Apply these rules only to TypeScript files
     extends: [
       eslintjs.configs.recommended,
       ...tseslint.configs.strictTypeChecked, // Upgraded from recommended to strict typechecking
@@ -40,6 +40,7 @@ export default tseslint.config(
       "n/no-missing-import": "off", // Handled natively by modern TypeScript moduleResolution configurations
       "n/no-process-exit": "error", // Blocks dangerous process kills that bypass graceful server shutdowns
       "n/global-require": "error", // Forces standardized static top-level ES6 import bindings
+      "n/no-unpublished-import": "off", // Allows importing of devDependencies for testing and seeding scripts without false positives
     },
   },
   // MUST BE LAST: Disables all stylistic ESLint rules that conflict with Prettier
