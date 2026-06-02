@@ -25,7 +25,7 @@ export default function ChatRoomPage() {
       return !!otherUser;
     }
     return false;
-  }, [channel, authId, onlineUsers]);
+  }, [channel, authId, onlineUsers, isOnline]);
 
   return (
     <div className="flex-1 flex flex-col h-full w-full bg-background">

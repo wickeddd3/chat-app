@@ -8,7 +8,7 @@ export function ChannelMember({ member }: { member: ChannelMemberType }) {
 
   const online = useMemo(() => {
     return isOnline(member.user.id);
-  }, [member, onlineUsers]);
+  }, [member, onlineUsers, isOnline]);
 
   return (
     <div

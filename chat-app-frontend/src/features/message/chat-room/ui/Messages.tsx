@@ -24,7 +24,7 @@ export function Messages({
   // items cleanly expand backwards into negative relative index coordinates.
   const firstItemIndex = useMemo(
     () => maxIndex - messages.length,
-    [messages.length],
+    [messages.length, maxIndex],
   );
 
   return (

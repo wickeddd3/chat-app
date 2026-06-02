@@ -23,7 +23,7 @@ export function MessageHeader({
       return !!otherUser;
     }
     return false;
-  }, [channel, authId, onlineUsers]);
+  }, [channel, authId, onlineUsers, isOnline]);
 
   return (
     <div className="w-full py-5 px-4">
