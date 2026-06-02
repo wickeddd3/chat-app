@@ -4,12 +4,13 @@ import { ConnectionsRepository } from "./connections.repository";
 import type { ConnectionStatus } from "@/prisma/client";
 import type { ConnectionRequestResponse, PaginatedConnections, PaginatedContacts } from "./connections.types";
 import { HttpException } from "@/utils/http.exception";
+import { EventEmitter } from "events";
 
 @injectable()
 export class ConnectionsService {
   constructor(
     @inject(TYPES.ConnectionsRepository) private connectionsRepository: ConnectionsRepository,
-    @inject(TYPES.EventDispatcher) private dispatcher: any,
+    @inject(TYPES.EventDispatcher) private dispatcher: EventEmitter,
   ) {}
 
   public async getUserContacts({

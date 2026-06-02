@@ -24,7 +24,7 @@ export class MessagesController extends BaseController implements Controller {
     try {
       const channelId = req.params.channelId as string;
       const limit = 20;
-      const cursor = req?.query?.cursor as string;
+      const cursor = typeof req.query.cursor === "string" ? req.query.cursor : "";
 
       const { messages, nextCursor, hasMore } = await this.messagesService.getMessages({
         channelId: parseInt(channelId),

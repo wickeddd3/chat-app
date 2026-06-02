@@ -82,7 +82,8 @@ export class ChannelsRepository {
       });
 
       const hasMore = channels.length === limit;
-      const nextCursor = hasMore ? channels[channels.length - 1]?.updatedAt?.toISOString() : null;
+      const lastItem = channels[channels.length - 1];
+      const nextCursor = hasMore && lastItem ? lastItem.updatedAt.toISOString() : null;
 
       return {
         channels,

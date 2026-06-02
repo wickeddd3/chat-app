@@ -88,7 +88,7 @@ export class MessagesRepository {
     try {
       const messages = await this.db.message.findMany({
         where: {
-          channelId: Number(channelId),
+          channelId: channelId,
           authorId: { not: userId },
           readBy: { none: { userId } },
         },

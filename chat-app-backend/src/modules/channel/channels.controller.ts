@@ -27,10 +27,10 @@ export class ChannelsController extends BaseController implements Controller {
 
   private getChannels = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authUserId = req?.user?.id || "";
+      const authUserId = req.user?.id ?? "";
       const limit = 20;
-      const cursor = (req.query.cursor as string) || "";
-      const query = (req.query.query as string) || "";
+      const cursor = typeof req.query.cursor === "string" ? req.query.cursor : "";
+      const query = typeof req.query.query === "string" ? req.query.query : "";
 
       const data = await this.channelsService.getChannels({ authUserId, limit, cursor, query });
 
@@ -49,8 +49,8 @@ export class ChannelsController extends BaseController implements Controller {
 
   private getChannel = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authUserId = req.user?.id || "";
-      const channelId = req.params.channelId as string;
+      const authUserId = req.user?.id ?? "";
+      const channelId = typeof req.params.channelId === "string" ? req.params.channelId : "";
       const channel = await this.channelsService.getChannel(authUserId, parseInt(channelId));
 
       const transformedChannel = channel ? channelToChannelDetails(channel, authUserId) : null;
@@ -63,8 +63,8 @@ export class ChannelsController extends BaseController implements Controller {
 
   private findChannelOrCreate = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authUserId = req.user?.id || "";
-      const targetUserId = req.params.targetUserId as string;
+      const authUserId = req.user?.id ?? "";
+      const targetUserId = typeof req.params.targetUserId === "string" ? req.params.targetUserId : "";
 
       const channel = await this.channelsService.findChannelOrCreate(authUserId, targetUserId);
 
@@ -76,8 +76,10 @@ export class ChannelsController extends BaseController implements Controller {
 
   private createGroupChannel = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authUserId = req.user?.id || "";
-      const { name, memberIds } = req.body;
+      const authUserId = req.user?.id ?? "";
+      const body = req.body as { name?: unknown; memberIds?: unknown };
+      const name = typeof body.name === "string" ? body.name : "";
+      const memberIds = Array.isArray(body.memberIds) ? (body.memberIds as string[]) : [];
 
       const channel = await this.channelsService.createGroupChannel(authUserId, { name, memberIds });
 
@@ -89,9 +91,11 @@ export class ChannelsController extends BaseController implements Controller {
 
   private updateGroupChannel = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authUserId = req.user?.id || "";
-      const channelId = req.params.channelId as string;
-      const { name, memberIds } = req.body;
+      const authUserId = req.user?.id ?? "";
+      const channelId = typeof req.params.channelId === "string" ? req.params.channelId : "";
+      const body = req.body as { name?: unknown; memberIds?: unknown };
+      const name = typeof body.name === "string" ? body.name : "";
+      const memberIds = Array.isArray(body.memberIds) ? (body.memberIds as string[]) : [];
 
       const channel = await this.channelsService.updateGroupChannel(authUserId, parseInt(channelId), {
         name,
