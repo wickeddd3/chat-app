@@ -22,7 +22,7 @@ const http: AxiosInstance = axios.create({
 // Request Interceptor
 http.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => config,
-  (error) => Promise.reject(error),
+  (error: unknown) => Promise.reject(error),
 );
 
 // Response Interceptor
@@ -51,30 +51,30 @@ http.interceptors.response.use(
  * Exposes generic HTTP methods that forward structural type matrices to Axios.
  */
 export const apiRequest = {
-  get: <T = any>(
+  get: <T = unknown>(
     url: string,
     config: AxiosRequestConfig = {},
   ): Promise<AxiosResponse<T>> => http.get<T>(url, config),
 
-  post: <T = any>(
+  post: <T = unknown>(
     url: string,
     data?: RequestData,
     config: AxiosRequestConfig = {},
   ): Promise<AxiosResponse<T>> => http.post<T>(url, data, config),
 
-  put: <T = any>(
+  put: <T = unknown>(
     url: string,
     data?: RequestData,
     config: AxiosRequestConfig = {},
   ): Promise<AxiosResponse<T>> => http.put<T>(url, data, config),
 
-  patch: <T = any>(
+  patch: <T = unknown>(
     url: string,
     data?: RequestData,
     config: AxiosRequestConfig = {},
   ): Promise<AxiosResponse<T>> => http.patch<T>(url, data, config),
 
-  delete: <T = any>(
+  delete: <T = unknown>(
     url: string,
     config: AxiosRequestConfig = {},
   ): Promise<AxiosResponse<T>> => http.delete<T>(url, config),
