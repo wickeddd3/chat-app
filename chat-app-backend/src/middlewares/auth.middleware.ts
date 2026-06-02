@@ -16,11 +16,11 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     }
 
     // Attach the user to the request object for use in controllers
-    (req as any).user = session.user;
-    (req as any).session = session.session;
+    req.user = session.user;
+    req.session = session.session;
 
     next();
-  } catch (error) {
+  } catch {
     next(new HttpException(401, "Authentication failed"));
   }
 };

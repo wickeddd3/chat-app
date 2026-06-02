@@ -1,9 +1,9 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { BaseController } from "@/utils/base.controller";
-import { Controller, ControllerRequest } from "@/interfaces/controller.interface";
+import { Controller } from "@/interfaces/controller.interface";
 import { NotificationsService } from "./notifications.service";
-import { type NextFunction, type Response, Router } from "express";
+import { Router, type Request, type Response, type NextFunction } from "express";
 import { authMiddleware } from "@/middlewares/auth.middleware";
 
 @injectable()
@@ -21,7 +21,7 @@ export class NotificationsController extends BaseController implements Controlle
     this.router.post(`${this.path}/mark-as-read`, [authMiddleware], this.markAsRead);
   }
 
-  private getNotifications = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+  private getNotifications = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.user?.id ?? "";
       const limit = 20;
@@ -43,7 +43,7 @@ export class NotificationsController extends BaseController implements Controlle
     }
   };
 
-  private markAsRead = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+  private markAsRead = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.user?.id ?? "";
       const body = req.body as { notificationIds?: unknown };

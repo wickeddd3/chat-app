@@ -1,9 +1,9 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { BaseController } from "@/utils/base.controller";
-import { Controller, ControllerRequest } from "@/interfaces/controller.interface";
+import { Controller } from "@/interfaces/controller.interface";
 import { UsersService } from "./users.service";
-import { type NextFunction, type Response, Router } from "express";
+import { Router, type Request, type Response, type NextFunction } from "express";
 import { authMiddleware } from "@/middlewares/auth.middleware";
 import { NotFoundException } from "@/utils/http.exception";
 
@@ -22,7 +22,7 @@ export class UsersController extends BaseController implements Controller {
     this.router.get(`${this.path}/profile/:username`, [authMiddleware], this.getUserByUsername);
   }
 
-  private getSuggestedUsers = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+  private getSuggestedUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.user?.id ?? "";
       const limit = 20;
@@ -36,7 +36,7 @@ export class UsersController extends BaseController implements Controller {
     }
   };
 
-  private getUserByUsername = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+  private getUserByUsername = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const username = req.params.username as string;
       const user = await this.usersService.getUserByUsername(username);

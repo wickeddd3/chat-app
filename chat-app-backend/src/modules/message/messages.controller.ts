@@ -1,9 +1,9 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { BaseController } from "@/utils/base.controller";
-import { Controller, ControllerRequest } from "@/interfaces/controller.interface";
+import { Controller } from "@/interfaces/controller.interface";
 import { MessagesService } from "./messages.service";
-import { type NextFunction, type Response, Router } from "express";
+import { Router, type Request, type Response, type NextFunction } from "express";
 import { authMiddleware } from "@/middlewares/auth.middleware";
 
 @injectable()
@@ -20,7 +20,7 @@ export class MessagesController extends BaseController implements Controller {
     this.router.get(`${this.path}/:channelId`, [authMiddleware], this.getMessages);
   }
 
-  private getMessages = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+  private getMessages = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const channelId = req.params.channelId as string;
       const limit = 20;

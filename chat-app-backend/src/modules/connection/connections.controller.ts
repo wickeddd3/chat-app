@@ -1,9 +1,9 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { BaseController } from "@/utils/base.controller";
-import { Controller, ControllerRequest } from "@/interfaces/controller.interface";
+import { Controller } from "@/interfaces/controller.interface";
 import { ConnectionsService } from "./connections.service";
-import { type NextFunction, type Response, Router } from "express";
+import { Router, type Request, type Response, type NextFunction } from "express";
 import { authMiddleware } from "@/middlewares/auth.middleware";
 
 @injectable()
@@ -26,7 +26,7 @@ export class ConnectionsController extends BaseController implements Controller 
     this.router.post(`${this.path}/request/:id/cancel`, [authMiddleware], this.cancelRequest);
   }
 
-  private getUserContacts = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+  private getUserContacts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = req.user?.id ?? "";
       const limit = 20;
@@ -50,7 +50,7 @@ export class ConnectionsController extends BaseController implements Controller 
     }
   };
 
-  private getSentConnections = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+  private getSentConnections = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = req.user?.id ?? "";
       const limit = 20;
@@ -73,7 +73,7 @@ export class ConnectionsController extends BaseController implements Controller 
     }
   };
 
-  private getReceivedConnections = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+  private getReceivedConnections = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = req.user?.id ?? "";
       const limit = 20;
@@ -95,7 +95,7 @@ export class ConnectionsController extends BaseController implements Controller 
     }
   };
 
-  private sendRequest = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+  private sendRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = req.user?.id ?? "";
       const body = req.body as { receiverId?: unknown };
@@ -109,7 +109,7 @@ export class ConnectionsController extends BaseController implements Controller 
     }
   };
 
-  private acceptRequest = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+  private acceptRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = req.user?.id ?? "";
       const connectionId = typeof req.params.id === "string" ? req.params.id : "";
@@ -122,7 +122,7 @@ export class ConnectionsController extends BaseController implements Controller 
     }
   };
 
-  private declineRequest = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+  private declineRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = req.user?.id ?? "";
       const connectionId = typeof req.params.id === "string" ? req.params.id : "";
@@ -135,7 +135,7 @@ export class ConnectionsController extends BaseController implements Controller 
     }
   };
 
-  private cancelRequest = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
+  private cancelRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = req.user?.id ?? "";
       const connectionId = typeof req.params.id === "string" ? req.params.id : "";
