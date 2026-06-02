@@ -4,12 +4,12 @@ import type {
 } from "@/entities/notification";
 import apiRequest from "@/shared/lib/axios.client";
 import type { ApiResponse } from "@/shared/types/api-response.type";
-import { toQueryParams } from "@/shared/utils/query-params";
+import { toQueryParams, type QueryParams } from "@/shared/utils/query-params";
 
 export async function getNotificationsApi({
   params,
 }: {
-  params: Record<string, any>;
+  params: QueryParams;
 }): Promise<PaginatedNotifications> {
   const queryParams = toQueryParams(params);
   const url = `/api/notifications${queryParams}`;

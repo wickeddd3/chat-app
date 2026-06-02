@@ -1,12 +1,12 @@
 import type { InboxChannel, PaginatedInboxChannel } from "@/entities/channel";
 import apiRequest from "@/shared/lib/axios.client";
 import type { ApiResponse } from "@/shared/types/api-response.type";
-import { toQueryParams } from "@/shared/utils/query-params";
+import { toQueryParams, type QueryParams } from "@/shared/utils/query-params";
 
 export async function getInboxApi({
   params,
 }: {
-  params: Record<string, any>;
+  params: QueryParams;
 }): Promise<PaginatedInboxChannel> {
   const queryParams = toQueryParams(params);
   const url = `/api/channels${queryParams}`;
