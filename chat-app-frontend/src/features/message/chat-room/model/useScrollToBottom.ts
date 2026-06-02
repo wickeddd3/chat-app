@@ -16,7 +16,7 @@ export function useScrollToBottom({ messages }: { messages: Message[] }) {
   const liveMessageTrackerKey = useMemo(() => {
     if (!lastMessage) return "";
     // Fallback chain handles: real ID, optimistic clientId, or a text chunk fallback
-    const uniqueId = lastMessage.id || (lastMessage as any).clientId || "";
+    const uniqueId = lastMessage.id || (lastMessage as Message).clientId || "";
     return `${uniqueId}-${lastMessage.createdAt}`;
   }, [lastMessage]);
 

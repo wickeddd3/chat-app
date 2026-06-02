@@ -15,9 +15,6 @@ export function useChatNavigation(): {
     onSuccess: (channel: Channel) => {
       navigate(`/messages/${channel.id}`);
     },
-    onError: (error) => {
-      console.error("Failed to retrieve user channel:", error);
-    },
   });
 
   return {

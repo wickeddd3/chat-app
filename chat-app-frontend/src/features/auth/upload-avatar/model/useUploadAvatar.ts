@@ -50,8 +50,7 @@ export function useUploadAvatar({ userId }: { userId: string }) {
       toast.success("Profile avatar uploaded successfully", {
         position: "bottom-right",
       });
-    } catch (error) {
-      console.error("Error uploading avatar:", error);
+    } finally {
       setIsUploading(false);
     }
   };

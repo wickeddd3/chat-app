@@ -11,7 +11,7 @@ import {
 } from "../model/schema";
 import { useUpdateGroupChannel } from "../model/useUpdateGroupChannel";
 import type { InboxChannel } from "@/entities/channel";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useAuth } from "@/entities/auth";
 
 export function GroupChannelForm({
@@ -40,20 +40,23 @@ export function GroupChannelForm({
     onSuccess?.();
   }
 
-  function setCurrentValues(channel: InboxChannel, authId: string) {
-    const name = channel.name;
-    const memberIds = channel.channelMembers
-      .filter((m) => m.user.id !== authId)
-      .map((m) => m.user.id);
-    form.reset({
-      name,
-      memberIds,
-    });
-  }
+  const setCurrentValues = useCallback(
+    (channel: InboxChannel, authId: string) => {
+      const name = channel.name;
+      const memberIds = channel.channelMembers
+        .filter((m) => m.user.id !== authId)
+        .map((m) => m.user.id);
+      form.reset({
+        name,
+        memberIds,
+      });
+    },
+    [form],
+  );
 
   useEffect(() => {
     setCurrentValues(channel, authId || "");
-  }, [channel, authId]);
+  }, [channel, authId, setCurrentValues]);
 
   return (
     <form
