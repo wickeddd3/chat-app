@@ -36,14 +36,16 @@ export function SignInForm({
   const { login } = useSignIn();
 
   async function onSubmit(data: SignInFormSchemaType) {
-    const response = await login(data);
-    if (response.error) {
+    const { success, error } = await login(data);
+
+    if (!success) {
       toast.error("Login Failed", {
-        description: "Invalid email or password",
+        description: error || "Invalid email or password",
         position: "bottom-right",
       });
       return;
     }
+
     toast.success("Login Successful", {
       position: "bottom-right",
     });

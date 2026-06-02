@@ -21,12 +21,11 @@ export function PasswordForm() {
   const { updatePassword } = usePassword();
 
   async function onSubmit(data: PasswordFormSchemaType) {
-    const response = await updatePassword(data);
+    const { success, error } = await updatePassword(data);
 
-    if (response.error) {
+    if (!success) {
       toast.error("Password update failed", {
-        description:
-          response?.error?.message || "Error occurred while updating password",
+        description: error || "Error occurred while updating password",
         position: "bottom-right",
       });
       return;

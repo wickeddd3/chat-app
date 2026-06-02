@@ -17,12 +17,11 @@ export function EmailForm({ email }: { email: string }) {
   const { updateEmail } = useEmail();
 
   async function onSubmit(data: EmailFormSchemaType) {
-    const response = await updateEmail(data);
+    const { success, error } = await updateEmail(data);
 
-    if (response.error) {
+    if (!success) {
       toast.error("Email update failed", {
-        description:
-          response?.error?.message || "Error occurred while updating email",
+        description: error || "Error occurred while updating email",
         position: "bottom-right",
       });
       return;
@@ -37,7 +36,7 @@ export function EmailForm({ email }: { email: string }) {
     form.reset({
       email: email,
     });
-  }, [email]);
+  }, [email, form]);
 
   return (
     <form id="email-form" onSubmit={form.handleSubmit(onSubmit)}>

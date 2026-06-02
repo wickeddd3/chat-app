@@ -5,18 +5,12 @@ import { useNavigate } from "react-router";
 export function useSignUp() {
   const navigate = useNavigate();
 
-  const register = async ({
-    email,
-    username,
-    password,
-    name,
-  }: SignUpFormSchemaType): Promise<any> => {
-    const response = await authClient.signUp.email(
+  const register = async (
+    values: SignUpFormSchemaType,
+  ): Promise<{ success: boolean; error?: string }> => {
+    const { error } = await authClient.signUp.email(
       {
-        email,
-        username,
-        password,
-        name,
+        ...values,
         callbackURL: "/messages",
       },
       {
@@ -25,7 +19,12 @@ export function useSignUp() {
         },
       },
     );
-    return response;
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
   };
 
   return { register };

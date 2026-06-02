@@ -2,16 +2,19 @@ import { authClient } from "@/shared/lib/better-auth.client";
 import type { SignInFormSchemaType } from "./schema";
 
 export function useSignIn() {
-  const login = async ({
-    email,
-    password,
-  }: SignInFormSchemaType): Promise<any> => {
-    const response = await authClient.signIn.email({
-      email,
-      password,
+  const login = async (
+    values: SignInFormSchemaType,
+  ): Promise<{ success: boolean; error?: string }> => {
+    const { error } = await authClient.signIn.email({
+      ...values,
       callbackURL: "/messages",
     });
-    return response;
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
   };
 
   return { login };

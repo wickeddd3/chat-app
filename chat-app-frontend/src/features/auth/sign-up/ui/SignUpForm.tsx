@@ -39,14 +39,16 @@ export function SignUpForm({
   const { register } = useSignUp();
 
   async function onSubmit(data: SignUpFormSchemaType) {
-    const response = await register(data);
-    if (response.error) {
+    const { success, error } = await register(data);
+
+    if (!success) {
       toast.error("Account creation failed", {
-        description: "Error occurred while creating account",
+        description: error || "Error occurred while creating account",
         position: "bottom-right",
       });
       return;
     }
+
     toast.success("Account created successfully", {
       position: "bottom-right",
     });

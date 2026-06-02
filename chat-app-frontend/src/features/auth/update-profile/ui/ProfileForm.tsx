@@ -24,12 +24,11 @@ export function ProfileForm({
   const { updateUser } = useProfile();
 
   async function onSubmit(data: ProfileFormSchemaType) {
-    const response = await updateUser(data);
+    const { success, error } = await updateUser(data);
 
-    if (response.error) {
+    if (!success) {
       toast.error("Profile update failed", {
-        description:
-          response?.error?.message || "Error occurred while updating profile",
+        description: error || "Error occurred while updating profile",
         position: "bottom-right",
       });
       return;
@@ -45,7 +44,7 @@ export function ProfileForm({
       name: name,
       username: username,
     });
-  }, [name, username]);
+  }, [name, username, form]);
 
   return (
     <form id="profile-form" onSubmit={form.handleSubmit(onSubmit)}>
