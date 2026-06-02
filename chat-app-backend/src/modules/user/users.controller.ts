@@ -18,7 +18,7 @@ export class UsersController extends BaseController implements Controller {
   }
 
   private initializeRoutes(): void {
-    this.router.get(`${this.path}`, [authMiddleware], this.getSuggestedUsers);
+    this.router.get(this.path, [authMiddleware], this.getSuggestedUsers);
     this.router.get(`${this.path}/profile/:username`, [authMiddleware], this.getUserByUsername);
   }
 
@@ -26,7 +26,7 @@ export class UsersController extends BaseController implements Controller {
     try {
       const authUserId = req.user?.id || "";
       const limit = 20;
-      const query = (req.query["query"] as string) || "";
+      const query = (req.query.query as string) || "";
       const responseData = await this.usersService.getSuggestedUsers({ authUserId, limit, query });
 
       this.sendSuccess(res, responseData, "Suggested users fetched successfully");

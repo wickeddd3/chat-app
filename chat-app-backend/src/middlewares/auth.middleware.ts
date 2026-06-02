@@ -11,7 +11,8 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     });
 
     if (!session) {
-      return next(new HttpException(401, "Unauthorized: Please log in."));
+      next(new HttpException(401, "Unauthorized: Please log in."));
+      return;
     }
 
     // Attach the user to the request object for use in controllers

@@ -10,7 +10,8 @@ export const socketAuthMiddleware = async (socket: Socket, next: (err?: Extended
     });
 
     if (!session) {
-      return next(new Error("Unauthorized: Please log in."));
+      next(new Error("Unauthorized: Please log in."));
+      return;
     }
 
     // Attach user info to socket data

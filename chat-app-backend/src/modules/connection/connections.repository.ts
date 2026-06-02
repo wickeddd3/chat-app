@@ -245,7 +245,7 @@ export class ConnectionsRepository {
           where: { id: connectionId },
         });
 
-        if (!connection || connection.receiverId !== receiverId) {
+        if (connection?.receiverId !== receiverId) {
           throw new Error("Unauthorized or invalid connection record");
         }
 

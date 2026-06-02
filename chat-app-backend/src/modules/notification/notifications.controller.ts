@@ -17,13 +17,13 @@ export class NotificationsController extends BaseController implements Controlle
   }
 
   private initializeRoutes(): void {
-    this.router.get(`${this.path}`, [authMiddleware], this.getNotifications);
+    this.router.get(this.path, [authMiddleware], this.getNotifications);
     this.router.post(`${this.path}/mark-as-read`, [authMiddleware], this.markAsRead);
   }
 
   private getNotifications = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authUserId = (req.user?.id as string) || "";
+      const authUserId = req.user?.id! || "";
       const limit = 20;
       const cursor = req?.query?.cursor as string;
 
@@ -45,7 +45,7 @@ export class NotificationsController extends BaseController implements Controlle
 
   private markAsRead = async (req: ControllerRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authUserId = (req.user?.id as string) || "";
+      const authUserId = req.user?.id! || "";
       const notificationIds = (req?.body?.notificationIds as string[]) || [];
       const notifications = await this.notificationsService.markAsRead({
         userId: authUserId,

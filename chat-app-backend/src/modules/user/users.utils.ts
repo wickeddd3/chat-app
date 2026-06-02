@@ -54,16 +54,16 @@ export function transformUsersIntoSuggestedUsers({
     if (combined) {
       if (combined.status === "ACCEPTED") {
         connectionStatus = "CONTACT";
-      } else if (outbound && outbound.status === "PENDING") {
+      } else if (outbound?.status === "PENDING") {
         connectionStatus = "PENDING_SENT";
-      } else if (inbound && inbound.status === "PENDING") {
+      } else if (inbound?.status === "PENDING") {
         connectionStatus = "PENDING_RECEIVED";
       }
     }
 
     // Calculate mutual score count match for the specific target user mapping
     const mutualCount = isInitialLoad
-      ? suggestedUserIds.indexOf(user.id) !== -1
+      ? suggestedUserIds.includes(user.id)
         ? suggestedUserIds.indexOf(user.id) + 1
         : 0
       : 0;

@@ -18,7 +18,7 @@ export class ChannelsController extends BaseController implements Controller {
   }
 
   private initializeRoutes(): void {
-    this.router.get(`${this.path}`, [authMiddleware], this.getChannels);
+    this.router.get(this.path, [authMiddleware], this.getChannels);
     this.router.get(`${this.path}/:channelId`, [authMiddleware], this.getChannel);
     this.router.get(`${this.path}/find/:targetUserId`, [authMiddleware], this.findChannelOrCreate);
     this.router.post(`${this.path}/group`, [authMiddleware], this.createGroupChannel);
@@ -29,8 +29,8 @@ export class ChannelsController extends BaseController implements Controller {
     try {
       const authUserId = req?.user?.id || "";
       const limit = 20;
-      const cursor = (req.query["cursor"] as string) || "";
-      const query = (req.query["query"] as string) || "";
+      const cursor = (req.query.cursor as string) || "";
+      const query = (req.query.query as string) || "";
 
       const data = await this.channelsService.getChannels({ authUserId, limit, cursor, query });
 
