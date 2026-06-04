@@ -23,7 +23,7 @@ export function useAcceptConnection(): {
       acceptConnectionRequestApi(connectionId),
     onMutate: (connectionId, context) =>
       optimisticUpdate(connectionId, context),
-    onError: (err, connectionId, onMutateResult, context) => {
+    onError: (_err, _connectionId, onMutateResult, context) => {
       // Rollback to previous state on failure
       if (onMutateResult?.previousRequests) {
         context.client.setQueryData(queryKey, onMutateResult.previousRequests);
@@ -33,11 +33,11 @@ export function useAcceptConnection(): {
         position: "bottom-right",
       });
     },
-    onSettled: (data, error, variables, onMutateResult, context) => {
+    onSettled: (_data, _error, _variables, _onMutateResult, context) => {
       // Invalidate to synchronize completely with DB
       context.client.invalidateQueries({ queryKey });
     },
-    onSuccess: (data, variables, onMutate, context) => {
+    onSuccess: (data, _variables, _onMutate, context) => {
       toast.success("Connection request accepted", {
         position: "bottom-right",
       });

@@ -24,7 +24,7 @@ export function useReceivedConnectionRequests(): {
     queryFn: ({ pageParam }) =>
       receivedConnectionRequestsApi({
         params: {
-          cursor: pageParam,
+          cursor: pageParam as string | number | null,
         },
       }),
     initialPageParam: null,

@@ -23,7 +23,7 @@ export function useSendConnection(): {
   const { mutate, isPending, error } = useMutation({
     mutationFn: (formData: SendConnectionRequestData) =>
       sendConnectionRequestApi(formData),
-    onSuccess: (data, variables, onMutate, context) => {
+    onSuccess: (data, _variables, _onMutate, context) => {
       toast.success("Connection request sent", {
         position: "bottom-right",
       });

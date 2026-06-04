@@ -17,7 +17,7 @@ export function useCancelConnection(): {
       cancelConnectionRequestApi(connectionId),
     onMutate: (connectionId, context) =>
       optimisticUpdate(connectionId, context),
-    onError: (err, connectionId, onMutateResult, context) => {
+    onError: (_err, _connectionId, onMutateResult, context) => {
       // Rollback to previous state on failure
       if (onMutateResult?.previousRequests) {
         context.client.setQueryData(queryKey, onMutateResult.previousRequests);
@@ -27,7 +27,7 @@ export function useCancelConnection(): {
         position: "bottom-right",
       });
     },
-    onSettled: (data, error, variables, onMutateResult, context) => {
+    onSettled: (_data, _error, _variables, _onMutateResult, context) => {
       // Invalidate to synchronize completely with DB
       context.client.invalidateQueries({ queryKey });
     },

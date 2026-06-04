@@ -24,7 +24,7 @@ export function useSentConnectionRequests(): {
     queryFn: ({ pageParam }) =>
       sentConnectionRequestsApi({
         params: {
-          cursor: pageParam,
+          cursor: pageParam as string | number | null,
         },
       }),
     initialPageParam: null,
