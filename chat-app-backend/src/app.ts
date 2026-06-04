@@ -74,7 +74,7 @@ export class App {
 
   private initializeAuth(): void {
     // Better-auth route for authentication
-    this.express.all("/api/auth/*splat", toNodeHandler(auth));
+    this.express.all("/api/auth/*", toNodeHandler(auth));
   }
 
   private initializeControllers(controllers: Controller[]): void {
