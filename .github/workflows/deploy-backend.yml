@@ -1,0 +1,53 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "chat-app-backend/**" # Only trigger if backend code changes
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    # Define variables here once for all steps
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      REDIS_URL: ${{ secrets.REDIS_URL }}
+      NODE_ENV: ${{ secrets.NODE_ENV }}
+      BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+      RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: "./chat-app-backend/package-lock.json"
+
+      - name: Install Dependencies
+        run: |
+          cd chat-app-backend
+          npm ci
+
+      - name: Prisma Generate
+        run: |
+          cd chat-app-backend
+          npx prisma generate
+
+      - name: Build Check
+        run: |
+          cd chat-app-backend
+          npm run build
+
+      - name: Deploy to Render
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          # Render provides a "Deploy Hook" URL in your service settings
+          curl -X POST ${{ env.RENDER_DEPLOY_HOOK }}
