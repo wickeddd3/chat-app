@@ -9,7 +9,7 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch: # Allow manual triggering from GitHub UI
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -30,23 +30,18 @@ jobs:
           cd chat-app-frontend
           npm ci
 
-      # 1. Run your linters cleanly first
-      # - name: Run Linters & Code Style Checks
-      #   run: |
-      #     cd chat-app-frontend
-      #     npm run lint
-
       - name: Install Vercel CLI Globally
         run: npm install --global vercel
 
-      # 2. Pull Vercel configurations
+      # 1. Pull Vercel configurations so the runner knows your project ID mappings
       - name: Pull Vercel Environment Context
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} --cwd ./chat-app-frontend
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
-      # 3. Build your Vite project natively using GitHub's environment
+      # 2. Build your Vite project natively inside the GitHub Runner
+      # This bakes your GitHub repository secrets directly into the compiled JavaScript
       - name: Build Vite Production Artifacts
         run: |
           cd chat-app-frontend
@@ -56,10 +51,16 @@ jobs:
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
-      # 4. Direct Production Deploy pointing straight to your compiled Vite distribution folder
+      # 3. Structure Vite's output into Vercel's required deployment format
+      - name: Prepare Vercel Prebuilt Directory
+        run: |
+          mkdir -p chat-app-frontend/.vercel/output
+          cp -R chat-app-frontend/dist/* chat-app-frontend/.vercel/output/
+
+      # 4. Force Production Deploy directly to Vercel using the prebuilt assets
       - name: Deploy to Vercel
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd ./chat-app-frontend
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd ./chat-app-frontend
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
