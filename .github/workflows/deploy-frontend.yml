@@ -30,32 +30,36 @@ jobs:
           cd chat-app-frontend
           npm ci
 
+      # 1. Run your linters cleanly first
       # - name: Run Linters & Code Style Checks
       #   run: |
       #     cd chat-app-frontend
       #     npm run lint
 
+      # 2. Build your Vite project natively using GitHub's environment
+      - name: Build Vite Production Artifacts
+        run: |
+          cd chat-app-frontend
+          npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+
       - name: Install Vercel CLI Globally
         run: npm install --global vercel
 
+      # 3. Pull Vercel configurations
       - name: Pull Vercel Environment Context
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} --cwd ./chat-app-frontend
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
-      - name: Build Project Natively via Vercel
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd ./chat-app-frontend
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
-
-      - name: Deploy Prebuilt Package to Vercel
+      # 4. Direct Production Deploy pointing straight to your compiled Vite distribution folder
+      - name: Deploy to Vercel
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd ./chat-app-frontend
+        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd ./chat-app-frontend
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
