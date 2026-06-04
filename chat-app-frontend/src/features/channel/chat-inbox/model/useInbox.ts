@@ -36,7 +36,7 @@ export function useInbox(query: string): {
     queryFn: ({ pageParam }) =>
       getInboxApi({
         params: {
-          cursor: pageParam,
+          cursor: pageParam as string | number | null,
           ...(debouncedQuery && { query: debouncedQuery }),
         },
       }),

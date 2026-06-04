@@ -26,7 +26,7 @@ export function useUsers(query: string): {
     queryFn: ({ pageParam }) =>
       getUsersApi({
         params: {
-          cursor: pageParam,
+          cursor: pageParam as string | number | null,
           ...(debouncedQuery && { query: debouncedQuery }),
         },
       }),

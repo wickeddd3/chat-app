@@ -37,7 +37,7 @@ export function useContacts(query: string): {
     queryFn: ({ pageParam }) =>
       getContactsApi({
         params: {
-          cursor: pageParam,
+          cursor: pageParam as string | number | null,
           ...(debouncedQuery && { query: debouncedQuery }),
         },
       }),

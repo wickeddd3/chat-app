@@ -17,7 +17,9 @@ export function useNotifications() {
     queryKey: ["notifications"],
     queryFn: ({ pageParam }) =>
       getNotificationsApi({
-        params: { cursor: pageParam },
+        params: {
+          cursor: pageParam as string | number | null,
+        },
       }),
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,

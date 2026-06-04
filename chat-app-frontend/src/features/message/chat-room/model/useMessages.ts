@@ -21,7 +21,12 @@ export function useMessages(channelId: string): {
   } = useInfiniteQuery<PaginatedMessage, Error, Message[]>({
     queryKey: ["messages", channelId],
     queryFn: ({ pageParam }) =>
-      getMessagesApi({ channelId, params: { cursor: pageParam } }),
+      getMessagesApi({
+        channelId,
+        params: {
+          cursor: pageParam as string | number | null,
+        },
+      }),
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
     select: (data) => {
