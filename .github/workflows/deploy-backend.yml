@@ -15,8 +15,6 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     # Define variables here once for all steps
-    env:
-      RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -37,6 +35,8 @@ jobs:
         run: |
           cd chat-app-backend
           npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Build Check
         run: |
@@ -47,4 +47,4 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           # Render provides a "Deploy Hook" URL in your service settings
-          curl -X POST ${{ env.RENDER_DEPLOY_HOOK }}
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
