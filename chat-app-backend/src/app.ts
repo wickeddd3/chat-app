@@ -33,6 +33,10 @@ export class App {
 
     this.initializeMiddlewares();
     this.initializeAuth();
+
+    // Mount express json middleware after Better Auth handler to ensure raw body is available for signature verification
+    this.express.use(express.json({ limit: "10mb" }));
+
     this.initializeControllers(controllers);
     // Error middleware MUST be loaded LAST in the express chain to capture bubble-ups
     this.express.use(errorMiddleware);
@@ -68,13 +72,12 @@ export class App {
       }),
     );
     this.express.use(morgan("dev"));
-    this.express.use(express.json({ limit: "10mb" }));
     this.express.use(compression());
   }
 
   private initializeAuth(): void {
     // Better-auth route for authentication
-    this.express.all("/api/auth/:any*", toNodeHandler(auth));
+    this.express.all("/api/auth/*splat", toNodeHandler(auth));
   }
 
   private initializeControllers(controllers: Controller[]): void {
