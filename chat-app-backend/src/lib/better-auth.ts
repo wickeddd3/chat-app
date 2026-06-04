@@ -2,7 +2,7 @@ import "dotenv/config";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "@/lib/prisma";
-import { APP_URL } from "@/config/app.config";
+import { APP_URL, BETTER_AUTH_URL } from "@/config/app.config";
 import { username } from "better-auth/plugins";
 
 export const auth = betterAuth({
@@ -10,7 +10,7 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
   trustedOrigins: [APP_URL],
-  baseURL: APP_URL,
+  baseURL: BETTER_AUTH_URL,
   emailAndPassword: {
     enabled: true,
   },
