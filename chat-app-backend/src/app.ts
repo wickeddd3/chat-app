@@ -34,9 +34,6 @@ export class App {
     this.initializeMiddlewares();
     this.initializeAuth();
 
-    // Mount express json middleware after Better Auth handler to ensure raw body is available for signature verification
-    this.express.use(express.json({ limit: "10mb" }));
-
     this.initializeControllers(controllers);
     // Error middleware MUST be loaded LAST in the express chain to capture bubble-ups
     this.express.use(errorMiddleware);
@@ -67,7 +64,14 @@ export class App {
     // Tell Express to trust Render's load balancer headers
     this.express.set("trust proxy", 1);
 
-    this.express.use(helmet());
+    this.express.use(express.json({ limit: "10mb" }));
+
+    this.express.use(
+      helmet({
+        crossOriginResourcePolicy: { policy: "cross-origin" },
+        crossOriginOpenerPolicy: { policy: "unsafe-none" },
+      }),
+    );
     this.express.use(
       cors({
         origin: ALLOWED_ORIGINS,
