@@ -12,8 +12,20 @@ export const auth = betterAuth({
   trustedOrigins: [APP_URL],
   baseURL: BETTER_AUTH_URL,
   trustProxy: true,
+  advanced: {
+    useSecureCookies: true,
+  },
+  cookie: {
+    secure: true,
+    sameSite: "lax",
+  },
+  session: {
+    maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
+    updateAge: 60 * 60 * 24, // 1 day in seconds
+  },
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: false,
   },
   user: {
     changeEmail: {
