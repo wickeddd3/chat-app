@@ -33,35 +33,42 @@ jobs:
       - name: Install Vercel CLI Globally
         run: npm install --global vercel
 
-      # 1. Build your Vite project natively inside the GitHub Runner
-      # This bakes your GitHub repository secrets directly into the compiled JavaScript
-      - name: Build Vite Production Artifacts
+      - name: Build Project
         run: |
           cd chat-app-frontend
-          npm run build
+          # 1. Run the standard Vite build with your secrets
+          yarn build
+
+          # 2. Manually create the folder structure Vercel '--prebuilt' requires
+          mkdir -p .vercel/output/static
+          cp -r dist/* .vercel/output/static
+
+          # 3. Create a dummy config so Vercel knows it's a static site
+          # Create the config.json with strict formatting
+          # We use cat to ensure a clean multi-line JSON write
+          cat <<EOF > .vercel/output/config.json
+          {
+            "version": 3,
+            "routes": [
+              { "handle": "filesystem" },
+              { "src": "/(.*)", "dest": "/index.html" }
+            ]
+          }
+          EOF
+
+          echo "✅ .vercel/output/config.json created with version 3"
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
-      # 2. Structure Vite's output into Vercel's required prebuilt deployment directory layout
-      # This completely bypasses Vercel's remote "Ignore Build Step" dashboard restriction rule
-      - name: Prepare Vercel Prebuilt Directory
-        run: |
-          # Create the required output directory structure
-          mkdir -p chat-app-frontend/.vercel/output
-
-          # Copy your compiled static Vite assets into it
-          cp -R chat-app-frontend/dist/* chat-app-frontend/.vercel/output/
-
-          # Write the mandatory Vercel configuration file
-          echo '{"version": 3, "routes": [{"handle": "filesystem"}, {"src": "/.*", "dest": "/index.html"}]}' > chat-app-frontend/.vercel/output/config.json
-
-      # 3. Direct Production Deploy pointing straight to your compiled Vite distribution folder
-      # We provide the Org and Project ID directly in the environment blocks to authorize the upload
       - name: Deploy to Vercel
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd ./chat-app-frontend
+        run: |
+          # 1. Navigate to the frontend folder
+          cd chat-app-frontend
+
+          # 2. Run deploy from here. 
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
