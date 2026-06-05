@@ -10,7 +10,7 @@ export function MessageHeader({
   channel: InboxChannel | null;
   authId: string;
 }) {
-  const { onlineUsers, isOnline } = usePresence();
+  const { isOnline } = usePresence();
 
   const online = useMemo(() => {
     if (channel?.type === "GROUP") {
@@ -23,7 +23,7 @@ export function MessageHeader({
       return !!otherUser;
     }
     return false;
-  }, [channel, authId, onlineUsers, isOnline]);
+  }, [channel, authId, isOnline]);
 
   return (
     <div className="w-full py-5 px-4">
