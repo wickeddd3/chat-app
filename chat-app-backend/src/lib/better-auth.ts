@@ -11,6 +11,7 @@ export const auth = betterAuth({
   }),
   trustedOrigins: [APP_URL],
   baseURL: BETTER_AUTH_URL,
+  trustProxy: true,
   emailAndPassword: {
     enabled: true,
   },
