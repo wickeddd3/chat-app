@@ -7,10 +7,6 @@ export function useWebSocketConnect(isAuthenticated: boolean) {
     if (isAuthenticated) {
       webSocketClient.connect();
 
-      webSocketClient.on("connect_error", (err) => {
-        console.error("Auth failed on socket:", err.message);
-      });
-
       return () => {
         webSocketClient.disconnect();
       };
