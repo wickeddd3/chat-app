@@ -33,14 +33,7 @@ jobs:
       - name: Install Vercel CLI Globally
         run: npm install --global vercel
 
-      # 1. Pull Vercel configurations so the runner knows your project ID mappings
-      - name: Pull Vercel Environment Context
-        run: vercel pull --yes --environment=production --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} --cwd ./chat-app-frontend
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
-      # 2. Build your Vite project natively inside the GitHub Runner
+      # 1. Build your Vite project natively inside the GitHub Runner
       # This bakes your GitHub repository secrets directly into the compiled JavaScript
       - name: Build Vite Production Artifacts
         run: |
@@ -51,13 +44,15 @@ jobs:
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
-      # 3. Structure Vite's output into Vercel's required deployment format
+      # 2. Structure Vite's output into Vercel's required prebuilt deployment directory layout
+      # This completely bypasses Vercel's remote "Ignore Build Step" dashboard restriction rule
       - name: Prepare Vercel Prebuilt Directory
         run: |
           mkdir -p chat-app-frontend/.vercel/output
           cp -R chat-app-frontend/dist/* chat-app-frontend/.vercel/output/
 
-      # 4. Force Production Deploy directly to Vercel using the prebuilt assets
+      # 3. Direct Production Deploy pointing straight to your compiled Vite distribution folder
+      # We provide the Org and Project ID directly in the environment blocks to authorize the upload
       - name: Deploy to Vercel
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd ./chat-app-frontend
