@@ -17,7 +17,7 @@ export const auth = betterAuth({
   },
   cookie: {
     secure: true,
-    sameSite: "lax",
+    sameSite: "none",
   },
   session: {
     maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
