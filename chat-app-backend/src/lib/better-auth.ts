@@ -14,6 +14,10 @@ export const auth = betterAuth({
   trustProxy: true,
   advanced: {
     useSecureCookies: true,
+    crossSubDomainCookies: {
+      enabled: true,
+      domain: new URL(APP_URL).hostname, // Extract domain from APP_URL for cookie setting
+    },
   },
   cookie: {
     secure: true,
