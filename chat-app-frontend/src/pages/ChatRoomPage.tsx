@@ -9,7 +9,7 @@ import { ChannelDetailsDrawer } from "@/widgets/channel-details-drawer";
 export default function ChatRoomPage() {
   const { channelId } = useParams();
   const { channel } = useChannel(channelId || "");
-  const { onlineUsers, isOnline } = usePresence();
+  const { isOnline } = usePresence();
   const { authId } = useAuth();
 
   const online = useMemo(() => {
@@ -25,7 +25,7 @@ export default function ChatRoomPage() {
       return !!otherUser;
     }
     return false;
-  }, [channel, authId, onlineUsers, isOnline]);
+  }, [channel, authId, isOnline]);
 
   return (
     <div className="flex-1 flex flex-col h-full w-full bg-background">
