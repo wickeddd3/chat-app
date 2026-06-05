@@ -15,6 +15,7 @@ const http: AxiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
     Accept: "application/json",
+    "Content-Type": "application/json",
   },
   withCredentials: true, // Crucial for Better-Auth session cookies
 });
