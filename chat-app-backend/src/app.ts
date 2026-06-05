@@ -64,6 +64,9 @@ export class App {
   }
 
   private initializeMiddlewares(): void {
+    // Tell Express to trust Render's load balancer headers
+    this.express.set("trust proxy", 1);
+
     this.express.use(helmet());
     this.express.use(
       cors({
