@@ -48,8 +48,14 @@ jobs:
       # This completely bypasses Vercel's remote "Ignore Build Step" dashboard restriction rule
       - name: Prepare Vercel Prebuilt Directory
         run: |
+          # Create the required output directory structure
           mkdir -p chat-app-frontend/.vercel/output
+
+          # Copy your compiled static Vite assets into it
           cp -R chat-app-frontend/dist/* chat-app-frontend/.vercel/output/
+
+          # Write the mandatory Vercel configuration file
+          echo '{"version": 3, "routes": [{"handle": "filesystem"}, {"src": "/.*", "dest": "/index.html"}]}' > chat-app-frontend/.vercel/output/config.json
 
       # 3. Direct Production Deploy pointing straight to your compiled Vite distribution folder
       # We provide the Org and Project ID directly in the environment blocks to authorize the upload
