@@ -6,7 +6,6 @@ import { TextField } from "@/shared/ui/form-fields/TextField";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { usePassword } from "../model/usePassword";
-import { toast } from "sonner";
 
 export function PasswordForm() {
   const form = useForm<PasswordFormSchemaType>({
@@ -21,19 +20,7 @@ export function PasswordForm() {
   const { updatePassword } = usePassword();
 
   async function onSubmit(data: PasswordFormSchemaType) {
-    const { success, error } = await updatePassword(data);
-
-    if (!success) {
-      toast.error("Password update failed", {
-        description: error || "Error occurred while updating password",
-        position: "bottom-right",
-      });
-      return;
-    }
-
-    toast.success("Password updated successfully", {
-      position: "bottom-right",
-    });
+    await updatePassword(data);
   }
 
   return (
