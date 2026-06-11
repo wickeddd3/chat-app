@@ -1,1 +1,3 @@
-export { useAuth } from "./model/useAuth";
+export type { AuthUser } from "./model/auth.types";
+
+export { useAuthProfile } from "./model/useAuthProfile";
