@@ -1,11 +1,11 @@
-import { useAuth } from "@/entities/auth";
+import { useAuth } from "@/app/store/AuthContext";
 import type { NewMessage } from "@/entities/message";
 import { webSocketClient } from "@/shared/lib/socket-io.client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 export function useSendMessage({ channelId }: { channelId: string }) {
-  const { authUser } = useAuth();
+  const { authProfile } = useAuth();
   const queryClient = useQueryClient();
 
   const [message, setMessage] = useState("");
@@ -58,9 +58,9 @@ export function useSendMessage({ channelId }: { channelId: string }) {
       channelId,
       content: message,
       author: {
-        id: authUser?.id,
-        name: authUser?.name,
-        image: authUser?.image,
+        id: authProfile?.id,
+        name: authProfile?.name,
+        image: authProfile?.image,
       },
       createdAt: new Date().toISOString(),
       isSending: true,
