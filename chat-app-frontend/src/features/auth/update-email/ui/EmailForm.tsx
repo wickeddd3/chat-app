@@ -13,10 +13,10 @@ export function EmailForm({ email }: { email: string }) {
     },
   });
 
-  const { updateEmail } = useEmail();
+  const { updateAccountEmail } = useEmail();
 
   async function onSubmit(data: EmailFormSchemaType) {
-    await updateEmail(data);
+    await updateAccountEmail(data);
   }
 
   useEffect(() => {

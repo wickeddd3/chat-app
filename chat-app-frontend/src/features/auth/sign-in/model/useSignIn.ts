@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 export function useSignIn() {
   const login = async (formData: SignInFormSchemaType) => {
-    const { error } = await signIn(formData.email, formData.password);
+    const { error } = await signIn(formData);
 
     if (error) {
       toast.error("Login Failed", {

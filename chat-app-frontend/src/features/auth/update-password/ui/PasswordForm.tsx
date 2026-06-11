@@ -17,10 +17,10 @@ export function PasswordForm() {
     },
   });
 
-  const { updatePassword } = usePassword();
+  const { updateAccountPassword } = usePassword();
 
   async function onSubmit(data: PasswordFormSchemaType) {
-    await updatePassword(data);
+    await updateAccountPassword(data);
   }
 
   return (
