@@ -7,9 +7,13 @@ import { PrismaClient } from "@/prisma/client";
 import { redisClient } from "@/lib/redis";
 import { eventDispatcher } from "@/lib/event-dispatcher";
 
+import { AuthController } from "@/modules/auth/auth.controller";
+import { AuthService } from "@/modules/auth/auth.service";
+import { AuthRepository } from "@/modules/auth/auth.repository";
+
+import { UsersController } from "@/modules/user/users.controller";
 import { UsersRepository } from "@/modules/user/users.repository";
 import { UsersService } from "@/modules/user/users.service";
-import { UsersController } from "@/modules/user/users.controller";
 
 import { ChannelsController } from "@/modules/channel/channels.controller";
 import { ChannelsService } from "@/modules/channel/channels.service";
@@ -53,6 +57,10 @@ container.bind(TYPES.RedisClient).toConstantValue(redisClient);
 container.bind(TYPES.EventDispatcher).toConstantValue(eventDispatcher);
 
 // Bind domain layers
+container.bind<AuthController>(TYPES.AuthController).to(AuthController);
+container.bind<AuthService>(TYPES.AuthService).to(AuthService);
+container.bind<AuthRepository>(TYPES.AuthRepository).to(AuthRepository);
+
 container.bind<UsersController>(TYPES.UsersController).to(UsersController);
 container.bind<UsersService>(TYPES.UsersService).to(UsersService);
 container.bind<UsersRepository>(TYPES.UsersRepository).to(UsersRepository);

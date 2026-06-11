@@ -10,6 +10,7 @@ validateEnv();
 
 // Dynamically resolve controllers out from central DI container instance
 const activeControllers: Controller[] = [
+  container.get<Controller>(TYPES.AuthController),
   container.get<Controller>(TYPES.UsersController),
   container.get<Controller>(TYPES.ChannelsController),
   container.get<Controller>(TYPES.MessagesController),
