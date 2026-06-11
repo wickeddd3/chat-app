@@ -1,20 +1,22 @@
-import { authClient } from "@/shared/lib/better-auth.client";
 import type { SignInFormSchemaType } from "./schema";
+import { signIn } from "@/shared/lib/supabase-auth";
+import { toast } from "sonner";
 
 export function useSignIn() {
-  const login = async (
-    values: SignInFormSchemaType,
-  ): Promise<{ success: boolean; error?: string }> => {
-    const { error } = await authClient.signIn.email({
-      ...values,
-      callbackURL: "/messages",
-    });
+  const login = async (formData: SignInFormSchemaType) => {
+    const { error } = await signIn(formData.email, formData.password);
 
     if (error) {
-      return { success: false, error: error.message };
+      toast.error("Login Failed", {
+        description: "Invalid email or password",
+        position: "bottom-right",
+      });
+      return;
     }
 
-    return { success: true };
+    toast.success("Login Successful", {
+      position: "bottom-right",
+    });
   };
 
   return { login };
