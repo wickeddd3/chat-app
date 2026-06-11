@@ -1,17 +1,12 @@
-import { authClient } from "@/shared/lib/better-auth.client";
+import { signOut } from "@/shared/lib/supabase-auth";
 import { useNavigate } from "react-router";
 
 export function useSignOut() {
   const navigate = useNavigate();
 
   const logout = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          navigate("/auth/sign-in");
-        },
-      },
-    });
+    await signOut();
+    navigate("/");
   };
 
   return { logout };
