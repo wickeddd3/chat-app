@@ -3,7 +3,6 @@ import { TYPES } from "@/config/types";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import { PresenceService } from "../services/presence.service";
 import { Socket } from "socket.io";
-import type { User } from "better-auth";
 
 @injectable()
 export class HeartbeatCommand implements WebSocketCommand {
@@ -11,8 +10,8 @@ export class HeartbeatCommand implements WebSocketCommand {
 
   constructor(@inject(TYPES.PresenceService) private presenceService: PresenceService) {}
 
-  public async execute(socket: Socket, user: User, _data: unknown): Promise<void> {
-    await this.presenceService.refreshPresence(user.id);
-    socket.emit("user_status_change", { userId: user.id, status: "online" });
+  public async execute(socket: Socket, authId: string, _data: unknown): Promise<void> {
+    await this.presenceService.refreshPresence(authId);
+    socket.emit("user_status_change", { userId: authId, status: "online" });
   }
 }

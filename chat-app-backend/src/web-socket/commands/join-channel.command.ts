@@ -1,7 +1,6 @@
 import { injectable } from "inversify";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import type { Socket } from "socket.io";
-import type { User } from "@/prisma/client";
 
 interface JoinChannelPayload {
   channelId: string;
@@ -11,9 +10,9 @@ interface JoinChannelPayload {
 export class JoinChannelCommand implements WebSocketCommand {
   public readonly eventName = "join_channel";
 
-  public async execute(socket: Socket, user: User, data: JoinChannelPayload): Promise<void> {
+  public async execute(socket: Socket, authId: string, data: JoinChannelPayload): Promise<void> {
     const { channelId } = data;
-    console.log(`User ${user.id} join channel: ${channelId}`);
+    console.log(`User ${authId} join channel: ${channelId}`);
     await socket.join(channelId);
   }
 }

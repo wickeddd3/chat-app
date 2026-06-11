@@ -4,7 +4,6 @@ import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import { MessagesService } from "@/modules/message/messages.service";
 import { ChannelsService } from "@/modules/channel/channels.service";
 import type { Socket } from "socket.io";
-import type { User } from "@/prisma/client";
 
 interface SendMessagePayload {
   content: string;
@@ -21,14 +20,14 @@ export class SendMessageCommand implements WebSocketCommand {
     @inject(TYPES.ChannelsService) private channelsService: ChannelsService,
   ) {}
 
-  public async execute(socket: Socket, user: User, data: SendMessagePayload): Promise<void> {
+  public async execute(socket: Socket, authId: string, data: SendMessagePayload): Promise<void> {
     const targetChannelId = parseInt(data.channelId, 10);
 
     // 1. Persist to Database
     const savedMessage = await this.messagesService.saveMessage({
       content: data.content,
       channelId: targetChannelId,
-      authorId: user.id,
+      authorId: authId,
     });
 
     // 2. Update Channel
