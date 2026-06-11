@@ -1,6 +1,4 @@
-FROM node:20
-
-RUN apt-get update -y && apt-get install -y openssl
+FROM node:22-alpine
 
 WORKDIR /app
 
