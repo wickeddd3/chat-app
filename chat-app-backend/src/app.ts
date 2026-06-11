@@ -7,9 +7,6 @@ import compression from "compression";
 import { Controller } from "@/interfaces/controller.interface";
 import { ALLOWED_ORIGINS } from "@/config/cors-origins";
 
-import { toNodeHandler } from "better-auth/node";
-import { auth } from "@/lib/better-auth";
-
 import { connectRedis } from "@/lib/redis";
 import { EventEmitter } from "events";
 
@@ -32,9 +29,8 @@ export class App {
     this.server = createServer(this.express);
 
     this.initializeMiddlewares();
-    this.initializeAuth();
-
     this.initializeControllers(controllers);
+
     // Error middleware MUST be loaded LAST in the express chain to capture bubble-ups
     this.express.use(errorMiddleware);
 
@@ -61,11 +57,7 @@ export class App {
   }
 
   private initializeMiddlewares(): void {
-    // Tell Express to trust Render's load balancer headers
-    this.express.set("trust proxy", 1);
-
     this.express.use(express.json({ limit: "10mb" }));
-
     this.express.use(
       helmet({
         crossOriginResourcePolicy: { policy: "cross-origin" },
@@ -80,11 +72,6 @@ export class App {
     );
     this.express.use(morgan("dev"));
     this.express.use(compression());
-  }
-
-  private initializeAuth(): void {
-    // Better-auth route for authentication
-    this.express.all(/^\/api\/auth\/.*/, toNodeHandler(auth));
   }
 
   private initializeControllers(controllers: Controller[]): void {
