@@ -1,31 +1,32 @@
-import { authClient } from "@/shared/lib/better-auth.client";
+import { useMutation, type UseMutateFunction } from "@tanstack/react-query";
+import type { User } from "@/entities/user";
 import type { SignUpFormSchemaType } from "./schema";
-import { useNavigate } from "react-router";
+import { signUpApi } from "../api/auth.api";
+import { toast } from "sonner";
 
-export function useSignUp() {
-  const navigate = useNavigate();
+export function useSignUp(): {
+  register: UseMutateFunction<User, Error, SignUpFormSchemaType, unknown>;
+  isPending: boolean;
+  error: unknown;
+} {
+  const { mutate, isPending, error } = useMutation({
+    mutationFn: (formData: SignUpFormSchemaType) => signUpApi(formData),
+    onError: () => {
+      toast.error("Account creation failed", {
+        description: "Error occurred while creating account",
+        position: "bottom-right",
+      });
+    },
+    onSuccess: () => {
+      toast.success("Account created successfully", {
+        position: "bottom-right",
+      });
+    },
+  });
 
-  const register = async (
-    values: SignUpFormSchemaType,
-  ): Promise<{ success: boolean; error?: string }> => {
-    const { error } = await authClient.signUp.email(
-      {
-        ...values,
-        callbackURL: "/messages",
-      },
-      {
-        onSuccess: () => {
-          navigate("/messages");
-        },
-      },
-    );
-
-    if (error) {
-      return { success: false, error: error.message };
-    }
-
-    return { success: true };
+  return {
+    register: mutate,
+    isPending: isPending,
+    error: error,
   };
-
-  return { register };
 }
