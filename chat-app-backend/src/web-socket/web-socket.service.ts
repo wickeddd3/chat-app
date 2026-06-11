@@ -3,7 +3,6 @@ import { TYPES } from "@/config/types";
 import { Server as SocketServer, type Socket } from "socket.io";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import { redisClient } from "@/lib/redis";
-import type { User } from "@supabase/supabase-js";
 
 @injectable()
 export class WebSocketService {
