@@ -1,10 +1,10 @@
-import { useAuth } from "@/entities/auth";
+import { useAuth } from "../store/AuthContext";
 import { Navigate, Outlet } from "react-router";
 
 export const AuthGuard = () => {
-  const { authSession, isAuthPending } = useAuth();
+  const { authUser, authUserLoading } = useAuth();
 
-  if (isAuthPending) {
+  if (authUserLoading) {
     return (
       <div className="w-full h-full flex justify-center items-center">
         <p className="text-center">Loading...</p>
@@ -12,7 +12,7 @@ export const AuthGuard = () => {
     );
   }
 
-  if (!authSession) {
+  if (!authUser) {
     return <Navigate to="/auth/sign-in" replace />;
   }
 

@@ -1,6 +1,6 @@
 import { Virtuoso } from "react-virtuoso";
 import { MessageBubble, type Message } from "@/entities/message";
-import { useAuth } from "@/entities/auth";
+import { useAuth } from "@/app/store/AuthContext";
 import { LoaderCircle } from "lucide-react";
 import { useMemo } from "react";
 import { useScrollToBottom } from "../model/useScrollToBottom";
@@ -16,7 +16,7 @@ export function Messages({
   isFetchingNextPage: boolean;
   fetchNextPage: () => void;
 }) {
-  const { authId } = useAuth();
+  const { authUser } = useAuth();
   const { virtuosoRef, maxIndex } = useScrollToBottom({ messages });
 
   // Dynamically calculate the starting index based on data size.
@@ -52,7 +52,7 @@ export function Messages({
         <MessageBubble
           key={message.id}
           message={message}
-          isAuthorsMessage={message.author.id === authId}
+          isAuthorsMessage={message.author.id === authUser?.id}
         />
       )}
       components={{

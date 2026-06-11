@@ -1,4 +1,4 @@
-import { useAuth } from "@/entities/auth";
+import { useAuth } from "@/app/store/AuthContext";
 import { Toaster } from "@/shared/ui/shadcn/sonner";
 import { ChatSidebar } from "@/widgets/navigation";
 import { Outlet } from "react-router";
@@ -7,9 +7,9 @@ import { useHeartbeat } from "@/features/message/online-presence";
 import { useRealTimeNotifications } from "@/features/notification/realtime-notification";
 
 export function ChatLayout() {
-  const { authSession } = useAuth();
-  useWebSocketConnect(!!authSession);
-  useHeartbeat(!!authSession);
+  const { authUser } = useAuth();
+  useWebSocketConnect(!authUser);
+  useHeartbeat(!authUser);
   useRealTimeNotifications();
 
   return (

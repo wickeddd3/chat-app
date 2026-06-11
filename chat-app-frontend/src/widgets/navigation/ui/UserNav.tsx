@@ -10,11 +10,11 @@ import {
 } from "@/shared/ui/shadcn/dropdown-menu";
 import { Link } from "react-router";
 import { useSignOut } from "@/features/auth/sign-out";
-import { useAuth } from "@/entities/auth";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
+import { useAuth } from "@/app/store/AuthContext";
 
 export function UserNav() {
-  const { authUser } = useAuth();
+  const { authProfile } = useAuth();
   const { logout } = useSignOut();
 
   return (
@@ -25,7 +25,7 @@ export function UserNav() {
           size="icon"
           className="rounded-full cursor-pointer"
         >
-          <ProfileAvatar imageSrc={authUser?.image || ""} />
+          <ProfileAvatar imageSrc={authProfile?.image || ""} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" sideOffset={8} className="w-40">
