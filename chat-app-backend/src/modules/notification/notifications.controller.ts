@@ -23,7 +23,7 @@ export class NotificationsController extends BaseController implements Controlle
 
   private getNotifications = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authUserId = req.user?.id ?? "";
+      const authUserId = req.authId ?? "";
       const limit = 20;
       const cursor = typeof req.query.cursor === "string" ? req.query.cursor : "";
 
@@ -45,7 +45,7 @@ export class NotificationsController extends BaseController implements Controlle
 
   private markAsRead = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authUserId = req.user?.id ?? "";
+      const authUserId = req.authId ?? "";
       const body = req.body as { notificationIds?: unknown };
       const notificationIds = Array.isArray(body.notificationIds) ? (body.notificationIds as string[]) : [];
 

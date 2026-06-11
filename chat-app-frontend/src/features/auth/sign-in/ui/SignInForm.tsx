@@ -19,7 +19,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router";
 import { SignInFormSchema, type SignInFormSchemaType } from "../model/schema";
 import { useSignIn } from "../model/useSignIn";
-import { toast } from "sonner";
 
 export function SignInForm({
   className,
@@ -36,19 +35,7 @@ export function SignInForm({
   const { login } = useSignIn();
 
   async function onSubmit(data: SignInFormSchemaType) {
-    const { success, error } = await login(data);
-
-    if (!success) {
-      toast.error("Login Failed", {
-        description: error || "Invalid email or password",
-        position: "bottom-right",
-      });
-      return;
-    }
-
-    toast.success("Login Successful", {
-      position: "bottom-right",
-    });
+    await login(data);
   }
 
   return (

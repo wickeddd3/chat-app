@@ -1,23 +1,29 @@
 import type { ExtendedError, Socket } from "socket.io";
-import { auth } from "@/lib/better-auth";
-import { fromNodeHeaders } from "better-auth/node";
-import type { User } from "better-auth";
+import { supabase } from "@/lib/supabase";
 
 export const socketAuthMiddleware = async (socket: Socket, next: (err?: ExtendedError) => void) => {
   try {
-    // Better-Auth checks the session via headers/cookies
-    const session = await auth.api.getSession({
-      headers: fromNodeHeaders(socket.handshake.headers),
-    });
+    const authHeader = socket.handshake.headers.authorization;
+    if (!authHeader?.startsWith("Bearer ")) {
+      next(new Error("Missing or malformed authorization header"));
+    }
 
-    if (!session) {
-      next(new Error("Unauthorized: Please log in."));
+    const token = authHeader?.split(" ")[1];
+
+    // Authenticate the token against Supabase infrastructure directly
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      next(new Error("Invalid or expired auth token session"));
       return;
     }
 
     // Attach user info to socket data
-    const socketData = socket.data as { user: User };
-    socketData.user = session.user;
+    const socketData = socket.data as { authId?: string };
+    socketData.authId = user.id;
 
     next();
   } catch {

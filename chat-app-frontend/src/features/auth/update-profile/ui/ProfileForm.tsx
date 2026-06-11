@@ -3,7 +3,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { ProfileFormSchema, type ProfileFormSchemaType } from "../model/schema";
 import { useProfile } from "../model/useProfile";
-import { toast } from "sonner";
 import { useEffect } from "react";
 
 export function ProfileForm({
@@ -24,19 +23,7 @@ export function ProfileForm({
   const { updateUser } = useProfile();
 
   async function onSubmit(data: ProfileFormSchemaType) {
-    const { success, error } = await updateUser(data);
-
-    if (!success) {
-      toast.error("Profile update failed", {
-        description: error || "Error occurred while updating profile",
-        position: "bottom-right",
-      });
-      return;
-    }
-
-    toast.success("Profile updated successfully", {
-      position: "bottom-right",
-    });
+    await updateUser(data);
   }
 
   useEffect(() => {

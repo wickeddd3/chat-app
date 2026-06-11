@@ -1,24 +1,25 @@
 import { Request, Response, NextFunction } from "express";
-import { auth } from "@/lib/better-auth"; // Your better-auth server instance
-import { fromNodeHeaders } from "better-auth/node";
 import { HttpException } from "@/utils/http.exception";
+import { supabase } from "@/lib/supabase";
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Better-Auth checks the session via headers/cookies
-    const session = await auth.api.getSession({
-      headers: fromNodeHeaders(req.headers),
-    });
+    const authHeader = req.headers.authorization;
 
-    if (!session) {
-      next(new HttpException(401, "Unauthorized: Please log in."));
+    const token = authHeader?.split(" ")[1];
+
+    // Authenticate the token against Supabase infrastructure directly
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      next(new HttpException(401, "Invalid or expired auth token session"));
       return;
     }
 
-    // Attach the user to the request object for use in controllers
-    req.user = session.user;
-    req.session = session.session;
-
+    req.authId = user.id;
     next();
   } catch {
     next(new HttpException(401, "Authentication failed"));

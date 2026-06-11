@@ -8,12 +8,12 @@ import { SearchField } from "@/shared/ui/SearchField";
 import { ChatInboxResults } from "./ChatInboxResults";
 import { useMemo, useState } from "react";
 import { usePresence } from "@/app/store/PresenceContext";
-import { useAuth } from "@/entities/auth";
+import { useAuth } from "@/app/store/AuthContext";
 import { useInbox } from "../model/useInbox";
 import { useInboxUpdate } from "../model/useInboxUpdate";
 
 export function ChatInbox() {
-  const { authId } = useAuth();
+  const { authUser } = useAuth();
 
   const [query, setQuery] = useState("");
 
@@ -35,12 +35,14 @@ export function ChatInbox() {
       online: () => {
         if (item.type === "GROUP") {
           return item.channelMembers.some(
-            (member) => member.user.id !== authId && isOnline(member.user.id),
+            (member) =>
+              member.user.id !== authUser?.id && isOnline(member.user.id),
           );
         }
         if (item.type === "DIRECT") {
           const otherUser = item.channelMembers.find(
-            (member) => member.user.id !== authId && isOnline(member.user.id),
+            (member) =>
+              member.user.id !== authUser?.id && isOnline(member.user.id),
           );
           return !!otherUser;
         }

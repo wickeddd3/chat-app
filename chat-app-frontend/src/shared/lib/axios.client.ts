@@ -4,11 +4,20 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
-import { authClient } from "./better-auth.client";
+import { signOut } from "./supabase-auth";
+import { supabase } from "./supabase.client";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 type RequestData = Record<string, unknown> | FormData | null;
+
+const getAuthToken = async () => {
+  // Get the current session from Supabase
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+
+  return token ? `Bearer ${token}` : "";
+};
 
 // Singleton Instance Configuration (Created once, shared everywhere)
 const http: AxiosInstance = axios.create({
@@ -17,12 +26,19 @@ const http: AxiosInstance = axios.create({
     Accept: "application/json",
     "Content-Type": "application/json",
   },
-  withCredentials: true, // Crucial for Better-Auth session cookies
+  withCredentials: true,
 });
 
 // Request Interceptor
 http.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => config,
+  async (config: InternalAxiosRequestConfig) => {
+    const authToken = await getAuthToken();
+    config.headers = axios.AxiosHeaders.from({
+      ...config.headers,
+      Authorization: authToken,
+    });
+    return config;
+  },
   (error: unknown) => Promise.reject(error),
 );
 
@@ -34,13 +50,7 @@ http.interceptors.response.use(
     if (response?.status === 401) {
       // Prevent redirect loops if signOut itself gets a 401
       if (!window.location.pathname.startsWith("/auth/sign-in")) {
-        authClient.signOut({
-          fetchOptions: {
-            onSuccess: () => {
-              window.location.href = "/auth/sign-in";
-            },
-          },
-        });
+        await signOut();
       }
     }
     return Promise.reject(error);
@@ -48,7 +58,6 @@ http.interceptors.response.use(
 );
 
 /**
- * Production-Grade API Wrapper
  * Exposes generic HTTP methods that forward structural type matrices to Axios.
  */
 export const apiRequest = {

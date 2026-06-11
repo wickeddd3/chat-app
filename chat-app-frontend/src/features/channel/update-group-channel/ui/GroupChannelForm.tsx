@@ -12,7 +12,7 @@ import {
 import { useUpdateGroupChannel } from "../model/useUpdateGroupChannel";
 import type { InboxChannel } from "@/entities/channel";
 import { useCallback, useEffect } from "react";
-import { useAuth } from "@/entities/auth";
+import { useAuth } from "@/app/store/AuthContext";
 
 export function GroupChannelForm({
   channel,
@@ -21,7 +21,7 @@ export function GroupChannelForm({
   channel: InboxChannel;
   onSuccess?: () => void;
 }) {
-  const { authId } = useAuth();
+  const { authUser } = useAuth();
 
   const form = useForm<GroupChannelFormSchemaType>({
     resolver: zodResolver(GroupChannelFormSchema),
@@ -55,8 +55,8 @@ export function GroupChannelForm({
   );
 
   useEffect(() => {
-    setCurrentValues(channel, authId || "");
-  }, [channel, authId, setCurrentValues]);
+    setCurrentValues(channel, authUser?.id || "");
+  }, [channel, authUser?.id, setCurrentValues]);
 
   return (
     <form

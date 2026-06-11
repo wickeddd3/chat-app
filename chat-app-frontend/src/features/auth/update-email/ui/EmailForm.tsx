@@ -3,7 +3,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { EmailFormSchema, type EmailFormSchemaType } from "../model/schema";
 import { useEmail } from "../model/useEmail";
-import { toast } from "sonner";
 import { useEffect } from "react";
 
 export function EmailForm({ email }: { email: string }) {
@@ -14,22 +13,10 @@ export function EmailForm({ email }: { email: string }) {
     },
   });
 
-  const { updateEmail } = useEmail();
+  const { updateAccountEmail } = useEmail();
 
   async function onSubmit(data: EmailFormSchemaType) {
-    const { success, error } = await updateEmail(data);
-
-    if (!success) {
-      toast.error("Email update failed", {
-        description: error || "Error occurred while updating email",
-        position: "bottom-right",
-      });
-      return;
-    }
-
-    toast.success("Email updated successfully", {
-      position: "bottom-right",
-    });
+    await updateAccountEmail(data);
   }
 
   useEffect(() => {

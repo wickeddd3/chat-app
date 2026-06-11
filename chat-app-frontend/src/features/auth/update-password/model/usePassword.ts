@@ -1,21 +1,23 @@
-import { authClient } from "@/shared/lib/better-auth.client";
+import { updatePassword } from "@/shared/lib/supabase-auth";
 import type { PasswordFormSchemaType } from "./schema";
+import { toast } from "sonner";
 
 export function usePassword() {
-  const updatePassword = async (
-    values: PasswordFormSchemaType,
-  ): Promise<{ success: boolean; error?: string }> => {
-    const { error } = await authClient.changePassword({
-      ...values,
-      revokeOtherSessions: true,
-    });
+  const updateAccountPassword = async (formData: PasswordFormSchemaType) => {
+    const { error } = await updatePassword(formData);
 
     if (error) {
-      return { success: false, error: error.message };
+      toast.error("Password update failed", {
+        description: "Error occurred while updating password",
+        position: "bottom-right",
+      });
+      return;
     }
 
-    return { success: true };
+    toast.success("Password updated successfully", {
+      position: "bottom-right",
+    });
   };
 
-  return { updatePassword };
+  return { updateAccountPassword };
 }

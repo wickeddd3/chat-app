@@ -19,7 +19,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "react-router";
 import { SignUpFormSchema, type SignUpFormSchemaType } from "../model/schema";
 import { useSignUp } from "../model/useSignUp";
-import { toast } from "sonner";
 
 export function SignUpForm({
   className,
@@ -39,19 +38,7 @@ export function SignUpForm({
   const { register } = useSignUp();
 
   async function onSubmit(data: SignUpFormSchemaType) {
-    const { success, error } = await register(data);
-
-    if (!success) {
-      toast.error("Account creation failed", {
-        description: error || "Error occurred while creating account",
-        position: "bottom-right",
-      });
-      return;
-    }
-
-    toast.success("Account created successfully", {
-      position: "bottom-right",
-    });
+    await register(data);
   }
 
   return (
