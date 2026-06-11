@@ -28,13 +28,13 @@ export class ConnectionsController extends BaseController implements Controller 
 
   private getUserContacts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userId = req.user?.id ?? "";
+      const authUserId = req.authId ?? "";
       const limit = 20;
       const cursor = typeof req.query.cursor === "string" ? req.query.cursor : "";
       const query = typeof req.query.query === "string" ? req.query.query : "";
 
       const { contacts, nextCursor, hasMore } = await this.connectionsService.getUserContacts({
-        authUserId: userId,
+        authUserId,
         limit,
         cursor,
         query,
@@ -52,12 +52,12 @@ export class ConnectionsController extends BaseController implements Controller 
 
   private getSentConnections = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userId = req.user?.id ?? "";
+      const authUserId = req.authId ?? "";
       const limit = 20;
       const cursor = typeof req.query.cursor === "string" ? req.query.cursor : "";
 
       const { connections, nextCursor, hasMore } = await this.connectionsService.getSentConnections({
-        authUserId: userId,
+        authUserId,
         limit,
         cursor,
         status: "PENDING",
@@ -75,11 +75,11 @@ export class ConnectionsController extends BaseController implements Controller 
 
   private getReceivedConnections = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userId = req.user?.id ?? "";
+      const authUserId = req.authId ?? "";
       const limit = 20;
       const cursor = typeof req.query.cursor === "string" ? req.query.cursor : "";
       const { connections, nextCursor, hasMore } = await this.connectionsService.getReceivedConnections({
-        authUserId: userId,
+        authUserId,
         limit,
         cursor,
         status: "PENDING",
@@ -97,11 +97,11 @@ export class ConnectionsController extends BaseController implements Controller 
 
   private sendRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userId = req.user?.id ?? "";
+      const authUserId = req.authId ?? "";
       const body = req.body as { receiverId?: unknown };
       const receiverId = typeof body.receiverId === "string" ? body.receiverId : "";
 
-      const request = await this.connectionsService.sendRequest(userId, receiverId);
+      const request = await this.connectionsService.sendRequest(authUserId, receiverId);
 
       this.sendSuccess(res, request, "Connection request sent successfully");
     } catch (error: unknown) {
@@ -111,10 +111,10 @@ export class ConnectionsController extends BaseController implements Controller 
 
   private acceptRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userId = req.user?.id ?? "";
+      const authUserId = req.authId ?? "";
       const connectionId = typeof req.params.id === "string" ? req.params.id : "";
 
-      const request = await this.connectionsService.acceptRequest(userId, connectionId);
+      const request = await this.connectionsService.acceptRequest(authUserId, connectionId);
 
       this.sendSuccess(res, request, "Connection request accepted successfully");
     } catch (error: unknown) {
@@ -124,10 +124,10 @@ export class ConnectionsController extends BaseController implements Controller 
 
   private declineRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userId = req.user?.id ?? "";
+      const authUserId = req.authId ?? "";
       const connectionId = typeof req.params.id === "string" ? req.params.id : "";
 
-      const request = await this.connectionsService.declineRequest(userId, connectionId);
+      const request = await this.connectionsService.declineRequest(authUserId, connectionId);
 
       this.sendSuccess(res, request, "Connection request declined successfully");
     } catch (error: unknown) {
@@ -137,10 +137,10 @@ export class ConnectionsController extends BaseController implements Controller 
 
   private cancelRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userId = req.user?.id ?? "";
+      const authUserId = req.authId ?? "";
       const connectionId = typeof req.params.id === "string" ? req.params.id : "";
 
-      const request = await this.connectionsService.cancelRequest(userId, connectionId);
+      const request = await this.connectionsService.cancelRequest(authUserId, connectionId);
 
       this.sendSuccess(res, request, "Connection request canceled successfully");
     } catch (error: unknown) {

@@ -24,7 +24,7 @@ export class UsersController extends BaseController implements Controller {
 
   private getSuggestedUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const authUserId = req.user?.id ?? "";
+      const authUserId = req.authId ?? "";
       const limit = 20;
       const query = (req.query.query as string) || "";
       const responseData = await this.usersService.getSuggestedUsers({ authUserId, limit, query });
