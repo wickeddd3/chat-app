@@ -1,3 +1,4 @@
+import "dotenv/config";
 import "reflect-metadata";
 import { validateEnv } from "@/lib/validate-env";
 import { PORT } from "@/config/app.config";
