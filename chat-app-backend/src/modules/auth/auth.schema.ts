@@ -13,3 +13,15 @@ export const SignUpSchema = z.object({
 });
 
 export type SignUpSchemaType = z.infer<typeof SignUpSchema>;
+
+export const ProfileSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(100),
+  username: z
+    .string()
+    .trim()
+    .min(5, "Username is required")
+    .max(100)
+    .regex(/^[a-zA-Z0-9_-]+$/, "Username can only contain alphanumeric characters, underscores, and hyphens"),
+});
+
+export type ProfileSchemaType = z.infer<typeof ProfileSchema>;
