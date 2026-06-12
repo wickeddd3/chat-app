@@ -1,19 +1,11 @@
 import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { faker } from "@faker-js/faker";
-import { createClient } from "@supabase/supabase-js";
-
-// Initialize the Admin Client
-const supabaseAdmin = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
 
 // Create the user in Supabase Auth
 async function createAuthUser(email: string, password: string) {
   try {
-    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+    const { data, error } = await supabase.auth.admin.createUser({
       email: email,
       password: password,
       email_confirm: true,

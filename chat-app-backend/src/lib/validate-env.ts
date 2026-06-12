@@ -10,6 +10,6 @@ export const validateEnv = (): void => {
     REDIS_URL: str(),
     APP_URL: str(),
     SUPABASE_URL: str(),
-    SUPABASE_PUBLISHABLE_KEY: str(),
+    SUPABASE_SERVICE_ROLE_KEY: str(),
   });
 };
