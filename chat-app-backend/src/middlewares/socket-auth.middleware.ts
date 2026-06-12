@@ -3,7 +3,9 @@ import { supabase } from "@/lib/supabase";
 
 export const socketAuthMiddleware = async (socket: Socket, next: (err?: ExtendedError) => void) => {
   try {
-    const authHeader = socket.handshake.headers.authorization;
+    const authObject = socket.handshake.auth as { token?: string };
+    const authHeader = authObject.token;
+
     if (!authHeader?.startsWith("Bearer ")) {
       next(new Error("Missing or malformed authorization header"));
     }
@@ -22,7 +24,7 @@ export const socketAuthMiddleware = async (socket: Socket, next: (err?: Extended
     }
 
     // Attach user info to socket data
-    const socketData = socket.data as { authId?: string };
+    const socketData = socket.data as Record<string, unknown>;
     socketData.authId = user.id;
 
     next();
