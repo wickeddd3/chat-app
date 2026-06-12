@@ -8,7 +8,7 @@ export default function SignUpPage() {
         <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
           <GalleryVerticalEnd className="size-4" />
         </div>
-        Chat App
+        Chikamo
       </a>
       <SignUpForm />
     </div>

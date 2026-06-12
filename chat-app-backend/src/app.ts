@@ -58,12 +58,7 @@ export class App {
 
   private initializeMiddlewares(): void {
     this.express.use(express.json({ limit: "10mb" }));
-    this.express.use(
-      helmet({
-        crossOriginResourcePolicy: { policy: "cross-origin" },
-        crossOriginOpenerPolicy: { policy: "unsafe-none" },
-      }),
-    );
+    this.express.use(helmet());
     this.express.use(
       cors({
         origin: ALLOWED_ORIGINS,

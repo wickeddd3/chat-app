@@ -1,5 +1,12 @@
 import { supabase } from "./supabase.client";
 
+export const getAuthToken = async () => {
+  const { data } = await supabase.auth.getSession();
+  const token = data.session?.access_token;
+
+  return token ? `Bearer ${token}` : "";
+};
+
 export const signOut = async () => {
   await supabase.auth.signOut();
 };

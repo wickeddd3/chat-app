@@ -11,10 +11,10 @@ import {
 import { Link } from "react-router";
 import { useSignOut } from "@/features/auth/sign-out";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuthProfile } from "@/entities/auth";
 
 export function UserNav() {
-  const { authProfile } = useAuth();
+  const { authProfile } = useAuthProfile();
   const { logout } = useSignOut();
 
   return (

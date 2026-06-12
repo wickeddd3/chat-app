@@ -8,8 +8,8 @@ import { useRealTimeNotifications } from "@/features/notification/realtime-notif
 
 export function ChatLayout() {
   const { authUser } = useAuth();
-  useWebSocketConnect(!authUser);
-  useHeartbeat(!authUser);
+  useWebSocketConnect(!!authUser);
+  useHeartbeat(!!authUser);
   useRealTimeNotifications();
 
   return (

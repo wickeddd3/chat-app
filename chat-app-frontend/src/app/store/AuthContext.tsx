@@ -7,14 +7,11 @@ import {
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/shared/lib/supabase.client";
-import { useAuthProfile, type AuthUser } from "@/entities/auth";
 
 interface AuthContextType {
   session: Session | null;
   authUser: User | null;
   authUserLoading: boolean;
-  authProfile: AuthUser | null;
-  authProfileLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,9 +20,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [authUserLoading, setAuthUserLoading] = useState(true);
-
-  // Fetch current profile data
-  const { authProfile, isLoading } = useAuthProfile();
 
   useEffect(() => {
     // Get the initial session status
@@ -56,8 +50,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         session,
         authUser,
         authUserLoading,
-        authProfile,
-        authProfileLoading: isLoading,
       }}
     >
       {children}

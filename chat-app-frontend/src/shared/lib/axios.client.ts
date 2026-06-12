@@ -4,20 +4,10 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
-import { signOut } from "./supabase-auth";
-import { supabase } from "./supabase.client";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { getAuthToken, signOut } from "./supabase-auth";
+import { API_URL } from "../config/app.config";
 
 type RequestData = Record<string, unknown> | FormData | null;
-
-const getAuthToken = async () => {
-  // Get the current session from Supabase
-  const { data } = await supabase.auth.getSession();
-  const token = data.session?.access_token;
-
-  return token ? `Bearer ${token}` : "";
-};
 
 // Singleton Instance Configuration (Created once, shared everywhere)
 const http: AxiosInstance = axios.create({

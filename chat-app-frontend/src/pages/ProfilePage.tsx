@@ -5,17 +5,19 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/shared/ui/shadcn/tabs";
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuthProfile } from "@/entities/auth";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { ProfileForm } from "@/features/auth/update-profile";
 import { EmailForm } from "@/features/auth/update-email";
 import { PasswordForm } from "@/features/auth/update-password";
 import { UploadAvatar } from "@/features/auth/upload-avatar";
+import { useAuth } from "@/app/store/AuthContext";
 
 export default function ProfilePage() {
-  const { authProfile, authProfileLoading } = useAuth();
+  const { authProfile, isLoading } = useAuthProfile();
+  const { authUser } = useAuth();
 
-  if (authProfileLoading) {
+  if (isLoading) {
     return <p>Loading profile...</p>;
   }
 
@@ -61,7 +63,7 @@ export default function ProfilePage() {
           </TabsContent>
           <TabsContent value="email">
             <Card className="py-10 px-6">
-              <EmailForm email={authProfile?.email || ""} />
+              <EmailForm email={authUser?.email || ""} />
             </Card>
           </TabsContent>
           <TabsContent value="password">
