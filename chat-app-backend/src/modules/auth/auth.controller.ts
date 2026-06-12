@@ -3,8 +3,10 @@ import { TYPES } from "@/config/types";
 import { BaseController } from "@/utils/base.controller";
 import { Controller } from "@/interfaces/controller.interface";
 import { AuthService } from "./auth.service";
+import { SignUpSchema, type SignUpSchemaType } from "./auth.schema";
 import { Router, type Request, type Response, type NextFunction } from "express";
 import { authMiddleware } from "@/middlewares/auth.middleware";
+import { requestMiddleware } from "@/middlewares/request.middleware";
 import { NotFoundException } from "@/utils/http.exception";
 
 @injectable()
@@ -19,14 +21,14 @@ export class AuthController extends BaseController implements Controller {
 
   private initializeRoutes(): void {
     this.router.get(this.path, [authMiddleware], this.getAuthUser);
-    this.router.post(`${this.path}/sign-up`, this.signUp);
+    this.router.post(`${this.path}/sign-up`, [requestMiddleware(SignUpSchema)], this.signUp);
     this.router.post(`${this.path}/profile`, [authMiddleware], this.updateUserProfile);
     this.router.post(`${this.path}/image`, [authMiddleware], this.updateUserImage);
   }
 
   private signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const data = req.body as { name: string; username: string; email: string; password: string };
+      const data = req.body as SignUpSchemaType;
       const responseData = await this.authService.createUser(data);
 
       this.sendSuccess(res, responseData, "User created successfully.");

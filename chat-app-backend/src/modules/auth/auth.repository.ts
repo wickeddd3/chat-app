@@ -3,12 +3,13 @@ import { TYPES } from "@/config/types";
 import type { PrismaClient, User } from "@/prisma/client";
 import { HttpException } from "@/utils/http.exception";
 import { supabase } from "@/lib/supabase";
+import type { SignUpSchemaType } from "./auth.schema";
 
 @injectable()
 export class AuthRepository {
   constructor(@inject(TYPES.PrismaClient) private db: PrismaClient) {}
 
-  public async create(data: { name: string; username: string; email: string; password: string }): Promise<User | null> {
+  public async create(data: SignUpSchemaType): Promise<User | null> {
     const { name, username, email, password } = data;
 
     let supabaseUserId: string | null = null;
