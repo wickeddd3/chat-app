@@ -5,8 +5,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 import { getAuthToken, signOut } from "./supabase-auth";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { API_URL } from "../config/app.config";
 
 type RequestData = Record<string, unknown> | FormData | null;
 

@@ -1,7 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
+import {
+  VITE_SUPABASE_PUBLISHABLE_KEY,
+  VITE_SUPABASE_URL,
+} from "../config/app.config";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const supabaseUrl = VITE_SUPABASE_URL;
+const supabasePublishableKey = VITE_SUPABASE_PUBLISHABLE_KEY;
 
 if (!supabaseUrl || !supabasePublishableKey) {
   throw new Error(
