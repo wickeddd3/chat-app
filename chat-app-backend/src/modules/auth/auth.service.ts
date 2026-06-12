@@ -3,7 +3,7 @@ import { TYPES } from "@/config/types";
 import { AuthRepository } from "./auth.repository";
 import type { User } from "@/prisma/client";
 import { HttpException } from "@/utils/http.exception";
-import { type SignUpSchemaType } from "./auth.schema";
+import type { ProfileSchemaType, SignUpSchemaType } from "./auth.schema";
 
 @injectable()
 export class AuthService {
@@ -25,7 +25,7 @@ export class AuthService {
     }
   }
 
-  public async updateUserProfile(authId: string, data: { name: string; username: string }): Promise<User | null> {
+  public async updateUserProfile(authId: string, data: ProfileSchemaType): Promise<User | null> {
     try {
       return await this.authRepository.updateProfile(authId, data);
     } catch {

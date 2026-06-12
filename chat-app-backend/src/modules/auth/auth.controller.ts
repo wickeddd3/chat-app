@@ -3,7 +3,7 @@ import { TYPES } from "@/config/types";
 import { BaseController } from "@/utils/base.controller";
 import { Controller } from "@/interfaces/controller.interface";
 import { AuthService } from "./auth.service";
-import { SignUpSchema, type SignUpSchemaType } from "./auth.schema";
+import { ProfileSchema, type ProfileSchemaType, SignUpSchema, type SignUpSchemaType } from "./auth.schema";
 import { Router, type Request, type Response, type NextFunction } from "express";
 import { authMiddleware } from "@/middlewares/auth.middleware";
 import { requestMiddleware } from "@/middlewares/request.middleware";
@@ -22,7 +22,11 @@ export class AuthController extends BaseController implements Controller {
   private initializeRoutes(): void {
     this.router.get(this.path, [authMiddleware], this.getAuthUser);
     this.router.post(`${this.path}/sign-up`, [requestMiddleware(SignUpSchema)], this.signUp);
-    this.router.post(`${this.path}/profile`, [authMiddleware], this.updateUserProfile);
+    this.router.post(
+      `${this.path}/profile`,
+      [authMiddleware, requestMiddleware(ProfileSchema)],
+      this.updateUserProfile,
+    );
     this.router.post(`${this.path}/image`, [authMiddleware], this.updateUserImage);
   }
 
@@ -55,7 +59,7 @@ export class AuthController extends BaseController implements Controller {
   private updateUserProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
-      const data = req.body as { name: string; username: string };
+      const data = req.body as ProfileSchemaType;
       const user = await this.authService.updateUserProfile(authUserId, data);
 
       this.sendSuccess(res, user, "User profile updated successfully.");
