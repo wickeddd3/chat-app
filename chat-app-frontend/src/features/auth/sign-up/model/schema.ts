@@ -8,7 +8,15 @@ export const SignUpFormSchema = z
       .trim()
       .min(1, "Email is required")
       .email({ pattern: z.regexes.email }),
-    username: z.string().trim().min(5, "Username is required").max(100),
+    username: z
+      .string()
+      .trim()
+      .min(5, "Username is required")
+      .max(100)
+      .regex(
+        /^[a-zA-Z0-9_-]+$/,
+        "Username can only contain alphanumeric characters, underscores, and hyphens",
+      ),
     password: z
       .string()
       .trim()
