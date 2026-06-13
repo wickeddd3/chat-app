@@ -1,31 +1,17 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { BaseController } from "@/utils/base.controller";
-import { Controller } from "@/interfaces/controller.interface";
 import { ChannelsService } from "./channels.service";
-import { Router, type Request, type Response, type NextFunction } from "express";
-import { authMiddleware } from "@/middlewares/auth.middleware";
+import type { Request, Response, NextFunction } from "express";
 import { channelToChannelDetails, channelToInboxChannel } from "./channels.transformer";
 
 @injectable()
-export class ChannelsController extends BaseController implements Controller {
-  public path = "/channels";
-  public router = Router();
-
+export class ChannelsController extends BaseController {
   constructor(@inject(TYPES.ChannelsService) private channelsService: ChannelsService) {
     super();
-    this.initializeRoutes();
   }
 
-  private initializeRoutes(): void {
-    this.router.get(this.path, [authMiddleware], this.getChannels);
-    this.router.get(`${this.path}/:channelId`, [authMiddleware], this.getChannel);
-    this.router.get(`${this.path}/find/:targetUserId`, [authMiddleware], this.findChannelOrCreate);
-    this.router.post(`${this.path}/group`, [authMiddleware], this.createGroupChannel);
-    this.router.post(`${this.path}/group/:channelId`, [authMiddleware], this.updateGroupChannel);
-  }
-
-  private getChannels = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getChannels = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const limit = 20;
@@ -47,7 +33,7 @@ export class ChannelsController extends BaseController implements Controller {
     }
   };
 
-  private getChannel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getChannel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const channelId = typeof req.params.channelId === "string" ? req.params.channelId : "";
@@ -61,7 +47,7 @@ export class ChannelsController extends BaseController implements Controller {
     }
   };
 
-  private findChannelOrCreate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public findChannelOrCreate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const targetUserId = typeof req.params.targetUserId === "string" ? req.params.targetUserId : "";
@@ -74,7 +60,7 @@ export class ChannelsController extends BaseController implements Controller {
     }
   };
 
-  private createGroupChannel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public createGroupChannel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const body = req.body as { name?: unknown; memberIds?: unknown };
@@ -89,7 +75,7 @@ export class ChannelsController extends BaseController implements Controller {
     }
   };
 
-  private updateGroupChannel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public updateGroupChannel = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const channelId = typeof req.params.channelId === "string" ? req.params.channelId : "";

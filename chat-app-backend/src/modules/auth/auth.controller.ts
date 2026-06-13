@@ -1,36 +1,18 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { BaseController } from "@/utils/base.controller";
-import { Controller } from "@/interfaces/controller.interface";
 import { AuthService } from "./auth.service";
-import { ProfileSchema, type ProfileSchemaType, SignUpSchema, type SignUpSchemaType } from "./auth.schema";
-import { Router, type Request, type Response, type NextFunction } from "express";
-import { authMiddleware } from "@/middlewares/auth.middleware";
-import { requestMiddleware } from "@/middlewares/request.middleware";
+import type { ProfileSchemaType, SignUpSchemaType } from "./auth.schema";
+import type { Request, Response, NextFunction } from "express";
 import { NotFoundException } from "@/utils/http.exception";
 
 @injectable()
-export class AuthController extends BaseController implements Controller {
-  public path = "/auth";
-  public router = Router();
-
+export class AuthController extends BaseController {
   constructor(@inject(TYPES.AuthService) private authService: AuthService) {
     super();
-    this.initializeRoutes();
   }
 
-  private initializeRoutes(): void {
-    this.router.get(this.path, [authMiddleware], this.getAuthUser);
-    this.router.post(`${this.path}/sign-up`, [requestMiddleware(SignUpSchema)], this.signUp);
-    this.router.post(
-      `${this.path}/profile`,
-      [authMiddleware, requestMiddleware(ProfileSchema)],
-      this.updateUserProfile,
-    );
-    this.router.post(`${this.path}/image`, [authMiddleware], this.updateUserImage);
-  }
-
-  private signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const data = req.body as SignUpSchemaType;
       const responseData = await this.authService.createUser(data);
@@ -41,7 +23,7 @@ export class AuthController extends BaseController implements Controller {
     }
   };
 
-  private getAuthUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getAuthUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const user = await this.authService.getUserById(authUserId);
@@ -56,7 +38,7 @@ export class AuthController extends BaseController implements Controller {
     }
   };
 
-  private updateUserProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public updateUserProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const data = req.body as ProfileSchemaType;
@@ -68,7 +50,7 @@ export class AuthController extends BaseController implements Controller {
     }
   };
 
-  private updateUserImage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public updateUserImage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const data = req.body as { image: string };

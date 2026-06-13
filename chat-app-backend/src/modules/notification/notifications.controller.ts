@@ -1,27 +1,16 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { BaseController } from "@/utils/base.controller";
-import { Controller } from "@/interfaces/controller.interface";
 import { NotificationsService } from "./notifications.service";
-import { Router, type Request, type Response, type NextFunction } from "express";
-import { authMiddleware } from "@/middlewares/auth.middleware";
+import type { Request, Response, NextFunction } from "express";
 
 @injectable()
-export class NotificationsController extends BaseController implements Controller {
-  public path = "/notifications";
-  public router = Router();
-
+export class NotificationsController extends BaseController {
   constructor(@inject(TYPES.NotificationsService) private notificationsService: NotificationsService) {
     super();
-    this.initializeRoutes();
   }
 
-  private initializeRoutes(): void {
-    this.router.get(this.path, [authMiddleware], this.getNotifications);
-    this.router.post(`${this.path}/mark-as-read`, [authMiddleware], this.markAsRead);
-  }
-
-  private getNotifications = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getNotifications = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const limit = 20;
@@ -43,7 +32,7 @@ export class NotificationsController extends BaseController implements Controlle
     }
   };
 
-  private markAsRead = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public markAsRead = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const body = req.body as { notificationIds?: unknown };

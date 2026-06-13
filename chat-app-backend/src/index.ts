@@ -5,19 +5,19 @@ import { PORT } from "@/config/app.config";
 import { App } from "@/app";
 import { container } from "@/config/inversify.config";
 import { TYPES } from "@/config/types";
-import { Controller } from "@/interfaces/controller.interface";
+import { HttpRouter } from "@/interfaces/router.interface";
 
 validateEnv();
 
-// Dynamically resolve controllers out from central DI container instance
-const activeControllers: Controller[] = [
-  container.get<Controller>(TYPES.AuthController),
-  container.get<Controller>(TYPES.UsersController),
-  container.get<Controller>(TYPES.ChannelsController),
-  container.get<Controller>(TYPES.MessagesController),
-  container.get<Controller>(TYPES.ConnectionsController),
-  container.get<Controller>(TYPES.NotificationsController),
+// Dynamically resolve routers out from central DI container instance
+const activeRouters: HttpRouter[] = [
+  container.get<HttpRouter>(TYPES.AuthRouter),
+  container.get<HttpRouter>(TYPES.UsersRouter),
+  container.get<HttpRouter>(TYPES.ChannelsRouter),
+  container.get<HttpRouter>(TYPES.MessagesRouter),
+  container.get<HttpRouter>(TYPES.ConnectionsRouter),
+  container.get<HttpRouter>(TYPES.NotificationsRouter),
 ];
 
-const app = new App(activeControllers, PORT);
+const app = new App(activeRouters, PORT);
 app.start();

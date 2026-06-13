@@ -1,26 +1,16 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { BaseController } from "@/utils/base.controller";
-import { Controller } from "@/interfaces/controller.interface";
 import { MessagesService } from "./messages.service";
-import { Router, type Request, type Response, type NextFunction } from "express";
-import { authMiddleware } from "@/middlewares/auth.middleware";
+import type { Request, Response, NextFunction } from "express";
 
 @injectable()
-export class MessagesController extends BaseController implements Controller {
-  public path = "/messages";
-  public router = Router();
-
+export class MessagesController extends BaseController {
   constructor(@inject(TYPES.MessagesService) private messagesService: MessagesService) {
     super();
-    this.initializeRoutes();
   }
 
-  private initializeRoutes(): void {
-    this.router.get(`${this.path}/:channelId`, [authMiddleware], this.getMessages);
-  }
-
-  private getMessages = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getMessages = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const channelId = req.params.channelId as string;
       const limit = 20;
