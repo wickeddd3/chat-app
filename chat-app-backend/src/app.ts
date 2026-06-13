@@ -4,7 +4,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import compression from "compression";
-import { Controller } from "@/interfaces/controller.interface";
+import { HttpRouter } from "./interfaces/router.interface";
 import { ALLOWED_ORIGINS } from "@/config/cors-origins";
 
 import { connectRedis } from "@/lib/redis";
@@ -23,13 +23,13 @@ export class App {
   public port: number;
   public server: HttpServer;
 
-  constructor(controllers: Controller[], port: number) {
+  constructor(routers: HttpRouter[], port: number) {
     this.express = express();
     this.port = port;
     this.server = createServer(this.express);
 
     this.initializeMiddlewares();
-    this.initializeControllers(controllers);
+    this.initializeRouters(routers);
 
     // Error middleware MUST be loaded LAST in the express chain to capture bubble-ups
     this.express.use(errorMiddleware);
@@ -69,9 +69,9 @@ export class App {
     this.express.use(compression());
   }
 
-  private initializeControllers(controllers: Controller[]): void {
-    controllers.forEach((controller: Controller) => {
-      this.express.use("/api", controller.router);
+  private initializeRouters(routers: HttpRouter[]): void {
+    routers.forEach((routerItem: HttpRouter) => {
+      this.express.use("/api", routerItem.router);
     });
   }
 
