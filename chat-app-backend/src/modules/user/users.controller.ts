@@ -1,28 +1,17 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { BaseController } from "@/utils/base.controller";
-import { Controller } from "@/interfaces/controller.interface";
 import { UsersService } from "./users.service";
-import { Router, type Request, type Response, type NextFunction } from "express";
-import { authMiddleware } from "@/middlewares/auth.middleware";
+import type { Request, Response, NextFunction } from "express";
 import { NotFoundException } from "@/utils/http.exception";
 
 @injectable()
-export class UsersController extends BaseController implements Controller {
-  public path = "/users";
-  public router = Router();
-
+export class UsersController extends BaseController {
   constructor(@inject(TYPES.UsersService) private usersService: UsersService) {
     super();
-    this.initializeRoutes();
   }
 
-  private initializeRoutes(): void {
-    this.router.get(this.path, [authMiddleware], this.getSuggestedUsers);
-    this.router.get(`${this.path}/profile/:username`, [authMiddleware], this.getUserByUsername);
-  }
-
-  private getSuggestedUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getSuggestedUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const limit = 20;
@@ -36,7 +25,7 @@ export class UsersController extends BaseController implements Controller {
     }
   };
 
-  private getUserByUsername = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getUserByUsername = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const username = req.params.username as string;
       const user = await this.usersService.getUserByUsername(username);

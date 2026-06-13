@@ -1,32 +1,16 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { BaseController } from "@/utils/base.controller";
-import { Controller } from "@/interfaces/controller.interface";
 import { ConnectionsService } from "./connections.service";
-import { Router, type Request, type Response, type NextFunction } from "express";
-import { authMiddleware } from "@/middlewares/auth.middleware";
+import type { Request, Response, NextFunction } from "express";
 
 @injectable()
-export class ConnectionsController extends BaseController implements Controller {
-  public path = "/connections";
-  public router = Router();
-
+export class ConnectionsController extends BaseController {
   constructor(@inject(TYPES.ConnectionsService) private connectionsService: ConnectionsService) {
     super();
-    this.initializeRoutes();
   }
 
-  private initializeRoutes(): void {
-    this.router.get(`${this.path}/contacts`, [authMiddleware], this.getUserContacts);
-    this.router.get(`${this.path}/sent`, [authMiddleware], this.getSentConnections);
-    this.router.get(`${this.path}/received`, [authMiddleware], this.getReceivedConnections);
-    this.router.post(`${this.path}/request`, [authMiddleware], this.sendRequest);
-    this.router.post(`${this.path}/request/:id/accept`, [authMiddleware], this.acceptRequest);
-    this.router.post(`${this.path}/request/:id/decline`, [authMiddleware], this.declineRequest);
-    this.router.post(`${this.path}/request/:id/cancel`, [authMiddleware], this.cancelRequest);
-  }
-
-  private getUserContacts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getUserContacts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const limit = 20;
@@ -50,7 +34,7 @@ export class ConnectionsController extends BaseController implements Controller 
     }
   };
 
-  private getSentConnections = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getSentConnections = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const limit = 20;
@@ -73,7 +57,7 @@ export class ConnectionsController extends BaseController implements Controller 
     }
   };
 
-  private getReceivedConnections = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getReceivedConnections = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const limit = 20;
@@ -95,7 +79,7 @@ export class ConnectionsController extends BaseController implements Controller 
     }
   };
 
-  private sendRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public sendRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const body = req.body as { receiverId?: unknown };
@@ -109,7 +93,7 @@ export class ConnectionsController extends BaseController implements Controller 
     }
   };
 
-  private acceptRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public acceptRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const connectionId = typeof req.params.id === "string" ? req.params.id : "";
@@ -122,7 +106,7 @@ export class ConnectionsController extends BaseController implements Controller 
     }
   };
 
-  private declineRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public declineRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const connectionId = typeof req.params.id === "string" ? req.params.id : "";
@@ -135,7 +119,7 @@ export class ConnectionsController extends BaseController implements Controller 
     }
   };
 
-  private cancelRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public cancelRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
       const connectionId = typeof req.params.id === "string" ? req.params.id : "";
