@@ -4,6 +4,10 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import compression from "compression";
+
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpecs } from "@/config/swagger";
+
 import { HttpRouter } from "./interfaces/router.interface";
 import { ALLOWED_ORIGINS } from "@/config/cors-origins";
 
@@ -33,6 +37,9 @@ export class App {
 
     // Error middleware MUST be loaded LAST in the express chain to capture bubble-ups
     this.express.use(errorMiddleware);
+
+    // API documentation
+    this.initializeSwagger();
 
     // Establish Redis connection before starting the WebSocket server
     void connectRedis();
@@ -73,6 +80,18 @@ export class App {
     routers.forEach((routerItem: HttpRouter) => {
       this.express.use("/api", routerItem.router);
     });
+  }
+
+  private initializeSwagger(): void {
+    this.express.use(
+      "/api-docs",
+      swaggerUi.serve,
+      swaggerUi.setup(swaggerSpecs, {
+        swaggerOptions: {
+          filter: true,
+        },
+      }),
+    );
   }
 
   private initializeEventSubscribers(): void {
