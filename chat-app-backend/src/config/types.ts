@@ -36,10 +36,13 @@ export const TYPES = {
 
   SocketServerProvider: Symbol.for("SocketServerProvider"),
   SocketServer: Symbol.for("SocketServer"),
-  WebSocketService: Symbol.for("WebSocketService"),
+  WebSocketServer: Symbol.for("WebSocketServer"),
   WebSocketCommand: Symbol.for("WebSocketCommand"),
+  WebSocketBroadcaster: Symbol.for("WebSocketBroadcaster"),
 
-  RedisClient: Symbol.for("RedisClient"),
+  RedisMainClient: Symbol.for("RedisMainClient"), // For regular DB cache operations & presence tracking
+  RedisPubClient: Symbol.for("RedisPubClient"), // Specifically for pushing data to the MessagePack bus
+  RedisSubClient: Symbol.for("RedisSubClient"), // reserved exclusively for Socket.io internal horizontal syncing
   PresenceService: Symbol.for("PresenceService"),
 
   EventDispatcher: Symbol.for("EventDispatcher"),

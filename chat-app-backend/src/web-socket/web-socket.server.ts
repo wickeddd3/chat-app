@@ -5,7 +5,7 @@ import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import { redisClient } from "@/lib/redis";
 
 @injectable()
-export class WebSocketService {
+export class WebSocketServer {
   private commandRegistry = new Map<string, WebSocketCommand>();
 
   constructor(
@@ -29,11 +29,11 @@ export class WebSocketService {
 
       // Join a private notification room unique to this specific user profile instance
       void socket.join(`user:${authId}`);
-
+      // Join the global presence stream room to listen for other users' heartbeats
+      void socket.join("presence:global");
       // Emit the current list of online users directly to this newly connected client
       void this.syncOnlinePresence(socket);
 
-      // DYNAMIC COMMAND ROUTER LOOP
       // Listen for incoming triggers from the registry map dynamically
       for (const [eventName, command] of this.commandRegistry.entries()) {
         socket.on(eventName, async (data: unknown) => {

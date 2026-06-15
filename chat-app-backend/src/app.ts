@@ -17,7 +17,7 @@ import { EventEmitter } from "events";
 import { container } from "@/config/inversify.config";
 import { TYPES } from "@/config/types";
 import { SocketServerProvider } from "@/web-socket/socket-server.provider";
-import { WebSocketService } from "@/web-socket/web-socket.service";
+import { WebSocketServer } from "@/web-socket/web-socket.server";
 
 import { NotificationSubscriber } from "@/web-socket/handlers/notification.subscriber";
 import { errorMiddleware } from "@/middlewares/error.middleware";
@@ -52,9 +52,9 @@ export class App {
     const serverProvider = container.get<SocketServerProvider>(TYPES.SocketServerProvider);
     serverProvider.create(this.server);
 
-    // Resolve and start the WebSocket service wrapper cleanly
-    const webSocketService = container.get<WebSocketService>(TYPES.WebSocketService);
-    webSocketService.start();
+    // Resolve and start the WebSocket server wrapper cleanly
+    const webSocketServer = container.get<WebSocketServer>(TYPES.WebSocketServer);
+    webSocketServer.start();
   }
 
   public start(): void {

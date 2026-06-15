@@ -4,7 +4,10 @@ import { TYPES } from "./types";
 
 import { prisma } from "@/lib/prisma";
 import { PrismaClient } from "@/prisma/client";
-import { redisClient } from "@/lib/redis";
+
+import type { Redis } from "ioredis";
+import { pubClient, redisClient, subClient } from "@/lib/redis";
+
 import { eventDispatcher } from "@/lib/event-dispatcher";
 
 import { AuthRouter } from "@/modules/auth/auth.router";
@@ -42,7 +45,7 @@ import { NotificationsController } from "@/modules/notification/notifications.co
 
 import { Server as SocketServer } from "socket.io";
 import { SocketServerProvider } from "@/web-socket/socket-server.provider";
-import { WebSocketService } from "@/web-socket/web-socket.service";
+import { WebSocketServer } from "@/web-socket/web-socket.server";
 import { PresenceService } from "@/web-socket/services/presence.service";
 
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
@@ -53,14 +56,22 @@ import { LeaveChannelCommand } from "@/web-socket/commands/leave-channel.command
 import { DisconnectCommand } from "@/web-socket/commands/disconnect.command";
 import { HeartbeatCommand } from "@/web-socket/commands/heartbeat.command";
 
+import { WebSocketBroadcaster } from "@/web-socket/web-socket.broadcaster";
+
 import { NotificationSubscriber } from "@/web-socket/handlers/notification.subscriber";
 
 const container = new Container();
 
 // Bind Prisma Client as a structural constant value singleton
 container.bind<PrismaClient>(TYPES.PrismaClient).toConstantValue(prisma);
-container.bind(TYPES.RedisClient).toConstantValue(redisClient);
 container.bind(TYPES.EventDispatcher).toConstantValue(eventDispatcher);
+
+// Main operational caching engine
+container.bind<Redis>(TYPES.RedisMainClient).toConstantValue(redisClient);
+// High performance outward cluster event pipeline
+container.bind<Redis>(TYPES.RedisPubClient).toConstantValue(pubClient);
+// Isolated internal inbound adapter sync listener
+container.bind<Redis>(TYPES.RedisSubClient).toConstantValue(subClient);
 
 // Bind domain layers
 container.bind<AuthRouter>(TYPES.AuthRouter).to(AuthRouter);
@@ -115,7 +126,9 @@ container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(LeaveChannelCommand)
 container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(DisconnectCommand);
 container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(HeartbeatCommand);
 
+container.bind<WebSocketBroadcaster>(TYPES.WebSocketBroadcaster).to(WebSocketBroadcaster);
+
 // Bind main service orchestration driver engine
-container.bind<WebSocketService>(TYPES.WebSocketService).to(WebSocketService);
+container.bind<WebSocketServer>(TYPES.WebSocketServer).to(WebSocketServer);
 
 export { container };
