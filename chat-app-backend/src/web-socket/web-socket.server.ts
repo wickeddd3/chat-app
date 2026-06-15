@@ -5,7 +5,7 @@ import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import { redisClient } from "@/lib/redis";
 
 @injectable()
-export class WebSocketService {
+export class WebSocketServer {
   private commandRegistry = new Map<string, WebSocketCommand>();
 
   constructor(

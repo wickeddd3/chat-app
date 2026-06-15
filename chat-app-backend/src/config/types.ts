@@ -36,7 +36,7 @@ export const TYPES = {
 
   SocketServerProvider: Symbol.for("SocketServerProvider"),
   SocketServer: Symbol.for("SocketServer"),
-  WebSocketService: Symbol.for("WebSocketService"),
+  WebSocketServer: Symbol.for("WebSocketServer"),
   WebSocketCommand: Symbol.for("WebSocketCommand"),
 
   RedisClient: Symbol.for("RedisClient"),

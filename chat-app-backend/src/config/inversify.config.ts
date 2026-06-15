@@ -42,7 +42,7 @@ import { NotificationsController } from "@/modules/notification/notifications.co
 
 import { Server as SocketServer } from "socket.io";
 import { SocketServerProvider } from "@/web-socket/socket-server.provider";
-import { WebSocketService } from "@/web-socket/web-socket.service";
+import { WebSocketServer } from "@/web-socket/web-socket.server";
 import { PresenceService } from "@/web-socket/services/presence.service";
 
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
@@ -116,6 +116,6 @@ container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(DisconnectCommand);
 container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(HeartbeatCommand);
 
 // Bind main service orchestration driver engine
-container.bind<WebSocketService>(TYPES.WebSocketService).to(WebSocketService);
+container.bind<WebSocketServer>(TYPES.WebSocketServer).to(WebSocketServer);
 
 export { container };
