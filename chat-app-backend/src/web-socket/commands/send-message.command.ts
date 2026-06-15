@@ -1,9 +1,10 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
+import type { Socket } from "socket.io";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import { MessagesService } from "@/modules/message/messages.service";
 import { ChannelsService } from "@/modules/channel/channels.service";
-import type { Socket } from "socket.io";
+import { WebSocketBroadcaster } from "../web-socket.broadcaster";
 
 interface SendMessagePayload {
   content: string;
@@ -18,6 +19,7 @@ export class SendMessageCommand implements WebSocketCommand {
   constructor(
     @inject(TYPES.MessagesService) private messagesService: MessagesService,
     @inject(TYPES.ChannelsService) private channelsService: ChannelsService,
+    @inject(TYPES.WebSocketBroadcaster) private broadcaster: WebSocketBroadcaster,
   ) {}
 
   public async execute(socket: Socket, authId: string, data: SendMessagePayload): Promise<void> {
@@ -33,8 +35,7 @@ export class SendMessageCommand implements WebSocketCommand {
     // 2. Update Channel
     await this.channelsService.updateChannel(targetChannelId);
 
-    // 3. Broadcast the saved message to the room
-    socket.to(data.channelId).emit("receive_message", {
+    const broadcastPayload = {
       clientId: data.clientId, // Echo back clientId for optimistic UI reconciliation
       id: savedMessage.id,
       content: savedMessage.content,
@@ -45,8 +46,10 @@ export class SendMessageCommand implements WebSocketCommand {
         image: savedMessage.author.image,
       },
       createdAt: savedMessage.createdAt,
-    });
+    };
 
-    socket.to(data.channelId).emit("inbox_updated");
+    // 3. Emits to everyone in the room (including the sender instance)
+    await this.broadcaster.emitToRoom(data.channelId, "receive_message", broadcastPayload);
+    await this.broadcaster.emitToRoom(data.channelId, "inbox_updated", null);
   }
 }
