@@ -5,7 +5,7 @@ import notepack from "notepack.io";
 
 @injectable()
 export class WebSocketBroadcaster {
-  constructor(@inject(TYPES.RedisClient) private pubClient: Redis) {}
+  constructor(@inject(TYPES.RedisPubClient) private pubClient: Redis) {}
 
   /**
    * Publishes a raw Engine.io packet directly to the Redis Inter-process Communication (IPC) bus.
