@@ -4,7 +4,10 @@ import { TYPES } from "./types";
 
 import { prisma } from "@/lib/prisma";
 import { PrismaClient } from "@/prisma/client";
-import { redisClient } from "@/lib/redis";
+
+import type { Redis } from "ioredis";
+import { pubClient, redisClient, subClient } from "@/lib/redis";
+
 import { eventDispatcher } from "@/lib/event-dispatcher";
 
 import { AuthRouter } from "@/modules/auth/auth.router";
@@ -61,8 +64,14 @@ const container = new Container();
 
 // Bind Prisma Client as a structural constant value singleton
 container.bind<PrismaClient>(TYPES.PrismaClient).toConstantValue(prisma);
-container.bind(TYPES.RedisClient).toConstantValue(redisClient);
 container.bind(TYPES.EventDispatcher).toConstantValue(eventDispatcher);
+
+// Main operational caching engine
+container.bind<Redis>(TYPES.RedisMainClient).toConstantValue(redisClient);
+// High performance outward cluster event pipeline
+container.bind<Redis>(TYPES.RedisPubClient).toConstantValue(pubClient);
+// Isolated internal inbound adapter sync listener
+container.bind<Redis>(TYPES.RedisSubClient).toConstantValue(subClient);
 
 // Bind domain layers
 container.bind<AuthRouter>(TYPES.AuthRouter).to(AuthRouter);
