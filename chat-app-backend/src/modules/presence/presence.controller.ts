@@ -13,9 +13,8 @@ export class PresenceController extends BaseController {
   public syncSnapshot = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authUserId = req.authId ?? "";
-      const { channelId } = req.body; // Optional active room view context
 
-      const data = await this.presenceService.getAggregatedPresenceMap(authUserId, channelId);
+      const data = await this.presenceService.getAggregatedPresenceMap(authUserId);
 
       this.sendSuccess(res, data, "Presence map fetched successfully", 200);
     } catch (error: unknown) {
