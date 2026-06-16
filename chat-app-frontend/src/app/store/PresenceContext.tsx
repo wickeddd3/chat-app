@@ -1,5 +1,6 @@
 import { usePresenceMap } from "@/features/message/online-presence";
 import React, { createContext, useContext } from "react";
+import { useAuth } from "./AuthContext";
 
 interface PresenceContextType {
   presenceMap: Record<string, "online" | "offline">;
@@ -13,7 +14,8 @@ const PresenceContext = createContext<PresenceContextType | undefined>(
 export const PresenceProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { presenceMap } = usePresenceMap();
+  const { authUser } = useAuth();
+  const { presenceMap } = usePresenceMap(!!authUser);
 
   const isOnline = (userId: string) => presenceMap[userId] === "online";
 
