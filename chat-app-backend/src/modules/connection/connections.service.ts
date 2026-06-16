@@ -87,7 +87,7 @@ export class ConnectionsService {
 
       // Extract the two user IDs involved in the connection
       const senderId = result.notification.userId; // The original requester
-      this.presenceService.setPresenceLookup({ senderId, receiverId });
+      this.presenceService.setPresenceLookup(senderId, receiverId);
 
       // Dispatch system notification event
       this.dispatcher.emit("notification:created", result.notification);
