@@ -15,6 +15,6 @@ export class PresenceRouter implements HttpRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.post(`${this.path}/sync-snapshot`, [authMiddleware], this.presenceController.syncSnapshot);
+    this.router.get(`${this.path}/sync-snapshot`, [authMiddleware], this.presenceController.syncSnapshot);
   }
 }
