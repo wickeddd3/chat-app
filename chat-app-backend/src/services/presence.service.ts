@@ -50,15 +50,8 @@ export class PresenceService {
   /**
    * Compiles and resolves the complete localized viewport slice for a user using Redis Set Unions.
    */
-  public async getAggregatedPresenceMap(
-    authUserId: string,
-    activeChannelId?: string,
-  ): Promise<Record<string, "online" | "offline">> {
+  public async getAggregatedPresenceMap(authUserId: string): Promise<Record<string, "online" | "offline">> {
     const unionKeys = [`presence:contacts:${authUserId}`];
-
-    if (activeChannelId) {
-      unionKeys.push(`presence:channel_members:${activeChannelId}`);
-    }
 
     // 1. Extract all target IDs across contact arrays and room rosters in O(N)
     const targetedUserIds = await this.redis.sunion(...unionKeys);
