@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { webSocketClient } from "@/shared/lib/socket-io.client";
+import { usePresenceMap } from "@/features/message/online-presence";
+import React, { createContext, useContext } from "react";
 
 interface PresenceContextType {
-  onlineUsers: Set<string>;
+  presenceMap: Record<string, "online" | "offline">;
   isOnline: (userId: string) => boolean;
 }
 
@@ -13,43 +13,12 @@ const PresenceContext = createContext<PresenceContextType | undefined>(
 export const PresenceProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
+  const { presenceMap } = usePresenceMap();
 
-  useEffect(() => {
-    // 1. Listen for individual status changes
-    const handleStatusChange = ({
-      userId,
-      status,
-    }: {
-      userId: string;
-      status: "online" | "offline";
-    }) => {
-      setOnlineUsers((prev) => {
-        const newSet = new Set(prev);
-        if (status === "online") newSet.add(userId);
-        else newSet.delete(userId);
-        return newSet;
-      });
-    };
-
-    // 2. Optional: Initial sync (Server sends the full list upon connection)
-    const handleInitialList = (userIds: string[]) => {
-      setOnlineUsers(new Set(userIds));
-    };
-
-    webSocketClient.on("user_status_change", handleStatusChange);
-    webSocketClient.on("online_users_list", handleInitialList);
-
-    return () => {
-      webSocketClient.off("user_status_change", handleStatusChange);
-      webSocketClient.off("online_users_list", handleInitialList);
-    };
-  }, []);
-
-  const isOnline = (userId: string) => onlineUsers.has(userId);
+  const isOnline = (userId: string) => presenceMap[userId] === "online";
 
   return (
-    <PresenceContext.Provider value={{ onlineUsers, isOnline }}>
+    <PresenceContext.Provider value={{ presenceMap, isOnline }}>
       {children}
     </PresenceContext.Provider>
   );
