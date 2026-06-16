@@ -8,7 +8,7 @@ import compression from "compression";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpecs } from "@/config/swagger";
 
-import { HttpRouter } from "./interfaces/router.interface";
+import { HttpRouter } from "@/interfaces/router.interface";
 import { ALLOWED_ORIGINS } from "@/config/cors-origins";
 
 import { connectRedis } from "@/lib/redis";
