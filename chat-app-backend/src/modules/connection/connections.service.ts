@@ -5,12 +5,14 @@ import type { ConnectionStatus } from "@/prisma/client";
 import type { ConnectionRequestResponse, PaginatedConnections, PaginatedContacts } from "./connections.types";
 import { HttpException } from "@/utils/http.exception";
 import { EventEmitter } from "events";
+import { PresenceService } from "@/services/presence.service";
 
 @injectable()
 export class ConnectionsService {
   constructor(
     @inject(TYPES.ConnectionsRepository) private connectionsRepository: ConnectionsRepository,
     @inject(TYPES.EventDispatcher) private dispatcher: EventEmitter,
+    @inject(TYPES.PresenceService) private presenceService: PresenceService,
   ) {}
 
   public async getUserContacts({
@@ -83,6 +85,11 @@ export class ConnectionsService {
     try {
       const result = await this.connectionsRepository.acceptRequest(receiverId, connectionId);
 
+      // Extract the two user IDs involved in the connection
+      const senderId = result.notification.userId; // The original requester
+      this.presenceService.setPresenceLookup(senderId, receiverId);
+
+      // Dispatch system notification event
       this.dispatcher.emit("notification:created", result.notification);
 
       return result;

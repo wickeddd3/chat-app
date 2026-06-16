@@ -1,14 +1,11 @@
 import { usePresence } from "@/app/store/PresenceContext";
 import type { ChannelMember as ChannelMemberType } from "@/entities/channel";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
-import { useMemo } from "react";
 
 export function ChannelMember({ member }: { member: ChannelMemberType }) {
-  const { onlineUsers, isOnline } = usePresence();
+  const { isOnline } = usePresence();
 
-  const online = useMemo(() => {
-    return isOnline(member.user.id);
-  }, [member, onlineUsers, isOnline]);
+  const online = isOnline(member.user.id);
 
   return (
     <div

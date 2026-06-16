@@ -2,7 +2,6 @@ import { injectable, inject, multiInject } from "inversify";
 import { TYPES } from "@/config/types";
 import { Server as SocketServer, type Socket } from "socket.io";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
-import { redisClient } from "@/lib/redis";
 
 @injectable()
 export class WebSocketServer {
@@ -29,10 +28,6 @@ export class WebSocketServer {
 
       // Join a private notification room unique to this specific user profile instance
       void socket.join(`user:${authId}`);
-      // Join the global presence stream room to listen for other users' heartbeats
-      void socket.join("presence:global");
-      // Emit the current list of online users directly to this newly connected client
-      void this.syncOnlinePresence(socket);
 
       // Listen for incoming triggers from the registry map dynamically
       for (const [eventName, command] of this.commandRegistry.entries()) {
@@ -48,17 +43,5 @@ export class WebSocketServer {
         });
       }
     });
-  }
-
-  /**
-   * Private helper routine to fetch presence lists from Redis
-   */
-  private async syncOnlinePresence(socket: Socket): Promise<void> {
-    try {
-      const onlineUserIds = await redisClient.smembers("presence:online_users");
-      socket.emit("online_users_list", onlineUserIds);
-    } catch (error) {
-      console.error("Failed to synchronize socket online presence matrix:", error);
-    }
   }
 }

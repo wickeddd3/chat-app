@@ -1,9 +1,11 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import type { Socket } from "socket.io";
+import type { Redis } from "ioredis";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
-import { PresenceService } from "../services/presence.service";
+import { PresenceService } from "../../services/presence.service";
 import { WebSocketBroadcaster } from "../web-socket.broadcaster";
+import { ConnectionsRepository } from "@/modules/connection/connections.repository";
 
 @injectable()
 export class HeartbeatCommand implements WebSocketCommand {
@@ -12,14 +14,41 @@ export class HeartbeatCommand implements WebSocketCommand {
   constructor(
     @inject(TYPES.PresenceService) private presenceService: PresenceService,
     @inject(TYPES.WebSocketBroadcaster) private broadcaster: WebSocketBroadcaster,
+    @inject(TYPES.ConnectionsRepository) private connectionsRepository: ConnectionsRepository,
+    @inject(TYPES.RedisMainClient) private redis: Redis,
   ) {}
 
   public async execute(socket: Socket, authId: string, _data: unknown): Promise<void> {
-    await this.presenceService.refreshPresence(authId);
+    const stateTransition = await this.presenceService.trackHeartbeat(authId);
 
-    await this.broadcaster.emitToRoom("presence:global", "user_status_change", {
-      userId: authId,
-      status: "online",
-    });
+    // TARGETED MULTI-CAST: Only notify followers if they transitioned from offline -> online
+    if (stateTransition === "LOGIN") {
+      const followerKey = `presence:followers_of:${authId}`;
+
+      // 1. Fetch live active observers from Redis cache
+      let observerIds = await this.redis.smembers(followerKey);
+
+      // 2. CRITICAL HEARTBEAT SELF-HEALING BRIDGE:
+      // If the followers index set is missing, look up relational bounds in Postgres
+      const followerSetExists = await this.redis.exists(followerKey);
+      if (!followerSetExists || observerIds.length === 0) {
+        const persistedContacts = await this.connectionsRepository.getRawContactIds(authId);
+
+        if (persistedContacts.length > 0) {
+          // Rebuild relationship keys cleanly in Redis
+          for (const friendId of persistedContacts) {
+            await this.presenceService.setPresenceLookup(authId, friendId);
+          }
+          observerIds = persistedContacts;
+        }
+      }
+
+      const deltaPayload = { userId: authId, status: "online" };
+
+      // Route delta updates directly to the private rooms of active observers
+      for (const observerId of observerIds) {
+        await this.broadcaster.emitToUser(observerId, "user_status_change", deltaPayload);
+      }
+    }
   }
 }

@@ -3,13 +3,17 @@ import { Toaster } from "@/shared/ui/shadcn/sonner";
 import { ChatSidebar } from "@/widgets/navigation";
 import { Outlet } from "react-router";
 import { useWebSocketConnect } from "@/features/message/websocket-connection";
-import { useHeartbeat } from "@/features/message/online-presence";
+import {
+  useHeartbeat,
+  usePresenceCacheSync,
+} from "@/features/message/online-presence";
 import { useRealTimeNotifications } from "@/features/notification/realtime-notification";
 
 export function ChatLayout() {
   const { authUser } = useAuth();
   useWebSocketConnect(!!authUser);
   useHeartbeat(!!authUser);
+  usePresenceCacheSync();
   useRealTimeNotifications();
 
   return (

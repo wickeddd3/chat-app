@@ -68,6 +68,36 @@ export class ConnectionsRepository {
     }
   }
 
+  public async getRawContactIds(authUserId: string): Promise<string[]> {
+    try {
+      // Fetch all accepted connections where the user is either sender or receiver
+      const connections = await this.db.connection.findMany({
+        where: {
+          status: "ACCEPTED",
+          AND: [
+            {
+              OR: [{ senderId: authUserId }, { receiverId: authUserId }],
+            },
+          ],
+        },
+        select: {
+          updatedAt: true,
+          senderId: true,
+          receiverId: true,
+          sender: { select: { id: true } },
+          receiver: { select: { id: true } },
+        },
+        orderBy: { updatedAt: "desc" },
+      });
+
+      const contacts = connections.map((conn) => (conn.senderId === authUserId ? conn.receiver.id : conn.sender.id));
+
+      return contacts;
+    } catch {
+      throw new HttpException(500, "Failed to retrieve contacts.");
+    }
+  }
+
   /**
    * Fetch all connections SENT BY the current user.
    * Maps data so the frontend receives the profile details of the Target Receiver.
