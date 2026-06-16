@@ -31,40 +31,64 @@ export class PresenceService {
     return hasLease === 1 ? "ALIVE" : "LOGIN";
   }
 
-  public async setPresenceLookup({ senderId, receiverId }: { senderId: string; receiverId: string }) {
-    // Map structural graphs bi-directionally inside Redis
-    // User A follows User B, and User B follows User A
+  /**
+   * Generates a structural graph mapping block inside Redis.
+   * Extends the lifespan of the graph with an explicit 24-hour TTL expiration.
+   */
+  public async setPresenceLookup(senderId: string, receiverId: string): Promise<void> {
     const pipeline = this.redis.pipeline();
 
     // Direct lookup contact sets
     pipeline.sadd(`presence:contacts:${senderId}`, receiverId);
     pipeline.sadd(`presence:contacts:${receiverId}`, senderId);
 
-    // Reverse lookup observer tracking sets (who wants to know when I change state)
+    // Reverse lookup observer tracking sets
     pipeline.sadd(`presence:followers_of:${senderId}`, receiverId);
     pipeline.sadd(`presence:followers_of:${receiverId}`, senderId);
+
+    // Give graphs a sliding window expiration so stale/dead connections evict naturally
+    pipeline.expire(`presence:contacts:${senderId}`, 86400);
+    pipeline.expire(`presence:contacts:${receiverId}`, 86400);
+    pipeline.expire(`presence:followers_of:${senderId}`, 86400);
+    pipeline.expire(`presence:followers_of:${receiverId}`, 86400);
 
     await pipeline.exec();
   }
 
   /**
-   * Compiles and resolves the complete localized viewport slice for a user using Redis Set Unions.
+   * Seeds an empty placeholder marker into Redis to protect against Cache Stampedes.
    */
-  public async getAggregatedPresenceMap(authUserId: string): Promise<Record<string, "online" | "offline">> {
-    const unionKeys = [`presence:contacts:${authUserId}`];
+  public async setEmptyPresenceMarker(userId: string): Promise<void> {
+    await this.redis.sadd(`presence:contacts:${userId}`, "EMPTY_MARKER");
+    await this.redis.expire(`presence:contacts:${userId}`, 3600); // Check again in 1 hour
+  }
 
-    // 1. Extract all target IDs across contact arrays and room rosters in O(N)
-    const targetedUserIds = await this.redis.sunion(...unionKeys);
+  /**
+   * Returns null if the underlying key graph does not exist in cache memory.
+   */
+  public async getAggregatedPresenceMap(authUserId: string): Promise<Record<string, "online" | "offline"> | null> {
+    const contactKey = `presence:contacts:${authUserId}`;
 
-    if (targetedUserIds.length === 0) return {};
+    // 1. Check if the graph exists in memory at all
+    const exists = await this.redis.exists(contactKey);
+    if (!exists) {
+      return null; // Return explicit null signaling a cache-miss recovery state to the controller
+    }
 
-    // 2. Query statuses instantly via an MGET batch pipeline
-    const statusKeys = targetedUserIds.map((id) => `${this.leasePrefix}${id}`);
+    // 2. Fetch the target identifiers from the Redis Set
+    const targetedUserIds = await this.redis.smembers(contactKey);
+
+    // Filter out markers immediately or return empty collection safely
+    const cleanUserIds = targetedUserIds.filter((id) => id !== "EMPTY_MARKER");
+    if (cleanUserIds.length === 0) return {};
+
+    // 3. Query statuses via an MGET batch pipeline
+    const statusKeys = cleanUserIds.map((id) => `${this.leasePrefix}${id}`);
     const results = await this.redis.mget(...statusKeys);
 
-    // 3. Assemble response payload dictionary
+    // 4. Assemble response payload dictionary
     const presenceMap: Record<string, "online" | "offline"> = {};
-    targetedUserIds.forEach((id, index) => {
+    cleanUserIds.forEach((id, index) => {
       presenceMap[id] = results[index] === "online" ? "online" : "offline";
     });
 

@@ -5,6 +5,7 @@ import type { Redis } from "ioredis";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import { PresenceService } from "../../services/presence.service";
 import { WebSocketBroadcaster } from "../web-socket.broadcaster";
+import { ConnectionsRepository } from "@/modules/connection/connections.repository";
 
 @injectable()
 export class HeartbeatCommand implements WebSocketCommand {
@@ -13,6 +14,7 @@ export class HeartbeatCommand implements WebSocketCommand {
   constructor(
     @inject(TYPES.PresenceService) private presenceService: PresenceService,
     @inject(TYPES.WebSocketBroadcaster) private broadcaster: WebSocketBroadcaster,
+    @inject(TYPES.ConnectionsRepository) private connectionsRepository: ConnectionsRepository,
     @inject(TYPES.RedisMainClient) private redis: Redis,
   ) {}
 
@@ -21,8 +23,25 @@ export class HeartbeatCommand implements WebSocketCommand {
 
     // TARGETED MULTI-CAST: Only notify followers if they transitioned from offline -> online
     if (stateTransition === "LOGIN") {
-      // Find all people who have this user in their contact list graph
-      const observerIds = await this.redis.smembers(`presence:followers_of:${authId}`);
+      const followerKey = `presence:followers_of:${authId}`;
+
+      // 1. Fetch live active observers from Redis cache
+      let observerIds = await this.redis.smembers(followerKey);
+
+      // 2. CRITICAL HEARTBEAT SELF-HEALING BRIDGE:
+      // If the followers index set is missing, look up relational bounds in Postgres
+      const followerSetExists = await this.redis.exists(followerKey);
+      if (!followerSetExists || observerIds.length === 0) {
+        const persistedContacts = await this.connectionsRepository.getRawContactIds(authId);
+
+        if (persistedContacts.length > 0) {
+          // Rebuild relationship keys cleanly in Redis
+          for (const friendId of persistedContacts) {
+            await this.presenceService.setPresenceLookup(authId, friendId);
+          }
+          observerIds = persistedContacts;
+        }
+      }
 
       const deltaPayload = { userId: authId, status: "online" };
 
