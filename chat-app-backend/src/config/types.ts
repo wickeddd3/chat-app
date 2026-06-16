@@ -34,6 +34,9 @@ export const TYPES = {
   NotificationsService: Symbol.for("NotificationsService"),
   NotificationsRepository: Symbol.for("NotificationsRepository"),
 
+  PresenceRouter: Symbol.for("PresenceRouter"),
+  PresenceController: Symbol.for("PresenceController"),
+
   SocketServerProvider: Symbol.for("SocketServerProvider"),
   SocketServer: Symbol.for("SocketServer"),
   WebSocketServer: Symbol.for("WebSocketServer"),
