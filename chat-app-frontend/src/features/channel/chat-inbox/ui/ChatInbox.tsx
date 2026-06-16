@@ -26,7 +26,8 @@ export function ChatInbox() {
     fetchNextPage,
   } = useInbox(query);
 
-  const { onlineUsers, isOnline } = usePresence();
+  const { isOnline } = usePresence();
+
   useInboxUpdate();
 
   const allInbox = useMemo(() => {
@@ -49,7 +50,7 @@ export function ChatInbox() {
         return false;
       },
     }));
-  }, [inbox, onlineUsers]);
+  }, [inbox, authUser, isOnline]);
 
   const filteredByOnline = useMemo(() => {
     return allInbox.filter((item) => item.online?.());

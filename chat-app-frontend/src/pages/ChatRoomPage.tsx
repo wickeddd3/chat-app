@@ -3,14 +3,14 @@ import { useMemo } from "react";
 import { BackButton, ChannelHeader, useChannel } from "@/entities/channel";
 import { useAuth } from "@/app/store/AuthContext";
 import { ChatRoom } from "@/features/message/chat-room";
-import { usePresence } from "@/app/store/PresenceContext";
 import { ChannelDetailsDrawer } from "@/widgets/channel-details-drawer";
+import { usePresence } from "@/app/store/PresenceContext";
 
 export default function ChatRoomPage() {
   const { channelId } = useParams();
   const { channel } = useChannel(channelId || "");
-  const { isOnline } = usePresence();
   const { authUser } = useAuth();
+  const { isOnline } = usePresence();
 
   const online = useMemo(() => {
     if (channel?.type === "GROUP") {
