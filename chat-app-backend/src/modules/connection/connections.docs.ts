@@ -200,10 +200,7 @@ export const connectionsPaths: OpenAPIV3.PathsObject = {
                   success: { type: "boolean", example: true },
                   message: { type: "string", example: "Connection request sent successfully" },
                   data: {
-                    type: "object",
-                    properties: {
-                      connection: { $ref: "#/components/schemas/ConnectionRequest" },
-                    },
+                    $ref: "#/components/schemas/ConnectionRequest",
                   },
                   timestamp: { type: "string", format: "date-time" },
                 },
@@ -242,10 +239,7 @@ export const connectionsPaths: OpenAPIV3.PathsObject = {
                   success: { type: "boolean", example: true },
                   message: { type: "string", example: "Connection request accepted successfully" },
                   data: {
-                    type: "object",
-                    properties: {
-                      connection: { $ref: "#/components/schemas/ConnectionRequest" },
-                    },
+                    $ref: "#/components/schemas/ConnectionRequest",
                   },
                   timestamp: { type: "string", format: "date-time" },
                 },
@@ -283,6 +277,7 @@ export const connectionsPaths: OpenAPIV3.PathsObject = {
                 properties: {
                   success: { type: "boolean", example: true },
                   message: { type: "string", example: "Connection request declined successfully" },
+                  data: { type: "string", example: "b1a23c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d" },
                   timestamp: { type: "string", format: "date-time" },
                 },
               },
@@ -319,6 +314,7 @@ export const connectionsPaths: OpenAPIV3.PathsObject = {
                 properties: {
                   success: { type: "boolean", example: true },
                   message: { type: "string", example: "Connection request canceled successfully" },
+                  data: { type: "string", example: "b1a23c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d" },
                   timestamp: { type: "string", format: "date-time" },
                 },
               },
