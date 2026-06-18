@@ -26,5 +26,5 @@ export function usePresenceCacheSync() {
     return () => {
       webSocketClient.off("user_status_change", handleStatusChange);
     };
-  }, []);
+  }, [queryClient]);
 }

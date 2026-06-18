@@ -1,8 +1,12 @@
-import type { Message } from "@/entities/message";
+import type { Message, NewMessage } from "@/entities/message";
 import { useEffect, useMemo, useRef } from "react";
 import type { VirtuosoHandle } from "react-virtuoso";
 
-export function useScrollToBottom({ messages }: { messages: Message[] }) {
+export function useScrollToBottom({
+  messages,
+}: {
+  messages: (Message | NewMessage)[];
+}) {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   // Establish a massive max boundary for virtual index layout calculations
   const MAX_INDEX = 50000;

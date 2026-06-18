@@ -1,5 +1,5 @@
 import { useAuthProfile } from "@/entities/auth";
-import type { NewMessage } from "@/entities/message";
+import type { Message, NewMessage } from "@/entities/message";
 import { webSocketClient } from "@/shared/lib/socket-io.client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -11,20 +11,23 @@ export function useSendMessage({ channelId }: { channelId: string }) {
   const [message, setMessage] = useState("");
 
   const handleOptimisticMessage = (newMessage: NewMessage) => {
-    queryClient.setQueryData(["messages", channelId], (oldData: any) => {
-      if (!oldData) return oldData;
+    queryClient.setQueryData(
+      ["messages", channelId],
+      (oldData: { pages: { messages: (Message | NewMessage)[] }[] }) => {
+        if (!oldData) return oldData;
 
-      const updatedPages = [...oldData.pages];
+        const updatedPages = [...oldData.pages];
 
-      // Push optimistic items to page 0, because it represents the newest timeline batch
-      updatedPages[0] = {
-        ...updatedPages[0],
-        messages: [...updatedPages[0].messages, newMessage],
-      };
+        // Push optimistic items to page 0, because it represents the newest timeline batch
+        updatedPages[0] = {
+          ...updatedPages[0],
+          messages: [...updatedPages[0].messages, newMessage],
+        };
 
-      // Push optimistic updates into the cache
-      return { ...oldData, pages: updatedPages };
-    });
+        // Push optimistic updates into the cache
+        return { ...oldData, pages: updatedPages };
+      },
+    );
   };
 
   const handleSendMessageToServer = ({

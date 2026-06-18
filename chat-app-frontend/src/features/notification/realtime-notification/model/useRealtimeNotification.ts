@@ -10,23 +10,28 @@ export function useRealTimeNotifications() {
   useEffect(() => {
     const handleIncomingNotification = (notification: Notification) => {
       // Optimistically update the infinite query notification cache list
-      queryClient.setQueryData(["notifications"], (oldData: any) => {
-        if (!oldData) return oldData;
+      queryClient.setQueryData(
+        ["notifications"],
+        (oldData: { pages: { notifications: Notification[] }[] }) => {
+          if (!oldData) return oldData;
 
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page: any, index: number) => {
-            // Prepend the brand new notification to the very first page (newest items)
-            if (index === 0) {
-              return {
-                ...page,
-                notifications: [notification, ...page.notifications],
-              };
-            }
-            return page;
-          }),
-        };
-      });
+          return {
+            ...oldData,
+            pages: oldData.pages.map(
+              (page: { notifications: Notification[] }, index: number) => {
+                // Prepend the brand new notification to the very first page (newest items)
+                if (index === 0) {
+                  return {
+                    ...page,
+                    notifications: [notification, ...page.notifications],
+                  };
+                }
+                return page;
+              },
+            ),
+          };
+        },
+      );
 
       // Trigger alert toast
       toast.info(notification.title, {

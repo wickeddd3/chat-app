@@ -12,6 +12,7 @@ export interface Message {
   channelId: number;
   parentId: string;
   clientId?: string;
+  isSending?: boolean;
 }
 
 export interface NewMessage {

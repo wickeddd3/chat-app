@@ -1,5 +1,9 @@
 import { Virtuoso } from "react-virtuoso";
-import { MessageBubble, type Message } from "@/entities/message";
+import {
+  MessageBubble,
+  type Message,
+  type NewMessage,
+} from "@/entities/message";
 import { useAuth } from "@/app/store/AuthContext";
 import { LoaderCircle } from "lucide-react";
 import { useMemo } from "react";
@@ -11,7 +15,7 @@ export function Messages({
   isFetchingNextPage,
   fetchNextPage,
 }: {
-  messages: Message[];
+  messages: (Message | NewMessage)[];
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   fetchNextPage: () => void;
