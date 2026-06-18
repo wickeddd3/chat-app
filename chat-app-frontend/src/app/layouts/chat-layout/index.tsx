@@ -7,6 +7,7 @@ import {
   useHeartbeat,
   usePresenceCacheSync,
 } from "@/features/message/online-presence";
+import { useMessageCacheSync } from "@/features/message/realtime-message";
 import { useRealTimeNotifications } from "@/features/notification/realtime-notification";
 
 export function ChatLayout() {
@@ -14,6 +15,7 @@ export function ChatLayout() {
   useWebSocketConnect(!!authUser);
   useHeartbeat(!!authUser);
   usePresenceCacheSync();
+  useMessageCacheSync();
   useRealTimeNotifications();
 
   return (
