@@ -10,7 +10,6 @@ import { useMemo, useState } from "react";
 import { usePresence } from "@/app/store/PresenceContext";
 import { useAuth } from "@/app/store/AuthContext";
 import { useInbox } from "../model/useInbox";
-import { useInboxUpdate } from "../model/useInboxUpdate";
 
 export function ChatInbox() {
   const { authUser } = useAuth();
@@ -27,8 +26,6 @@ export function ChatInbox() {
   } = useInbox(query);
 
   const { isOnline } = usePresence();
-
-  useInboxUpdate();
 
   const allInbox = useMemo(() => {
     return inbox.map((item) => ({

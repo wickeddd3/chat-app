@@ -7,7 +7,6 @@ import { useState } from "react";
 export function useSendMessage({ channelId }: { channelId: string }) {
   const { authProfile } = useAuthProfile();
   const queryClient = useQueryClient();
-
   const [message, setMessage] = useState("");
 
   const handleOptimisticMessage = (newMessage: NewMessage) => {
@@ -19,10 +18,12 @@ export function useSendMessage({ channelId }: { channelId: string }) {
         const updatedPages = [...oldData.pages];
 
         // Push optimistic items to page 0, because it represents the newest timeline batch
-        updatedPages[0] = {
-          ...updatedPages[0],
-          messages: [...updatedPages[0].messages, newMessage],
-        };
+        if (updatedPages[0]) {
+          updatedPages[0] = {
+            ...updatedPages[0],
+            messages: [...updatedPages[0].messages, newMessage],
+          };
+        }
 
         // Push optimistic updates into the cache
         return { ...oldData, pages: updatedPages };
