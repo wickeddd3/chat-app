@@ -117,12 +117,12 @@ export function onSuccess(
     if (!old) return old;
 
     const currentUsers = [...old];
-    const newContactIndex = currentUsers.findIndex(
+    const userIndex = currentUsers.findIndex(
       (user) => user.id === newContact.id,
     );
 
-    currentUsers[newContactIndex] = {
-      ...currentUsers[newContactIndex],
+    currentUsers[userIndex] = {
+      ...currentUsers[userIndex],
       connectionStatus: "CONTACT",
     };
 
