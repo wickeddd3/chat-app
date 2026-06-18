@@ -34,11 +34,8 @@ export function useAcceptConnection(): {
   >({
     mutationFn: (connectionId: string) =>
       acceptConnectionRequestApi(connectionId),
-
     onMutate: (variables) => onMutate(variables, { client: queryClient }),
-
     onError: (err, variables, context) => onError(err, variables, context),
-
     onSuccess: (data, variables, context) =>
       onSuccess(data, variables, context),
   });
