@@ -35,10 +35,12 @@ export function useMessages(channelId: string): {
     enabled: !!channelId,
   });
 
+  const messages = data ?? [];
+
   return {
-    messages: data ?? [],
+    messages,
     isLoading,
-    isEmpty: !isLoading && !(data && data?.length),
+    isEmpty: !isLoading && messages.length === 0,
     error,
     fetchNextPage,
     hasNextPage,
