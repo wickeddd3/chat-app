@@ -12,7 +12,7 @@ import {
   type TError,
   type TVariables,
   type TContext,
-} from "./optimistic-update";
+} from "./cache-update";
 
 export function useAcceptConnection(): {
   acceptConnectionRequest: UseMutateFunction<
