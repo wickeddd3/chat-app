@@ -27,7 +27,7 @@ export function UserListItem({
       </div>
 
       {optionSlot && (
-        <div className="shrink-0 flex items-center justify-end">
+        <div className="shrink-0 flex items-center justify-end gap-2">
           {optionSlot}
         </div>
       )}
