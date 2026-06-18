@@ -17,6 +17,7 @@ export function ReceivedRequests({
   declineButton: React.ComponentType<{
     text: string;
     connectionRequestId: string;
+    connectionRequestUserId: string;
   }>;
 }) {
   const {
@@ -55,6 +56,7 @@ export function ReceivedRequests({
                   <DeclineButton
                     text="Decline Request"
                     connectionRequestId={request.id}
+                    connectionRequestUserId={request.user.id}
                   />
                   <AcceptButton
                     text="Accept Request"

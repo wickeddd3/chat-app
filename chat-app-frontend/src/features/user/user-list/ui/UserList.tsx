@@ -29,6 +29,7 @@ export function UserList({
   declineButton: React.ComponentType<{
     text: string;
     connectionRequestId: string;
+    connectionRequestUserId: string;
   }>;
   acceptButton: React.ComponentType<{
     text: string;
@@ -89,6 +90,7 @@ export function UserList({
                           <DeclineButton
                             text="Decline Request"
                             connectionRequestId={user.connectionId}
+                            connectionRequestUserId={user.id}
                           />
                           <AcceptButton
                             text="Accept Request"
