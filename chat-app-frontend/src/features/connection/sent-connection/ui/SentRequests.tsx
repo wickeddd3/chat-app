@@ -12,6 +12,7 @@ export function SentRequests({
   cancelButton: React.ComponentType<{
     text: string;
     connectionRequestId: string;
+    connectionRequestUserId: string;
   }>;
 }) {
   const {
@@ -49,6 +50,7 @@ export function SentRequests({
                 <CancelButton
                   text="Cancel Request"
                   connectionRequestId={request.id}
+                  connectionRequestUserId={request.user.id}
                 />
               }
             />

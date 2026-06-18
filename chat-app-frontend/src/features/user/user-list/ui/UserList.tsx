@@ -24,6 +24,7 @@ export function UserList({
   cancelButton: React.ComponentType<{
     text: string;
     connectionRequestId: string;
+    connectionRequestUserId: string;
   }>;
   declineButton: React.ComponentType<{
     text: string;
@@ -79,6 +80,7 @@ export function UserList({
                         <CancelButton
                           text="Cancel Request"
                           connectionRequestId={user.connectionId}
+                          connectionRequestUserId={user.id}
                         />
                       )}
                     {user.connectionStatus === "PENDING_RECEIVED" &&
