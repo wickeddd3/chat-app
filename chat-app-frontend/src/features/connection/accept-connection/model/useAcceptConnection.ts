@@ -1,84 +1,48 @@
-import { useMutation, type UseMutateFunction } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  type UseMutateFunction,
+} from "@tanstack/react-query";
 import { acceptConnectionRequestApi } from "../api/connections.api";
-import type { Connection, ConnectionUser } from "@/entities/connection";
-import { toast } from "sonner";
-import { optimisticUpdate } from "./optimistic-update";
-import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
+import {
+  onError,
+  onMutate,
+  onSuccess,
+  type TData,
+  type TError,
+  type TVariables,
+  type TContext,
+} from "./cache-update";
 
 export function useAcceptConnection(): {
   acceptConnectionRequest: UseMutateFunction<
-    Connection,
-    Error,
-    string,
-    unknown
+    TData,
+    TError,
+    TVariables,
+    TContext
   >;
   isPending: boolean;
-  error: unknown;
+  error: Error | null;
 } {
-  const queryKey = REACT_QUERY_KEYS["RECEIVED_CONNECTION_REQUESTS"];
-  const contactQueryKey = [...REACT_QUERY_KEYS["CONTACTS"], ""];
+  const queryClient = useQueryClient();
 
-  const { mutate, isPending, error } = useMutation({
+  const { mutate, isPending, error } = useMutation<
+    TData,
+    TError,
+    TVariables,
+    TContext
+  >({
     mutationFn: (connectionId: string) =>
       acceptConnectionRequestApi(connectionId),
-    onMutate: (connectionId, context) =>
-      optimisticUpdate(connectionId, context),
-    onError: (_err, _connectionId, onMutateResult, context) => {
-      // Rollback to previous state on failure
-      if (onMutateResult?.previousRequests) {
-        context.client.setQueryData(queryKey, onMutateResult.previousRequests);
-      }
-      toast.error("Failed to accept request", {
-        description: "Error occurred while accepting connection request",
-        position: "bottom-right",
-      });
-    },
-    onSettled: (_data, _error, _variables, _onMutateResult, context) => {
-      // Invalidate to synchronize completely with DB
-      context.client.invalidateQueries({ queryKey });
-    },
-    onSuccess: (data, _variables, _onMutate, context) => {
-      toast.success("Connection request accepted", {
-        position: "bottom-right",
-      });
-
-      const newContact: ConnectionUser = {
-        id: data?.user.id || "",
-        name: data?.user.name || "",
-        username: data?.user.username || "",
-        image: data?.user.image || "",
-        updatedAt: data?.updatedAt || "",
-      };
-
-      // Update contacts list to include the new connection if it was accepted successfully
-      context.client.setQueryData(
-        contactQueryKey,
-        (old: { pages: { contacts: ConnectionUser[] }[] }) => {
-          if (!old) return old;
-
-          return {
-            ...old,
-            pages: old.pages.map(
-              (page: { contacts: ConnectionUser[] }, index) => {
-                // Prepend only to page index 0 (the initial loaded batch view)
-                if (index === 0) {
-                  return {
-                    ...page,
-                    contacts: [newContact, ...page.contacts],
-                  };
-                }
-                return page;
-              },
-            ),
-          };
-        },
-      );
-    },
+    onMutate: (variables) => onMutate(variables, { client: queryClient }),
+    onError: (err, variables, context) => onError(err, variables, context),
+    onSuccess: (data, variables, context) =>
+      onSuccess(data, variables, context),
   });
 
   return {
     acceptConnectionRequest: mutate,
-    isPending: isPending,
-    error: error,
+    isPending,
+    error,
   };
 }

@@ -2,19 +2,10 @@ import { useAuth } from "@/app/store/AuthContext";
 import { Toaster } from "@/shared/ui/shadcn/sonner";
 import { ChatSidebar } from "@/widgets/navigation";
 import { Outlet } from "react-router";
-import { useWebSocketConnect } from "@/features/message/websocket-connection";
-import {
-  useHeartbeat,
-  usePresenceCacheSync,
-} from "@/features/message/online-presence";
-import { useRealTimeNotifications } from "@/features/notification/realtime-notification";
+import { SocketOrchestrator } from "./SocketOrchestrator";
 
 export function ChatLayout() {
   const { authUser } = useAuth();
-  useWebSocketConnect(!!authUser);
-  useHeartbeat(!!authUser);
-  usePresenceCacheSync();
-  useRealTimeNotifications();
 
   return (
     <div className="flex flex-col-reverse md:flex-row h-screen w-full overflow-hidden bg-background">
@@ -32,6 +23,8 @@ export function ChatLayout() {
       </main>
 
       <Toaster theme="light" />
+
+      <SocketOrchestrator isAuthenticated={!!authUser} />
     </div>
   );
 }

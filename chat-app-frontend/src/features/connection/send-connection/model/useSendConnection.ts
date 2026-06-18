@@ -1,68 +1,38 @@
-import { useMutation, type UseMutateFunction } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  type UseMutateFunction,
+} from "@tanstack/react-query";
 import { sendConnectionRequestApi } from "../api/connections.api";
-import type { Connection } from "@/entities/connection";
-import { toast } from "sonner";
-import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
-
-interface SendConnectionRequestData {
-  receiverId: string;
-}
+import {
+  onError,
+  onMutate,
+  onSuccess,
+  type TContext,
+  type TData,
+  type TError,
+  type TVariables,
+} from "./cache-update";
 
 export function useSendConnection(): {
-  sendConnectionRequest: UseMutateFunction<
-    Connection,
-    Error,
-    SendConnectionRequestData,
-    unknown
-  >;
+  sendConnectionRequest: UseMutateFunction<TData, TError, TVariables, TContext>;
   isPending: boolean;
   error: unknown;
 } {
-  const queryKey = REACT_QUERY_KEYS["SENT_CONNECTION_REQUESTS"];
+  const queryClient = useQueryClient();
 
-  const { mutate, isPending, error } = useMutation({
-    mutationFn: (formData: SendConnectionRequestData) =>
+  const { mutate, isPending, error } = useMutation<
+    TData,
+    TError,
+    TVariables,
+    TContext
+  >({
+    mutationFn: (formData: { receiverId: string }) =>
       sendConnectionRequestApi(formData),
-    onSuccess: (data, _variables, _onMutate, context) => {
-      toast.success("Connection request sent", {
-        position: "bottom-right",
-      });
-
-      const newRequest: Connection = {
-        ...data,
-      };
-
-      // Update sent requests list to include the new request
-      context.client.setQueryData(
-        queryKey,
-        (old: { pages: { connections: Connection[] }[] }) => {
-          if (!old) return old;
-
-          return {
-            ...old,
-            pages: old.pages.map(
-              (page: { connections: Connection[] }, index) => {
-                // Prepend only to page index 0 (the initial loaded batch view)
-                if (index === 0) {
-                  return {
-                    ...page,
-                    connections: [newRequest, ...page.connections],
-                  };
-                }
-                return page;
-              },
-            ),
-          };
-        },
-      );
-    },
-    onError: (error) => {
-      toast.error("Connection request failed", {
-        description:
-          error?.message || "Error occurred while sending connection request",
-        position: "bottom-right",
-      });
-    },
+    onMutate: (variables) => onMutate(variables, { client: queryClient }),
+    onSuccess: (data, variables, context) =>
+      onSuccess(data, variables, context),
+    onError: (err, variables, context) => onError(err, variables, context),
   });
 
   return {

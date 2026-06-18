@@ -1,0 +1,131 @@
+import type { Connection, ConnectionUser } from "@/entities/connection";
+import type { User } from "@/entities/user";
+import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
+import type { QueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+
+const receivedRequestsQueryKey =
+  REACT_QUERY_KEYS["RECEIVED_CONNECTION_REQUESTS"];
+const contactsQueryKey = [...REACT_QUERY_KEYS["CONTACTS"], ""];
+const usersQueryKey = [...REACT_QUERY_KEYS["USERS"], ""];
+
+export type TData = Connection;
+export type TError = Error;
+export type TVariables = string; // connectionId is a string
+export type TContext = {
+  previousRequests: unknown; // Specific shape of cached query data
+  client: QueryClient; // Passing the client via custom context
+};
+
+export async function onMutate(
+  variables: TVariables,
+  context: { client: QueryClient },
+): Promise<TContext> {
+  const connectionId = variables;
+
+  // 1. Cancel outbound refetches so they don't overwrite our optimistic state
+  await context.client.cancelQueries({ queryKey: receivedRequestsQueryKey });
+
+  // 2. Snapshot the previous value to restore if things break
+  const previousRequests = context.client.getQueryData(
+    receivedRequestsQueryKey,
+  );
+
+  // 3. Optimistically update the cache by filtering out the item
+  context.client.setQueryData(
+    receivedRequestsQueryKey,
+    (old: { pages: { connections: Connection[] }[] }) => {
+      if (!old) return old;
+
+      return {
+        ...old,
+        // Map through each paginated page and filter out the accepted request
+        pages: old.pages.map((page: { connections: Connection[] }) => ({
+          ...page,
+          connections: page.connections.filter(
+            (req: Connection) => req.id !== connectionId,
+          ),
+        })),
+      };
+    },
+  );
+
+  // 4. Return the context object containing the rollback snapshot data
+  return { previousRequests, client: context.client };
+}
+
+export function onError(
+  _err: TError,
+  _variables: TVariables,
+  context: TContext | undefined,
+) {
+  // Rollback to previous state on failure
+  if (context?.previousRequests) {
+    context.client.setQueryData(
+      receivedRequestsQueryKey,
+      context.previousRequests,
+    );
+  }
+
+  toast.error("Failed to accept request", {
+    description: "Error occurred while accepting connection request",
+    position: "bottom-right",
+  });
+}
+
+export function onSuccess(
+  data: TData,
+  _variables: TVariables,
+  context: TContext | undefined,
+) {
+  toast.success("Connection request accepted", {
+    position: "bottom-right",
+  });
+
+  const newContact: ConnectionUser = {
+    id: data?.user.id || "",
+    name: data?.user.name || "",
+    username: data?.user.username || "",
+    image: data?.user.image || "",
+    updatedAt: data?.updatedAt || "",
+  };
+
+  // Update contacts list to include the new contact
+  context?.client.setQueryData(
+    contactsQueryKey,
+    (old: { pages: { contacts: ConnectionUser[] }[] }) => {
+      if (!old) return old;
+
+      return {
+        ...old,
+        pages: old.pages.map((page: { contacts: ConnectionUser[] }, index) => {
+          // Prepend only to page index 0 (the initial loaded batch view)
+          if (index === 0) {
+            return {
+              ...page,
+              contacts: [newContact, ...page.contacts],
+            };
+          }
+          return page;
+        }),
+      };
+    },
+  );
+
+  // Update users list to update user connectionStatus
+  context?.client.setQueryData(usersQueryKey, (old: User[]) => {
+    if (!old) return old;
+
+    const currentUsers = [...old];
+    const userIndex = currentUsers.findIndex(
+      (user) => user.id === newContact.id,
+    );
+
+    currentUsers[userIndex] = {
+      ...currentUsers[userIndex],
+      connectionStatus: "CONTACT",
+    };
+
+    return currentUsers;
+  });
+}

@@ -1,12 +1,13 @@
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { dateToNow } from "@/shared/utils/date-format";
 import { CheckCheck } from "lucide-react";
+import type { Message, NewMessage } from "../model/message.types";
 
 export function MessageBubble({
   message,
   isAuthorsMessage,
 }: {
-  message: any;
+  message: Message | NewMessage;
   isAuthorsMessage: boolean;
 }) {
   const {
@@ -24,7 +25,7 @@ export function MessageBubble({
       `}
     >
       <div className="shrink-0 mt-0.5">
-        <ProfileAvatar imageSrc={authorImage} size="sm" />
+        <ProfileAvatar imageSrc={authorImage || ""} size="sm" />
       </div>
 
       <div

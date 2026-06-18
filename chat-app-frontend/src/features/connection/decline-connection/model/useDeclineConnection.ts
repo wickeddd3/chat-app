@@ -1,41 +1,46 @@
-import { useMutation, type UseMutateFunction } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  type UseMutateFunction,
+} from "@tanstack/react-query";
 import { declineConnectionRequestApi } from "../api/connections.api";
-import type { Channel } from "@/entities/channel";
-import { toast } from "sonner";
-import { optimisticUpdate } from "./optimistic-update";
-import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
+import {
+  onError,
+  onMutate,
+  onSuccess,
+  type TContext,
+  type TData,
+  type TError,
+  type TVariables,
+} from "./cache-update";
 
 export function useDeclineConnection(): {
-  declineConnectionRequest: UseMutateFunction<Channel, Error, string, unknown>;
+  declineConnectionRequest: UseMutateFunction<
+    TData,
+    TError,
+    TVariables,
+    TContext
+  >;
   isPending: boolean;
   error: unknown;
 } {
-  const queryKey = REACT_QUERY_KEYS["RECEIVED_CONNECTION_REQUESTS"];
+  const queryClient = useQueryClient();
 
-  const { mutate, isPending, error } = useMutation({
-    mutationFn: (connectionId: string) =>
-      declineConnectionRequestApi(connectionId),
-    onMutate: (connectionId, context) =>
-      optimisticUpdate(connectionId, context),
-    onError: (_err, _connectionId, onMutateResult, context) => {
-      // Rollback to previous state on failure
-      if (onMutateResult?.previousRequests) {
-        context.client.setQueryData(queryKey, onMutateResult.previousRequests);
-      }
-      toast.error("Failed to decline request", {
-        description: "Error occurred while declining connection request",
-        position: "bottom-right",
-      });
-    },
-    onSettled: (_data, _error, _variables, _onMutateResult, context) => {
-      // Invalidate to synchronize completely with DB
-      context.client.invalidateQueries({ queryKey });
-    },
-    onSuccess: () => {
-      toast.success("Connection request declined", {
-        position: "bottom-right",
-      });
-    },
+  const { mutate, isPending, error } = useMutation<
+    TData,
+    TError,
+    TVariables,
+    TContext
+  >({
+    mutationFn: ({ connectionRequestId, connectionRequestUserId }) =>
+      declineConnectionRequestApi({
+        connectionRequestId,
+        connectionRequestUserId,
+      }),
+    onMutate: (variables) => onMutate(variables, { client: queryClient }),
+    onSuccess: (data, variables, context) =>
+      onSuccess(data, variables, context),
+    onError: (err, variables, context) => onError(err, variables, context),
   });
 
   return {

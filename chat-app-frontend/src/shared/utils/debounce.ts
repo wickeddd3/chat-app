@@ -1,4 +1,4 @@
-export function debounce<Args extends any[]>(
+export function debounce<Args extends unknown[]>(
   func: (...args: Args) => void,
   delay: number,
 ): (...args: Args) => void {
