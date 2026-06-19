@@ -61,8 +61,27 @@ export function SocketOrchestrator({
     };
 
     // B. Inbox badge/list invalidation handler
-    const handleRefetchInbox = () => {
+    const handleAmbientInboxUpdate = (payload: {
+      channelId: string;
+      latestMessageSnippet: string;
+    }) => {
+      // 1. Instantly invalidate the sidebar list query so it re-fetches latest previews
       queryClient.invalidateQueries({ queryKey: ["inbox"] });
+
+      // 2. SELF-HEALING CACHE PATCHING:
+      // If TanStack already has a message cache active for this specific channel,
+      // we can append a placeholder or invalidate it so it seamlessly updates
+      // behind the scenes without requiring a page refresh.
+      const isChannelCacheActive = queryClient
+        .getQueryCache()
+        .find({ queryKey: ["messages", payload.channelId] });
+
+      if (isChannelCacheActive) {
+        // Invalidate tells TanStack to quietly pull fresh data from the server in the background
+        queryClient.invalidateQueries({
+          queryKey: ["messages", payload.channelId],
+        });
+      }
     };
 
     // C. Real-time notifications interceptor
@@ -125,14 +144,14 @@ export function SocketOrchestrator({
 
     // Mount Listeners securely
     webSocketClient.on("user_status_change", handleStatusChange);
-    webSocketClient.on("inbox_updated", handleRefetchInbox);
+    webSocketClient.on("inbox_updated", handleAmbientInboxUpdate);
     webSocketClient.on("new_notification", handleIncomingNotification);
     webSocketClient.on("receive_message", handleIncomingMessage);
 
     // Explicit function reference tear-down to avoid silent memory leaks
     return () => {
       webSocketClient.off("user_status_change", handleStatusChange);
-      webSocketClient.off("inbox_updated", handleRefetchInbox);
+      webSocketClient.off("inbox_updated", handleAmbientInboxUpdate);
       webSocketClient.off("new_notification", handleIncomingNotification);
       webSocketClient.off("receive_message", handleIncomingMessage);
     };
