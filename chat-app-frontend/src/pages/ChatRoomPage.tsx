@@ -5,6 +5,7 @@ import { useAuth } from "@/app/store/AuthContext";
 import { ChatRoom } from "@/features/message/chat-room";
 import { ChannelDetailsDrawer } from "@/widgets/channel-details-drawer";
 import { usePresence } from "@/app/store/PresenceContext";
+import { usePresenceMap } from "@/features/message/online-presence";
 
 export default function ChatRoomPage() {
   const { channelId } = useParams();
@@ -12,19 +13,15 @@ export default function ChatRoomPage() {
   const { authUser } = useAuth();
   const { isOnline } = usePresence();
 
+  usePresenceMap(!!authUser, channelId);
+
   const online = useMemo(() => {
-    if (channel?.type === "GROUP") {
-      return channel.channelMembers.some(
-        (member) => member.user.id !== authUser?.id && isOnline(member.user.id),
-      );
-    }
-    if (channel?.type === "DIRECT") {
-      const otherUser = channel.channelMembers.find(
-        (member) => member.user.id !== authUser?.id && isOnline(member.user.id),
-      );
-      return !!otherUser;
-    }
-    return false;
+    if (!channel?.channelMembers) return false;
+
+    return channel.channelMembers.some((member) => {
+      if (member.user.id === authUser?.id) return false; // Skip checking authUser
+      return isOnline(member.user.id);
+    });
   }, [channel, authUser?.id, isOnline]);
 
   return (

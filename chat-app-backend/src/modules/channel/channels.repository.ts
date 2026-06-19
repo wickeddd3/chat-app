@@ -131,6 +131,32 @@ export class ChannelsRepository {
     }
   }
 
+  public async getRawMemberIds(userId: string, channelId: number): Promise<string[]> {
+    try {
+      const channel = await this.db.channel.findFirst({
+        where: {
+          id: channelId,
+          channelMembers: { some: { userId: userId } },
+        },
+        include: {
+          channelMembers: {
+            include: {
+              user: {
+                select: { id: true },
+              },
+            },
+          },
+        },
+      });
+
+      const channelMembers: string[] = channel?.channelMembers.map((member) => member.user.id) ?? [];
+
+      return channelMembers;
+    } catch {
+      throw new HttpException(500, "Failed to retrieve channel member ids.");
+    }
+  }
+
   public async findExistingDirectChannel(userId: string, targetUserId: string): Promise<Channel | null> {
     try {
       const existing = await this.db.channel.findFirst({

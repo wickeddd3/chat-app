@@ -6,6 +6,9 @@ import type { Redis } from "ioredis";
 export class PresenceService {
   private readonly globalRegistryKey = "presence:global";
   private readonly leasePrefix = "presence:status:";
+  private readonly contactPrefix = "presence:contacts:";
+  private readonly followersPrefix = "presence:followers_of:";
+  private readonly channelPrefix = "presence:channel_members:";
 
   constructor(@inject(TYPES.RedisMainClient) private redis: Redis) {}
 
@@ -39,54 +42,90 @@ export class PresenceService {
     const pipeline = this.redis.pipeline();
 
     // Direct lookup contact sets
-    pipeline.sadd(`presence:contacts:${senderId}`, receiverId);
-    pipeline.sadd(`presence:contacts:${receiverId}`, senderId);
+    pipeline.sadd(`${this.contactPrefix}${senderId}`, receiverId);
+    pipeline.sadd(`${this.contactPrefix}${receiverId}`, senderId);
 
     // Reverse lookup observer tracking sets
-    pipeline.sadd(`presence:followers_of:${senderId}`, receiverId);
-    pipeline.sadd(`presence:followers_of:${receiverId}`, senderId);
+    pipeline.sadd(`${this.followersPrefix}${senderId}`, receiverId);
+    pipeline.sadd(`${this.followersPrefix}${receiverId}`, senderId);
 
     // Give graphs a sliding window expiration so stale/dead connections evict naturally
-    pipeline.expire(`presence:contacts:${senderId}`, 86400);
-    pipeline.expire(`presence:contacts:${receiverId}`, 86400);
-    pipeline.expire(`presence:followers_of:${senderId}`, 86400);
-    pipeline.expire(`presence:followers_of:${receiverId}`, 86400);
+    pipeline.expire(`${this.contactPrefix}${senderId}`, 86400);
+    pipeline.expire(`${this.contactPrefix}${receiverId}`, 86400);
+    pipeline.expire(`${this.followersPrefix}${senderId}`, 86400);
+    pipeline.expire(`${this.followersPrefix}${receiverId}`, 86400);
 
     await pipeline.exec();
+  }
+
+  /**
+   * Seeds/Updates the full roster mapping of a channel inside Redis.
+   */
+  public async setChannelMembersLookup(channelId: string, memberIds: string[]): Promise<void> {
+    if (memberIds.length === 0) return;
+
+    const key = `${this.channelPrefix}${channelId}`;
+    const pipeline = this.redis.pipeline();
+
+    pipeline.sadd(key, ...memberIds);
+    pipeline.expire(key, 86400); // 24-hour retention window
+
+    // Crucial Strategy: Also cross-register everyone in the channel to watch each other.
+    // This ensures when an off-screen member logs on, your WebSocket command knows to notify this channel's room.
+    memberIds.forEach((memberId) => {
+      pipeline.sadd(`${this.followersPrefix}${memberId}`, ...memberIds);
+      pipeline.expire(`${this.followersPrefix}${memberId}`, 86400);
+    });
+
+    await pipeline.exec();
+  }
+
+  /**
+   * Checks if a channel cache exists in Redis memory.
+   */
+  public async checkChannelCacheExists(channelId: string): Promise<boolean> {
+    const result = await this.redis.exists(`${this.channelPrefix}${channelId}`);
+    return result === 1;
   }
 
   /**
    * Seeds an empty placeholder marker into Redis to protect against Cache Stampedes.
    */
   public async setEmptyPresenceMarker(userId: string): Promise<void> {
-    await this.redis.sadd(`presence:contacts:${userId}`, "EMPTY_MARKER");
-    await this.redis.expire(`presence:contacts:${userId}`, 3600); // Check again in 1 hour
+    await this.redis.sadd(`${this.contactPrefix}${userId}`, "EMPTY_MARKER");
+    await this.redis.expire(`${this.contactPrefix}${userId}`, 3600); // Check again in 1 hour
   }
 
   /**
-   * Returns null if the underlying key graph does not exist in cache memory.
+   * Compiles the complete visible presence viewport map for a user.
+   * Dynamically merges their contact list with an optional array of active channel rosters.
+   * Returns null if the user's primary contact graph key is entirely missing.
    */
-  public async getAggregatedPresenceMap(authUserId: string): Promise<Record<string, "online" | "offline"> | null> {
-    const contactKey = `presence:contacts:${authUserId}`;
+  public async getAggregatedPresenceMap(
+    authUserId: string,
+    activeChannelIds: string[] = [],
+  ): Promise<Record<string, "online" | "offline">> {
+    const contactKey = `${this.contactPrefix}${authUserId}`;
 
-    // 1. Check if the graph exists in memory at all
-    const exists = await this.redis.exists(contactKey);
-    if (!exists) {
-      return null; // Return explicit null signaling a cache-miss recovery state to the controller
-    }
+    // Prepare our key collection for Redis Set Union (SUNION)
+    const unionKeys = [contactKey];
 
-    // 2. Fetch the target identifiers from the Redis Set
-    const targetedUserIds = await this.redis.smembers(contactKey);
+    activeChannelIds.forEach((channelId) => {
+      unionKeys.push(`${this.channelPrefix}${channelId}`);
+    });
 
-    // Filter out markers immediately or return empty collection safely
-    const cleanUserIds = targetedUserIds.filter((id) => id !== "EMPTY_MARKER");
+    // 1. Gather all unique user IDs across contacts and channel members simultaneously in O(N)
+    const targetedUserIds = await this.redis.sunion(...unionKeys);
+
+    // Filter out metadata marker states safely
+    const cleanUserIds = targetedUserIds.filter((id) => id !== "EMPTY_MARKER" && id !== authUserId);
     if (cleanUserIds.length === 0) return {};
 
-    // 3. Query statuses via an MGET batch pipeline
+    // 2. Query statuses instantly via an MGET batch pipeline
     const statusKeys = cleanUserIds.map((id) => `${this.leasePrefix}${id}`);
     const results = await this.redis.mget(...statusKeys);
 
-    // 4. Assemble response payload dictionary
+    // 3. Assemble response payload dictionary
     const presenceMap: Record<string, "online" | "offline"> = {};
     cleanUserIds.forEach((id, index) => {
       presenceMap[id] = results[index] === "online" ? "online" : "offline";

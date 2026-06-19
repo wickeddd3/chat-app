@@ -35,6 +35,6 @@ export class ReadMessageCommand implements WebSocketCommand {
 
     // 3. Tell the user's frontend to clear the badge locally
     // socket.emit("unread_cleared", { channelId });
-    await this.broadcaster.emitToRoom(data.channelId, "inbox_updated", null);
+    // await this.broadcaster.emitToRoom(data.channelId, "inbox_updated", null);
   }
 }
