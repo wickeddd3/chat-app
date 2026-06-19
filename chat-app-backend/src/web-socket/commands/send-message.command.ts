@@ -5,6 +5,7 @@ import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import { MessagesService } from "@/modules/message/messages.service";
 import { ChannelsService } from "@/modules/channel/channels.service";
 import { WebSocketBroadcaster } from "../web-socket.broadcaster";
+import type { Redis } from "ioredis";
 
 interface SendMessagePayload {
   content: string;
@@ -20,6 +21,7 @@ export class SendMessageCommand implements WebSocketCommand {
     @inject(TYPES.MessagesService) private messagesService: MessagesService,
     @inject(TYPES.ChannelsService) private channelsService: ChannelsService,
     @inject(TYPES.WebSocketBroadcaster) private broadcaster: WebSocketBroadcaster,
+    @inject(TYPES.RedisMainClient) private redis: Redis,
   ) {}
 
   public async execute(socket: Socket, authId: string, data: SendMessagePayload): Promise<void> {
@@ -48,8 +50,22 @@ export class SendMessageCommand implements WebSocketCommand {
       createdAt: savedMessage.createdAt,
     };
 
-    // 3. Emits to everyone in the room (including the sender instance)
+    // 3. DIRECT FAN-OUT: Broadcast the full message payload to the active room.
+    // Only clients currently inside this room room (via join_channel) will hear this.
     await this.broadcaster.emitToRoom(data.channelId, "receive_message", broadcastPayload);
-    await this.broadcaster.emitToRoom(data.channelId, "inbox_updated", null);
+
+    // 4. AMBIENT BACKGROUND FAN-OUT: Fetch all members belonging to this channel
+    const channelMemberIds = await this.redis.smembers(`presence:channel_members:${data.channelId}`);
+
+    // Loop through members to update counts and trigger background cache invalidations
+    for (const memberId of channelMemberIds) {
+      // Notify the member's background socket layer across the server cluster
+      // This fires whether they are looking at the channel or sitting on the settings page!
+      await this.broadcaster.emitToUser(memberId, "inbox_updated", {
+        channelId: data.channelId,
+        latestMessageSnippet: data.content.substring(0, 30),
+        senderName: socket.data.userName,
+      });
+    }
   }
 }
