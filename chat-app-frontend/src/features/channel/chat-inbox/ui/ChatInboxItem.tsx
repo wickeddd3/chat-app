@@ -1,9 +1,10 @@
-import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { Link, useParams } from "react-router";
 import { CheckCheck } from "lucide-react";
+import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { dateToNow } from "@/shared/utils/date-format";
-import type { InboxChannel } from "@/entities/channel";
 import { cn } from "@/shared/lib/utils";
+import { webSocketClient } from "@/shared/lib/socket-io.client";
+import type { InboxChannel } from "@/entities/channel";
 
 export function ChatInboxItem({
   inboxItem: {
@@ -25,6 +26,11 @@ export function ChatInboxItem({
       ? `${unreadCount} unread messages`
       : lastMessage?.content || "";
 
+  const handleMarkAsRead = () => {
+    // Mark messages as read
+    webSocketClient.emit("mark_as_read", { channelId });
+  };
+
   return (
     <Link
       to={`/messages/${id}`}
@@ -34,13 +40,10 @@ export function ChatInboxItem({
         overflow-hidden transition-colors`,
         isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "",
       )}
+      onClick={handleMarkAsRead}
     >
       <div className="shrink-0">
-        <ProfileAvatar
-          imageSrc={displayImage}
-          isOnline={online?.()}
-          badge={true}
-        />
+        <ProfileAvatar imageSrc={displayImage} isOnline={online} badge={true} />
       </div>
 
       <div className="flex-1 flex flex-col items-start min-w-0 gap-1.5">

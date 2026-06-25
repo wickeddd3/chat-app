@@ -30,27 +30,14 @@ export function ChatInbox() {
   const allInbox = useMemo(() => {
     return inbox.map((item) => ({
       ...item,
-      online: () => {
-        if (item.type === "GROUP") {
-          return item.channelMembers.some(
-            (member) =>
-              member.user.id !== authUser?.id && isOnline(member.user.id),
-          );
-        }
-        if (item.type === "DIRECT") {
-          const otherUser = item.channelMembers.find(
-            (member) =>
-              member.user.id !== authUser?.id && isOnline(member.user.id),
-          );
-          return !!otherUser;
-        }
-        return false;
-      },
+      online: item.channelMembers.some(
+        (member) => member.user.id !== authUser?.id && isOnline(member.user.id),
+      ),
     }));
   }, [inbox, authUser, isOnline]);
 
   const filteredByOnline = useMemo(() => {
-    return allInbox.filter((item) => item.online?.());
+    return allInbox.filter((item) => item.online);
   }, [allInbox]);
 
   const filteredByUnread = useMemo(() => {

@@ -4,6 +4,7 @@ import { webSocketClient } from "@/shared/lib/socket-io.client";
 import { toast } from "sonner";
 import type { Message } from "@/entities/message";
 import type { Notification } from "@/entities/notification";
+import type { InboxChannel } from "@/entities/channel";
 
 interface SocketOrchestratorProps {
   isAuthenticated: boolean;
@@ -53,35 +54,103 @@ export function SocketOrchestrator({
       status: "online" | "offline";
     }) => {
       queryClient.setQueryData(
-        ["presence", "matrix"],
+        ["presence", "matrix", "global"],
         (oldMap: Record<string, string> | undefined) => {
           return { ...oldMap, [data.userId]: data.status };
         },
       );
     };
 
-    // B. Inbox badge/list invalidation handler
-    const handleAmbientInboxUpdate = (payload: {
-      channelId: string;
-      latestMessageSnippet: string;
+    // B. Inbox badge/list invalidation handler and Global Message listener
+    const handleIncomingMessage = (payload: {
+      channelPayload: {
+        channelId: string;
+        lastMessage: {
+          content: string;
+          createdAt: string;
+        };
+      };
+      messagePayload: Message;
     }) => {
-      // 1. Instantly invalidate the sidebar list query so it re-fetches latest previews
-      queryClient.invalidateQueries({ queryKey: ["inbox"] });
+      const { channelPayload, messagePayload } = payload;
 
-      // 2. SELF-HEALING CACHE PATCHING:
-      // If TanStack already has a message cache active for this specific channel,
-      // we can append a placeholder or invalidate it so it seamlessly updates
-      // behind the scenes without requiring a page refresh.
-      const isChannelCacheActive = queryClient
-        .getQueryCache()
-        .find({ queryKey: ["messages", payload.channelId] });
+      // Inbox cache update
+      queryClient.setQueryData(
+        ["inbox", ""],
+        (oldData: { pages: { channels: InboxChannel[] }[] }) => {
+          if (!oldData) return oldData;
 
-      if (isChannelCacheActive) {
-        // Invalidate tells TanStack to quietly pull fresh data from the server in the background
-        queryClient.invalidateQueries({
-          queryKey: ["messages", payload.channelId],
-        });
-      }
+          const updatedPages = [...oldData.pages];
+
+          const pageIndex = updatedPages.findIndex(
+            (page: { channels: InboxChannel[] }) =>
+              page.channels.some(
+                (channel: InboxChannel) =>
+                  String(channel.id) === channelPayload.channelId,
+              ),
+          );
+
+          if (pageIndex !== -1) {
+            updatedPages[pageIndex] = {
+              ...updatedPages[pageIndex],
+              channels: updatedPages[pageIndex].channels.map(
+                (channel: InboxChannel) =>
+                  String(channel.id) === channelPayload.channelId
+                    ? {
+                        ...channel,
+                        lastMessage: channelPayload.lastMessage,
+                        unreadCount:
+                          channel?.unreadCount !== undefined
+                            ? channel.unreadCount + 1
+                            : channel?.unreadCount,
+                      }
+                    : channel,
+              ),
+            };
+          }
+
+          return { ...oldData, pages: updatedPages };
+        },
+      );
+
+      // Channel messages cache update
+      queryClient.setQueryData(
+        ["messages", String(channelPayload.channelId)],
+        (oldData: { pages: { messages: Message[] }[] }) => {
+          if (!oldData) return oldData;
+
+          const updatedPages = [...oldData.pages];
+
+          // Look for an optimistic version to replace across pages
+          const pageIndex = updatedPages.findIndex(
+            (page: { messages: Message[] }) =>
+              page.messages.some(
+                (m: Message) => m.clientId === messagePayload.clientId,
+              ),
+          );
+
+          if (pageIndex !== -1) {
+            updatedPages[pageIndex] = {
+              ...updatedPages[pageIndex],
+              messages: updatedPages[pageIndex].messages.map((m: Message) =>
+                m.clientId === messagePayload.clientId
+                  ? { ...messagePayload, isSending: false }
+                  : m,
+              ),
+            };
+          } else {
+            // Otherwise append straight to page 0
+            if (updatedPages[0]) {
+              updatedPages[0] = {
+                ...updatedPages[0],
+                messages: [...updatedPages[0].messages, messagePayload],
+              };
+            }
+          }
+
+          return { ...oldData, pages: updatedPages };
+        },
+      );
     };
 
     // C. Real-time notifications interceptor
@@ -103,40 +172,37 @@ export function SocketOrchestrator({
       toast.info(notification.title, { description: notification.content });
     };
 
-    // D. Global Message listener (Ensures you process messages even when looking at other channels)
-    const handleIncomingMessage = (newMessage: Message) => {
+    // D. Clear unread messages
+    const handleClearUnread = (channelId: string) => {
       queryClient.setQueryData(
-        ["messages", String(newMessage.channelId)],
-        (oldData: { pages: { messages: Message[] }[] }) => {
+        ["inbox", ""],
+        (oldData: { pages: { channels: InboxChannel[] }[] }) => {
           if (!oldData) return oldData;
+
           const updatedPages = [...oldData.pages];
 
-          // Look for an optimistic version to replace across pages
           const pageIndex = updatedPages.findIndex(
-            (page: { messages: Message[] }) =>
-              page.messages.some(
-                (m: Message) => m.clientId === newMessage.clientId,
+            (page: { channels: InboxChannel[] }) =>
+              page.channels.some(
+                (channel: InboxChannel) => String(channel.id) === channelId,
               ),
           );
 
           if (pageIndex !== -1) {
             updatedPages[pageIndex] = {
               ...updatedPages[pageIndex],
-              messages: updatedPages[pageIndex].messages.map((m: Message) =>
-                m.clientId === newMessage.clientId
-                  ? { ...newMessage, isSending: false }
-                  : m,
+              channels: updatedPages[pageIndex].channels.map(
+                (channel: InboxChannel) =>
+                  String(channel.id) === channelId
+                    ? {
+                        ...channel,
+                        unreadCount: 0,
+                      }
+                    : channel,
               ),
             };
-          } else {
-            // Otherwise append straight to page 0
-            if (updatedPages[0]) {
-              updatedPages[0] = {
-                ...updatedPages[0],
-                messages: [...updatedPages[0].messages, newMessage],
-              };
-            }
           }
+
           return { ...oldData, pages: updatedPages };
         },
       );
@@ -144,16 +210,16 @@ export function SocketOrchestrator({
 
     // Mount Listeners securely
     webSocketClient.on("user_status_change", handleStatusChange);
-    webSocketClient.on("inbox_updated", handleAmbientInboxUpdate);
     webSocketClient.on("new_notification", handleIncomingNotification);
     webSocketClient.on("receive_message", handleIncomingMessage);
+    webSocketClient.on("unread_cleared", handleClearUnread);
 
     // Explicit function reference tear-down to avoid silent memory leaks
     return () => {
       webSocketClient.off("user_status_change", handleStatusChange);
-      webSocketClient.off("inbox_updated", handleAmbientInboxUpdate);
       webSocketClient.off("new_notification", handleIncomingNotification);
       webSocketClient.off("receive_message", handleIncomingMessage);
+      webSocketClient.off("unread_cleared", handleClearUnread);
     };
   }, [isAuthenticated, queryClient]);
 

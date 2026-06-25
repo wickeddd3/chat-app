@@ -50,21 +50,21 @@ export class SendMessageCommand implements WebSocketCommand {
       createdAt: savedMessage.createdAt,
     };
 
-    // 3. DIRECT FAN-OUT: Broadcast the full message payload to the active room.
-    // Only clients currently inside this room room (via join_channel) will hear this.
-    await this.broadcaster.emitToRoom(data.channelId, "receive_message", broadcastPayload);
-
-    // 4. AMBIENT BACKGROUND FAN-OUT: Fetch all members belonging to this channel
+    // 3. AMBIENT BACKGROUND FAN-OUT: Fetch all members belonging to this channel
     const channelMemberIds = await this.redis.smembers(`presence:channel_members:${data.channelId}`);
 
     // Loop through members to update counts and trigger background cache invalidations
     for (const memberId of channelMemberIds) {
       // Notify the member's background socket layer across the server cluster
-      // This fires whether they are looking at the channel or sitting on the settings page!
-      await this.broadcaster.emitToUser(memberId, "inbox_updated", {
-        channelId: data.channelId,
-        latestMessageSnippet: data.content.substring(0, 30),
-        senderName: socket.data.userName,
+      await this.broadcaster.emitToUser(memberId, "receive_message", {
+        channelPayload: {
+          channelId: data.channelId,
+          lastMessage: {
+            content: savedMessage.content,
+            createdAt: savedMessage.createdAt,
+          },
+        },
+        messagePayload: broadcastPayload,
       });
     }
   }
