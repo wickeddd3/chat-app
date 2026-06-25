@@ -46,6 +46,9 @@ import { NotificationsService } from "@/modules/notification/notifications.servi
 import { PresenceRouter } from "@/modules/presence/presence.router";
 import { PresenceController } from "@/modules/presence/presence.controller";
 
+import { StatsRouter } from "@/modules/stats/stats.router";
+import { StatsController } from "@/modules/stats/stats.controller";
+
 import { Server as SocketServer } from "socket.io";
 import { SocketServerProvider } from "@/web-socket/socket-server.provider";
 import { WebSocketServer } from "@/web-socket/web-socket.server";
@@ -112,6 +115,9 @@ container.bind<NotificationsRepository>(TYPES.NotificationsRepository).to(Notifi
 
 container.bind<PresenceRouter>(TYPES.PresenceRouter).to(PresenceRouter);
 container.bind<PresenceController>(TYPES.PresenceController).to(PresenceController);
+
+container.bind<StatsRouter>(TYPES.StatsRouter).to(StatsRouter);
+container.bind<StatsController>(TYPES.StatsController).to(StatsController);
 
 container.bind<SocketServerProvider>(TYPES.SocketServerProvider).to(SocketServerProvider).inSingletonScope();
 container.bind<PresenceService>(TYPES.PresenceService).to(PresenceService).inSingletonScope();
