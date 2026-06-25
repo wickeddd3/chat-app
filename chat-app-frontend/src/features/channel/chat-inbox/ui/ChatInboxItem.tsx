@@ -36,11 +36,7 @@ export function ChatInboxItem({
       )}
     >
       <div className="shrink-0">
-        <ProfileAvatar
-          imageSrc={displayImage}
-          isOnline={online?.()}
-          badge={true}
-        />
+        <ProfileAvatar imageSrc={displayImage} isOnline={online} badge={true} />
       </div>
 
       <div className="flex-1 flex flex-col items-start min-w-0 gap-1.5">
