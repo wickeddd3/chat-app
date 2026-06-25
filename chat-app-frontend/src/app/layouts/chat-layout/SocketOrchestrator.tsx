@@ -172,16 +172,54 @@ export function SocketOrchestrator({
       toast.info(notification.title, { description: notification.content });
     };
 
+    // D. Clear unread messages
+    const handleClearUnread = (channelId: string) => {
+      queryClient.setQueryData(
+        ["inbox", ""],
+        (oldData: { pages: { channels: InboxChannel[] }[] }) => {
+          if (!oldData) return oldData;
+
+          const updatedPages = [...oldData.pages];
+
+          const pageIndex = updatedPages.findIndex(
+            (page: { channels: InboxChannel[] }) =>
+              page.channels.some(
+                (channel: InboxChannel) => String(channel.id) === channelId,
+              ),
+          );
+
+          if (pageIndex !== -1) {
+            updatedPages[pageIndex] = {
+              ...updatedPages[pageIndex],
+              channels: updatedPages[pageIndex].channels.map(
+                (channel: InboxChannel) =>
+                  String(channel.id) === channelId
+                    ? {
+                        ...channel,
+                        unreadCount: 0,
+                      }
+                    : channel,
+              ),
+            };
+          }
+
+          return { ...oldData, pages: updatedPages };
+        },
+      );
+    };
+
     // Mount Listeners securely
     webSocketClient.on("user_status_change", handleStatusChange);
     webSocketClient.on("new_notification", handleIncomingNotification);
     webSocketClient.on("receive_message", handleIncomingMessage);
+    webSocketClient.on("unread_cleared", handleClearUnread);
 
     // Explicit function reference tear-down to avoid silent memory leaks
     return () => {
       webSocketClient.off("user_status_change", handleStatusChange);
       webSocketClient.off("new_notification", handleIncomingNotification);
       webSocketClient.off("receive_message", handleIncomingMessage);
+      webSocketClient.off("unread_cleared", handleClearUnread);
     };
   }, [isAuthenticated, queryClient]);
 
