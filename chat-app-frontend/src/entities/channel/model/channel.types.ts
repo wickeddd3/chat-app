@@ -32,7 +32,7 @@ export interface InboxChannel extends Channel {
   }[];
   recipient: ChannelRecipient | null;
   unreadCount?: number;
-  online?: () => boolean;
+  online?: boolean;
 }
 
 export interface PaginatedInboxChannel {
