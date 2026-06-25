@@ -61,8 +61,8 @@ export function SocketOrchestrator({
       );
     };
 
-    // B. Inbox badge/list invalidation handler
-    const handleAmbientInboxUpdate = (payload: {
+    // B. Inbox badge/list invalidation handler and Global Message listener
+    const handleIncomingMessage = (payload: {
       channelPayload: {
         channelId: string;
         lastMessage: {
@@ -121,11 +121,31 @@ export function SocketOrchestrator({
 
           const updatedPages = [...oldData.pages];
 
-          if (updatedPages[0]) {
-            updatedPages[0] = {
-              ...updatedPages[0],
-              messages: [...updatedPages[0].messages, messagePayload],
+          // Look for an optimistic version to replace across pages
+          const pageIndex = updatedPages.findIndex(
+            (page: { messages: Message[] }) =>
+              page.messages.some(
+                (m: Message) => m.clientId === messagePayload.clientId,
+              ),
+          );
+
+          if (pageIndex !== -1) {
+            updatedPages[pageIndex] = {
+              ...updatedPages[pageIndex],
+              messages: updatedPages[pageIndex].messages.map((m: Message) =>
+                m.clientId === messagePayload.clientId
+                  ? { ...messagePayload, isSending: false }
+                  : m,
+              ),
             };
+          } else {
+            // Otherwise append straight to page 0
+            if (updatedPages[0]) {
+              updatedPages[0] = {
+                ...updatedPages[0],
+                messages: [...updatedPages[0].messages, messagePayload],
+              };
+            }
           }
 
           return { ...oldData, pages: updatedPages };
@@ -152,55 +172,14 @@ export function SocketOrchestrator({
       toast.info(notification.title, { description: notification.content });
     };
 
-    // D. Global Message listener (Ensures you process messages even when looking at other channels)
-    const handleIncomingMessage = (newMessage: Message) => {
-      queryClient.setQueryData(
-        ["messages", String(newMessage.channelId)],
-        (oldData: { pages: { messages: Message[] }[] }) => {
-          if (!oldData) return oldData;
-          const updatedPages = [...oldData.pages];
-
-          // Look for an optimistic version to replace across pages
-          const pageIndex = updatedPages.findIndex(
-            (page: { messages: Message[] }) =>
-              page.messages.some(
-                (m: Message) => m.clientId === newMessage.clientId,
-              ),
-          );
-
-          if (pageIndex !== -1) {
-            updatedPages[pageIndex] = {
-              ...updatedPages[pageIndex],
-              messages: updatedPages[pageIndex].messages.map((m: Message) =>
-                m.clientId === newMessage.clientId
-                  ? { ...newMessage, isSending: false }
-                  : m,
-              ),
-            };
-          } else {
-            // Otherwise append straight to page 0
-            if (updatedPages[0]) {
-              updatedPages[0] = {
-                ...updatedPages[0],
-                messages: [...updatedPages[0].messages, newMessage],
-              };
-            }
-          }
-          return { ...oldData, pages: updatedPages };
-        },
-      );
-    };
-
     // Mount Listeners securely
     webSocketClient.on("user_status_change", handleStatusChange);
-    webSocketClient.on("inbox_updated", handleAmbientInboxUpdate);
     webSocketClient.on("new_notification", handleIncomingNotification);
     webSocketClient.on("receive_message", handleIncomingMessage);
 
     // Explicit function reference tear-down to avoid silent memory leaks
     return () => {
       webSocketClient.off("user_status_change", handleStatusChange);
-      webSocketClient.off("inbox_updated", handleAmbientInboxUpdate);
       webSocketClient.off("new_notification", handleIncomingNotification);
       webSocketClient.off("receive_message", handleIncomingMessage);
     };
