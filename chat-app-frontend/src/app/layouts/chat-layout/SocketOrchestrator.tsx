@@ -78,10 +78,14 @@ export function SocketOrchestrator({
       queryClient.setQueryData(
         ["inbox", ""],
         (oldData: { pages: { channels: InboxChannel[] }[] }) => {
-          if (!oldData) return oldData;
+          if (!oldData) {
+            // Fetch fresh inbox list if inbox cache doesn't exist
+            queryClient.invalidateQueries({ queryKey: ["inbox", ""] });
+          }
 
           const updatedPages = [...oldData.pages];
 
+          // Find channel page index from existing inbox cache
           const pageIndex = updatedPages.findIndex(
             (page: { channels: InboxChannel[] }) =>
               page.channels.some(
@@ -91,6 +95,7 @@ export function SocketOrchestrator({
           );
 
           if (pageIndex !== -1) {
+            // Increase unreadCount and set lastMessage if channel exist
             updatedPages[pageIndex] = {
               ...updatedPages[pageIndex],
               channels: updatedPages[pageIndex].channels.map(
@@ -107,6 +112,9 @@ export function SocketOrchestrator({
                     : channel,
               ),
             };
+          } else {
+            // Fetch fresh inbox list if channel doesn't exist
+            queryClient.invalidateQueries({ queryKey: ["inbox", ""] });
           }
 
           return { ...oldData, pages: updatedPages };
@@ -121,7 +129,7 @@ export function SocketOrchestrator({
 
           const updatedPages = [...oldData.pages];
 
-          // Look for an optimistic version to replace across pages
+          // Find message page index from existing channel message cache
           const pageIndex = updatedPages.findIndex(
             (page: { messages: Message[] }) =>
               page.messages.some(
@@ -130,6 +138,7 @@ export function SocketOrchestrator({
           );
 
           if (pageIndex !== -1) {
+            // Set isSending to false if channel message exist
             updatedPages[pageIndex] = {
               ...updatedPages[pageIndex],
               messages: updatedPages[pageIndex].messages.map((m: Message) =>
@@ -139,7 +148,7 @@ export function SocketOrchestrator({
               ),
             };
           } else {
-            // Otherwise append straight to page 0
+            // Otherwise append straight to page 0 (latest message batch)
             if (updatedPages[0]) {
               updatedPages[0] = {
                 ...updatedPages[0],
