@@ -53,7 +53,7 @@ export function SocketOrchestrator({
       status: "online" | "offline";
     }) => {
       queryClient.setQueryData(
-        ["presence", "matrix"],
+        ["presence", "matrix", "global"],
         (oldMap: Record<string, string> | undefined) => {
           return { ...oldMap, [data.userId]: data.status };
         },
