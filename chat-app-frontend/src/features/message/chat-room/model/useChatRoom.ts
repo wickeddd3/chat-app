@@ -8,6 +8,9 @@ export function useChatRoom(channelId: string) {
     // Join room on mount
     webSocketClient.emit("join_channel", { channelId });
 
+    // Mark messages as read
+    webSocketClient.emit("mark_as_read", { channelId });
+
     // Cleanup to prevent duplicate listeners
     return () => {
       // Tell the server to stop sending messages for this channel to this socket
