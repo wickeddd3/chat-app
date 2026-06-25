@@ -4,6 +4,7 @@ import { webSocketClient } from "@/shared/lib/socket-io.client";
 import { toast } from "sonner";
 import type { Message } from "@/entities/message";
 import type { Notification } from "@/entities/notification";
+import type { InboxChannel } from "@/entities/channel";
 
 interface SocketOrchestratorProps {
   isAuthenticated: boolean;
@@ -62,26 +63,74 @@ export function SocketOrchestrator({
 
     // B. Inbox badge/list invalidation handler
     const handleAmbientInboxUpdate = (payload: {
-      channelId: string;
-      latestMessageSnippet: string;
+      channelPayload: {
+        channelId: string;
+        lastMessage: {
+          content: string;
+          createdAt: string;
+        };
+      };
+      messagePayload: Message;
     }) => {
-      // 1. Instantly invalidate the sidebar list query so it re-fetches latest previews
-      queryClient.invalidateQueries({ queryKey: ["inbox"] });
+      const { channelPayload, messagePayload } = payload;
 
-      // 2. SELF-HEALING CACHE PATCHING:
-      // If TanStack already has a message cache active for this specific channel,
-      // we can append a placeholder or invalidate it so it seamlessly updates
-      // behind the scenes without requiring a page refresh.
-      const isChannelCacheActive = queryClient
-        .getQueryCache()
-        .find({ queryKey: ["messages", payload.channelId] });
+      // Inbox cache update
+      queryClient.setQueryData(
+        ["inbox", ""],
+        (oldData: { pages: { channels: InboxChannel[] }[] }) => {
+          if (!oldData) return oldData;
 
-      if (isChannelCacheActive) {
-        // Invalidate tells TanStack to quietly pull fresh data from the server in the background
-        queryClient.invalidateQueries({
-          queryKey: ["messages", payload.channelId],
-        });
-      }
+          const updatedPages = [...oldData.pages];
+
+          const pageIndex = updatedPages.findIndex(
+            (page: { channels: InboxChannel[] }) =>
+              page.channels.some(
+                (channel: InboxChannel) =>
+                  String(channel.id) === channelPayload.channelId,
+              ),
+          );
+
+          if (pageIndex !== -1) {
+            updatedPages[pageIndex] = {
+              ...updatedPages[pageIndex],
+              channels: updatedPages[pageIndex].channels.map(
+                (channel: InboxChannel) =>
+                  String(channel.id) === channelPayload.channelId
+                    ? {
+                        ...channel,
+                        lastMessage: channelPayload.lastMessage,
+                        unreadCount:
+                          channel?.unreadCount !== undefined
+                            ? channel.unreadCount + 1
+                            : channel?.unreadCount,
+                      }
+                    : channel,
+              ),
+            };
+          }
+
+          return { ...oldData, pages: updatedPages };
+        },
+      );
+
+      // Channel messages cache update
+      queryClient.setQueryData(
+        ["messages", String(channelPayload.channelId)],
+        (oldData: { pages: { messages: Message[] }[] }) => {
+          if (!oldData) return oldData;
+
+          const updatedPages = [...oldData.pages];
+
+          if (updatedPages[0]) {
+            updatedPages[0] = {
+              ...updatedPages[0],
+              messages: [...updatedPages[0].messages, messagePayload],
+            };
+          }
+
+          return { ...oldData, pages: updatedPages };
+        },
+      );
     };
 
     // C. Real-time notifications interceptor
