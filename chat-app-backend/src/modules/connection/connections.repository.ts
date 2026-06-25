@@ -217,6 +217,21 @@ export class ConnectionsRepository {
     }
   }
 
+  public async getReceivedConnectionsCount({ authUserId }: { authUserId: string }): Promise<number> {
+    try {
+      const pendingRequestsCount = await this.db.connection.count({
+        where: {
+          receiverId: authUserId,
+          status: "PENDING",
+        },
+      });
+
+      return pendingRequestsCount;
+    } catch {
+      throw new HttpException(500, "Failed to retrieve received connection requests count.");
+    }
+  }
+
   public async sendRequest(senderId: string, receiverId: string): Promise<ConnectionRequestResponse> {
     try {
       if (senderId === receiverId) throw new Error("You cannot connect with yourself");
