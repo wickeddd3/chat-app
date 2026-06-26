@@ -18,6 +18,7 @@ export const navItems: NavItem[] = [
     title: "Messages",
     url: "/messages",
     icon: MessageCircleIcon,
+    badgeName: "unreadMessagesCount",
   },
   {
     title: "Contacts",
@@ -33,10 +34,12 @@ export const navItems: NavItem[] = [
     title: "Contact Requests",
     url: "/contact-requests",
     icon: HandshakeIcon,
+    badgeName: "pendingRequestsCount",
   },
   {
     title: "Notifications",
     url: "/notifications",
     icon: BellIcon,
+    badgeName: "unreadNotificationsCount",
   },
 ];

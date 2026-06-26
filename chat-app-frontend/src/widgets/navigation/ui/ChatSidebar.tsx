@@ -3,8 +3,10 @@ import { useLocation } from "react-router";
 import { UserNav } from "./UserNav";
 import { SidebarLink } from "./SidebarLink";
 import { navItems } from "../model/nav-items";
+import { useUnreadCounts } from "@/features/stats/unread-counts";
 
 export function ChatSidebar() {
+  const { unreadCounts } = useUnreadCounts();
   const location = useLocation();
 
   const isActive = (url: string) => {
@@ -36,11 +38,16 @@ export function ChatSidebar() {
         <section
           className={`
             flex flex-row md:flex-col items-center gap-1
-            md:gap-0 w-full justify-around md:justify-start
+            md:gap-3 w-full justify-around md:justify-start
           `}
         >
           {navItems.map((nav) => (
-            <SidebarLink key={nav.url} nav={nav} isActive={isActive(nav.url)} />
+            <SidebarLink
+              key={nav.url}
+              nav={nav}
+              isActive={isActive(nav.url)}
+              badgeCount={unreadCounts[nav?.badgeName ?? ""]}
+            />
           ))}
         </section>
       </div>
