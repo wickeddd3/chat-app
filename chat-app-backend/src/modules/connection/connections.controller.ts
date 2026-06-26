@@ -87,7 +87,7 @@ export class ConnectionsController extends BaseController {
 
       const request = await this.connectionsService.sendRequest(authUserId, receiverId);
 
-      this.sendSuccess(res, request.connection, "Connection request sent successfully");
+      this.sendSuccess(res, request.sentConnection, "Connection request sent successfully");
     } catch (error: unknown) {
       next(error);
     }
@@ -100,7 +100,7 @@ export class ConnectionsController extends BaseController {
 
       const request = await this.connectionsService.acceptRequest(authUserId, connectionId);
 
-      this.sendSuccess(res, request.connection, "Connection request accepted successfully");
+      this.sendSuccess(res, request.receivedConnection, "Connection request accepted successfully");
     } catch (error: unknown) {
       next(error);
     }
