@@ -7,6 +7,7 @@ export const handleNewRequest = (
   queryClient: QueryClient,
   connection: Connection,
 ) => {
+  // Append new connection request to existing received connection requests cache
   queryClient.setQueryData(
     REACT_QUERY_KEYS["RECEIVED_CONNECTION_REQUESTS"],
     (old: { pages: { connections: Connection[] }[] }) => {
@@ -25,6 +26,20 @@ export const handleNewRequest = (
           return page;
         }),
       };
+    },
+  );
+
+  // Increment pending request count
+  queryClient.setQueryData(
+    REACT_QUERY_KEYS["UNREAD_COUNT_STATS"],
+    (old: Record<string, number>) => {
+      if (!old) return old;
+
+      const currentUnreadCountStats = { ...old };
+      currentUnreadCountStats["pendingRequestsCount"] =
+        currentUnreadCountStats["pendingRequestsCount"] + 1;
+
+      return currentUnreadCountStats;
     },
   );
 };
