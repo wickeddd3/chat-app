@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import type { Message } from "@/entities/message";
 import type { Notification } from "@/entities/notification";
 import type { InboxChannel } from "@/entities/channel";
+import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
 
 interface SocketOrchestratorProps {
   isAuthenticated: boolean;
@@ -164,20 +165,39 @@ export function SocketOrchestrator({
 
     // C. Real-time notifications interceptor
     const handleIncomingNotification = (notification: Notification) => {
+      // Append new notification to exisitng notification cache
       queryClient.setQueryData(
         ["notifications"],
         (oldData: { pages: { notifications: Notification[] }[] }) => {
           if (!oldData) return oldData;
+
           const updatedPages = [...oldData.pages];
+
           if (updatedPages[0]) {
             updatedPages[0] = {
               ...updatedPages[0],
               notifications: [notification, ...updatedPages[0].notifications],
             };
           }
+
           return { ...oldData, pages: updatedPages };
         },
       );
+
+      // Increment unread notification count
+      queryClient.setQueryData(
+        REACT_QUERY_KEYS["UNREAD_COUNT_STATS"],
+        (old: Record<string, number>) => {
+          if (!old) return old;
+
+          const currentUnreadCountStats = { ...old };
+          currentUnreadCountStats["unreadNotificationsCount"] =
+            currentUnreadCountStats["unreadNotificationsCount"] + 1;
+
+          return currentUnreadCountStats;
+        },
+      );
+
       toast.info(notification.title, { description: notification.content });
     };
 
