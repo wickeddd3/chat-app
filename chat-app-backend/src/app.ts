@@ -104,7 +104,7 @@ export class App {
     const requestSubscriber = container.get<RequestSubscriber>(TYPES.RequestSubscriber);
 
     // Register the handler using injectable class context instance
-    dispatcher.on("notification:created", notificationSubscriber.handleNotificationCreated);
+    dispatcher.on("notification:new", notificationSubscriber.handleNotificationCreated);
     dispatcher.on("request:new", requestSubscriber.handleRequestSent);
 
     console.log("🔔 [App] Successfully registered domain event subscribers");
