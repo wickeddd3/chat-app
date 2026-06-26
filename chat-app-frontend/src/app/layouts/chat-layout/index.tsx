@@ -2,7 +2,7 @@ import { useAuth } from "@/app/store/AuthContext";
 import { Toaster } from "@/shared/ui/shadcn/sonner";
 import { ChatSidebar } from "@/widgets/navigation";
 import { Outlet } from "react-router";
-import { SocketOrchestrator } from "./SocketOrchestrator";
+import { SocketOrchestrator } from "@/features/websocket";
 
 export function ChatLayout() {
   const { authUser } = useAuth();
