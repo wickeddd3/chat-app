@@ -107,6 +107,7 @@ export class App {
     dispatcher.on("notification:new", notificationSubscriber.handleNotificationCreated);
     dispatcher.on("request:new", requestSubscriber.handleRequestSent);
     dispatcher.on("request:cancel", requestSubscriber.handleRequestCanceled);
+    dispatcher.on("request:declined", requestSubscriber.handleRequestDeclined);
 
     console.log("🔔 [App] Successfully registered domain event subscribers");
   }
