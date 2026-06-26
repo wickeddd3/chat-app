@@ -4,6 +4,7 @@ import type {
   PaginatedNotifications,
   Notification,
 } from "@/entities/notification";
+import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
 
 export function useNotifications() {
   const {
@@ -14,7 +15,7 @@ export function useNotifications() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<PaginatedNotifications, Error, Notification[]>({
-    queryKey: ["notifications"],
+    queryKey: REACT_QUERY_KEYS["NOTIFICATIONS"],
     queryFn: ({ pageParam }) =>
       getNotificationsApi({
         params: {
