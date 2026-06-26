@@ -17,7 +17,7 @@ export class RequestSubscriber {
     receiverId: string;
     connection: ConnectionRequest;
   }): Promise<void> => {
-    await this.broadcaster.emitToUser(receiverId, "new_request", connection);
+    await this.broadcaster.emitToUser(receiverId, "request:new", connection);
   };
 
   public handleRequestCanceled = async ({
@@ -27,6 +27,6 @@ export class RequestSubscriber {
     receiverId: string;
     connectionId: string;
   }): Promise<void> => {
-    await this.broadcaster.emitToUser(receiverId, "cancel_request", connectionId);
+    await this.broadcaster.emitToUser(receiverId, "request:cancel", connectionId);
   };
 }
