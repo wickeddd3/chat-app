@@ -101,7 +101,10 @@ export class ConnectionsService {
 
   public async declineRequest(receiverId: string, connectionId: string): Promise<string> {
     try {
-      await this.connectionsRepository.declineRequest(receiverId, connectionId);
+      const senderId = await this.connectionsRepository.declineRequest(receiverId, connectionId);
+
+      this.dispatcher.emit("request:declined", { senderId, connectionId });
+
       return connectionId;
     } catch {
       throw new HttpException(500, "Failed to decline connection request.");
@@ -110,9 +113,9 @@ export class ConnectionsService {
 
   public async cancelRequest(senderId: string, connectionId: string): Promise<string> {
     try {
-      const connectionReceiverId = await this.connectionsRepository.cancelRequest(senderId, connectionId);
+      const receiverId = await this.connectionsRepository.cancelRequest(senderId, connectionId);
 
-      this.dispatcher.emit("request:cancel", { receiverId: connectionReceiverId, connectionId });
+      this.dispatcher.emit("request:cancel", { receiverId, connectionId });
 
       return connectionId;
     } catch {
