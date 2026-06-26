@@ -8,7 +8,7 @@ interface JoinChannelPayload {
 
 @injectable()
 export class JoinChannelCommand implements WebSocketCommand {
-  public readonly eventName = "join_channel";
+  public readonly eventName = "channel:join_channel";
 
   public async execute(socket: Socket, authId: string, data: JoinChannelPayload): Promise<void> {
     const { channelId } = data;
