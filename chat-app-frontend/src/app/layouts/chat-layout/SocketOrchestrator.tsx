@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import type { Message } from "@/entities/message";
 import type { Notification } from "@/entities/notification";
 import type { InboxChannel } from "@/entities/channel";
+import type { Connection } from "@/entities/connection";
 import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
 
 interface SocketOrchestratorProps {
@@ -237,11 +238,38 @@ export function SocketOrchestrator({
       );
     };
 
+    // E. Append new connection request to received request cache
+    const handleNewRequest = (connection: Connection) => {
+      queryClient.setQueryData(
+        REACT_QUERY_KEYS["RECEIVED_CONNECTION_REQUESTS"],
+        (old: { pages: { connections: Connection[] }[] }) => {
+          if (!old) return old;
+
+          return {
+            ...old,
+            pages: old.pages.map(
+              (page: { connections: Connection[] }, index) => {
+                // Prepend only to page index 0 (the initial loaded batch view)
+                if (index === 0) {
+                  return {
+                    ...page,
+                    connections: [connection, ...page.connections],
+                  };
+                }
+                return page;
+              },
+            ),
+          };
+        },
+      );
+    };
+
     // Mount Listeners securely
     webSocketClient.on("user_status_change", handleStatusChange);
     webSocketClient.on("new_notification", handleIncomingNotification);
     webSocketClient.on("receive_message", handleIncomingMessage);
     webSocketClient.on("unread_cleared", handleClearUnread);
+    webSocketClient.on("new_request", handleNewRequest);
 
     // Explicit function reference tear-down to avoid silent memory leaks
     return () => {
@@ -249,6 +277,7 @@ export function SocketOrchestrator({
       webSocketClient.off("new_notification", handleIncomingNotification);
       webSocketClient.off("receive_message", handleIncomingMessage);
       webSocketClient.off("unread_cleared", handleClearUnread);
+      webSocketClient.off("new_request", handleNewRequest);
     };
   }, [isAuthenticated, queryClient]);
 
