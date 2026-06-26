@@ -74,6 +74,7 @@ export class ConnectionsService {
       const result = await this.connectionsRepository.sendRequest(senderId, receiverId);
 
       this.dispatcher.emit("notification:created", result.notification);
+      this.dispatcher.emit("request:new", { receiverId, connection: result.receivedConnection });
 
       return result;
     } catch {
