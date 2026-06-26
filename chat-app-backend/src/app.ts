@@ -106,6 +106,7 @@ export class App {
     // Register the handler using injectable class context instance
     dispatcher.on("notification:new", notificationSubscriber.handleNotificationCreated);
     dispatcher.on("request:new", requestSubscriber.handleRequestSent);
+    dispatcher.on("request:cancel", requestSubscriber.handleRequestCanceled);
 
     console.log("🔔 [App] Successfully registered domain event subscribers");
   }
