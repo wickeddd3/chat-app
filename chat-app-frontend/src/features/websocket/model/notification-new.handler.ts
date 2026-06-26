@@ -10,7 +10,7 @@ export const handleIncomingNotification = (
 ) => {
   // Append new notification to exisitng notification cache
   queryClient.setQueryData(
-    ["notifications"],
+    REACT_QUERY_KEYS["NOTIFICATIONS"],
     (oldData: { pages: { notifications: Notification[] }[] }) => {
       if (!oldData) return oldData;
 
