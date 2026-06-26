@@ -53,4 +53,5 @@ export const TYPES = {
 
   EventDispatcher: Symbol.for("EventDispatcher"),
   NotificationSubscriber: Symbol.for("NotificationSubscriber"),
+  RequestSubscriber: Symbol.for("RequestSubscriber"),
 };

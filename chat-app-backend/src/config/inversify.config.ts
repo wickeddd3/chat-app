@@ -65,6 +65,7 @@ import { HeartbeatCommand } from "@/web-socket/commands/heartbeat.command";
 import { WebSocketBroadcaster } from "@/web-socket/web-socket.broadcaster";
 
 import { NotificationSubscriber } from "@/web-socket/handlers/notification.subscriber";
+import { RequestSubscriber } from "@/web-socket/handlers/request.subscriber";
 
 const container = new Container();
 
@@ -124,6 +125,7 @@ container.bind<PresenceService>(TYPES.PresenceService).to(PresenceService).inSin
 
 // Bind subscriber class handler
 container.bind<NotificationSubscriber>(TYPES.NotificationSubscriber).to(NotificationSubscriber).inSingletonScope();
+container.bind<RequestSubscriber>(TYPES.RequestSubscriber).to(RequestSubscriber).inSingletonScope();
 
 // Bind the actual SocketServer token using a dynamic Inversify Factory Provider resolution lookup
 container.bind<SocketServer>(TYPES.SocketServer).toDynamicValue((context) => {
