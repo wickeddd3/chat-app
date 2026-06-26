@@ -28,7 +28,7 @@ export function ChatInboxItem({
 
   const handleMarkAsRead = () => {
     // Mark messages as read
-    webSocketClient.emit("mark_as_read", { channelId });
+    webSocketClient.emit("message:mark_as_read", { channelId });
   };
 
   return (
