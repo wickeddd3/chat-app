@@ -3,4 +3,6 @@ export const REACT_QUERY_KEYS = {
   RECEIVED_CONNECTION_REQUESTS: ["connections", "requests", "received"],
   CONTACTS: ["connections", "contacts"],
   USERS: ["users"],
+  NOTIFICATIONS: ["notifications"],
+  UNREAD_COUNT_STATS: ["stats", "unread-counts"],
 };
