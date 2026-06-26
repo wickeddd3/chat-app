@@ -4,6 +4,7 @@ import { UserNav } from "./UserNav";
 import { SidebarLink } from "./SidebarLink";
 import { navItems } from "../model/nav-items";
 import { useUnreadCounts } from "@/features/stats/unread-counts";
+import { Badge } from "@/shared/ui/shadcn/badge";
 
 export function ChatSidebar() {
   const { unreadCounts } = useUnreadCounts();
@@ -14,11 +15,13 @@ export function ChatSidebar() {
     return location.pathname.startsWith(url);
   };
 
+  const unreadNotificationBadge = unreadCounts["unreadNotificationsCount"];
+
   return (
     <div
       className={`
-        w-full h-full flex flex-row justify-between items-center px-4 py-0 gap-2
-        md:flex-col md:justify-between md:items-center md:px-0 md:py-4 md:gap-4
+        w-full h-full flex flex-row justify-between items-center px-4 py-0 gap-5
+        md:flex-col md:justify-between md:items-center md:px-0 md:py-4 md:gap-3
       `}
     >
       <div
@@ -51,8 +54,13 @@ export function ChatSidebar() {
           ))}
         </section>
       </div>
-      <div className="flex shrink-0">
+      <div className="relative flex shrink-0 mr-4 md:mr-0">
         <UserNav />
+        {unreadNotificationBadge && unreadNotificationBadge > 0 && (
+          <Badge className="border-4 py-2.5 rounded-full border-white bg-red-500 text-gray-50 absolute top-0 inset-e-0 -mt-2 -me-3">
+            {unreadNotificationBadge}
+          </Badge>
+        )}
       </div>
     </div>
   );
