@@ -264,12 +264,34 @@ export function SocketOrchestrator({
       );
     };
 
+    // F. Remove connection request to received request cache
+    const handleCancelRequest = (connectionId: string) => {
+      queryClient.setQueryData(
+        REACT_QUERY_KEYS["RECEIVED_CONNECTION_REQUESTS"],
+        (old: { pages: { connections: Connection[] }[] }) => {
+          if (!old) return old;
+
+          return {
+            ...old,
+            // Map through each paginated page and filter out the canceled request
+            pages: old.pages.map((page: { connections: Connection[] }) => ({
+              ...page,
+              connections: page.connections.filter(
+                (req: Connection) => req.id !== connectionId,
+              ),
+            })),
+          };
+        },
+      );
+    };
+
     // Mount Listeners securely
     webSocketClient.on("user_status_change", handleStatusChange);
     webSocketClient.on("new_notification", handleIncomingNotification);
     webSocketClient.on("receive_message", handleIncomingMessage);
     webSocketClient.on("unread_cleared", handleClearUnread);
     webSocketClient.on("new_request", handleNewRequest);
+    webSocketClient.on("cancel_request", handleCancelRequest);
 
     // Explicit function reference tear-down to avoid silent memory leaks
     return () => {
@@ -278,6 +300,7 @@ export function SocketOrchestrator({
       webSocketClient.off("receive_message", handleIncomingMessage);
       webSocketClient.off("unread_cleared", handleClearUnread);
       webSocketClient.off("new_request", handleNewRequest);
+      webSocketClient.off("cancel_request", handleCancelRequest);
     };
   }, [isAuthenticated, queryClient]);
 
