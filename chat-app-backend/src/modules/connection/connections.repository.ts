@@ -402,7 +402,7 @@ export class ConnectionsRepository {
    * CANCEL: Run by the author of an outbound request.
    * Target connection must originate from the active user and still be 'PENDING'.
    */
-  public async cancelRequest(senderId: string, connectionId: string): Promise<void> {
+  public async cancelRequest(senderId: string, connectionId: string): Promise<string> {
     try {
       // 1. Find the target record to verify authorization and status rules
       const connection = await this.db.connection.findUnique({
@@ -437,6 +437,8 @@ export class ConnectionsRepository {
           },
         }),
       ]);
+
+      return connection.receiverId;
     } catch {
       throw new HttpException(500, "Failed to cancel connection request.");
     }
