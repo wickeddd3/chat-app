@@ -4,7 +4,6 @@ import {
   BookUserIcon,
   UsersRoundIcon,
   HandshakeIcon,
-  BellIcon,
 } from "lucide-react";
 import type { NavItem } from "./nav.types";
 
@@ -35,11 +34,5 @@ export const navItems: NavItem[] = [
     url: "/contact-requests",
     icon: HandshakeIcon,
     badgeName: "pendingRequestsCount",
-  },
-  {
-    title: "Notifications",
-    url: "/notifications",
-    icon: BellIcon,
-    badgeName: "unreadNotificationsCount",
   },
 ];
