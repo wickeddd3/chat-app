@@ -110,7 +110,10 @@ export class ConnectionsService {
 
   public async cancelRequest(senderId: string, connectionId: string): Promise<string> {
     try {
-      await this.connectionsRepository.cancelRequest(senderId, connectionId);
+      const connectionReceiverId = await this.connectionsRepository.cancelRequest(senderId, connectionId);
+
+      this.dispatcher.emit("request:cancel", { receiverId: connectionReceiverId, connectionId });
+
       return connectionId;
     } catch {
       throw new HttpException(500, "Failed to cancel connection request.");
