@@ -357,7 +357,7 @@ export class ConnectionsRepository {
    * DECLINE: Run by the recipient of an incoming request.
    * Target connection must be directed to the active user and currently be 'PENDING'.
    */
-  public async declineRequest(receiverId: string, connectionId: string): Promise<void> {
+  public async declineRequest(receiverId: string, connectionId: string): Promise<string> {
     try {
       // 1. Find the target record to verify authorization and status rules
       const connection = await this.db.connection.findUnique({
@@ -393,6 +393,8 @@ export class ConnectionsRepository {
           },
         }),
       ]);
+
+      return connection.senderId;
     } catch {
       throw new HttpException(500, "Failed to decline connection request.");
     }
