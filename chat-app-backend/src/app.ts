@@ -16,11 +16,14 @@ import { EventEmitter } from "events";
 
 import { container } from "@/config/inversify.config";
 import { TYPES } from "@/config/types";
+
+import { errorMiddleware } from "@/middlewares/error.middleware";
+
 import { SocketServerProvider } from "@/web-socket/socket-server.provider";
 import { WebSocketServer } from "@/web-socket/web-socket.server";
 
 import { NotificationSubscriber } from "@/web-socket/handlers/notification.subscriber";
-import { errorMiddleware } from "@/middlewares/error.middleware";
+import { RequestSubscriber } from "@/web-socket/handlers/request.subscriber";
 
 export class App {
   public express: Application;
@@ -98,9 +101,11 @@ export class App {
     // Extract the dispatcher instance and subscriber class from the DI environment
     const dispatcher = container.get<EventEmitter>(TYPES.EventDispatcher);
     const notificationSubscriber = container.get<NotificationSubscriber>(TYPES.NotificationSubscriber);
+    const requestSubscriber = container.get<RequestSubscriber>(TYPES.RequestSubscriber);
 
     // Register the handler using injectable class context instance
     dispatcher.on("notification:created", notificationSubscriber.handleNotificationCreated);
+    dispatcher.on("request:new", requestSubscriber.handleRequestSent);
 
     console.log("🔔 [App] Successfully registered domain event subscribers");
   }
