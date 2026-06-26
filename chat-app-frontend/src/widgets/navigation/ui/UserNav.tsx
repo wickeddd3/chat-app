@@ -46,7 +46,7 @@ export function UserNav() {
             <Link to={"/notifications"}>
               <BellIcon />
               Notifications
-              {unreadNotificationBadge && unreadNotificationBadge > 0 && (
+              {unreadNotificationBadge > 0 && (
                 <Badge className="rounded-full border-white bg-red-500 text-gray-50">
                   {unreadNotificationBadge}
                 </Badge>

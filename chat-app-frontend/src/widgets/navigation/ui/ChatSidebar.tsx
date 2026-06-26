@@ -49,14 +49,14 @@ export function ChatSidebar() {
               key={nav.url}
               nav={nav}
               isActive={isActive(nav.url)}
-              badgeCount={unreadCounts[nav?.badgeName ?? ""]}
+              badgeCount={unreadCounts[nav?.badgeName ?? ""] ?? 0}
             />
           ))}
         </section>
       </div>
       <div className="relative flex shrink-0 mr-4 md:mr-0">
         <UserNav />
-        {unreadNotificationBadge && unreadNotificationBadge > 0 && (
+        {unreadNotificationBadge > 0 && (
           <Badge className="border-4 py-2.5 rounded-full border-white bg-red-500 text-gray-50 absolute top-0 inset-e-0 -mt-2 -me-3">
             {unreadNotificationBadge}
           </Badge>

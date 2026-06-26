@@ -15,7 +15,7 @@ export function SidebarLink({
 }: {
   nav: NavItem;
   isActive: boolean;
-  badgeCount?: number;
+  badgeCount: number;
 }) {
   return (
     <Tooltip>
@@ -31,7 +31,7 @@ export function SidebarLink({
           <button className="cursor-pointer">
             <Icon />
           </button>
-          {badgeCount && badgeCount > 0 && (
+          {badgeCount > 0 && (
             <Badge className="border-4 py-2.5 rounded-full border-white bg-red-500 text-gray-50 absolute top-0 inset-e-0 -mt-2 -me-3">
               {badgeCount}
             </Badge>
