@@ -269,12 +269,19 @@ export class ConnectionsRepository {
         });
 
         return {
-          connection: {
+          sentConnection: {
             id: connection.id,
             status: connection.status,
             createdAt: connection.createdAt,
             updatedAt: connection.updatedAt,
             user: connection.receiver,
+          },
+          receivedConnection: {
+            id: connection.id,
+            status: connection.status,
+            createdAt: connection.createdAt,
+            updatedAt: connection.updatedAt,
+            user: connection.sender,
           },
           notification,
         };
@@ -324,7 +331,14 @@ export class ConnectionsRepository {
         });
 
         return {
-          connection: {
+          sentConnection: {
+            id: updatedConnection.id,
+            status: updatedConnection.status,
+            createdAt: updatedConnection.createdAt,
+            updatedAt: updatedConnection.updatedAt,
+            user: updatedConnection.receiver,
+          },
+          receivedConnection: {
             id: updatedConnection.id,
             status: updatedConnection.status,
             createdAt: updatedConnection.createdAt,
