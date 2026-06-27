@@ -51,6 +51,7 @@ export function MemberListField<T extends FieldValues>({
               placeholder="Search and select members"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              className="text-sm"
             />
             <div className="w-full flex flex-col h-64 overflow-y-auto mt-2 border rounded-md divide-y">
               <MemberList
