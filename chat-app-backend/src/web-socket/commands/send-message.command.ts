@@ -4,7 +4,7 @@ import type { Socket } from "socket.io";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import { MessagesService } from "@/modules/message/messages.service";
 import { ChannelsService } from "@/modules/channel/channels.service";
-import { WebSocketBroadcaster } from "../web-socket.broadcaster";
+import { BroadcasterService } from "@/services/broadcaster.service";
 import type { Redis } from "ioredis";
 
 interface SendMessagePayload {
@@ -20,7 +20,7 @@ export class SendMessageCommand implements WebSocketCommand {
   constructor(
     @inject(TYPES.MessagesService) private messagesService: MessagesService,
     @inject(TYPES.ChannelsService) private channelsService: ChannelsService,
-    @inject(TYPES.WebSocketBroadcaster) private broadcaster: WebSocketBroadcaster,
+    @inject(TYPES.BroadcasterService) private broadcaster: BroadcasterService,
     @inject(TYPES.RedisMainClient) private redis: Redis,
   ) {}
 

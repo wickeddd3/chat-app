@@ -4,7 +4,7 @@ import type { Redis } from "ioredis";
 import notepack from "notepack.io";
 
 @injectable()
-export class WebSocketBroadcaster {
+export class BroadcasterService {
   constructor(@inject(TYPES.RedisPubClient) private pubClient: Redis) {}
 
   /**

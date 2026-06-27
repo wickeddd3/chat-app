@@ -44,7 +44,8 @@ export const TYPES = {
   SocketServer: Symbol.for("SocketServer"),
   WebSocketServer: Symbol.for("WebSocketServer"),
   WebSocketCommand: Symbol.for("WebSocketCommand"),
-  WebSocketBroadcaster: Symbol.for("WebSocketBroadcaster"),
+
+  BroadcasterService: Symbol.for("BroadcasterService"),
 
   RedisMainClient: Symbol.for("RedisMainClient"), // For regular DB cache operations & presence tracking
   RedisPubClient: Symbol.for("RedisPubClient"), // Specifically for pushing data to the MessagePack bus

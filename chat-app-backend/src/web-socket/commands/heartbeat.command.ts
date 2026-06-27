@@ -3,8 +3,8 @@ import { TYPES } from "@/config/types";
 import type { Socket } from "socket.io";
 import type { Redis } from "ioredis";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
-import { PresenceService } from "../../services/presence.service";
-import { WebSocketBroadcaster } from "../web-socket.broadcaster";
+import { PresenceService } from "@/services/presence.service";
+import { BroadcasterService } from "@/services/broadcaster.service";
 import { ConnectionsRepository } from "@/modules/connection/connections.repository";
 
 @injectable()
@@ -13,7 +13,7 @@ export class HeartbeatCommand implements WebSocketCommand {
 
   constructor(
     @inject(TYPES.PresenceService) private presenceService: PresenceService,
-    @inject(TYPES.WebSocketBroadcaster) private broadcaster: WebSocketBroadcaster,
+    @inject(TYPES.BroadcasterService) private broadcaster: BroadcasterService,
     @inject(TYPES.ConnectionsRepository) private connectionsRepository: ConnectionsRepository,
     @inject(TYPES.RedisMainClient) private redis: Redis,
   ) {}
