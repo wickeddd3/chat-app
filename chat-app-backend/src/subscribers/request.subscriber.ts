@@ -1,11 +1,11 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import type { ConnectionRequest } from "@/modules/connection/connections.types";
-import { WebSocketBroadcaster } from "../web-socket.broadcaster";
+import { BroadcasterService } from "@/services/broadcaster.service";
 
 @injectable()
 export class RequestSubscriber {
-  constructor(@inject(TYPES.WebSocketBroadcaster) private broadcaster: WebSocketBroadcaster) {
+  constructor(@inject(TYPES.BroadcasterService) private broadcaster: BroadcasterService) {
     this.handleRequestSent = this.handleRequestSent.bind(this);
     this.handleRequestAccepted = this.handleRequestAccepted.bind(this);
     this.handleRequestCanceled = this.handleRequestCanceled.bind(this);
