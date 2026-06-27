@@ -4,7 +4,7 @@ import type { Socket } from "socket.io";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import { MessagesService } from "@/modules/message/messages.service";
 import { MessageReceiptsService } from "@/modules/message-receipt/message-receipts.service";
-import { WebSocketBroadcaster } from "../web-socket.broadcaster";
+import { BroadcasterService } from "@/services/broadcaster.service";
 
 interface ReadMessagePayload {
   channelId: string;
@@ -17,7 +17,7 @@ export class ReadMessageCommand implements WebSocketCommand {
   constructor(
     @inject(TYPES.MessagesService) private messagesService: MessagesService,
     @inject(TYPES.MessageReceiptsService) private messageReceiptsService: MessageReceiptsService,
-    @inject(TYPES.WebSocketBroadcaster) private broadcaster: WebSocketBroadcaster,
+    @inject(TYPES.BroadcasterService) private broadcaster: BroadcasterService,
   ) {}
 
   public async execute(socket: Socket, authId: string, data: ReadMessagePayload): Promise<void> {
@@ -28,7 +28,7 @@ export class ReadMessageCommand implements WebSocketCommand {
     const unreadMessages = await this.messagesService.getUnreadMessages(targetChannelId, authId);
     const unreadMessagesIds = unreadMessages.map((m) => m.id);
 
-    let readMessageCount: number = 0;
+    let readMessageCount = 0;
 
     if (unreadMessages.length > 0) {
       // 2. Bulk create receipts
