@@ -14,7 +14,7 @@ export default function MessagesPage() {
           ${isInsideChatRoom ? "hidden md:flex" : "flex-1 flex"}
         `}
       >
-        <div className="flex justify-between items-center p-4">
+        <div className="flex justify-between items-center px-4 py-3">
           <h1 className="text-base font-medium text-foreground">Chat Inbox</h1>
           <CreateGroupChannel />
         </div>

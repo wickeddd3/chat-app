@@ -1,4 +1,9 @@
-import { BadgeCheckIcon, BellIcon, CogIcon, LogOutIcon } from "lucide-react";
+import {
+  CircleUserRoundIcon,
+  BellIcon,
+  CogIcon,
+  LogOutIcon,
+} from "lucide-react";
 import { Button } from "@/shared/ui/shadcn/button";
 import {
   DropdownMenu,
@@ -37,7 +42,7 @@ export function UserNav() {
         <DropdownMenuGroup>
           <DropdownMenuItem asChild className="cursor-pointer">
             <Link to={"/profile"}>
-              <BadgeCheckIcon />
+              <CircleUserRoundIcon />
               Account
             </Link>
           </DropdownMenuItem>

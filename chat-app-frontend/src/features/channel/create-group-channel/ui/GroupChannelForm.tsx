@@ -40,6 +40,7 @@ export function GroupChannelForm({ onSuccess }: { onSuccess?: () => void }) {
           id="name"
           label="Name"
           placeholder="Group Name"
+          inputClassName="text-sm"
           labelClassName="text-md"
         />
         <MemberListField
@@ -50,7 +51,7 @@ export function GroupChannelForm({ onSuccess }: { onSuccess?: () => void }) {
       </FieldGroup>
       <Button
         type="submit"
-        className="w-full font-semibold bg-blue-500 py-6 hover:bg-blue-600 cursor-pointer"
+        className="w-full font-semibold bg-blue-500 hover:bg-blue-600 cursor-pointer"
         disabled={isPending}
       >
         {isPending && <Spinner data-icon="inline-start" />}

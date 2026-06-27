@@ -55,7 +55,9 @@ export function TextField<T extends FieldValues>({
             className={cn("", inputClassName)}
           />
           {description && <FieldDescription>{description}</FieldDescription>}
-          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+          {fieldState.invalid && (
+            <FieldError className="text-xs" errors={[fieldState.error]} />
+          )}
         </Field>
       )}
     />

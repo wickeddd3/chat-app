@@ -30,7 +30,7 @@ export const navItems: NavItem[] = [
     icon: UsersRoundIcon,
   },
   {
-    title: "Contact Requests",
+    title: "Connection Requests",
     url: "/contact-requests",
     icon: HandshakeIcon,
     badgeName: "pendingRequestsCount",

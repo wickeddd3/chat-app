@@ -32,7 +32,7 @@ export function PasswordForm() {
           id="currentPassword"
           label="Current Password"
           placeholder="Current Password"
-          inputClassName="rounded-2xl py-7 px-4 placeholder:font-medium"
+          inputClassName="rounded-xl md:rounded-2xl py-5 md:py-7 px-3 md:px-4 text-sm placeholder:font-medium"
           labelClassName="text-md"
         />
         <TextField
@@ -41,7 +41,7 @@ export function PasswordForm() {
           id="newPassword"
           label="New Password"
           placeholder="New Password"
-          inputClassName="rounded-2xl py-7 px-4 placeholder:font-medium"
+          inputClassName="rounded-xl md:rounded-2xl py-5 md:py-7 px-3 md:px-4 text-sm placeholder:font-medium"
           labelClassName="text-md"
         />
         <TextField
@@ -50,10 +50,10 @@ export function PasswordForm() {
           id="confirmNewPassword"
           label="Confirm New Password"
           placeholder="Confirm New Password"
-          inputClassName="rounded-2xl py-7 px-4 placeholder:font-medium"
+          inputClassName="rounded-xl md:rounded-2xl py-5 md:py-7 px-3 md:px-4 text-sm placeholder:font-medium"
           labelClassName="text-md"
         />
-        <button className="bg-blue-500 rounded-full p-3 text-white font-medium cursor-pointer mt-6">
+        <button className="bg-blue-500 rounded-xl p-3 text-white font-bold cursor-pointer mt-6 hover:bg-blue-600">
           Save Changes
         </button>
       </div>
