@@ -102,7 +102,7 @@ export class ConnectionsService {
     try {
       const senderId = await this.connectionsRepository.declineRequest(receiverId, connectionId);
 
-      this.dispatcher.emit("request:declined", { senderId, connectionId });
+      this.dispatcher.emit("request:declined", { senderId, receiverId, connectionId });
 
       return connectionId;
     } catch {

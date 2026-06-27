@@ -44,11 +44,13 @@ export class RequestSubscriber {
 
   public handleRequestDeclined = async ({
     senderId,
+    receiverId,
     connectionId,
   }: {
     senderId: string;
+    receiverId: string;
     connectionId: string;
   }): Promise<void> => {
-    await this.broadcaster.emitToUser(senderId, "request:declined", connectionId);
+    await this.broadcaster.emitToUser(senderId, "request:declined", { receiverId, connectionId });
   };
 }
