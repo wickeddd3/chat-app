@@ -22,8 +22,8 @@ import { errorMiddleware } from "@/middlewares/error.middleware";
 import { SocketServerProvider } from "@/web-socket/socket-server.provider";
 import { WebSocketServer } from "@/web-socket/web-socket.server";
 
-import { NotificationSubscriber } from "@/web-socket/handlers/notification.subscriber";
-import { RequestSubscriber } from "@/web-socket/handlers/request.subscriber";
+import { NotificationSubscriber } from "@/subscribers/notification.subscriber";
+import { RequestSubscriber } from "@/subscribers/request.subscriber";
 
 export class App {
   public express: Application;
