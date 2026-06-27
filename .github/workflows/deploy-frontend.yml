@@ -9,6 +9,8 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - "chat-app-frontend/**"
   workflow_dispatch:
 
 jobs:
@@ -63,6 +65,8 @@ jobs:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
       - name: Deploy to Vercel
+        # This condition ensures deployment ONLY happens on a push/merge to main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           # 1. Navigate to the frontend folder
           cd chat-app-frontend
