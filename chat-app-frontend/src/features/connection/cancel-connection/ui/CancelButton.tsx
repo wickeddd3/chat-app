@@ -1,3 +1,4 @@
+import { UserRoundMinusIcon } from "lucide-react";
 import { useCancelConnection } from "../model/useCancelConnection";
 
 export function CancelButton({
@@ -19,12 +20,15 @@ export function CancelButton({
           connectionRequestUserId,
         })
       }
-      className="bg-blue-500 text-gray-50 text-xs font-medium rounded-lg px-3 py-2 cursor-pointer hover:bg-blue-600"
+      className="bg-blue-500  rounded-lg px-3 py-2 flex items-center justify-center gap-2 cursor-pointer hover:bg-blue-600"
       aria-label="Cancel connection request"
       role="button"
       title="Cancel connection request"
     >
-      {text}
+      <UserRoundMinusIcon size={18} className="text-gray-50" />
+      <span className="text-xs font-medium text-gray-50 hidden sm:inline-block">
+        {text}
+      </span>
     </button>
   );
 }
