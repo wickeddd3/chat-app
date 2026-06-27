@@ -28,12 +28,16 @@ export class ReadMessageCommand implements WebSocketCommand {
     const unreadMessages = await this.messagesService.getUnreadMessages(targetChannelId, authId);
     const unreadMessagesIds = unreadMessages.map((m) => m.id);
 
+    let readMessageCount: number = 0;
+
     if (unreadMessages.length > 0) {
       // 2. Bulk create receipts
-      await this.messageReceiptsService.createMessageReceipts(authId, unreadMessagesIds);
+      const { count } = await this.messageReceiptsService.createMessageReceipts(authId, unreadMessagesIds);
+
+      readMessageCount = count;
     }
 
     // 3. Tell the user's frontend to clear the badge locally
-    await this.broadcaster.emitToUser(authId, "message:read", String(targetChannelId));
+    await this.broadcaster.emitToUser(authId, "message:read", { channelId: String(targetChannelId), readMessageCount });
   }
 }
