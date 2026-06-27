@@ -9,6 +9,8 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - "chat-app-backend/**"
   workflow_dispatch: # Allow manual triggering from GitHub UI
 
 jobs:
