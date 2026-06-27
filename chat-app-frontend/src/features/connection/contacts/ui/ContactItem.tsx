@@ -4,10 +4,12 @@ import type { ReactNode } from "react";
 export function ContactItem({
   user: { name, image, username },
   isNew = false,
+  isOnline = false,
   optionSlot,
 }: {
   user: { name: string; username: string; image?: string | null };
   isNew?: boolean;
+  isOnline?: boolean;
   optionSlot?: ReactNode;
 }) {
   return (
@@ -18,7 +20,11 @@ export function ContactItem({
       `}
     >
       <div className="shrink-0">
-        <ProfileAvatar imageSrc={image || ""} />
+        <ProfileAvatar
+          imageSrc={image || ""}
+          isOnline={isOnline}
+          badge={true}
+        />
       </div>
 
       <div className="flex-1 flex flex-col items-start min-w-0 gap-1">
