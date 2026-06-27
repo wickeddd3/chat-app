@@ -7,6 +7,7 @@ import { WebSocketBroadcaster } from "../web-socket.broadcaster";
 export class RequestSubscriber {
   constructor(@inject(TYPES.WebSocketBroadcaster) private broadcaster: WebSocketBroadcaster) {
     this.handleRequestSent = this.handleRequestSent.bind(this);
+    this.handleRequestAccepted = this.handleRequestAccepted.bind(this);
     this.handleRequestCanceled = this.handleRequestCanceled.bind(this);
     this.handleRequestDeclined = this.handleRequestDeclined.bind(this);
   }
@@ -19,6 +20,16 @@ export class RequestSubscriber {
     connection: ConnectionRequest;
   }): Promise<void> => {
     await this.broadcaster.emitToUser(receiverId, "request:new", connection);
+  };
+
+  public handleRequestAccepted = async ({
+    senderId,
+    connection,
+  }: {
+    senderId: string;
+    connection: ConnectionRequest;
+  }): Promise<void> => {
+    await this.broadcaster.emitToUser(senderId, "request:accepted", connection);
   };
 
   public handleRequestCanceled = async ({

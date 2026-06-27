@@ -106,6 +106,7 @@ export class App {
     // Register the handler using injectable class context instance
     dispatcher.on("notification:new", notificationSubscriber.handleNotificationCreated);
     dispatcher.on("request:new", requestSubscriber.handleRequestSent);
+    dispatcher.on("request:accepted", requestSubscriber.handleRequestAccepted);
     dispatcher.on("request:canceled", requestSubscriber.handleRequestCanceled);
     dispatcher.on("request:declined", requestSubscriber.handleRequestDeclined);
 
