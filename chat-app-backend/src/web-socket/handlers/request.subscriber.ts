@@ -28,7 +28,7 @@ export class RequestSubscriber {
     receiverId: string;
     connectionId: string;
   }): Promise<void> => {
-    await this.broadcaster.emitToUser(receiverId, "request:cancel", connectionId);
+    await this.broadcaster.emitToUser(receiverId, "request:canceled", connectionId);
   };
 
   public handleRequestDeclined = async ({
