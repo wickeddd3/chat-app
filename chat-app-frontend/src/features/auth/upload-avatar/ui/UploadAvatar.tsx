@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shared/ui/shadcn/dialog";
-import { CloudUploadIcon } from "lucide-react";
+import { CameraIcon, CloudUploadIcon } from "lucide-react";
 import { useUploadAvatar } from "../model/useUploadAvatar";
 import { Spinner } from "@/shared/ui/shadcn/spinner";
 import { useState } from "react";
@@ -26,10 +26,13 @@ export function UploadAvatar({ userId }: { userId: string }) {
       <form id="avatar-form">
         <DialogTrigger asChild>
           <Button
-            className="cursor-pointer font-semibold px-4 bg-blue-500 hover:bg-blue-600"
+            className="cursor-pointer rounded-lg px-4 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600"
             onClick={() => setOpen(true)}
           >
-            Change avatar
+            <CameraIcon size={16} />
+            <span className="text-md font-semibold hidden md:inline-block">
+              Change avatar
+            </span>
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-sm" showCloseButton={false}>
