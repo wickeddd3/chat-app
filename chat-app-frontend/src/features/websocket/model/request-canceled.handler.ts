@@ -1,12 +1,16 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { Connection } from "@/entities/connection";
 import type { Notification } from "@/entities/notification";
+import type { User } from "@/entities/user";
 import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
 
 // Remove connection request to received request cache
 export const handleCanceledRequest = (
   queryClient: QueryClient,
-  connectionId: string,
+  payload: {
+    senderId: string;
+    connectionId: string;
+  },
 ) => {
   // Remove new connection request from existing received connection requests cache
   queryClient.setQueryData(
@@ -20,7 +24,7 @@ export const handleCanceledRequest = (
         pages: old.pages.map((page: { connections: Connection[] }) => ({
           ...page,
           connections: page.connections.filter(
-            (req: Connection) => req.id !== connectionId,
+            (req: Connection) => req.id !== payload.connectionId,
           ),
         })),
       };
@@ -39,11 +43,33 @@ export const handleCanceledRequest = (
           return {
             ...page,
             notifications: page.notifications.filter(
-              (notif: Notification) => notif.referenceId !== connectionId,
+              (notif: Notification) =>
+                notif.referenceId !== payload.connectionId,
             ),
           };
         }),
       };
+    },
+  );
+
+  // Update users list to update user connectionStatus
+  queryClient.setQueryData(
+    [...REACT_QUERY_KEYS["USERS"], ""],
+    (old: User[]) => {
+      if (!old) return old;
+
+      const currentUsers = [...old];
+      const userIndex = currentUsers.findIndex(
+        (user) => user.id === payload.senderId,
+      );
+
+      currentUsers[userIndex] = {
+        ...currentUsers[userIndex],
+        connectionId: null,
+        connectionStatus: "STRANGER",
+      };
+
+      return currentUsers;
     },
   );
 
