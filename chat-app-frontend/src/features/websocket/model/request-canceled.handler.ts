@@ -4,7 +4,7 @@ import type { Notification } from "@/entities/notification";
 import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
 
 // Remove connection request to received request cache
-export const handleCancelRequest = (
+export const handleCanceledRequest = (
   queryClient: QueryClient,
   connectionId: string,
 ) => {

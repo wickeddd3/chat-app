@@ -7,7 +7,7 @@ import { handleIncomingMessage } from "./message-receive.handler";
 import { handleClearUnread } from "./message-read.handler";
 import { handleIncomingNotification } from "./notification-new.handler";
 import { handleNewRequest } from "./request-new.handler";
-import { handleCancelRequest } from "./request-cancel.handler";
+import { handleCanceledRequest } from "./request-canceled.handler";
 import { handleDeclinedRequest } from "./request-declined.handler";
 
 interface SocketOrchestratorProps {
@@ -62,8 +62,8 @@ export function SocketOrchestrator({
       handleIncomingNotification(queryClient, payload);
     const onNewRequest = (payload: any) =>
       handleNewRequest(queryClient, payload);
-    const onCancelRequest = (payload: any) =>
-      handleCancelRequest(queryClient, payload);
+    const onCanceledRequest = (payload: any) =>
+      handleCanceledRequest(queryClient, payload);
     const onDeclinedRequest = (payload: any) =>
       handleDeclinedRequest(queryClient, payload);
 
@@ -73,7 +73,7 @@ export function SocketOrchestrator({
     webSocketClient.on("message:read", onClearUnread);
     webSocketClient.on("notification:new", onIncomingNotification);
     webSocketClient.on("request:new", onNewRequest);
-    webSocketClient.on("request:cancel", onCancelRequest);
+    webSocketClient.on("request:canceled", onCanceledRequest);
     webSocketClient.on("request:declined", onDeclinedRequest);
 
     // Explicit function reference tear-down to avoid silent memory leaks
@@ -83,7 +83,7 @@ export function SocketOrchestrator({
       webSocketClient.off("message:read", onClearUnread);
       webSocketClient.off("notification:new", onIncomingNotification);
       webSocketClient.off("request:new", onNewRequest);
-      webSocketClient.off("request:cancel", onCancelRequest);
+      webSocketClient.off("request:canceled", onCanceledRequest);
       webSocketClient.off("request:declined", onDeclinedRequest);
     };
   }, [isAuthenticated, queryClient]);
