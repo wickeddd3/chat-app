@@ -1,4 +1,5 @@
 import type { Connection } from "@/entities/connection";
+import type { Notification } from "@/entities/notification";
 import type { User } from "@/entities/user";
 import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
 import type { QueryClient } from "@tanstack/react-query";
@@ -7,6 +8,8 @@ import { toast } from "sonner";
 const receivedRequestsQueryKey =
   REACT_QUERY_KEYS["RECEIVED_CONNECTION_REQUESTS"];
 const usersQueryKey = [...REACT_QUERY_KEYS["USERS"], ""];
+const unreadCountStatsQueryKey = REACT_QUERY_KEYS["UNREAD_COUNT_STATS"];
+const notificationsQueryKey = REACT_QUERY_KEYS["NOTIFICATIONS"];
 
 export type TData = string;
 export type TError = Error;
@@ -103,4 +106,41 @@ export function onSuccess(
 
     return currentUsers;
   });
+
+  // Remove new connection request notification from existing notifications cache
+  context?.client.setQueryData(
+    notificationsQueryKey,
+    (old: { pages: { notifications: Notification[] }[] }) => {
+      if (!old) return old;
+
+      return {
+        ...old,
+        pages: old.pages.map((page: { notifications: Notification[] }) => {
+          return {
+            ...page,
+            notifications: page.notifications.filter(
+              (notif: Notification) =>
+                notif.referenceId !== connectionRequestId,
+            ),
+          };
+        }),
+      };
+    },
+  );
+
+  // Decrement pending request count and unread notifications count
+  context?.client.setQueryData(
+    unreadCountStatsQueryKey,
+    (old: Record<string, number>) => {
+      if (!old) return old;
+
+      const currentUnreadCountStats = { ...old };
+      currentUnreadCountStats["pendingRequestsCount"] =
+        currentUnreadCountStats["pendingRequestsCount"] - 1;
+      currentUnreadCountStats["unreadNotificationsCount"] =
+        currentUnreadCountStats["unreadNotificationsCount"] - 1;
+
+      return currentUnreadCountStats;
+    },
+  );
 }

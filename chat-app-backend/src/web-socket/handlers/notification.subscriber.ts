@@ -10,6 +10,6 @@ export class NotificationSubscriber {
   }
 
   public handleNotificationCreated = async (notification: Notification): Promise<void> => {
-    await this.broadcaster.emitToUser(notification.userId, "new_notification", notification);
+    await this.broadcaster.emitToUser(notification.userId, "notification:new", notification);
   };
 }

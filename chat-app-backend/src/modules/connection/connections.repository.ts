@@ -217,6 +217,21 @@ export class ConnectionsRepository {
     }
   }
 
+  public async getReceivedConnectionsCount({ authUserId }: { authUserId: string }): Promise<number> {
+    try {
+      const pendingRequestsCount = await this.db.connection.count({
+        where: {
+          receiverId: authUserId,
+          status: "PENDING",
+        },
+      });
+
+      return pendingRequestsCount;
+    } catch {
+      throw new HttpException(500, "Failed to retrieve received connection requests count.");
+    }
+  }
+
   public async sendRequest(senderId: string, receiverId: string): Promise<ConnectionRequestResponse> {
     try {
       if (senderId === receiverId) throw new Error("You cannot connect with yourself");
@@ -254,12 +269,19 @@ export class ConnectionsRepository {
         });
 
         return {
-          connection: {
+          sentConnection: {
             id: connection.id,
             status: connection.status,
             createdAt: connection.createdAt,
             updatedAt: connection.updatedAt,
             user: connection.receiver,
+          },
+          receivedConnection: {
+            id: connection.id,
+            status: connection.status,
+            createdAt: connection.createdAt,
+            updatedAt: connection.updatedAt,
+            user: connection.sender,
           },
           notification,
         };
@@ -309,7 +331,14 @@ export class ConnectionsRepository {
         });
 
         return {
-          connection: {
+          sentConnection: {
+            id: updatedConnection.id,
+            status: updatedConnection.status,
+            createdAt: updatedConnection.createdAt,
+            updatedAt: updatedConnection.updatedAt,
+            user: updatedConnection.receiver,
+          },
+          receivedConnection: {
             id: updatedConnection.id,
             status: updatedConnection.status,
             createdAt: updatedConnection.createdAt,
@@ -328,7 +357,7 @@ export class ConnectionsRepository {
    * DECLINE: Run by the recipient of an incoming request.
    * Target connection must be directed to the active user and currently be 'PENDING'.
    */
-  public async declineRequest(receiverId: string, connectionId: string): Promise<void> {
+  public async declineRequest(receiverId: string, connectionId: string): Promise<string> {
     try {
       // 1. Find the target record to verify authorization and status rules
       const connection = await this.db.connection.findUnique({
@@ -364,6 +393,8 @@ export class ConnectionsRepository {
           },
         }),
       ]);
+
+      return connection.senderId;
     } catch {
       throw new HttpException(500, "Failed to decline connection request.");
     }
@@ -373,7 +404,7 @@ export class ConnectionsRepository {
    * CANCEL: Run by the author of an outbound request.
    * Target connection must originate from the active user and still be 'PENDING'.
    */
-  public async cancelRequest(senderId: string, connectionId: string): Promise<void> {
+  public async cancelRequest(senderId: string, connectionId: string): Promise<string> {
     try {
       // 1. Find the target record to verify authorization and status rules
       const connection = await this.db.connection.findUnique({
@@ -408,6 +439,8 @@ export class ConnectionsRepository {
           },
         }),
       ]);
+
+      return connection.receiverId;
     } catch {
       throw new HttpException(500, "Failed to cancel connection request.");
     }

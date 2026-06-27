@@ -73,7 +73,8 @@ export class ConnectionsService {
     try {
       const result = await this.connectionsRepository.sendRequest(senderId, receiverId);
 
-      this.dispatcher.emit("notification:created", result.notification);
+      this.dispatcher.emit("notification:new", result.notification);
+      this.dispatcher.emit("request:new", { receiverId, connection: result.receivedConnection });
 
       return result;
     } catch {
@@ -85,12 +86,11 @@ export class ConnectionsService {
     try {
       const result = await this.connectionsRepository.acceptRequest(receiverId, connectionId);
 
-      // Extract the two user IDs involved in the connection
       const senderId = result.notification.userId; // The original requester
       this.presenceService.setPresenceLookup(senderId, receiverId);
 
-      // Dispatch system notification event
-      this.dispatcher.emit("notification:created", result.notification);
+      this.dispatcher.emit("notification:new", result.notification);
+      this.dispatcher.emit("request:accepted", { senderId, connection: result.sentConnection });
 
       return result;
     } catch {
@@ -100,7 +100,10 @@ export class ConnectionsService {
 
   public async declineRequest(receiverId: string, connectionId: string): Promise<string> {
     try {
-      await this.connectionsRepository.declineRequest(receiverId, connectionId);
+      const senderId = await this.connectionsRepository.declineRequest(receiverId, connectionId);
+
+      this.dispatcher.emit("request:declined", { senderId, receiverId, connectionId });
+
       return connectionId;
     } catch {
       throw new HttpException(500, "Failed to decline connection request.");
@@ -109,7 +112,10 @@ export class ConnectionsService {
 
   public async cancelRequest(senderId: string, connectionId: string): Promise<string> {
     try {
-      await this.connectionsRepository.cancelRequest(senderId, connectionId);
+      const receiverId = await this.connectionsRepository.cancelRequest(senderId, connectionId);
+
+      this.dispatcher.emit("request:canceled", { receiverId, senderId, connectionId });
+
       return connectionId;
     } catch {
       throw new HttpException(500, "Failed to cancel connection request.");

@@ -41,7 +41,7 @@ export function useSendMessage({ channelId }: { channelId: string }) {
     message: string;
   }) => {
     // Emit message to websocket server
-    webSocketClient.emit("send_message", {
+    webSocketClient.emit("message:send_message", {
       channelId,
       clientId,
       content: message,

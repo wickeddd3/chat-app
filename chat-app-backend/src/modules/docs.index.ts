@@ -5,6 +5,7 @@ import { connectionsPaths, connectionsSchemas } from "./connection/connections.d
 import { messagesPaths, messagesSchemas } from "./message/messages.docs";
 import { notificationsPaths, notificationsSchemas } from "./notification/notifications.docs";
 import { usersPaths, usersSchemas } from "./user/users.docs";
+import { statsPaths } from "./stats/stats.docs";
 
 export const combinedPaths: OpenAPIV3.PathsObject = {
   ...authPaths,
@@ -13,6 +14,7 @@ export const combinedPaths: OpenAPIV3.PathsObject = {
   ...messagesPaths,
   ...notificationsPaths,
   ...usersPaths,
+  ...statsPaths,
 };
 
 export const combinedSchemas: Record<string, OpenAPIV3.SchemaObject> = {

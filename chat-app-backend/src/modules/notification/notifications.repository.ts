@@ -8,6 +8,21 @@ import { HttpException } from "@/utils/http.exception";
 export class NotificationsRepository {
   constructor(@inject(TYPES.PrismaClient) private db: PrismaClient) {}
 
+  public async getUnreadNotificationsCount({ authUserId }: { authUserId: string }): Promise<number> {
+    try {
+      const unreadCount = await this.db.notification.count({
+        where: {
+          userId: authUserId,
+          isRead: false,
+        },
+      });
+
+      return unreadCount;
+    } catch {
+      throw new HttpException(500, "An error occurred while retrieving notifications unread count");
+    }
+  }
+
   /**
    * Retrieves a list of notifications based on userId.
    * Ordered chronologically descending (newest alerts first).

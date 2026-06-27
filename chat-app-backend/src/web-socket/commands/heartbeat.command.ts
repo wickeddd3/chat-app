@@ -9,7 +9,7 @@ import { ConnectionsRepository } from "@/modules/connection/connections.reposito
 
 @injectable()
 export class HeartbeatCommand implements WebSocketCommand {
-  public readonly eventName = "heartbeat";
+  public readonly eventName = "connection:heartbeat";
 
   constructor(
     @inject(TYPES.PresenceService) private presenceService: PresenceService,
@@ -47,7 +47,7 @@ export class HeartbeatCommand implements WebSocketCommand {
 
       // Route delta updates directly to the private rooms of active observers
       for (const observerId of observerIds) {
-        await this.broadcaster.emitToUser(observerId, "user_status_change", deltaPayload);
+        await this.broadcaster.emitToUser(observerId, "connection:status_change", deltaPayload);
       }
     }
   }

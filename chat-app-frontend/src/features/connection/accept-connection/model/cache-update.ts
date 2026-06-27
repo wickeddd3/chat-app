@@ -128,4 +128,18 @@ export function onSuccess(
 
     return currentUsers;
   });
+
+  // Decrement pending request count
+  context?.client.setQueryData(
+    REACT_QUERY_KEYS["UNREAD_COUNT_STATS"],
+    (old: Record<string, number>) => {
+      if (!old) return old;
+
+      const currentUnreadCountStats = { ...old };
+      currentUnreadCountStats["pendingRequestsCount"] =
+        currentUnreadCountStats["pendingRequestsCount"] - 1;
+
+      return currentUnreadCountStats;
+    },
+  );
 }

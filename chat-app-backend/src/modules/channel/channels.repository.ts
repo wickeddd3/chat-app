@@ -9,6 +9,52 @@ import { HttpException } from "@/utils/http.exception";
 export class ChannelsRepository {
   constructor(@inject(TYPES.PrismaClient) private db: PrismaClient) {}
 
+  public async getUnreadMessagesCount({ authUserId }: { authUserId: string }): Promise<number> {
+    try {
+      const channels = await this.db.channel.findMany({
+        where: {
+          channelMembers: { some: { userId: authUserId } },
+          OR: [
+            {
+              type: "GROUP",
+            },
+            {
+              AND: [
+                { type: "DIRECT" },
+                {
+                  messages: { some: {} },
+                  channelMembers: {
+                    some: {
+                      userId: { not: authUserId }, // Exclude current user from name matching
+                    },
+                  },
+                }, // DMs only visible if messages exist
+              ],
+            },
+          ],
+        },
+        include: {
+          _count: {
+            select: {
+              messages: {
+                where: {
+                  authorId: { not: authUserId },
+                  readBy: { none: { userId: authUserId } }, // Count messages where auth user have NO receipt
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const unreadCount = channels.reduce((total, channel) => total + channel._count.messages, 0);
+
+      return unreadCount;
+    } catch {
+      throw new HttpException(500, "Failed to retrieve unread messages count.");
+    }
+  }
+
   public async getChannels({
     authUserId,
     limit = 20,

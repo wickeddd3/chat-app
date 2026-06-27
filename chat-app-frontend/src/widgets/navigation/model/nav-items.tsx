@@ -4,7 +4,6 @@ import {
   BookUserIcon,
   UsersRoundIcon,
   HandshakeIcon,
-  BellIcon,
 } from "lucide-react";
 import type { NavItem } from "./nav.types";
 
@@ -18,6 +17,7 @@ export const navItems: NavItem[] = [
     title: "Messages",
     url: "/messages",
     icon: MessageCircleIcon,
+    badgeName: "unreadMessagesCount",
   },
   {
     title: "Contacts",
@@ -33,10 +33,6 @@ export const navItems: NavItem[] = [
     title: "Contact Requests",
     url: "/contact-requests",
     icon: HandshakeIcon,
-  },
-  {
-    title: "Notifications",
-    url: "/notifications",
-    icon: BellIcon,
+    badgeName: "pendingRequestsCount",
   },
 ];

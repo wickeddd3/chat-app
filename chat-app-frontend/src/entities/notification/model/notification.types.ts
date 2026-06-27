@@ -10,6 +10,7 @@ export interface Notification {
   content: string;
   isRead: boolean;
   createdAt: string;
+  referenceId: string;
 }
 
 export interface PaginatedNotifications {

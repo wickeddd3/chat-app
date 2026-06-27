@@ -18,6 +18,7 @@ const activeRouters: HttpRouter[] = [
   container.get<HttpRouter>(TYPES.ConnectionsRouter),
   container.get<HttpRouter>(TYPES.NotificationsRouter),
   container.get<HttpRouter>(TYPES.PresenceRouter),
+  container.get<HttpRouter>(TYPES.StatsRouter),
 ];
 
 const app = new App(activeRouters, PORT);

@@ -46,6 +46,9 @@ import { NotificationsService } from "@/modules/notification/notifications.servi
 import { PresenceRouter } from "@/modules/presence/presence.router";
 import { PresenceController } from "@/modules/presence/presence.controller";
 
+import { StatsRouter } from "@/modules/stats/stats.router";
+import { StatsController } from "@/modules/stats/stats.controller";
+
 import { Server as SocketServer } from "socket.io";
 import { SocketServerProvider } from "@/web-socket/socket-server.provider";
 import { WebSocketServer } from "@/web-socket/web-socket.server";
@@ -62,6 +65,7 @@ import { HeartbeatCommand } from "@/web-socket/commands/heartbeat.command";
 import { WebSocketBroadcaster } from "@/web-socket/web-socket.broadcaster";
 
 import { NotificationSubscriber } from "@/web-socket/handlers/notification.subscriber";
+import { RequestSubscriber } from "@/web-socket/handlers/request.subscriber";
 
 const container = new Container();
 
@@ -113,11 +117,15 @@ container.bind<NotificationsRepository>(TYPES.NotificationsRepository).to(Notifi
 container.bind<PresenceRouter>(TYPES.PresenceRouter).to(PresenceRouter);
 container.bind<PresenceController>(TYPES.PresenceController).to(PresenceController);
 
+container.bind<StatsRouter>(TYPES.StatsRouter).to(StatsRouter);
+container.bind<StatsController>(TYPES.StatsController).to(StatsController);
+
 container.bind<SocketServerProvider>(TYPES.SocketServerProvider).to(SocketServerProvider).inSingletonScope();
 container.bind<PresenceService>(TYPES.PresenceService).to(PresenceService).inSingletonScope();
 
 // Bind subscriber class handler
 container.bind<NotificationSubscriber>(TYPES.NotificationSubscriber).to(NotificationSubscriber).inSingletonScope();
+container.bind<RequestSubscriber>(TYPES.RequestSubscriber).to(RequestSubscriber).inSingletonScope();
 
 // Bind the actual SocketServer token using a dynamic Inversify Factory Provider resolution lookup
 container.bind<SocketServer>(TYPES.SocketServer).toDynamicValue((context) => {

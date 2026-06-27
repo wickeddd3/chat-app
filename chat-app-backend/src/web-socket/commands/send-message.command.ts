@@ -15,7 +15,7 @@ interface SendMessagePayload {
 
 @injectable()
 export class SendMessageCommand implements WebSocketCommand {
-  public readonly eventName = "send_message";
+  public readonly eventName = "message:send_message";
 
   constructor(
     @inject(TYPES.MessagesService) private messagesService: MessagesService,
@@ -56,7 +56,7 @@ export class SendMessageCommand implements WebSocketCommand {
     // Loop through members to update counts and trigger background cache invalidations
     for (const memberId of channelMemberIds) {
       // Notify the member's background socket layer across the server cluster
-      await this.broadcaster.emitToUser(memberId, "receive_message", {
+      await this.broadcaster.emitToUser(memberId, "message:receive_message", {
         channelPayload: {
           channelId: data.channelId,
           lastMessage: {

@@ -12,7 +12,7 @@ interface ReadMessagePayload {
 
 @injectable()
 export class ReadMessageCommand implements WebSocketCommand {
-  public readonly eventName = "mark_as_read";
+  public readonly eventName = "message:mark_as_read";
 
   constructor(
     @inject(TYPES.MessagesService) private messagesService: MessagesService,
@@ -28,12 +28,16 @@ export class ReadMessageCommand implements WebSocketCommand {
     const unreadMessages = await this.messagesService.getUnreadMessages(targetChannelId, authId);
     const unreadMessagesIds = unreadMessages.map((m) => m.id);
 
+    let readMessageCount: number = 0;
+
     if (unreadMessages.length > 0) {
       // 2. Bulk create receipts
-      await this.messageReceiptsService.createMessageReceipts(authId, unreadMessagesIds);
+      const { count } = await this.messageReceiptsService.createMessageReceipts(authId, unreadMessagesIds);
+
+      readMessageCount = count;
     }
 
     // 3. Tell the user's frontend to clear the badge locally
-    await this.broadcaster.emitToUser(authId, "unread_cleared", String(targetChannelId));
+    await this.broadcaster.emitToUser(authId, "message:read", { channelId: String(targetChannelId), readMessageCount });
   }
 }

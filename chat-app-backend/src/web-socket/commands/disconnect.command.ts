@@ -4,7 +4,7 @@ import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 
 @injectable()
 export class DisconnectCommand implements WebSocketCommand {
-  public readonly eventName = "disconnect";
+  public readonly eventName = "connection:disconnect";
 
   constructor() {}
 

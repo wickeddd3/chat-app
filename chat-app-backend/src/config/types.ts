@@ -37,6 +37,9 @@ export const TYPES = {
   PresenceRouter: Symbol.for("PresenceRouter"),
   PresenceController: Symbol.for("PresenceController"),
 
+  StatsRouter: Symbol.for("StatsRouter"),
+  StatsController: Symbol.for("StatsController"),
+
   SocketServerProvider: Symbol.for("SocketServerProvider"),
   SocketServer: Symbol.for("SocketServer"),
   WebSocketServer: Symbol.for("WebSocketServer"),
@@ -50,4 +53,5 @@ export const TYPES = {
 
   EventDispatcher: Symbol.for("EventDispatcher"),
   NotificationSubscriber: Symbol.for("NotificationSubscriber"),
+  RequestSubscriber: Symbol.for("RequestSubscriber"),
 };

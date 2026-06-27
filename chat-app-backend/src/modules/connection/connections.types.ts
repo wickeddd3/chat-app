@@ -28,6 +28,7 @@ export interface ConnectionRequest {
 }
 
 export interface ConnectionRequestResponse {
-  connection: ConnectionRequest;
+  sentConnection: ConnectionRequest;
+  receivedConnection: ConnectionRequest;
   notification: Notification;
 }

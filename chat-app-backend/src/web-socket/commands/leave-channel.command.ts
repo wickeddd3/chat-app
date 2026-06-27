@@ -8,7 +8,7 @@ interface LeaveChannelPayload {
 
 @injectable()
 export class LeaveChannelCommand implements WebSocketCommand {
-  public readonly eventName = "leave_channel";
+  public readonly eventName = "channel:leave_channel";
 
   public async execute(socket: Socket, authId: string, data: LeaveChannelPayload): Promise<void> {
     const { channelId } = data;
