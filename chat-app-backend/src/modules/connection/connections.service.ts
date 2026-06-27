@@ -114,7 +114,7 @@ export class ConnectionsService {
     try {
       const receiverId = await this.connectionsRepository.cancelRequest(senderId, connectionId);
 
-      this.dispatcher.emit("request:canceled", { receiverId, connectionId });
+      this.dispatcher.emit("request:canceled", { receiverId, senderId, connectionId });
 
       return connectionId;
     } catch {
