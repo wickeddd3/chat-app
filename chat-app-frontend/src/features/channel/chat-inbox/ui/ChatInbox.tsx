@@ -4,6 +4,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/shared/ui/shadcn/tabs";
+import { Badge } from "@/shared/ui/shadcn/badge";
 import { SearchField } from "@/shared/ui/SearchField";
 import { ChatInboxResults } from "./ChatInboxResults";
 import { useMemo, useState } from "react";
@@ -53,24 +54,30 @@ export function ChatInbox() {
       <SearchField value={query} onChange={setQuery} className="p-4" />
       <Tabs defaultValue="all" className="flex-1 flex flex-col min-h-0">
         <TabsList className="w-fit px-2 bg-transparent shrink-0">
-          <TabsTrigger value="all" className="px-4 cursor-pointer rounded-full">
+          <TabsTrigger value="all" className="px-3 cursor-pointer rounded-full">
             All
           </TabsTrigger>
           <TabsTrigger
             value="online"
-            className="px-4 cursor-pointer rounded-full"
+            className="px-3 cursor-pointer rounded-full"
           >
             Online
+            <Badge className="border-4 py-2.5 rounded-full border-white bg-emerald-500 text-gray-50 font-bold">
+              {filteredByOnline.length}
+            </Badge>
           </TabsTrigger>
           <TabsTrigger
             value="unread"
-            className="px-4 cursor-pointer rounded-full"
+            className="px-3 cursor-pointer rounded-full"
           >
             Unread
+            <Badge className="border-4 py-2.5 rounded-full border-white bg-gray-200 text-gray-800 font-bold">
+              {filteredByUnread.length}
+            </Badge>
           </TabsTrigger>
           <TabsTrigger
             value="groups"
-            className="px-4 cursor-pointer rounded-full"
+            className="px-3 cursor-pointer rounded-full"
           >
             Groups
           </TabsTrigger>

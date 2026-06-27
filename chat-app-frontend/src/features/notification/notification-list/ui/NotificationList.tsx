@@ -1,9 +1,13 @@
-import { Virtuoso } from "react-virtuoso";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/ui/shadcn/tabs";
+import { Badge } from "@/shared/ui/shadcn/badge";
 import { useNotifications } from "../model/useNotifications";
-import { NotificationItem } from "./NotificationItem";
-import { LoadingPlaceholder } from "./LoadingPlaceholder";
-import { EmptyPlaceholder } from "./EmptyPlaceholder";
-import { LoaderCircle } from "lucide-react";
+import { NotificationResults } from "./NotificationResults";
+import { useMemo } from "react";
 
 export function NotificationList({
   onClick,
@@ -19,42 +23,54 @@ export function NotificationList({
     fetchNextPage,
   } = useNotifications();
 
+  const filteredByUnread = useMemo(() => {
+    return notifications.filter((item) => !item.isRead);
+  }, [notifications]);
+
   return (
-    <div className="flex-1 w-full overflow-hidden relative">
-      {isLoading && <LoadingPlaceholder />}
-
-      {!isLoading && !isEmpty && (
-        <Virtuoso
-          style={{ height: "100%", width: "100%" }}
-          data={notifications}
-          overscan={300}
-          endReached={() => {
-            if (hasNextPage && !isFetchingNextPage) {
-              fetchNextPage();
-            }
-          }}
-          itemContent={(_, notification) => (
-            <NotificationItem
-              key={notification.id}
-              notification={notification}
-              onClick={() => onClick([notification.id])}
-            />
-          )}
-          components={{
-            Footer: () =>
-              isFetchingNextPage ? (
-                <div className="py-4 flex justify-center w-full">
-                  <LoaderCircle
-                    size={20}
-                    className="text-primary animate-spin"
-                  />
-                </div>
-              ) : null,
-          }}
+    <Tabs defaultValue="all" className="flex-1 flex flex-col min-h-0">
+      <TabsList className="w-fit px-4 bg-transparent shrink-0">
+        <TabsTrigger value="all" className="px-4 cursor-pointer rounded-full">
+          All
+        </TabsTrigger>
+        <TabsTrigger
+          value="unread"
+          className="px-4 cursor-pointer rounded-full"
+        >
+          Unread
+          <Badge className="border-4 py-2.5 rounded-full border-white bg-gray-200 text-gray-800 font-bold">
+            {filteredByUnread.length}
+          </Badge>
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent
+        value="all"
+        className="flex-1 min-h-0 data-[state=active]:flex flex-col m-0"
+      >
+        <NotificationResults
+          results={notifications}
+          isLoading={isLoading}
+          isEmpty={isEmpty}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          fetchNextPage={fetchNextPage}
+          onClick={onClick}
         />
-      )}
-
-      {!isLoading && isEmpty && <EmptyPlaceholder />}
-    </div>
+      </TabsContent>
+      <TabsContent
+        value="unread"
+        className="flex-1 min-h-0 data-[state=active]:flex flex-col m-0"
+      >
+        <NotificationResults
+          results={filteredByUnread}
+          isLoading={isLoading}
+          isEmpty={!filteredByUnread.length}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          fetchNextPage={fetchNextPage}
+          onClick={onClick}
+        />
+      </TabsContent>
+    </Tabs>
   );
 }
