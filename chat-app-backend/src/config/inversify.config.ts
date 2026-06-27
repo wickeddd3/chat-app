@@ -62,10 +62,10 @@ import { LeaveChannelCommand } from "@/web-socket/commands/leave-channel.command
 import { DisconnectCommand } from "@/web-socket/commands/disconnect.command";
 import { HeartbeatCommand } from "@/web-socket/commands/heartbeat.command";
 
-import { WebSocketBroadcaster } from "@/web-socket/web-socket.broadcaster";
+import { BroadcasterService } from "@/services/broadcaster.service";
 
-import { NotificationSubscriber } from "@/web-socket/handlers/notification.subscriber";
-import { RequestSubscriber } from "@/web-socket/handlers/request.subscriber";
+import { NotificationSubscriber } from "@/subscribers/notification.subscriber";
+import { RequestSubscriber } from "@/subscribers/request.subscriber";
 
 const container = new Container();
 
@@ -140,7 +140,7 @@ container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(LeaveChannelCommand)
 container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(DisconnectCommand);
 container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(HeartbeatCommand);
 
-container.bind<WebSocketBroadcaster>(TYPES.WebSocketBroadcaster).to(WebSocketBroadcaster);
+container.bind<BroadcasterService>(TYPES.BroadcasterService).to(BroadcasterService);
 
 // Bind main service orchestration driver engine
 container.bind<WebSocketServer>(TYPES.WebSocketServer).to(WebSocketServer);
