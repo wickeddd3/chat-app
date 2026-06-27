@@ -86,12 +86,11 @@ export class ConnectionsService {
     try {
       const result = await this.connectionsRepository.acceptRequest(receiverId, connectionId);
 
-      // Extract the two user IDs involved in the connection
       const senderId = result.notification.userId; // The original requester
       this.presenceService.setPresenceLookup(senderId, receiverId);
 
-      // Dispatch system notification event
       this.dispatcher.emit("notification:new", result.notification);
+      this.dispatcher.emit("request:accepted", { senderId, connection: result.sentConnection });
 
       return result;
     } catch {
