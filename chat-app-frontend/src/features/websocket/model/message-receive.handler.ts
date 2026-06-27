@@ -1,6 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { Message } from "@/entities/message";
 import type { InboxChannel } from "@/entities/channel";
+import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
 
 // Inbox badge/list invalidation handler and Global Message listener
 export const handleIncomingMessage = (
@@ -102,6 +103,20 @@ export const handleIncomingMessage = (
       }
 
       return { ...oldData, pages: updatedPages };
+    },
+  );
+
+  // Increment unread message count
+  queryClient.setQueryData(
+    REACT_QUERY_KEYS["UNREAD_COUNT_STATS"],
+    (old: Record<string, number>) => {
+      if (!old) return old;
+
+      const currentUnreadCountStats = { ...old };
+      currentUnreadCountStats["unreadMessagesCount"] =
+        currentUnreadCountStats["unreadMessagesCount"] + 1;
+
+      return currentUnreadCountStats;
     },
   );
 };
