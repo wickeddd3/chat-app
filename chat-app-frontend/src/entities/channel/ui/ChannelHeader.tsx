@@ -14,7 +14,7 @@ export function ChannelHeader({
   if (!channel) return;
 
   return (
-    <div className="w-full flex justify-between items-center py-3.5 px-4">
+    <div className="w-full flex justify-between items-center">
       <div className="flex items-center gap-4">
         <ProfileAvatar
           imageSrc={channel.displayImage || ""}

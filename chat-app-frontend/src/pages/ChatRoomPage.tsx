@@ -29,7 +29,7 @@ export default function ChatRoomPage() {
       <div className="flex items-center w-full">
         <BackButton />
 
-        <div className="flex-1">
+        <div className="flex-1 py-3.5 pr-4 md:px-4">
           <ChannelHeader
             channel={channel}
             isOnline={online}

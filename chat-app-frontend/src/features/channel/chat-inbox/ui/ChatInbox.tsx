@@ -51,7 +51,11 @@ export function ChatInbox() {
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
-      <SearchField value={query} onChange={setQuery} className="p-4" />
+      <SearchField
+        value={query}
+        onChange={setQuery}
+        className="px-4 pb-6 pt-1"
+      />
       <Tabs defaultValue="all" className="flex-1 flex flex-col min-h-0">
         <TabsList className="w-fit px-2 bg-transparent shrink-0">
           <TabsTrigger value="all" className="px-3 cursor-pointer rounded-full">
