@@ -7,6 +7,7 @@ import { handleIncomingMessage } from "./message-receive.handler";
 import { handleClearUnread } from "./message-read.handler";
 import { handleIncomingNotification } from "./notification-new.handler";
 import { handleNewRequest } from "./request-new.handler";
+import { handleAcceptedRequest } from "./request-accepted.handler";
 import { handleCanceledRequest } from "./request-canceled.handler";
 import { handleDeclinedRequest } from "./request-declined.handler";
 
@@ -62,6 +63,8 @@ export function SocketOrchestrator({
       handleIncomingNotification(queryClient, payload);
     const onNewRequest = (payload: any) =>
       handleNewRequest(queryClient, payload);
+    const onAcceptedRequest = (payload: any) =>
+      handleAcceptedRequest(queryClient, payload);
     const onCanceledRequest = (payload: any) =>
       handleCanceledRequest(queryClient, payload);
     const onDeclinedRequest = (payload: any) =>
@@ -73,6 +76,7 @@ export function SocketOrchestrator({
     webSocketClient.on("message:read", onClearUnread);
     webSocketClient.on("notification:new", onIncomingNotification);
     webSocketClient.on("request:new", onNewRequest);
+    webSocketClient.on("request:accepted", onAcceptedRequest);
     webSocketClient.on("request:canceled", onCanceledRequest);
     webSocketClient.on("request:declined", onDeclinedRequest);
 
@@ -83,6 +87,7 @@ export function SocketOrchestrator({
       webSocketClient.off("message:read", onClearUnread);
       webSocketClient.off("notification:new", onIncomingNotification);
       webSocketClient.off("request:new", onNewRequest);
+      webSocketClient.off("request:accepted", onAcceptedRequest);
       webSocketClient.off("request:canceled", onCanceledRequest);
       webSocketClient.off("request:declined", onDeclinedRequest);
     };
