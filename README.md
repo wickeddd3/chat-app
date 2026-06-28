@@ -2,7 +2,9 @@
 
 A high-performance, enterprise-grade real-time chat engine merging Slack's channel workspaces with Discord's active online presence topologies. Built on a self-healing hybrid caching model using React, Node.js, Express, TypeScript, InversifyJS, PostgreSQL, and Redis.
 
----
+![Chat App Thumbnail](./app-thumbnail.png)
+
+![API Docs Thumbnail](./api-docs-thumbnail.png)
 
 ## 🛠 Tech Stack
 
