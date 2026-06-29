@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { webSocketClient } from "@/shared/lib/socket-io.client";
+import { createQueryKeys } from "@/shared/config/react-query-keys";
 
 import { handleStatusChange } from "./connection-status.handler";
 import { handleIncomingMessage } from "./message-receive.handler";
@@ -11,18 +12,13 @@ import { handleAcceptedRequest } from "./request-accepted.handler";
 import { handleCanceledRequest } from "./request-canceled.handler";
 import { handleDeclinedRequest } from "./request-declined.handler";
 
-interface SocketOrchestratorProps {
-  isAuthenticated: boolean;
-}
-
-export function SocketOrchestrator({
-  isAuthenticated,
-}: SocketOrchestratorProps) {
+export function SocketOrchestrator({ authId }: { authId: string | undefined }) {
   const queryClient = useQueryClient();
+  const queryKeys = createQueryKeys(authId);
 
   // 1. GLOBAL CORE CONNECTION LIFECYCLE
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!authId) {
       if (webSocketClient.connected) webSocketClient.disconnect();
       return;
     }
@@ -32,11 +28,11 @@ export function SocketOrchestrator({
     return () => {
       webSocketClient.disconnect();
     };
-  }, [isAuthenticated]);
+  }, [authId]);
 
   // 2. GLOBAL HEARTBEAT LEASE TICK
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!authId) return;
 
     webSocketClient.emit("connection:heartbeat");
 
@@ -47,28 +43,28 @@ export function SocketOrchestrator({
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [isAuthenticated]);
+  }, [authId]);
 
   // 3. GLOBAL BACKGROUND EVENTS (Matrix Sync, Notifications, Inbox Badges, Message Sync)
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!authId) return;
 
     const onStatusChange = (payload: any) =>
-      handleStatusChange(queryClient, payload);
+      handleStatusChange(queryClient, queryKeys, payload);
     const onIncomingMessage = (payload: any) =>
-      handleIncomingMessage(queryClient, payload);
+      handleIncomingMessage(queryClient, queryKeys, payload);
     const onClearUnread = (payload: any) =>
-      handleClearUnread(queryClient, payload);
+      handleClearUnread(queryClient, queryKeys, payload);
     const onIncomingNotification = (payload: any) =>
-      handleIncomingNotification(queryClient, payload);
+      handleIncomingNotification(queryClient, queryKeys, payload);
     const onNewRequest = (payload: any) =>
-      handleNewRequest(queryClient, payload);
+      handleNewRequest(queryClient, queryKeys, payload);
     const onAcceptedRequest = (payload: any) =>
-      handleAcceptedRequest(queryClient, payload);
+      handleAcceptedRequest(queryClient, queryKeys, payload);
     const onCanceledRequest = (payload: any) =>
-      handleCanceledRequest(queryClient, payload);
+      handleCanceledRequest(queryClient, queryKeys, payload);
     const onDeclinedRequest = (payload: any) =>
-      handleDeclinedRequest(queryClient, payload);
+      handleDeclinedRequest(queryClient, queryKeys, payload);
 
     // Mount Listeners securely
     webSocketClient.on("connection:status_change", onStatusChange);
@@ -91,7 +87,7 @@ export function SocketOrchestrator({
       webSocketClient.off("request:canceled", onCanceledRequest);
       webSocketClient.off("request:declined", onDeclinedRequest);
     };
-  }, [isAuthenticated, queryClient]);
+  }, [authId, queryClient, queryKeys]);
 
   return null; // Headless provider, renders nothing directly
 }
