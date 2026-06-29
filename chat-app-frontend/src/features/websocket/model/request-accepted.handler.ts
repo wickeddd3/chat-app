@@ -14,7 +14,7 @@ export const handleAcceptedRequest = (
 
   // Remove sent connection request from existing sent connection requests cache
   queryClient.setQueryData(
-    queryKeys.sentRequests.list(),
+    queryKeys.connections.sent(),
     (old: { pages: { connections: Connection[] }[] }) => {
       if (!old) return old;
 
@@ -41,7 +41,7 @@ export const handleAcceptedRequest = (
 
   // Update contacts list to include the new contact
   queryClient.setQueryData(
-    queryKeys.contacts.list(""),
+    queryKeys.connections.contacts(""),
     (old: { pages: { contacts: ConnectionUser[] }[] }) => {
       if (!old) return old;
 

@@ -22,7 +22,7 @@ export function useReceivedConnectionRequests(authId?: string): {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<PaginatedConnections, unknown, Connection[]>({
-    queryKey: keys.receivedRequests.list(),
+    queryKey: keys.connections.received(),
     queryFn: ({ pageParam }) =>
       receivedConnectionRequestsApi({
         params: {

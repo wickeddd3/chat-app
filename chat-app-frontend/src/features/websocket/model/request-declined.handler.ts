@@ -15,7 +15,7 @@ export const handleDeclinedRequest = (
 ) => {
   // Remove sent connection request from existing sent connection requests cache
   queryClient.setQueryData(
-    queryKeys.sentRequests.list(),
+    queryKeys.connections.sent(),
     (old: { pages: { connections: Connection[] }[] }) => {
       if (!old) return old;
 

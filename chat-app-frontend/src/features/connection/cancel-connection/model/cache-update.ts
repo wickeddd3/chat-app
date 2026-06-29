@@ -24,17 +24,17 @@ export async function onMutate(
 
   // 1. Cancel outbound refetches so they don't overwrite our optimistic state
   await context.client.cancelQueries({
-    queryKey: context.keys.sentRequests.list(),
+    queryKey: context.keys.connections.sent(),
   });
 
   // 2. Snapshot the previous value to restore if things break
   const previousRequests = context.client.getQueryData(
-    context.keys.sentRequests.list(),
+    context.keys.connections.sent(),
   );
 
   // 3. Optimistically update the cache by filtering out the item
   context.client.setQueryData(
-    context.keys.sentRequests.list(),
+    context.keys.connections.sent(),
     (old: { pages: { connections: Connection[] }[] }) => {
       if (!old) return old;
 
@@ -63,7 +63,7 @@ export function onError(
   // Rollback to previous state on failure
   if (context?.previousRequests) {
     context.client.setQueryData(
-      context.keys.sentRequests.list(),
+      context.keys.connections.sent(),
       context.previousRequests,
     );
   }

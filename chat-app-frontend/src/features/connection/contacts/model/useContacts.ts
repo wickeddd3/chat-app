@@ -38,7 +38,7 @@ export function useContacts(
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<PaginatedContacts, unknown, ConnectionUser[]>({
-    queryKey: keys.contacts.list(debouncedQuery),
+    queryKey: keys.connections.contacts(debouncedQuery),
     queryFn: ({ pageParam }) =>
       getContactsApi({
         params: {

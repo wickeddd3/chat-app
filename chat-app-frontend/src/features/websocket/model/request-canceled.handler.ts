@@ -16,7 +16,7 @@ export const handleCanceledRequest = (
 ) => {
   // Remove new connection request from existing received connection requests cache
   queryClient.setQueryData(
-    queryKeys.receivedRequests.list(),
+    queryKeys.connections.received(),
     (old: { pages: { connections: Connection[] }[] }) => {
       if (!old) return old;
 

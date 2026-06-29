@@ -19,7 +19,7 @@ export async function onMutate(
 ): Promise<TContext> {
   // Snapshot the previous value to restore if things break
   const previousRequests = context.client.getQueryData(
-    context.keys.sentRequests.list(),
+    context.keys.connections.sent(),
   );
 
   // Return the context object containing the rollback snapshot data
@@ -50,7 +50,7 @@ export function onSuccess(
 
   // Update sent requests list to include the new request
   context?.client.setQueryData(
-    context.keys.sentRequests.list(),
+    context.keys.connections.sent(),
     (old: { pages: { connections: Connection[] }[] }) => {
       if (!old) return old;
 

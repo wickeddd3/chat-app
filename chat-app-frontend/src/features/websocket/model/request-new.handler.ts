@@ -14,7 +14,7 @@ export const handleNewRequest = (
 
   // Append new connection request to existing received connection requests cache
   queryClient.setQueryData(
-    queryKeys.receivedRequests.list(),
+    queryKeys.connections.received(),
     (old: { pages: { connections: Connection[] }[] }) => {
       if (!old) return old;
 

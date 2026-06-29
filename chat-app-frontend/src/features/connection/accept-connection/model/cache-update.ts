@@ -21,17 +21,17 @@ export async function onMutate(
 
   // 1. Cancel outbound refetches so they don't overwrite our optimistic state
   await context.client.cancelQueries({
-    queryKey: context.keys.receivedRequests.list(),
+    queryKey: context.keys.connections.received(),
   });
 
   // 2. Snapshot the previous value to restore if things break
   const previousRequests = context.client.getQueryData(
-    context.keys.receivedRequests.list(),
+    context.keys.connections.received(),
   );
 
   // 3. Optimistically update the cache by filtering out the item
   context.client.setQueryData(
-    context.keys.receivedRequests.list(),
+    context.keys.connections.received(),
     (old: { pages: { connections: Connection[] }[] }) => {
       if (!old) return old;
 
@@ -60,7 +60,7 @@ export function onError(
   // Rollback to previous state on failure
   if (context?.previousRequests) {
     context.client.setQueryData(
-      context.keys.receivedRequests.list(),
+      context.keys.connections.received(),
       context.previousRequests,
     );
   }
@@ -90,7 +90,7 @@ export function onSuccess(
 
   // Update contacts list to include the new contact
   context?.client.setQueryData(
-    context.keys.contacts.list(""),
+    context.keys.connections.contacts(""),
     (old: { pages: { contacts: ConnectionUser[] }[] }) => {
       if (!old) return old;
 
