@@ -14,6 +14,10 @@ export const createQueryKeys = (authId: string | undefined) => {
     dashboard: {
       badges: () => [scope, "dashboard", "badges"] as const,
     },
+    channel: {
+      details: (channelId: string) =>
+        [scope, "channel", "details", channelId] as const,
+    },
     inbox: {
       list: (query: string) => [scope, "inbox", "list", query] as const,
     },
