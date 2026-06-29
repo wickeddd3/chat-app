@@ -24,7 +24,7 @@ export function ChatInbox() {
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useInbox(query);
+  } = useInbox(authUser?.id, query);
 
   const { isOnline } = usePresence();
 

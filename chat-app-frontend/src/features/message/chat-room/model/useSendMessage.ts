@@ -1,3 +1,4 @@
+import { useAuth } from "@/app/store/AuthContext";
 import { useAuthProfile } from "@/entities/auth";
 import type { Message, NewMessage } from "@/entities/message";
 import { webSocketClient } from "@/shared/lib/socket-io.client";
@@ -5,7 +6,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 export function useSendMessage({ channelId }: { channelId: string }) {
-  const { authProfile } = useAuthProfile();
+  const { authUser } = useAuth();
+  const { authProfile } = useAuthProfile(authUser?.id);
   const queryClient = useQueryClient();
   const [message, setMessage] = useState("");
 

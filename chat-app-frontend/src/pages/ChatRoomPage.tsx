@@ -13,7 +13,7 @@ export default function ChatRoomPage() {
   const { authUser } = useAuth();
   const { isOnline } = usePresence();
 
-  usePresenceMap(!!authUser, channelId);
+  usePresenceMap(authUser?.id, channelId);
 
   const online = useMemo(() => {
     if (!channel?.channelMembers) return false;

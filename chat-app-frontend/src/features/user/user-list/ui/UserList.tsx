@@ -5,6 +5,7 @@ import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { UserListItem } from "./UserListItem";
 import { useState } from "react";
 import { Virtuoso } from "react-virtuoso";
+import { useAuth } from "@/app/store/AuthContext";
 
 export function UserList({
   messageButton: MessageButton,
@@ -38,7 +39,8 @@ export function UserList({
 }) {
   const [query, setQuery] = useState("");
 
-  const { users, isLoading, isEmpty } = useUsers(query);
+  const { authUser } = useAuth();
+  const { users, isLoading, isEmpty } = useUsers(authUser?.id, query);
 
   return (
     <div className="flex-1 flex flex-col border-r h-full min-h-0">

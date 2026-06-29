@@ -10,6 +10,7 @@ import { useContacts } from "../model/useContacts";
 import { useMemo, useState } from "react";
 import { ContactResults } from "./ContactResults";
 import { usePresence } from "@/app/store/PresenceContext";
+import { useAuth } from "@/app/store/AuthContext";
 
 export function ContactList({
   messageButton: MessageButton,
@@ -21,6 +22,7 @@ export function ContactList({
 }) {
   const [query, setQuery] = useState("");
 
+  const { authUser } = useAuth();
   const {
     contacts,
     isLoading,
@@ -28,7 +30,7 @@ export function ContactList({
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useContacts(query);
+  } = useContacts(authUser?.id, query);
 
   const { isOnline } = usePresence();
 

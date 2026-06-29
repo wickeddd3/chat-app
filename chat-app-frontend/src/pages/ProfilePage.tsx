@@ -14,8 +14,8 @@ import { UploadAvatar } from "@/features/auth/upload-avatar";
 import { useAuth } from "@/app/store/AuthContext";
 
 export default function ProfilePage() {
-  const { authProfile, isLoading } = useAuthProfile();
   const { authUser } = useAuth();
+  const { authProfile, isLoading } = useAuthProfile(authUser?.id);
 
   if (isLoading) {
     return <p>Loading profile...</p>;
