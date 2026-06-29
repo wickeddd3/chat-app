@@ -25,14 +25,11 @@ export const createQueryKeys = (authId: string | undefined) => {
       timeline: (channelId: string) =>
         [scope, "messages", "timeline", channelId] as const,
     },
-    sentRequests: {
-      list: () => [scope, "sentRequests", "list"] as const,
-    },
-    receivedRequests: {
-      list: () => [scope, "receivedRequests", "list"] as const,
-    },
-    contacts: {
-      list: (query: string) => [scope, "contacts", "list", query] as const,
+    connections: {
+      sent: () => [scope, "connections", "sent"] as const,
+      received: () => [scope, "connections", "received"] as const,
+      contacts: (query: string) =>
+        [scope, "connections", "contacts", query] as const,
     },
     users: {
       recommended: (query: string) =>
