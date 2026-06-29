@@ -1,12 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { getUnreadCountsApi } from "../api/stats.api";
-import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
+import { createQueryKeys } from "@/shared/config/react-query-keys";
 
-export function useUnreadCounts(): {
+export function useUnreadCounts(authId?: string): {
   unreadCounts: Record<string, number>;
 } {
+  const keys = createQueryKeys(authId);
+
   const { data: unreadCounts = {} } = useQuery<Record<string, number>>({
-    queryKey: REACT_QUERY_KEYS["UNREAD_COUNT_STATS"],
+    queryKey: keys.dashboard.badges(),
     queryFn: getUnreadCountsApi,
     staleTime: 60000,
   });

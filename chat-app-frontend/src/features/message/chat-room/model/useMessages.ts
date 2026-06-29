@@ -1,8 +1,12 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getMessagesApi } from "../api/messages.api";
 import type { Message, PaginatedMessage } from "@/entities/message";
+import { createQueryKeys } from "@/shared/config/react-query-keys";
 
-export function useMessages(channelId: string): {
+export function useMessages(
+  channelId: string,
+  authId?: string,
+): {
   messages: Message[];
   isLoading: boolean;
   isEmpty: boolean;
@@ -11,6 +15,8 @@ export function useMessages(channelId: string): {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
 } {
+  const keys = createQueryKeys(authId);
+
   const {
     data,
     isLoading,
@@ -19,7 +25,7 @@ export function useMessages(channelId: string): {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<PaginatedMessage, Error, Message[]>({
-    queryKey: ["messages", channelId],
+    queryKey: keys.messages.timeline(channelId),
     queryFn: ({ pageParam }) =>
       getMessagesApi({
         channelId,
