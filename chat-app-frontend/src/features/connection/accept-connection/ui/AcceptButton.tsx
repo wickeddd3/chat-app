@@ -1,5 +1,6 @@
 import { UserRoundCheckIcon } from "lucide-react";
 import { useAcceptConnection } from "../model/useAcceptConnection";
+import { useAuth } from "@/app/store/AuthContext";
 
 export function AcceptButton({
   text,
@@ -8,7 +9,8 @@ export function AcceptButton({
   text: string;
   connectionRequestId: string;
 }) {
-  const { acceptConnectionRequest } = useAcceptConnection();
+  const { authUser } = useAuth();
+  const { acceptConnectionRequest } = useAcceptConnection(authUser?.id);
 
   return (
     <button
