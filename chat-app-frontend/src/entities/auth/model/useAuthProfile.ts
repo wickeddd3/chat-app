@@ -11,7 +11,7 @@ export function useAuthProfile(authId?: string): {
   const keys = createQueryKeys(authId);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: keys.authProfile.details(),
+    queryKey: keys.auth.profile(),
     queryFn: getAuthProfile,
   });
 
