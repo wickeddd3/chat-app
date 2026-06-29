@@ -3,14 +3,38 @@ import { useQueryClient } from "@tanstack/react-query";
 import { webSocketClient } from "@/shared/lib/socket-io.client";
 import { createQueryKeys } from "@/shared/config/react-query-keys";
 
-import { handleStatusChange } from "./connection-status.handler";
-import { handleIncomingMessage } from "./message-receive.handler";
-import { handleClearUnread } from "./message-read.handler";
-import { handleIncomingNotification } from "./notification-new.handler";
-import { handleNewRequest } from "./request-new.handler";
-import { handleAcceptedRequest } from "./request-accepted.handler";
-import { handleCanceledRequest } from "./request-canceled.handler";
-import { handleDeclinedRequest } from "./request-declined.handler";
+import {
+  handleStatusChange,
+  type StatusPayload,
+} from "./connection-status.handler";
+import {
+  handleIncomingMessage,
+  type IncomingMessagePayload,
+} from "./message-receive.handler";
+import {
+  handleClearUnread,
+  type UnreadMessagePayload,
+} from "./message-read.handler";
+import {
+  handleIncomingNotification,
+  type IncomingNotificationPayload,
+} from "./notification-new.handler";
+import {
+  handleNewRequest,
+  type NewRequestPayload,
+} from "./request-new.handler";
+import {
+  handleAcceptedRequest,
+  type AcceptedRequestPayload,
+} from "./request-accepted.handler";
+import {
+  handleCanceledRequest,
+  type CanceledRequestPayload,
+} from "./request-canceled.handler";
+import {
+  handleDeclinedRequest,
+  type DeclinedRequestPayload,
+} from "./request-declined.handler";
 
 export function SocketOrchestrator({ authId }: { authId: string | undefined }) {
   const queryClient = useQueryClient();
@@ -49,21 +73,28 @@ export function SocketOrchestrator({ authId }: { authId: string | undefined }) {
   useEffect(() => {
     if (!authId) return;
 
-    const onStatusChange = (payload: any) =>
+    const onStatusChange = (payload: StatusPayload) =>
       handleStatusChange(queryClient, queryKeys, payload);
-    const onIncomingMessage = (payload: any) =>
+
+    const onIncomingMessage = (payload: IncomingMessagePayload) =>
       handleIncomingMessage(queryClient, queryKeys, payload);
-    const onClearUnread = (payload: any) =>
+
+    const onClearUnread = (payload: UnreadMessagePayload) =>
       handleClearUnread(queryClient, queryKeys, payload);
-    const onIncomingNotification = (payload: any) =>
+
+    const onIncomingNotification = (payload: IncomingNotificationPayload) =>
       handleIncomingNotification(queryClient, queryKeys, payload);
-    const onNewRequest = (payload: any) =>
+
+    const onNewRequest = (payload: NewRequestPayload) =>
       handleNewRequest(queryClient, queryKeys, payload);
-    const onAcceptedRequest = (payload: any) =>
+
+    const onAcceptedRequest = (payload: AcceptedRequestPayload) =>
       handleAcceptedRequest(queryClient, queryKeys, payload);
-    const onCanceledRequest = (payload: any) =>
+
+    const onCanceledRequest = (payload: CanceledRequestPayload) =>
       handleCanceledRequest(queryClient, queryKeys, payload);
-    const onDeclinedRequest = (payload: any) =>
+
+    const onDeclinedRequest = (payload: DeclinedRequestPayload) =>
       handleDeclinedRequest(queryClient, queryKeys, payload);
 
     // Mount Listeners securely
