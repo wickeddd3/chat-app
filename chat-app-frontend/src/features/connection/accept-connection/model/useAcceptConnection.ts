@@ -13,8 +13,9 @@ import {
   type TVariables,
   type TContext,
 } from "./cache-update";
+import { createQueryKeys } from "@/shared/config/react-query-keys";
 
-export function useAcceptConnection(): {
+export function useAcceptConnection(authId?: string): {
   acceptConnectionRequest: UseMutateFunction<
     TData,
     TError,
@@ -25,6 +26,7 @@ export function useAcceptConnection(): {
   error: Error | null;
 } {
   const queryClient = useQueryClient();
+  const keys = createQueryKeys(authId);
 
   const { mutate, isPending, error } = useMutation<
     TData,
@@ -34,7 +36,7 @@ export function useAcceptConnection(): {
   >({
     mutationFn: (connectionId: string) =>
       acceptConnectionRequestApi(connectionId),
-    onMutate: (variables) => onMutate(variables, { client: queryClient }),
+    onMutate: (variables) => onMutate(variables, { client: queryClient, keys }),
     onError: (err, variables, context) => onError(err, variables, context),
     onSuccess: (data, variables, context) =>
       onSuccess(data, variables, context),

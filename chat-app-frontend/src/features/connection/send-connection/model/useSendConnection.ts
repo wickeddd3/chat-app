@@ -13,13 +13,15 @@ import {
   type TError,
   type TVariables,
 } from "./cache-update";
+import { createQueryKeys } from "@/shared/config/react-query-keys";
 
-export function useSendConnection(): {
+export function useSendConnection(authId?: string): {
   sendConnectionRequest: UseMutateFunction<TData, TError, TVariables, TContext>;
   isPending: boolean;
   error: unknown;
 } {
   const queryClient = useQueryClient();
+  const keys = createQueryKeys(authId);
 
   const { mutate, isPending, error } = useMutation<
     TData,
@@ -29,7 +31,7 @@ export function useSendConnection(): {
   >({
     mutationFn: (formData: { receiverId: string }) =>
       sendConnectionRequestApi(formData),
-    onMutate: (variables) => onMutate(variables, { client: queryClient }),
+    onMutate: (variables) => onMutate(variables, { client: queryClient, keys }),
     onSuccess: (data, variables, context) =>
       onSuccess(data, variables, context),
     onError: (err, variables, context) => onError(err, variables, context),
