@@ -1,16 +1,17 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { Notification } from "@/entities/notification";
-import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
+import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 import { toast } from "sonner";
 
 // Real-time notifications interceptor
 export const handleIncomingNotification = (
   queryClient: QueryClient,
+  queryKeys: ScopedQueryKeys,
   notification: Notification,
 ) => {
   // Append new notification to exisitng notification cache
   queryClient.setQueryData(
-    REACT_QUERY_KEYS["NOTIFICATIONS"],
+    queryKeys.notifications.list(),
     (oldData: { pages: { notifications: Notification[] }[] }) => {
       if (!oldData) return oldData;
 
@@ -29,7 +30,7 @@ export const handleIncomingNotification = (
 
   // Increment unread notification count
   queryClient.setQueryData(
-    REACT_QUERY_KEYS["UNREAD_COUNT_STATS"],
+    queryKeys.dashboard.badges(),
     (old: Record<string, number>) => {
       if (!old) return old;
 

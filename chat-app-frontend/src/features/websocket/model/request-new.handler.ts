@@ -1,16 +1,17 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { Connection } from "@/entities/connection";
 import type { User } from "@/entities/user";
-import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
+import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 
 // Append new connection request to received request cache
 export const handleNewRequest = (
   queryClient: QueryClient,
+  queryKeys: ScopedQueryKeys,
   connection: Connection,
 ) => {
   // Append new connection request to existing received connection requests cache
   queryClient.setQueryData(
-    REACT_QUERY_KEYS["RECEIVED_CONNECTION_REQUESTS"],
+    queryKeys.receivedRequests.list(),
     (old: { pages: { connections: Connection[] }[] }) => {
       if (!old) return old;
 
@@ -32,7 +33,7 @@ export const handleNewRequest = (
 
   // Increment pending request count
   queryClient.setQueryData(
-    REACT_QUERY_KEYS["UNREAD_COUNT_STATS"],
+    queryKeys.dashboard.badges(),
     (old: Record<string, number>) => {
       if (!old) return old;
 
@@ -45,23 +46,20 @@ export const handleNewRequest = (
   );
 
   // Update users list to update user connectionStatus
-  queryClient.setQueryData(
-    [...REACT_QUERY_KEYS["USERS"], ""],
-    (old: User[]) => {
-      if (!old) return old;
+  queryClient.setQueryData(queryKeys.users.recommended(""), (old: User[]) => {
+    if (!old) return old;
 
-      const currentUsers = [...old];
-      const userIndex = currentUsers.findIndex(
-        (user) => user.id === connection.user.id,
-      );
+    const currentUsers = [...old];
+    const userIndex = currentUsers.findIndex(
+      (user) => user.id === connection.user.id,
+    );
 
-      currentUsers[userIndex] = {
-        ...currentUsers[userIndex],
-        connectionId: connection.id,
-        connectionStatus: "PENDING_RECEIVED",
-      };
+    currentUsers[userIndex] = {
+      ...currentUsers[userIndex],
+      connectionId: connection.id,
+      connectionStatus: "PENDING_RECEIVED",
+    };
 
-      return currentUsers;
-    },
-  );
+    return currentUsers;
+  });
 };

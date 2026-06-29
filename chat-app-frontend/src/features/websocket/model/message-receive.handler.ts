@@ -1,11 +1,12 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { Message } from "@/entities/message";
 import type { InboxChannel } from "@/entities/channel";
-import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
+import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 
 // Inbox badge/list invalidation handler and Global Message listener
 export const handleIncomingMessage = (
   queryClient: QueryClient,
+  queryKeys: ScopedQueryKeys,
   payload: {
     channelPayload: {
       channelId: string;
@@ -21,11 +22,11 @@ export const handleIncomingMessage = (
 
   // Inbox cache update
   queryClient.setQueryData(
-    ["inbox", ""],
+    queryKeys.inbox.list(""),
     (oldData: { pages: { channels: InboxChannel[] }[] }) => {
       if (!oldData) {
         // Fetch fresh inbox list if inbox cache doesn't exist
-        queryClient.invalidateQueries({ queryKey: ["inbox", ""] });
+        queryClient.invalidateQueries({ queryKey: queryKeys.inbox.list("") });
       }
 
       const updatedPages = [...oldData.pages];
@@ -59,7 +60,7 @@ export const handleIncomingMessage = (
         };
       } else {
         // Fetch fresh inbox list if channel doesn't exist
-        queryClient.invalidateQueries({ queryKey: ["inbox", ""] });
+        queryClient.invalidateQueries({ queryKey: queryKeys.inbox.list("") });
       }
 
       return { ...oldData, pages: updatedPages };
@@ -68,7 +69,7 @@ export const handleIncomingMessage = (
 
   // Channel messages cache update
   queryClient.setQueryData(
-    ["messages", String(channelPayload.channelId)],
+    queryKeys.messages.timeline(String(channelPayload.channelId)),
     (oldData: { pages: { messages: Message[] }[] }) => {
       if (!oldData) return oldData;
 
@@ -108,7 +109,7 @@ export const handleIncomingMessage = (
 
   // Increment unread message count
   queryClient.setQueryData(
-    REACT_QUERY_KEYS["UNREAD_COUNT_STATS"],
+    queryKeys.dashboard.badges(),
     (old: Record<string, number>) => {
       if (!old) return old;
 
