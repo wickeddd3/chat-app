@@ -8,8 +8,8 @@ export const createQueryKeys = (authId: string | undefined) => {
       matrix: (channelId?: string) =>
         [scope, "presence", "matrix", channelId ?? "global"] as const,
     },
-    authProfile: {
-      details: () => [scope, "authProfile", "details"] as const,
+    auth: {
+      profile: () => [scope, "auth", "profile"] as const,
     },
     dashboard: {
       badges: () => [scope, "dashboard", "badges"] as const,
