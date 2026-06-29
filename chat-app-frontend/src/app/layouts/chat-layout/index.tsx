@@ -27,7 +27,7 @@ export function ChatLayout() {
 
       <Toaster theme="light" />
 
-      <SocketOrchestrator isAuthenticated={!!authUser} />
+      <SocketOrchestrator authId={authUser?.id} />
     </div>
   );
 }
