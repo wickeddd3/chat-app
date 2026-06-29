@@ -1,8 +1,10 @@
 import { NotificationList } from "@/features/notification/notification-list";
 import { useReadNotification } from "@/features/notification/mark-as-read";
+import { useAuth } from "@/app/store/AuthContext";
 
 export default function NotificationsPage() {
-  const { readNotification } = useReadNotification();
+  const { authUser } = useAuth();
+  const { readNotification } = useReadNotification(authUser?.id);
 
   return (
     <div className="flex-1 flex flex-col max-h-full border-r">

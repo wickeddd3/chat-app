@@ -1,9 +1,9 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { receivedConnectionRequestsApi } from "../api/connections.api";
 import type { Connection, PaginatedConnections } from "@/entities/connection";
-import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
+import { createQueryKeys } from "@/shared/config/react-query-keys";
 
-export function useReceivedConnectionRequests(): {
+export function useReceivedConnectionRequests(authId?: string): {
   receivedRequests: Connection[];
   isLoading: boolean;
   isEmpty: boolean;
@@ -12,6 +12,8 @@ export function useReceivedConnectionRequests(): {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
 } {
+  const keys = createQueryKeys(authId);
+
   const {
     data,
     isLoading,
@@ -20,7 +22,7 @@ export function useReceivedConnectionRequests(): {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<PaginatedConnections, unknown, Connection[]>({
-    queryKey: REACT_QUERY_KEYS["RECEIVED_CONNECTION_REQUESTS"],
+    queryKey: keys.connections.received(),
     queryFn: ({ pageParam }) =>
       receivedConnectionRequestsApi({
         params: {

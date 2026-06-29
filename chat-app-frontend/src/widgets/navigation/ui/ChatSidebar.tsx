@@ -5,9 +5,11 @@ import { SidebarLink } from "./SidebarLink";
 import { navItems } from "../model/nav-items";
 import { useUnreadCounts } from "@/features/stats/unread-counts";
 import { Badge } from "@/shared/ui/shadcn/badge";
+import { useAuth } from "@/app/store/AuthContext";
 
 export function ChatSidebar() {
-  const { unreadCounts } = useUnreadCounts();
+  const { authUser } = useAuth();
+  const { unreadCounts } = useUnreadCounts(authUser?.id);
   const location = useLocation();
 
   const isActive = (url: string) => {

@@ -15,7 +15,7 @@ export const PresenceProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { authUser } = useAuth();
-  const { presenceMap } = usePresenceMap(!!authUser);
+  const { presenceMap } = usePresenceMap(authUser?.id);
 
   const isOnline = (userId: string) => presenceMap[userId] === "online";
 

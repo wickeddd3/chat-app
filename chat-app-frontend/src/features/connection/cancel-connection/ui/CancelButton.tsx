@@ -1,5 +1,6 @@
 import { UserRoundMinusIcon } from "lucide-react";
 import { useCancelConnection } from "../model/useCancelConnection";
+import { useAuth } from "@/app/store/AuthContext";
 
 export function CancelButton({
   text,
@@ -10,7 +11,8 @@ export function CancelButton({
   connectionRequestId: string;
   connectionRequestUserId: string;
 }) {
-  const { cancelConnectionRequest } = useCancelConnection();
+  const { authUser } = useAuth();
+  const { cancelConnectionRequest } = useCancelConnection(authUser?.id);
 
   return (
     <button

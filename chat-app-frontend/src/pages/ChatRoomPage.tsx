@@ -9,11 +9,11 @@ import { usePresenceMap } from "@/features/message/online-presence";
 
 export default function ChatRoomPage() {
   const { channelId } = useParams();
-  const { channel } = useChannel(channelId || "");
   const { authUser } = useAuth();
+  const { channel } = useChannel(channelId || "", authUser?.id);
   const { isOnline } = usePresence();
 
-  usePresenceMap(!!authUser, channelId);
+  usePresenceMap(authUser?.id, channelId);
 
   const online = useMemo(() => {
     if (!channel?.channelMembers) return false;

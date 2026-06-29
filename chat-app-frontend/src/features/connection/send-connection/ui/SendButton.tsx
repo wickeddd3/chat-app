@@ -1,5 +1,6 @@
 import { UserRoundPlusIcon } from "lucide-react";
 import { useSendConnection } from "../model/useSendConnection";
+import { useAuth } from "@/app/store/AuthContext";
 
 export function SendButton({
   text,
@@ -8,7 +9,8 @@ export function SendButton({
   text: string;
   receiverId: string;
 }) {
-  const { sendConnectionRequest } = useSendConnection();
+  const { authUser } = useAuth();
+  const { sendConnectionRequest } = useSendConnection(authUser?.id);
 
   return (
     <button

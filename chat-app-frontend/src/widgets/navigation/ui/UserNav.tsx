@@ -19,11 +19,13 @@ import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { useAuthProfile } from "@/entities/auth";
 import { useUnreadCounts } from "@/features/stats/unread-counts";
 import { Badge } from "@/shared/ui/shadcn/badge";
+import { useAuth } from "@/app/store/AuthContext";
 
 export function UserNav() {
-  const { authProfile } = useAuthProfile();
+  const { authUser } = useAuth();
+  const { authProfile } = useAuthProfile(authUser?.id);
   const { logout } = useSignOut();
-  const { unreadCounts } = useUnreadCounts();
+  const { unreadCounts } = useUnreadCounts(authUser?.id);
 
   const unreadNotificationBadge = unreadCounts["unreadNotificationsCount"];
 

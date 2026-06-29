@@ -13,8 +13,9 @@ import {
   type TError,
   type TVariables,
 } from "./cache-update";
+import { createQueryKeys } from "@/shared/config/react-query-keys";
 
-export function useDeclineConnection(): {
+export function useDeclineConnection(authId?: string): {
   declineConnectionRequest: UseMutateFunction<
     TData,
     TError,
@@ -25,6 +26,7 @@ export function useDeclineConnection(): {
   error: unknown;
 } {
   const queryClient = useQueryClient();
+  const keys = createQueryKeys(authId);
 
   const { mutate, isPending, error } = useMutation<
     TData,
@@ -37,7 +39,7 @@ export function useDeclineConnection(): {
         connectionRequestId,
         connectionRequestUserId,
       }),
-    onMutate: (variables) => onMutate(variables, { client: queryClient }),
+    onMutate: (variables) => onMutate(variables, { client: queryClient, keys }),
     onSuccess: (data, variables, context) =>
       onSuccess(data, variables, context),
     onError: (err, variables, context) => onError(err, variables, context),

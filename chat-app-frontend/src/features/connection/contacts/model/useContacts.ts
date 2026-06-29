@@ -3,9 +3,12 @@ import { getContactsApi } from "../api/connections.api";
 import type { ConnectionUser, PaginatedContacts } from "@/entities/connection";
 import { useEffect, useMemo, useState } from "react";
 import { debounce } from "@/shared/utils/debounce";
-import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
+import { createQueryKeys } from "@/shared/config/react-query-keys";
 
-export function useContacts(query: string): {
+export function useContacts(
+  authId?: string,
+  query?: string,
+): {
   contacts: ConnectionUser[];
   isLoading: boolean;
   isEmpty: boolean;
@@ -14,7 +17,9 @@ export function useContacts(query: string): {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
 } {
-  const [debouncedQuery, setDebouncedQuery] = useState(query);
+  const keys = createQueryKeys(authId);
+
+  const [debouncedQuery, setDebouncedQuery] = useState(query ?? "");
 
   const debouncedSetQuery = useMemo(
     () => debounce((value: string) => setDebouncedQuery(value), 500),
@@ -22,7 +27,7 @@ export function useContacts(query: string): {
   );
 
   useEffect(() => {
-    debouncedSetQuery(query);
+    debouncedSetQuery(query ?? "");
   }, [query, debouncedSetQuery]);
 
   const {
@@ -33,7 +38,7 @@ export function useContacts(query: string): {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<PaginatedContacts, unknown, ConnectionUser[]>({
-    queryKey: [...REACT_QUERY_KEYS["CONTACTS"], debouncedQuery],
+    queryKey: keys.connections.contacts(debouncedQuery),
     queryFn: ({ pageParam }) =>
       getContactsApi({
         params: {

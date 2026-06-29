@@ -13,8 +13,9 @@ import {
   type TError,
   type TVariables,
 } from "./cache-update";
+import { createQueryKeys } from "@/shared/config/react-query-keys";
 
-export function useCancelConnection(): {
+export function useCancelConnection(authId?: string): {
   cancelConnectionRequest: UseMutateFunction<
     TData,
     TError,
@@ -25,6 +26,7 @@ export function useCancelConnection(): {
   error: unknown;
 } {
   const queryClient = useQueryClient();
+  const keys = createQueryKeys(authId);
 
   const { mutate, isPending, error } = useMutation<
     TData,
@@ -37,7 +39,7 @@ export function useCancelConnection(): {
         connectionRequestId,
         connectionRequestUserId,
       }),
-    onMutate: (variables) => onMutate(variables, { client: queryClient }),
+    onMutate: (variables) => onMutate(variables, { client: queryClient, keys }),
     onSuccess: (data, variables, context) =>
       onSuccess(data, variables, context),
     onError: (err, variables, context) => onError(err, variables, context),

@@ -4,18 +4,18 @@ import { Messages } from "./Messages";
 import { MessageInput } from "./MessageInput";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
+import { useAuth } from "@/app/store/AuthContext";
 
 export function ChatRoom({ channelId }: { channelId: string }) {
-  // Fetch channel messages
+  const { authUser } = useAuth();
   const {
     messages,
     isLoading,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useMessages(channelId);
+  } = useMessages(channelId, authUser?.id);
 
-  // Manage chat history and real-time updates
   useChatRoom(channelId);
 
   return (

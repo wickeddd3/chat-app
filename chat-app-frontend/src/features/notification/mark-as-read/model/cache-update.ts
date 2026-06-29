@@ -1,10 +1,7 @@
 import type { Notification } from "@/entities/notification";
-import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
+import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 import type { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-
-const notificationsQueryKey = REACT_QUERY_KEYS["NOTIFICATIONS"];
-const unreadCountStatsQueryKey = REACT_QUERY_KEYS["UNREAD_COUNT_STATS"];
 
 export type TData = { count: number };
 export type TError = Error;
@@ -12,17 +9,20 @@ export type TVariables = string[];
 export type TContext = {
   previousRequests: unknown; // Specific shape of cached query data
   client: QueryClient; // Passing the client via custom context
+  keys: ScopedQueryKeys;
 };
 
 export async function onMutate(
   _variables: TVariables,
-  context: { client: QueryClient },
+  context: { client: QueryClient; keys: ScopedQueryKeys },
 ): Promise<TContext> {
   // Snapshot the previous value to restore if things break
-  const previousRequests = context.client.getQueryData(notificationsQueryKey);
+  const previousRequests = context.client.getQueryData(
+    context.keys.notifications.list(),
+  );
 
   // Return the context object containing the rollback snapshot data
-  return { previousRequests, client: context.client };
+  return { previousRequests, client: context.client, keys: context.keys };
 }
 
 export function onError(
@@ -45,7 +45,7 @@ export function onSuccess(
 
   // Update notifications cache data to mark notification as read
   context?.client.setQueryData(
-    notificationsQueryKey,
+    context.keys.notifications.list(),
     (old: { pages: { notifications: Notification[] }[] }) => {
       if (!old) return old;
 
@@ -72,7 +72,7 @@ export function onSuccess(
 
   // Decrement unread notification count
   context?.client.setQueryData(
-    unreadCountStatsQueryKey,
+    context.keys.dashboard.badges(),
     (old: Record<string, number>) => {
       if (!old) return old;
 

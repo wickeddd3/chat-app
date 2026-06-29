@@ -1,15 +1,20 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { Connection, ConnectionUser } from "@/entities/connection";
 import type { User } from "@/entities/user";
-import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
+import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
+
+export type AcceptedRequestPayload = Connection;
 
 export const handleAcceptedRequest = (
   queryClient: QueryClient,
-  connection: Connection,
+  queryKeys: ScopedQueryKeys,
+  payload: AcceptedRequestPayload,
 ) => {
+  const connection = payload;
+
   // Remove sent connection request from existing sent connection requests cache
   queryClient.setQueryData(
-    REACT_QUERY_KEYS["SENT_CONNECTION_REQUESTS"],
+    queryKeys.connections.sent(),
     (old: { pages: { connections: Connection[] }[] }) => {
       if (!old) return old;
 
@@ -36,7 +41,7 @@ export const handleAcceptedRequest = (
 
   // Update contacts list to include the new contact
   queryClient.setQueryData(
-    [...REACT_QUERY_KEYS["CONTACTS"], ""],
+    queryKeys.connections.contacts(""),
     (old: { pages: { contacts: ConnectionUser[] }[] }) => {
       if (!old) return old;
 
@@ -57,22 +62,19 @@ export const handleAcceptedRequest = (
   );
 
   // Update users list to update user connectionStatus
-  queryClient.setQueryData(
-    [...REACT_QUERY_KEYS["USERS"], ""],
-    (old: User[]) => {
-      if (!old) return old;
+  queryClient.setQueryData(queryKeys.users.recommended(""), (old: User[]) => {
+    if (!old) return old;
 
-      const currentUsers = [...old];
-      const userIndex = currentUsers.findIndex(
-        (user) => user.id === newContact.id,
-      );
+    const currentUsers = [...old];
+    const userIndex = currentUsers.findIndex(
+      (user) => user.id === newContact.id,
+    );
 
-      currentUsers[userIndex] = {
-        ...currentUsers[userIndex],
-        connectionStatus: "CONTACT",
-      };
+    currentUsers[userIndex] = {
+      ...currentUsers[userIndex],
+      connectionStatus: "CONTACT",
+    };
 
-      return currentUsers;
-    },
-  );
+    return currentUsers;
+  });
 };

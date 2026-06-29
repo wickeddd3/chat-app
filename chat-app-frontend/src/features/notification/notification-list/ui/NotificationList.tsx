@@ -8,12 +8,14 @@ import { Badge } from "@/shared/ui/shadcn/badge";
 import { useNotifications } from "../model/useNotifications";
 import { NotificationResults } from "./NotificationResults";
 import { useMemo } from "react";
+import { useAuth } from "@/app/store/AuthContext";
 
 export function NotificationList({
   onClick,
 }: {
   onClick: (notificationIds: string[]) => void;
 }) {
+  const { authUser } = useAuth();
   const {
     notifications,
     isLoading,
@@ -21,7 +23,7 @@ export function NotificationList({
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useNotifications();
+  } = useNotifications(authUser?.id);
 
   const filteredByUnread = useMemo(() => {
     return notifications.filter((item) => !item.isRead);

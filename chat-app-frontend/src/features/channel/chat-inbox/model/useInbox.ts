@@ -3,8 +3,12 @@ import { getInboxApi } from "../api/channels.api";
 import type { InboxChannel, PaginatedInboxChannel } from "@/entities/channel";
 import { useEffect, useMemo, useState } from "react";
 import { debounce } from "@/shared/utils/debounce";
+import { createQueryKeys } from "@/shared/config/react-query-keys";
 
-export function useInbox(query: string): {
+export function useInbox(
+  authId?: string,
+  query?: string,
+): {
   inbox: InboxChannel[];
   isLoading: boolean;
   isEmpty: boolean;
@@ -13,7 +17,9 @@ export function useInbox(query: string): {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
 } {
-  const [debouncedQuery, setDebouncedQuery] = useState(query);
+  const keys = createQueryKeys(authId);
+
+  const [debouncedQuery, setDebouncedQuery] = useState(query ?? "");
 
   const debouncedSetQuery = useMemo(
     () => debounce((value: string) => setDebouncedQuery(value), 500),
@@ -21,7 +27,7 @@ export function useInbox(query: string): {
   );
 
   useEffect(() => {
-    debouncedSetQuery(query);
+    debouncedSetQuery(query ?? "");
   }, [query, debouncedSetQuery]);
 
   const {
@@ -32,7 +38,7 @@ export function useInbox(query: string): {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<PaginatedInboxChannel, unknown, InboxChannel[]>({
-    queryKey: ["inbox", debouncedQuery],
+    queryKey: keys.inbox.list(debouncedQuery),
     queryFn: ({ pageParam }) =>
       getInboxApi({
         params: {

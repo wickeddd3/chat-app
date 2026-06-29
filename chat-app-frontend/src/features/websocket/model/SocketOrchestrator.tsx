@@ -1,28 +1,48 @@
 import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { webSocketClient } from "@/shared/lib/socket-io.client";
+import { createQueryKeys } from "@/shared/config/react-query-keys";
 
-import { handleStatusChange } from "./connection-status.handler";
-import { handleIncomingMessage } from "./message-receive.handler";
-import { handleClearUnread } from "./message-read.handler";
-import { handleIncomingNotification } from "./notification-new.handler";
-import { handleNewRequest } from "./request-new.handler";
-import { handleAcceptedRequest } from "./request-accepted.handler";
-import { handleCanceledRequest } from "./request-canceled.handler";
-import { handleDeclinedRequest } from "./request-declined.handler";
+import {
+  handleStatusChange,
+  type StatusPayload,
+} from "./connection-status.handler";
+import {
+  handleIncomingMessage,
+  type IncomingMessagePayload,
+} from "./message-receive.handler";
+import {
+  handleClearUnread,
+  type UnreadMessagePayload,
+} from "./message-read.handler";
+import {
+  handleIncomingNotification,
+  type IncomingNotificationPayload,
+} from "./notification-new.handler";
+import {
+  handleNewRequest,
+  type NewRequestPayload,
+} from "./request-new.handler";
+import {
+  handleAcceptedRequest,
+  type AcceptedRequestPayload,
+} from "./request-accepted.handler";
+import {
+  handleCanceledRequest,
+  type CanceledRequestPayload,
+} from "./request-canceled.handler";
+import {
+  handleDeclinedRequest,
+  type DeclinedRequestPayload,
+} from "./request-declined.handler";
 
-interface SocketOrchestratorProps {
-  isAuthenticated: boolean;
-}
-
-export function SocketOrchestrator({
-  isAuthenticated,
-}: SocketOrchestratorProps) {
+export function SocketOrchestrator({ authId }: { authId: string | undefined }) {
   const queryClient = useQueryClient();
+  const queryKeys = createQueryKeys(authId);
 
   // 1. GLOBAL CORE CONNECTION LIFECYCLE
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!authId) {
       if (webSocketClient.connected) webSocketClient.disconnect();
       return;
     }
@@ -32,11 +52,11 @@ export function SocketOrchestrator({
     return () => {
       webSocketClient.disconnect();
     };
-  }, [isAuthenticated]);
+  }, [authId]);
 
   // 2. GLOBAL HEARTBEAT LEASE TICK
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!authId) return;
 
     webSocketClient.emit("connection:heartbeat");
 
@@ -47,28 +67,35 @@ export function SocketOrchestrator({
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [isAuthenticated]);
+  }, [authId]);
 
   // 3. GLOBAL BACKGROUND EVENTS (Matrix Sync, Notifications, Inbox Badges, Message Sync)
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!authId) return;
 
-    const onStatusChange = (payload: any) =>
-      handleStatusChange(queryClient, payload);
-    const onIncomingMessage = (payload: any) =>
-      handleIncomingMessage(queryClient, payload);
-    const onClearUnread = (payload: any) =>
-      handleClearUnread(queryClient, payload);
-    const onIncomingNotification = (payload: any) =>
-      handleIncomingNotification(queryClient, payload);
-    const onNewRequest = (payload: any) =>
-      handleNewRequest(queryClient, payload);
-    const onAcceptedRequest = (payload: any) =>
-      handleAcceptedRequest(queryClient, payload);
-    const onCanceledRequest = (payload: any) =>
-      handleCanceledRequest(queryClient, payload);
-    const onDeclinedRequest = (payload: any) =>
-      handleDeclinedRequest(queryClient, payload);
+    const onStatusChange = (payload: StatusPayload) =>
+      handleStatusChange(queryClient, queryKeys, payload);
+
+    const onIncomingMessage = (payload: IncomingMessagePayload) =>
+      handleIncomingMessage(queryClient, queryKeys, payload);
+
+    const onClearUnread = (payload: UnreadMessagePayload) =>
+      handleClearUnread(queryClient, queryKeys, payload);
+
+    const onIncomingNotification = (payload: IncomingNotificationPayload) =>
+      handleIncomingNotification(queryClient, queryKeys, payload);
+
+    const onNewRequest = (payload: NewRequestPayload) =>
+      handleNewRequest(queryClient, queryKeys, payload);
+
+    const onAcceptedRequest = (payload: AcceptedRequestPayload) =>
+      handleAcceptedRequest(queryClient, queryKeys, payload);
+
+    const onCanceledRequest = (payload: CanceledRequestPayload) =>
+      handleCanceledRequest(queryClient, queryKeys, payload);
+
+    const onDeclinedRequest = (payload: DeclinedRequestPayload) =>
+      handleDeclinedRequest(queryClient, queryKeys, payload);
 
     // Mount Listeners securely
     webSocketClient.on("connection:status_change", onStatusChange);
@@ -91,7 +118,7 @@ export function SocketOrchestrator({
       webSocketClient.off("request:canceled", onCanceledRequest);
       webSocketClient.off("request:declined", onDeclinedRequest);
     };
-  }, [isAuthenticated, queryClient]);
+  }, [authId, queryClient, queryKeys]);
 
   return null; // Headless provider, renders nothing directly
 }

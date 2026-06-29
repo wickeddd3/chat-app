@@ -1,11 +1,8 @@
 import type { Connection } from "@/entities/connection";
 import type { User } from "@/entities/user";
-import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
+import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 import type { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-
-const sentRequestsQueryKey = REACT_QUERY_KEYS["SENT_CONNECTION_REQUESTS"];
-const usersQueryKey = [...REACT_QUERY_KEYS["USERS"], ""];
 
 export type TData = Connection;
 export type TError = Error;
@@ -13,17 +10,20 @@ export type TVariables = { receiverId: string };
 export type TContext = {
   previousRequests: unknown; // Specific shape of cached query data
   client: QueryClient; // Passing the client via custom context
+  keys: ScopedQueryKeys;
 };
 
 export async function onMutate(
   _variables: TVariables,
-  context: { client: QueryClient },
+  context: { client: QueryClient; keys: ScopedQueryKeys },
 ): Promise<TContext> {
   // Snapshot the previous value to restore if things break
-  const previousRequests = context.client.getQueryData(sentRequestsQueryKey);
+  const previousRequests = context.client.getQueryData(
+    context.keys.connections.sent(),
+  );
 
   // Return the context object containing the rollback snapshot data
-  return { previousRequests, client: context.client };
+  return { previousRequests, client: context.client, keys: context.keys };
 }
 
 export function onError(
@@ -50,7 +50,7 @@ export function onSuccess(
 
   // Update sent requests list to include the new request
   context?.client.setQueryData(
-    sentRequestsQueryKey,
+    context.keys.connections.sent(),
     (old: { pages: { connections: Connection[] }[] }) => {
       if (!old) return old;
 
@@ -71,20 +71,23 @@ export function onSuccess(
   );
 
   // Update users list to update user connectionStatus
-  context?.client.setQueryData(usersQueryKey, (old: User[]) => {
-    if (!old) return old;
+  context?.client.setQueryData(
+    context.keys.users.recommended(""),
+    (old: User[]) => {
+      if (!old) return old;
 
-    const currentUsers = [...old];
-    const userIndex = currentUsers.findIndex(
-      (user) => user.id === newRequest.user.id,
-    );
+      const currentUsers = [...old];
+      const userIndex = currentUsers.findIndex(
+        (user) => user.id === newRequest.user.id,
+      );
 
-    currentUsers[userIndex] = {
-      ...currentUsers[userIndex],
-      connectionStatus: "PENDING_SENT",
-      connectionId: newRequest.id,
-    };
+      currentUsers[userIndex] = {
+        ...currentUsers[userIndex],
+        connectionStatus: "PENDING_SENT",
+        connectionId: newRequest.id,
+      };
 
-    return currentUsers;
-  });
+      return currentUsers;
+    },
+  );
 }

@@ -1,15 +1,9 @@
 import type { Connection } from "@/entities/connection";
 import type { Notification } from "@/entities/notification";
 import type { User } from "@/entities/user";
-import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
+import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 import type { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-
-const receivedRequestsQueryKey =
-  REACT_QUERY_KEYS["RECEIVED_CONNECTION_REQUESTS"];
-const usersQueryKey = [...REACT_QUERY_KEYS["USERS"], ""];
-const unreadCountStatsQueryKey = REACT_QUERY_KEYS["UNREAD_COUNT_STATS"];
-const notificationsQueryKey = REACT_QUERY_KEYS["NOTIFICATIONS"];
 
 export type TData = string;
 export type TError = Error;
@@ -20,25 +14,28 @@ export type TVariables = {
 export type TContext = {
   previousRequests: unknown; // Specific shape of cached query data
   client: QueryClient; // Passing the client via custom context
+  keys: ScopedQueryKeys;
 };
 
 export async function onMutate(
   variables: TVariables,
-  context: { client: QueryClient },
+  context: { client: QueryClient; keys: ScopedQueryKeys },
 ): Promise<TContext> {
   const connectionRequestId = variables.connectionRequestId;
 
   // 1. Cancel outbound refetches so they don't overwrite our optimistic state
-  await context.client.cancelQueries({ queryKey: receivedRequestsQueryKey });
+  await context.client.cancelQueries({
+    queryKey: context.keys.connections.received(),
+  });
 
   // 2. Snapshot the previous value to restore if things break
   const previousRequests = context.client.getQueryData(
-    receivedRequestsQueryKey,
+    context.keys.connections.received(),
   );
 
   // 3. Optimistically update the cache by filtering out the item
   context.client.setQueryData(
-    receivedRequestsQueryKey,
+    context.keys.connections.received(),
     (old: { pages: { connections: Connection[] }[] }) => {
       if (!old) return old;
 
@@ -56,7 +53,7 @@ export async function onMutate(
   );
 
   // 4. Return the context object containing the rollback snapshot data
-  return { previousRequests, client: context.client };
+  return { previousRequests, client: context.client, keys: context.keys };
 }
 
 export function onError(
@@ -67,7 +64,7 @@ export function onError(
   // Rollback to previous state on failure
   if (context?.previousRequests) {
     context.client.setQueryData(
-      receivedRequestsQueryKey,
+      context.keys.connections.received(),
       context.previousRequests,
     );
   }
@@ -90,26 +87,29 @@ export function onSuccess(
   const connectionRequestUserId: string = variables.connectionRequestUserId;
 
   // Update users list to update user connectionStatus
-  context?.client.setQueryData(usersQueryKey, (old: User[]) => {
-    if (!old) return old;
+  context?.client.setQueryData(
+    context.keys.users.recommended(""),
+    (old: User[]) => {
+      if (!old) return old;
 
-    const currentUsers = [...old];
-    const userIndex = currentUsers.findIndex(
-      (user) => user.id === connectionRequestUserId,
-    );
+      const currentUsers = [...old];
+      const userIndex = currentUsers.findIndex(
+        (user) => user.id === connectionRequestUserId,
+      );
 
-    currentUsers[userIndex] = {
-      ...currentUsers[userIndex],
-      connectionStatus: "STRANGER",
-      connectionId: connectionRequestId,
-    };
+      currentUsers[userIndex] = {
+        ...currentUsers[userIndex],
+        connectionStatus: "STRANGER",
+        connectionId: connectionRequestId,
+      };
 
-    return currentUsers;
-  });
+      return currentUsers;
+    },
+  );
 
   // Remove new connection request notification from existing notifications cache
   context?.client.setQueryData(
-    notificationsQueryKey,
+    context.keys.notifications.list(),
     (old: { pages: { notifications: Notification[] }[] }) => {
       if (!old) return old;
 
@@ -130,7 +130,7 @@ export function onSuccess(
 
   // Decrement pending request count and unread notifications count
   context?.client.setQueryData(
-    unreadCountStatsQueryKey,
+    context.keys.dashboard.badges(),
     (old: Record<string, number>) => {
       if (!old) return old;
 

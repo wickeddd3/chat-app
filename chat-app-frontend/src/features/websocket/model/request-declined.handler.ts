@@ -1,19 +1,21 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { Connection } from "@/entities/connection";
 import type { User } from "@/entities/user";
-import { REACT_QUERY_KEYS } from "@/shared/config/react-query-keys";
+import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 
-// Remove connection request to received request cache
+export interface DeclinedRequestPayload {
+  receiverId: string;
+  connectionId: string;
+}
+
 export const handleDeclinedRequest = (
   queryClient: QueryClient,
-  payload: {
-    receiverId: string;
-    connectionId: string;
-  },
+  queryKeys: ScopedQueryKeys,
+  payload: DeclinedRequestPayload,
 ) => {
   // Remove sent connection request from existing sent connection requests cache
   queryClient.setQueryData(
-    REACT_QUERY_KEYS["SENT_CONNECTION_REQUESTS"],
+    queryKeys.connections.sent(),
     (old: { pages: { connections: Connection[] }[] }) => {
       if (!old) return old;
 
@@ -31,23 +33,20 @@ export const handleDeclinedRequest = (
   );
 
   // Update users list to update user connectionStatus
-  queryClient.setQueryData(
-    [...REACT_QUERY_KEYS["USERS"], ""],
-    (old: User[]) => {
-      if (!old) return old;
+  queryClient.setQueryData(queryKeys.users.recommended(""), (old: User[]) => {
+    if (!old) return old;
 
-      const currentUsers = [...old];
-      const userIndex = currentUsers.findIndex(
-        (user) => user.id === payload.receiverId,
-      );
+    const currentUsers = [...old];
+    const userIndex = currentUsers.findIndex(
+      (user) => user.id === payload.receiverId,
+    );
 
-      currentUsers[userIndex] = {
-        ...currentUsers[userIndex],
-        connectionId: null,
-        connectionStatus: "STRANGER",
-      };
+    currentUsers[userIndex] = {
+      ...currentUsers[userIndex],
+      connectionId: null,
+      connectionStatus: "STRANGER",
+    };
 
-      return currentUsers;
-    },
-  );
+    return currentUsers;
+  });
 };

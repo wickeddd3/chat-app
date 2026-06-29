@@ -5,6 +5,7 @@ import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { Virtuoso } from "react-virtuoso";
 import { dateToNow } from "@/shared/utils/date-format";
+import { useAuth } from "@/app/store/AuthContext";
 
 export function SentRequests({
   cancelButton: CancelButton,
@@ -15,6 +16,7 @@ export function SentRequests({
     connectionRequestUserId: string;
   }>;
 }) {
+  const { authUser } = useAuth();
   const {
     sentRequests,
     isLoading,
@@ -22,7 +24,7 @@ export function SentRequests({
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useSentConnectionRequests();
+  } = useSentConnectionRequests(authUser?.id);
 
   return (
     <div className="flex-1 h-full overflow-y-auto min-h-0 scrollbar-thin">
