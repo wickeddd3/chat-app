@@ -3,14 +3,15 @@ import type { Connection } from "@/entities/connection";
 import type { User } from "@/entities/user";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 
-// Remove connection request to received request cache
+export interface DeclinedRequestPayload {
+  receiverId: string;
+  connectionId: string;
+}
+
 export const handleDeclinedRequest = (
   queryClient: QueryClient,
   queryKeys: ScopedQueryKeys,
-  payload: {
-    receiverId: string;
-    connectionId: string;
-  },
+  payload: DeclinedRequestPayload,
 ) => {
   // Remove sent connection request from existing sent connection requests cache
   queryClient.setQueryData(

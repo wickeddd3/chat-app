@@ -3,12 +3,15 @@ import type { Connection } from "@/entities/connection";
 import type { User } from "@/entities/user";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 
-// Append new connection request to received request cache
+export type NewRequestPayload = Connection;
+
 export const handleNewRequest = (
   queryClient: QueryClient,
   queryKeys: ScopedQueryKeys,
-  connection: Connection,
+  payload: NewRequestPayload,
 ) => {
+  const connection = payload;
+
   // Append new connection request to existing received connection requests cache
   queryClient.setQueryData(
     queryKeys.receivedRequests.list(),

@@ -2,15 +2,17 @@ import type { QueryClient } from "@tanstack/react-query";
 import type { InboxChannel } from "@/entities/channel";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 
-// Clear unread messages
+export interface UnreadMessagePayload {
+  channelId: string;
+  readMessageCount: number;
+}
+
 export const handleClearUnread = (
   queryClient: QueryClient,
   queryKeys: ScopedQueryKeys,
-  payload: {
-    channelId: string;
-    readMessageCount: number;
-  },
+  payload: UnreadMessagePayload,
 ) => {
+  // Clear unread message count from inbox
   queryClient.setQueryData(
     queryKeys.inbox.list(""),
     (oldData: { pages: { channels: InboxChannel[] }[] }) => {

@@ -3,12 +3,15 @@ import type { Notification } from "@/entities/notification";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 import { toast } from "sonner";
 
-// Real-time notifications interceptor
+export type IncomingNotificationPayload = Notification;
+
 export const handleIncomingNotification = (
   queryClient: QueryClient,
   queryKeys: ScopedQueryKeys,
-  notification: Notification,
+  payload: IncomingNotificationPayload,
 ) => {
+  const notification = payload;
+
   // Append new notification to exisitng notification cache
   queryClient.setQueryData(
     queryKeys.notifications.list(),
@@ -42,5 +45,6 @@ export const handleIncomingNotification = (
     },
   );
 
+  // Show notification toast
   toast.info(notification.title, { description: notification.content });
 };

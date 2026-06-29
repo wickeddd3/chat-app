@@ -3,20 +3,21 @@ import type { Message } from "@/entities/message";
 import type { InboxChannel } from "@/entities/channel";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 
-// Inbox badge/list invalidation handler and Global Message listener
+export interface IncomingMessagePayload {
+  channelPayload: {
+    channelId: string;
+    lastMessage: {
+      content: string;
+      createdAt: string;
+    };
+  };
+  messagePayload: Message;
+}
+
 export const handleIncomingMessage = (
   queryClient: QueryClient,
   queryKeys: ScopedQueryKeys,
-  payload: {
-    channelPayload: {
-      channelId: string;
-      lastMessage: {
-        content: string;
-        createdAt: string;
-      };
-    };
-    messagePayload: Message;
-  },
+  payload: IncomingMessagePayload,
 ) => {
   const { channelPayload, messagePayload } = payload;
 

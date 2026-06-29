@@ -1,19 +1,21 @@
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 import type { QueryClient } from "@tanstack/react-query";
 
-// Presence updates handler
+export interface StatusPayload {
+  userId: string;
+  status: "online" | "offline";
+}
+
 export const handleStatusChange = (
   queryClient: QueryClient,
   queryKeys: ScopedQueryKeys,
-  data: {
-    userId: string;
-    status: "online" | "offline";
-  },
+  payload: StatusPayload,
 ) => {
+  // Update user presence status
   queryClient.setQueryData(
     queryKeys.presence.matrix(),
     (oldMap: Record<string, string> | undefined) => {
-      return { ...oldMap, [data.userId]: data.status };
+      return { ...oldMap, [payload.userId]: payload.status };
     },
   );
 };
