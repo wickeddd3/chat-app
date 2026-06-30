@@ -52,7 +52,10 @@ export function TextField<T extends FieldValues>({
             aria-invalid={fieldState.invalid}
             placeholder={placeholder}
             autoComplete={name}
-            className={cn("", inputClassName)}
+            className={cn(
+              "focus-visible:ring-0 focus-visible:ring-offset-0 aria-invalid:ring-0",
+              inputClassName,
+            )}
           />
           {description && <FieldDescription>{description}</FieldDescription>}
           {fieldState.invalid && (

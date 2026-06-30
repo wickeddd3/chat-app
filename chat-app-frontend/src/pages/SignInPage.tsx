@@ -1,16 +1,16 @@
-import { GalleryVerticalEnd } from "lucide-react";
+import { MessageCircleDashedIcon } from "lucide-react";
 import { SignInForm } from "@/features/auth/sign-in";
+import { HelpAlert } from "@/widgets/help-alert";
 
 export default function SignInPage() {
   return (
     <div className="flex w-full max-w-md flex-col gap-6">
-      <a href="#" className="flex items-center gap-2 self-center font-medium">
-        <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-          <GalleryVerticalEnd className="size-4" />
-        </div>
+      <div className="flex items-center gap-2 self-center font-medium">
+        <MessageCircleDashedIcon className="text-blue-500" />
         Chikamo
-      </a>
+      </div>
       <SignInForm />
+      <HelpAlert />
     </div>
   );
 }
