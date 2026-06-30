@@ -14,9 +14,10 @@ import {
   FieldGroup,
   FieldSeparator,
 } from "@/shared/ui/shadcn/field";
+import { Link } from "react-router";
+import { Loader } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "react-router";
 import { SignInFormSchema, type SignInFormSchemaType } from "../model/schema";
 import { useSignIn } from "../model/useSignIn";
 
@@ -32,7 +33,7 @@ export function SignInForm({
     },
   });
 
-  const { login } = useSignIn();
+  const { login, loading } = useSignIn();
 
   async function onSubmit(data: SignInFormSchemaType) {
     await login(data);
@@ -94,8 +95,13 @@ export function SignInForm({
                 aria-label="Login account"
                 role="button"
                 title="Login account"
+                disabled={loading}
               >
-                Login
+                {loading ? (
+                  <Loader className="animate-spin" size={20} />
+                ) : (
+                  "Login"
+                )}
               </Button>
               {/* <FieldDescription className="text-center">
                 <Link to="/auth/sign-up">Forgot your password?</Link>

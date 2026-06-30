@@ -14,9 +14,10 @@ import {
   FieldGroup,
   FieldSeparator,
 } from "@/shared/ui/shadcn/field";
+import { Link } from "react-router";
+import { Loader } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "react-router";
 import { SignUpFormSchema, type SignUpFormSchemaType } from "../model/schema";
 import { useSignUp } from "../model/useSignUp";
 
@@ -35,7 +36,7 @@ export function SignUpForm({
     },
   });
 
-  const { register } = useSignUp();
+  const { register, isPending } = useSignUp();
 
   async function onSubmit(data: SignUpFormSchemaType) {
     await register(data);
@@ -131,8 +132,13 @@ export function SignUpForm({
                 aria-label="Create an account"
                 role="button"
                 title="Create an account"
+                disabled={isPending}
               >
-                Create Account
+                {isPending ? (
+                  <Loader className="animate-spin" size={20} />
+                ) : (
+                  "Create Account"
+                )}
               </Button>
               <FieldDescription className="text-center">
                 Already have an account? <Link to="/auth/sign-in">Sign in</Link>
