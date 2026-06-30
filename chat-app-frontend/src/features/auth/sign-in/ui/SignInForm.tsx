@@ -73,12 +73,19 @@ export function SignInForm({
               name="email"
               id="email"
               label="Email"
+              placeholder="johndoe@gmail.com"
+              inputClassName="text-sm"
+              labelClassName="text-md"
             />
             <TextField
+              type="password"
               control={form.control}
               name="password"
               id="password"
               label="Password"
+              placeholder="********"
+              inputClassName="text-sm"
+              labelClassName="text-md"
             />
             <Field>
               <Button

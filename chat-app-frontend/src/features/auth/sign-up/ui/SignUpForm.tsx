@@ -78,32 +78,49 @@ export function SignUpForm({
               name="name"
               id="name"
               label="Full Name"
+              placeholder="John Doe"
+              inputClassName="text-sm"
+              labelClassName="text-md"
             />
             <TextField
               control={form.control}
               name="email"
               id="email"
               label="Email"
+              placeholder="johndoe@gmail.com"
+              inputClassName="text-sm"
+              labelClassName="text-md"
             />
             <TextField
               control={form.control}
               name="username"
               id="username"
               label="Username"
+              placeholder="johndoe888"
+              inputClassName="text-sm"
+              labelClassName="text-md"
             />
             <Field>
               <Field className="grid grid-cols-2 gap-4">
                 <TextField
+                  type="password"
                   control={form.control}
                   name="password"
                   id="password"
                   label="Password"
+                  placeholder="********"
+                  inputClassName="text-sm"
+                  labelClassName="text-md"
                 />
                 <TextField
+                  type="password"
                   control={form.control}
                   name="confirmPassword"
                   id="confirmPassword"
                   label="Confirm Password"
+                  placeholder="********"
+                  inputClassName="text-sm"
+                  labelClassName="text-md"
                 />
               </Field>
             </Field>
