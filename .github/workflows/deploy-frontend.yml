@@ -27,7 +27,7 @@ jobs:
           cache: "npm"
           cache-dependency-path: "chat-app-frontend/package-lock.json"
 
-      - name: Install Frontend Dependencies
+      - name: Install Dependencies
         run: |
           cd chat-app-frontend
           npm ci
@@ -39,7 +39,7 @@ jobs:
         run: |
           cd chat-app-frontend
           # 1. Run the standard Vite build with your secrets
-          yarn build
+          npm run build
 
           # 2. Manually create the folder structure Vercel '--prebuilt' requires
           mkdir -p .vercel/output/static
