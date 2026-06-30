@@ -1,5 +1,6 @@
 import { MessageCircleDashedIcon } from "lucide-react";
 import { SignInForm } from "@/features/auth/sign-in";
+import { HelpAlert } from "@/widgets/help-alert";
 
 export default function SignInPage() {
   return (
@@ -9,6 +10,7 @@ export default function SignInPage() {
         Chikamo
       </div>
       <SignInForm />
+      <HelpAlert />
     </div>
   );
 }
