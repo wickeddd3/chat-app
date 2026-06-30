@@ -1,23 +1,36 @@
 import type { SignInFormSchemaType } from "./schema";
 import { signIn } from "@/shared/lib/supabase-auth";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export function useSignIn() {
-  const login = async (formData: SignInFormSchemaType) => {
-    const { error } = await signIn(formData);
+  const [loading, setLoading] = useState(false);
 
-    if (error) {
+  const login = async (formData: SignInFormSchemaType) => {
+    setLoading(true);
+    try {
+      const { error } = await signIn(formData);
+
+      if (error) {
+        toast.error("Login Failed", {
+          description: "Invalid email or password",
+          position: "bottom-right",
+        });
+        return;
+      }
+
+      toast.success("Login Successful", {
+        position: "bottom-right",
+      });
+    } catch {
       toast.error("Login Failed", {
         description: "Invalid email or password",
         position: "bottom-right",
       });
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    toast.success("Login Successful", {
-      position: "bottom-right",
-    });
   };
 
-  return { login };
+  return { login, loading };
 }
