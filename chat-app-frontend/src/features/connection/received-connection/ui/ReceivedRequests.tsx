@@ -1,4 +1,3 @@
-import { ConnectionItem } from "@/entities/connection";
 import { useReceivedConnectionRequests } from "../model/useReceivedConnectionRequests";
 import { LoaderCircleIcon } from "lucide-react";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
@@ -6,6 +5,7 @@ import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { Virtuoso } from "react-virtuoso";
 import { dateToNow } from "@/shared/utils/date-format";
 import { useAuth } from "@/entities/auth";
+import { UserListItem } from "@/entities/user";
 
 export function ReceivedRequests({
   acceptButton: AcceptButton,
@@ -49,7 +49,7 @@ export function ReceivedRequests({
             }
           }}
           itemContent={(_, request) => (
-            <ConnectionItem
+            <UserListItem
               key={request.id}
               user={request.user}
               date={dateToNow(request.createdAt)}

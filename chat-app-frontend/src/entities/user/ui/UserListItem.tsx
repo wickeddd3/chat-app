@@ -1,21 +1,23 @@
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import type { ReactNode } from "react";
 
-export function ContactItem({
-  user: { name, image, username },
+export function UserListItem({
+  user: { name, username, image },
+  isOnline,
   isNew = false,
-  isOnline = false,
+  date,
   optionSlot,
 }: {
   user: { name: string; username: string; image?: string | null };
-  isNew?: boolean;
   isOnline?: boolean;
+  isNew?: boolean;
+  date?: string;
   optionSlot?: ReactNode;
 }) {
   return (
     <article
       className={`
-        flex items-center gap-4 border-b px-4 py-3 text-sm leading-tight last:border-b-0 
+        flex items-center gap-4 border-b px-4 py-3 text-sm leading-tight last:border-b-0
         hover:bg-sidebar-accent hover:text-sidebar-accent-foreground w-full overflow-hidden
       `}
     >
@@ -23,7 +25,7 @@ export function ContactItem({
         <ProfileAvatar
           imageSrc={image || ""}
           isOnline={isOnline}
-          badge={true}
+          badge={isOnline !== undefined}
         />
       </div>
 
@@ -33,7 +35,7 @@ export function ContactItem({
           {isNew && (
             <span
               className={`
-              bg-blue-100 text-blue-800 text-[10px] font-medium px-1.5 
+              bg-blue-100 text-blue-800 text-[10px] font-medium px-1.5
                 py-0.5 rounded-sm shrink-0 whitespace-nowrap
               `}
             >
@@ -42,11 +44,16 @@ export function ContactItem({
           )}
         </div>
 
-        <h2 className="text-xs text-muted-foreground truncate w-full">{`@${username}`}</h2>
+        <div className="flex items-center gap-1 min-w-0 w-full text-muted-foreground">
+          <h2 className="text-xs truncate">{`@${username}`}</h2>
+          {date && (
+            <span className="text-xs shrink-0 whitespace-nowrap">• {date}</span>
+          )}
+        </div>
       </div>
 
       {optionSlot && (
-        <div className="shrink-0 flex items-center justify-end">
+        <div className="shrink-0 flex items-center justify-end gap-2">
           {optionSlot}
         </div>
       )}

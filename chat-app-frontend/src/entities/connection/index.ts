@@ -5,5 +5,3 @@ export type {
   PaginatedConnections,
   PaginatedContacts,
 } from "./model/connection.types";
-
-export { ConnectionItem } from "./ui/ConnectionItem";
