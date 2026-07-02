@@ -4,12 +4,14 @@ import { GuestGuard } from "./GuestGuard";
 import { AuthLayout } from "../layouts/auth-layout";
 import { ChatLayout } from "../layouts/chat-layout";
 import { ContentPlaceholder } from "@/features/message/chat-room";
+import { RouteErrorBoundary } from "@/shared/ui/RouteErrorBoundary";
 
 export const router = createBrowserRouter([
   // --- PROTECTED ROUTES ---
   {
     path: "/",
     element: <AuthGuard />,
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         path: "",
@@ -86,6 +88,7 @@ export const router = createBrowserRouter([
   {
     path: "/auth",
     element: <GuestGuard />,
+    errorElement: <RouteErrorBoundary />,
     children: [
       {
         path: "",
