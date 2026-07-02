@@ -12,7 +12,7 @@ export function BackButton() {
       role="button"
       title="Back to inbox"
     >
-      <FaChevronLeft className="h-6 w-6 text-muted-foreground" />
+      <FaChevronLeft className="h-4 w-4 text-muted-foreground" />
     </button>
   );
 }
