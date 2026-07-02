@@ -1,4 +1,4 @@
-import { MessageCircleDashedIcon } from "lucide-react";
+import { FaCommentDots } from "react-icons/fa6";
 import { useLocation } from "react-router";
 import { UserNav } from "./UserNav";
 import { SidebarLink } from "./SidebarLink";
@@ -34,11 +34,12 @@ export function ChatSidebar() {
       >
         <section
           className={`
-            hidden md:flex aspect-square size-12 items-center justify-center 
-            rounded-xl bg-blue-500 text-gray-50 shrink-0
+            hidden md:flex aspect-square size-12 items-center justify-center
+            rounded-2xl bg-linear-to-br from-blue-500 to-blue-600 text-gray-50
+            shadow-lg shadow-blue-500/30 shrink-0
           `}
         >
-          <MessageCircleDashedIcon />
+          <FaCommentDots className="size-6" />
         </section>
         <nav
           aria-label="Primary"
@@ -60,7 +61,7 @@ export function ChatSidebar() {
       <div className="relative flex shrink-0 mr-4 md:mr-0">
         <UserNav />
         {unreadNotificationBadge > 0 && (
-          <Badge className="border-4 py-2.5 rounded-full border-white bg-red-500 text-gray-50 absolute top-0 inset-e-0 -mt-2 -me-3">
+          <Badge className="border-4 py-2.5 rounded-full border-white bg-red-500 text-gray-50 absolute top-0 inset-e-0 -mt-4 -me-4">
             {unreadNotificationBadge}
           </Badge>
         )}
