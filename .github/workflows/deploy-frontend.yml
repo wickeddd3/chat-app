@@ -37,6 +37,11 @@ jobs:
           cd chat-app-frontend
           npm run lint
 
+      - name: Unit Tests
+        run: |
+          cd chat-app-frontend
+          npm run test:run
+
       - name: Install Vercel CLI Globally
         run: npm install --global vercel
 
