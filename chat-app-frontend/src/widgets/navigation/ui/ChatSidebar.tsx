@@ -5,7 +5,7 @@ import { SidebarLink } from "./SidebarLink";
 import { navItems } from "../model/nav-items";
 import { useUnreadCounts } from "@/features/stats/unread-counts";
 import { Badge } from "@/shared/ui/shadcn/badge";
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuth } from "@/entities/auth";
 
 export function ChatSidebar() {
   const { authUser } = useAuth();

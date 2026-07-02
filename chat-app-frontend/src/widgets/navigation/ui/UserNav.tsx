@@ -19,7 +19,7 @@ import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { useAuthProfile } from "@/entities/auth";
 import { useUnreadCounts } from "@/features/stats/unread-counts";
 import { Badge } from "@/shared/ui/shadcn/badge";
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuth } from "@/entities/auth";
 
 export function UserNav() {
   const { authUser } = useAuth();

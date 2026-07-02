@@ -9,8 +9,7 @@ import { SearchField } from "@/shared/ui/SearchField";
 import { useContacts } from "../model/useContacts";
 import { useMemo, useState } from "react";
 import { ContactResults } from "./ContactResults";
-import { usePresence } from "@/app/store/PresenceContext";
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuth, usePresence } from "@/entities/auth";
 
 export function ContactList({
   messageButton: MessageButton,

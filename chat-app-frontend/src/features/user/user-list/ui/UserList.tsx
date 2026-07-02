@@ -5,7 +5,7 @@ import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { UserListItem } from "./UserListItem";
 import { useState } from "react";
 import { Virtuoso } from "react-virtuoso";
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuth } from "@/entities/auth";
 
 export function UserList({
   messageButton: MessageButton,

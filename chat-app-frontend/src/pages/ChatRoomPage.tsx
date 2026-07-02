@@ -1,11 +1,9 @@
 import { useParams } from "react-router";
 import { useMemo } from "react";
 import { BackButton, ChannelHeader, useChannel } from "@/entities/channel";
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuth, usePresence, usePresenceMap } from "@/entities/auth";
 import { ChatRoom } from "@/features/message/chat-room";
 import { ChannelDetailsDrawer } from "@/widgets/channel-details-drawer";
-import { usePresence } from "@/app/store/PresenceContext";
-import { usePresenceMap } from "@/features/message/online-presence";
 
 export default function ChatRoomPage() {
   const { channelId } = useParams();

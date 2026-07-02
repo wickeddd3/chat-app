@@ -1,4 +1,4 @@
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuth } from "@/entities/auth";
 import { useAuthProfile } from "@/entities/auth";
 import type { Message, NewMessage } from "@/entities/message";
 import { webSocketClient } from "@/shared/lib/socket-io.client";

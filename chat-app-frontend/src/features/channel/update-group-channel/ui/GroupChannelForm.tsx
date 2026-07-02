@@ -12,7 +12,7 @@ import {
 import { useUpdateGroupChannel } from "../model/useUpdateGroupChannel";
 import type { InboxChannel } from "@/entities/channel";
 import { useCallback, useEffect } from "react";
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuth } from "@/entities/auth";
 
 export function GroupChannelForm({
   channel,

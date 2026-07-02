@@ -11,7 +11,7 @@ import { ProfileForm } from "@/features/auth/update-profile";
 import { EmailForm } from "@/features/auth/update-email";
 import { PasswordForm } from "@/features/auth/update-password";
 import { UploadAvatar } from "@/features/auth/upload-avatar";
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuth } from "@/entities/auth";
 
 export default function ProfilePage() {
   const { authUser } = useAuth();

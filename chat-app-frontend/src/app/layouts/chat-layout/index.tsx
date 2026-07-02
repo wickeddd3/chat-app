@@ -1,4 +1,4 @@
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuth } from "@/entities/auth";
 import { Toaster } from "@/shared/ui/shadcn/sonner";
 import { ChatSidebar } from "@/widgets/navigation";
 import { Outlet, useParams } from "react-router";
