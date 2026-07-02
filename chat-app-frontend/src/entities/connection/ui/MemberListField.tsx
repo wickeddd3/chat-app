@@ -14,17 +14,19 @@ interface MemberListFieldProps<T extends FieldValues> {
   control: Control<T>;
   name: Path<T>;
   label: string;
+  authId?: string;
 }
 
 export function MemberListField<T extends FieldValues>({
   control,
   name,
   label,
+  authId,
 }: MemberListFieldProps<T>) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { contacts, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useContacts(searchQuery);
+    useContacts(authId, searchQuery);
 
   return (
     <Controller

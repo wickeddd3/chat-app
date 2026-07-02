@@ -2,7 +2,8 @@ import { FieldGroup } from "@/shared/ui/shadcn/field";
 import { Button } from "@/shared/ui/shadcn/button";
 import { Spinner } from "@/shared/ui/shadcn/spinner";
 import { TextField } from "@/shared/ui/form-fields/TextField";
-import { MemberListField } from "./MemberListField";
+import { MemberListField } from "@/entities/connection";
+import { useAuth } from "@/entities/auth";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -12,6 +13,8 @@ import {
 import { useCreateGroupChannel } from "../model/useCreateGroupChannel";
 
 export function GroupChannelForm({ onSuccess }: { onSuccess?: () => void }) {
+  const { authUser } = useAuth();
+
   const form = useForm<GroupChannelFormSchemaType>({
     resolver: zodResolver(GroupChannelFormSchema),
     defaultValues: {
@@ -47,6 +50,7 @@ export function GroupChannelForm({ onSuccess }: { onSuccess?: () => void }) {
           control={form.control}
           name="memberIds"
           label="Add Members"
+          authId={authUser?.id}
         />
       </FieldGroup>
       <Button
