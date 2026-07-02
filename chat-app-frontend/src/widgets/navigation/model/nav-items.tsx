@@ -1,38 +1,38 @@
 import {
-  HomeIcon,
-  MessageCircleIcon,
-  BookUserIcon,
-  UsersRoundIcon,
-  HandshakeIcon,
-} from "lucide-react";
+  FaHouse,
+  FaComments,
+  FaAddressBook,
+  FaUsers,
+  FaHandshake,
+} from "react-icons/fa6";
 import type { NavItem } from "./nav.types";
 
 export const navItems: NavItem[] = [
   {
     title: "Home",
     url: "/",
-    icon: HomeIcon,
+    icon: FaHouse,
   },
   {
     title: "Messages",
     url: "/messages",
-    icon: MessageCircleIcon,
+    icon: FaComments,
     badgeName: "unreadMessagesCount",
   },
   {
     title: "Contacts",
     url: "/contacts",
-    icon: BookUserIcon,
+    icon: FaAddressBook,
   },
   {
     title: "People",
     url: "/people",
-    icon: UsersRoundIcon,
+    icon: FaUsers,
   },
   {
-    title: "Connection Requests",
+    title: "Requests",
     url: "/contact-requests",
-    icon: HandshakeIcon,
+    icon: FaHandshake,
     badgeName: "pendingRequestsCount",
   },
 ];

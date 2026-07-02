@@ -1,9 +1,9 @@
-import { BookUserIcon } from "lucide-react";
+import { FaAddressBook } from "react-icons/fa6";
 
 export function EmptyPlaceholder() {
   return (
     <div className="w-full h-full flex flex-col justify-center items-center gap-4">
-      <BookUserIcon size={60} className="text-gray-300" />
+      <FaAddressBook size={60} className="text-gray-300" />
       <p className="text-lg font-medium text-gray-300">Empty</p>
     </div>
   );

@@ -4,7 +4,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/shared/ui/shadcn/input-group";
-import { SearchIcon } from "lucide-react";
+import { FaMagnifyingGlass } from "react-icons/fa6";
 import { cn } from "@/shared/lib/utils";
 
 export interface SearchFieldProps {
@@ -31,7 +31,7 @@ export function SearchField({
           aria-label={ariaLabel}
         />
         <InputGroupAddon align="inline-start">
-          <SearchIcon />
+          <FaMagnifyingGlass />
         </InputGroupAddon>
       </InputGroup>
     </Field>

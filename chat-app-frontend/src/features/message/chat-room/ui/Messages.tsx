@@ -5,7 +5,7 @@ import {
   type NewMessage,
 } from "@/entities/message";
 import { useAuth } from "@/entities/auth";
-import { LoaderCircle } from "lucide-react";
+import { FaCircleNotch } from "react-icons/fa6";
 import { useMemo } from "react";
 import { useScrollToBottom } from "../model/useScrollToBottom";
 
@@ -65,7 +65,7 @@ export function Messages({
         Header: () =>
           isFetchingNextPage ? (
             <div className="py-4 flex justify-center w-full">
-              <LoaderCircle size={20} className="text-blue-500 animate-spin" />
+              <FaCircleNotch size={20} className="text-blue-500 animate-spin" />
             </div>
           ) : null,
       }}

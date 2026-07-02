@@ -15,7 +15,7 @@ import {
   FieldSeparator,
 } from "@/shared/ui/shadcn/field";
 import { Link } from "react-router";
-import { Loader } from "lucide-react";
+import { FaSpinner } from "react-icons/fa6";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignInFormSchema, type SignInFormSchemaType } from "../model/schema";
@@ -98,7 +98,7 @@ export function SignInForm({
                 disabled={loading}
               >
                 {loading ? (
-                  <Loader className="animate-spin" size={20} />
+                  <FaSpinner className="animate-spin" size={20} />
                 ) : (
                   "Login"
                 )}

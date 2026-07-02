@@ -1,5 +1,5 @@
 import { useReceivedConnectionRequests } from "../model/useReceivedConnectionRequests";
-import { LoaderCircleIcon } from "lucide-react";
+import { FaCircleNotch } from "react-icons/fa6";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { Virtuoso } from "react-virtuoso";
@@ -74,7 +74,7 @@ export function ReceivedRequests({
             Footer: () =>
               isFetchingNextPage ? (
                 <div className="py-4 flex justify-center">
-                  <LoaderCircleIcon
+                  <FaCircleNotch
                     size={20}
                     className="text-blue-500 animate-spin"
                   />

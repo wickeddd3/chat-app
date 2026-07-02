@@ -1,9 +1,4 @@
-import {
-  CircleUserRoundIcon,
-  BellIcon,
-  CogIcon,
-  LogOutIcon,
-} from "lucide-react";
+import { FaCircleUser, FaBell, FaGear, FaRightFromBracket } from "react-icons/fa6";
 import { Button } from "@/shared/ui/shadcn/button";
 import {
   DropdownMenu,
@@ -45,14 +40,14 @@ export function UserNav() {
         <DropdownMenuGroup>
           <DropdownMenuItem asChild className="cursor-pointer">
             <Link to={"/profile"}>
-              <CircleUserRoundIcon />
+              <FaCircleUser />
               Account
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild className="cursor-pointer">
             <Link to={"/notifications"}>
-              <BellIcon />
+              <FaBell />
               Notifications
               {unreadNotificationBadge > 0 && (
                 <Badge
@@ -65,13 +60,13 @@ export function UserNav() {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem disabled>
-            <CogIcon />
+            <FaGear />
             Settings
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer" onClick={logout}>
-          <LogOutIcon />
+          <FaRightFromBracket />
           Sign Out
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -1,6 +1,6 @@
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { dateToNow } from "@/shared/utils/date-format";
-import { CheckCheck } from "lucide-react";
+import { FaCheckDouble } from "react-icons/fa6";
 import type { Message, NewMessage } from "../model/message.types";
 
 export interface MessageBubbleProps {
@@ -55,7 +55,7 @@ export function MessageBubble({
 
         {isAuthorsMessage && (
           <div className="flex justify-end w-full mt-0.5 shrink-0">
-            <CheckCheck
+            <FaCheckDouble
               size={14}
               className={isSending ? "opacity-40 animate-pulse" : "opacity-90"}
             />

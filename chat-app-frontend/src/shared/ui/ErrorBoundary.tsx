@@ -1,6 +1,6 @@
 import { Component, type ReactNode } from "react";
 import { Button } from "@/shared/ui/shadcn/button";
-import { TriangleAlertIcon } from "lucide-react";
+import { FaTriangleExclamation } from "react-icons/fa6";
 
 export interface ErrorBoundaryProps {
   children: ReactNode;
@@ -24,7 +24,7 @@ export class ErrorBoundary extends Component<
     if (this.state.hasError) {
       return (
         <div className="w-full h-screen flex flex-col items-center justify-center gap-4 p-6 text-center bg-background">
-          <TriangleAlertIcon className="text-muted-foreground" size={40} />
+          <FaTriangleExclamation className="text-muted-foreground" size={40} />
           <div className="flex flex-col gap-1">
             <h1 className="text-lg font-semibold text-foreground">
               Something went wrong

@@ -6,7 +6,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/shared/ui/shadcn/drawer";
-import { InfoIcon } from "lucide-react";
+import { FaCircleInfo } from "react-icons/fa6";
 import { ChannelDetails, type InboxChannel } from "@/entities/channel";
 import { UpdateGroupChannel } from "@/features/channel/update-group-channel";
 import { usePresence } from "@/entities/auth";
@@ -33,7 +33,7 @@ export function ChannelDetailsDrawer({
           role="button"
           title="Channel info"
         >
-          <InfoIcon className="h-6 w-6 text-muted-foreground" />
+          <FaCircleInfo className="h-6 w-6 text-muted-foreground" />
         </button>
       </DrawerTrigger>
       <DrawerContent>

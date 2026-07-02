@@ -1,4 +1,4 @@
-import { MessageCircleIcon } from "lucide-react";
+import { FaComment } from "react-icons/fa6";
 import { useChatNavigation } from "../model/useChatNavigation";
 
 export interface MessageButtonProps {
@@ -17,7 +17,7 @@ export function MessageButton({ text, targetUserId }: MessageButtonProps) {
       role="button"
       title="Send message"
     >
-      <MessageCircleIcon size={18} className="text-gray-50" />
+      <FaComment size={18} className="text-gray-50" />
       <span className="text-xs font-medium text-gray-50 hidden sm:inline-block">
         {text}
       </span>

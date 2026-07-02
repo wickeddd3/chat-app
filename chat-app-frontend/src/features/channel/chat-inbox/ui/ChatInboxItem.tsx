@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router";
-import { CheckCheck } from "lucide-react";
+import { FaCheckDouble } from "react-icons/fa6";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { dateToNow } from "@/shared/utils/date-format";
 import { cn } from "@/shared/lib/utils";
@@ -56,7 +56,7 @@ export function ChatInboxItem({
               <span className="text-[11px] whitespace-nowrap">
                 {dateToNow(lastMessage.createdAt)}
               </span>
-              <CheckCheck
+              <FaCheckDouble
                 className={cn(
                   unreadCount === 0 ? "text-blue-500" : "opacity-40",
                 )}
