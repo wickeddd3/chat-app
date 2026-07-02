@@ -8,9 +8,17 @@ import { Card } from "@/shared/ui/shadcn/card";
 import { Avatar, AvatarImage } from "@/shared/ui/shadcn/avatar";
 import { ChannelMembers } from "./ChannelMembers";
 import { AttachmentFiles } from "./AttachmentFiles";
-import type { InboxChannel } from "@/entities/channel";
+import type { InboxChannel } from "../model/channel.types";
 
-export function ChannelDetails({ channel }: { channel: InboxChannel | null }) {
+export function ChannelDetails({
+  channel,
+  isOnline,
+}: {
+  channel: InboxChannel | null;
+  // Presence is injected from a higher layer so this entity stays decoupled
+  // from the auth/presence entity (entities may only depend on shared).
+  isOnline: (userId: string) => boolean;
+}) {
   if (!channel) return;
 
   return (
@@ -19,7 +27,7 @@ export function ChannelDetails({ channel }: { channel: InboxChannel | null }) {
         <Avatar className="w-24 h-24">
           <AvatarImage
             src={channel?.displayImage || "/default-avatar.jpg"}
-            alt="profile-avatar"
+            alt=""
           />
         </Avatar>
       </Card>
@@ -35,7 +43,10 @@ export function ChannelDetails({ channel }: { channel: InboxChannel | null }) {
             Members
           </AccordionTrigger>
           <AccordionContent className="w-full h-full">
-            <ChannelMembers members={channel.channelMembers} />
+            <ChannelMembers
+              members={channel.channelMembers}
+              isOnline={isOnline}
+            />
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="attachments">

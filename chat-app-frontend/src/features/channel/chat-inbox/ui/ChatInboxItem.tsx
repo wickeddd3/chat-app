@@ -45,9 +45,9 @@ export function ChatInboxItem({
 
       <div className="flex-1 flex flex-col items-start min-w-0 gap-1.5">
         <div className="flex w-full items-center justify-between gap-2 min-w-0">
-          <h1 className="font-medium text-foreground truncate flex-1">
+          <p className="font-medium text-foreground truncate flex-1">
             {displayName}
-          </h1>
+          </p>
 
           {lastMessage && (
             <div className="shrink-0 flex items-center gap-1.5 text-muted-foreground/60">

@@ -23,14 +23,14 @@ export function SidebarLink({
         <Link
           key={url}
           to={url}
+          aria-label={badgeCount > 0 ? `${title}, ${badgeCount} unread` : title}
+          aria-current={isActive ? "page" : undefined}
           className={cn(
-            "relative flex justify-center items-center text-gray-600 p-2 rounded-lg transition-colors duration-200",
+            "relative flex justify-center items-center text-gray-600 p-2 rounded-lg transition-colors duration-200 cursor-pointer",
             isActive && "bg-gray-200 text-gray-900",
           )}
         >
-          <button className="cursor-pointer">
-            <Icon />
-          </button>
+          <Icon />
           {badgeCount > 0 && (
             <Badge className="border-4 py-2.5 rounded-full border-white bg-red-500 text-gray-50 absolute top-0 inset-e-0 -mt-2 -me-3">
               {badgeCount}
