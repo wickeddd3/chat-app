@@ -3,6 +3,7 @@ import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
+import boundaries from "eslint-plugin-boundaries";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
@@ -56,6 +57,101 @@ export default defineConfig([
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },
+      ],
+    },
+  },
+  {
+    // Feature-Sliced Design layer boundaries
+    files: ["src/**/*.{ts,tsx}"],
+    plugins: { boundaries },
+    settings: {
+      "import/resolver": {
+        typescript: {
+          alwaysTryTypes: true,
+        },
+      },
+      "boundaries/include": ["src/**/*.{ts,tsx}"],
+      "boundaries/elements": [
+        { type: "app", pattern: "src/main.tsx", mode: "file" },
+        { type: "app", pattern: "src/app", mode: "folder" },
+        { type: "pages", pattern: "src/pages/*", mode: "file" },
+        { type: "widgets", pattern: "src/widgets/*", capture: ["slice"] },
+        // features/websocket has no domain grouping, unlike every other feature slice;
+        // it must be matched before the generic two-level pattern below
+        {
+          type: "features",
+          pattern: "src/features/websocket",
+          capture: ["slice"],
+        },
+        {
+          type: "features",
+          pattern: "src/features/*/*",
+          capture: ["domain", "slice"],
+        },
+        { type: "entities", pattern: "src/entities/*", capture: ["slice"] },
+        { type: "shared", pattern: "src/shared/*", capture: ["slice"] },
+      ],
+    },
+    rules: {
+      // Layers may only depend on themselves and layers below them; sibling slices within
+      // widgets/features/entities may not import each other (push shared logic down instead)
+      "boundaries/dependencies": [
+        "error",
+        {
+          default: "disallow",
+          rules: [
+            {
+              from: { type: "app" },
+              allow: [
+                { to: { type: "app" } },
+                { to: { type: "pages" } },
+                { to: { type: "widgets" } },
+                { to: { type: "features" } },
+                { to: { type: "entities" } },
+                { to: { type: "shared" } },
+              ],
+            },
+            {
+              from: { type: "pages" },
+              allow: [
+                { to: { type: "widgets" } },
+                { to: { type: "features" } },
+                { to: { type: "entities" } },
+                { to: { type: "shared" } },
+              ],
+            },
+            {
+              from: { type: "widgets" },
+              allow: [
+                { to: { type: "features" } },
+                { to: { type: "entities" } },
+                { to: { type: "shared" } },
+              ],
+            },
+            {
+              from: { type: "features" },
+              allow: [{ to: { type: "entities" } }, { to: { type: "shared" } }],
+            },
+            {
+              from: { type: "entities" },
+              allow: [{ to: { type: "shared" } }],
+            },
+            {
+              from: { type: "shared" },
+              allow: [{ to: { type: "shared" } }],
+            },
+            // Slices are only reachable through their public index.ts barrel, never by deep
+            // import. Same-slice internal imports are unaffected: boundaries/dependencies
+            // ignores dependencies within the same element by default (checkInternals: false).
+            {
+              to: {
+                type: ["widgets", "features", "entities"],
+                internalPath: "!index.ts",
+              },
+              disallow: [{ from: { type: "*" } }],
+            },
+          ],
+        },
       ],
     },
   },
