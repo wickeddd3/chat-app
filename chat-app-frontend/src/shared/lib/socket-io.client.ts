@@ -8,7 +8,14 @@ const socketUrl = API_URL;
 export const webSocketClient = io(socketUrl, {
   autoConnect: false, // Don't connect until we know the user is logged in
   withCredentials: true,
-  auth: {
-    token: await getAuthToken(),
+  auth: (callback) => {
+    // Resolved fresh on every (re)connection attempt so token refreshes/expiry are respected
+    getAuthToken()
+      .then((token) => {
+        callback({ token });
+      })
+      .catch(() => {
+        callback({ token: "" });
+      });
   },
 });
