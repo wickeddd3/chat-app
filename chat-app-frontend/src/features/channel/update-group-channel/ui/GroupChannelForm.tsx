@@ -2,13 +2,13 @@ import { FieldGroup } from "@/shared/ui/shadcn/field";
 import { Button } from "@/shared/ui/shadcn/button";
 import { Spinner } from "@/shared/ui/shadcn/spinner";
 import { TextField } from "@/shared/ui/form-fields/TextField";
-import { MemberListField } from "@/entities/connection";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  MemberListField,
   GroupChannelFormSchema,
   type GroupChannelFormSchemaType,
-} from "../model/schema";
+} from "@/entities/connection";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useUpdateGroupChannel } from "../model/useUpdateGroupChannel";
 import type { InboxChannel } from "@/entities/channel";
 import { useCallback, useEffect } from "react";

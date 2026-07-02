@@ -2,14 +2,14 @@ import { FieldGroup } from "@/shared/ui/shadcn/field";
 import { Button } from "@/shared/ui/shadcn/button";
 import { Spinner } from "@/shared/ui/shadcn/spinner";
 import { TextField } from "@/shared/ui/form-fields/TextField";
-import { MemberListField } from "@/entities/connection";
+import {
+  MemberListField,
+  GroupChannelFormSchema,
+  type GroupChannelFormSchemaType,
+} from "@/entities/connection";
 import { useAuth } from "@/entities/auth";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  GroupChannelFormSchema,
-  type GroupChannelFormSchemaType,
-} from "../model/schema";
 import { useCreateGroupChannel } from "../model/useCreateGroupChannel";
 
 export function GroupChannelForm({ onSuccess }: { onSuccess?: () => void }) {

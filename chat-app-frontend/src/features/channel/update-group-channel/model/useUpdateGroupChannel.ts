@@ -2,7 +2,7 @@ import { useMutation, type UseMutateFunction } from "@tanstack/react-query";
 import { updateGroupChannelApi } from "../api/channels.api";
 import type { Channel } from "@/entities/channel";
 import { toast } from "sonner";
-import type { GroupChannelFormSchemaType } from "./schema";
+import type { GroupChannelFormSchemaType } from "@/entities/connection";
 
 export function useUpdateGroupChannel(channelId: string): {
   updateGroupChannel: UseMutateFunction<
