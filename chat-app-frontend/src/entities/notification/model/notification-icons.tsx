@@ -1,4 +1,4 @@
-import type { NotificationType } from "@/entities/notification";
+import type { NotificationType } from "./notification.types";
 import { MailIcon, UserRoundCheckIcon, UserRoundPlusIcon } from "lucide-react";
 import type { ElementType } from "react";
 

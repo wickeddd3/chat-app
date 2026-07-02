@@ -1,4 +1,4 @@
-import type { Notification } from "@/entities/notification";
+import type { Notification } from "../model/notification.types";
 import { iconType } from "../model/notification-icons";
 import { dateToNow } from "@/shared/utils/date-format";
 import { cn } from "@/shared/lib/utils";
@@ -15,7 +15,7 @@ export function NotificationItem({
   return (
     <article
       className={cn(
-        `flex justify-between items-center gap-4 px-4 py-2 border-b 
+        `flex justify-between items-center gap-4 px-4 py-2 border-b
         hover:bg-sidebar-accent cursor-pointer w-full overflow-hidden`,
         notification.isRead ? "" : "bg-sidebar-accent/50",
       )}
