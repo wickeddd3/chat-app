@@ -1,10 +1,10 @@
 import { LoaderCircleIcon } from "lucide-react";
-import { ContactItem } from "./ContactItem";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { Virtuoso } from "react-virtuoso";
 import { isLessThanADayOld } from "@/shared/utils/date-format";
 import type { ConnectionUser } from "@/entities/connection";
+import { UserListItem } from "@/entities/user";
 
 export function ContactResults({
   isLoading = false,
@@ -44,7 +44,7 @@ export function ContactResults({
             }
           }}
           itemContent={(_, contact) => (
-            <ContactItem
+            <UserListItem
               key={contact.id}
               user={{
                 name: contact.name,

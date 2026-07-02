@@ -6,10 +6,10 @@ import {
 } from "@/shared/ui/shadcn/tabs";
 import { Badge } from "@/shared/ui/shadcn/badge";
 import { SearchField } from "@/shared/ui/SearchField";
-import { useContacts } from "../model/useContacts";
 import { useMemo, useState } from "react";
 import { ContactResults } from "./ContactResults";
 import { useAuth, usePresence } from "@/entities/auth";
+import { useContacts } from "@/entities/connection";
 
 export function ContactList({
   messageButton: MessageButton,

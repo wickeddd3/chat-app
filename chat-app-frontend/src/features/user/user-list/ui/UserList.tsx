@@ -2,10 +2,10 @@ import { SearchField } from "@/shared/ui/SearchField";
 import { useUsers } from "../model/useUsers";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
-import { UserListItem } from "./UserListItem";
 import { useState } from "react";
 import { Virtuoso } from "react-virtuoso";
 import { useAuth } from "@/entities/auth";
+import { UserListItem } from "@/entities/user";
 
 export function UserList({
   messageButton: MessageButton,

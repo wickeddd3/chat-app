@@ -1,9 +1,8 @@
 import { Virtuoso } from "react-virtuoso";
-import { NotificationItem } from "./NotificationItem";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { LoaderCircle } from "lucide-react";
-import type { Notification } from "@/entities/notification";
+import { NotificationItem, type Notification } from "@/entities/notification";
 
 export function NotificationResults({
   isLoading = false,

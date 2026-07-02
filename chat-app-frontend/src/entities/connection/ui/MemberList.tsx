@@ -1,4 +1,4 @@
-import type { ConnectionUser } from "@/entities/connection";
+import type { ConnectionUser } from "../model/connection.types";
 import { Virtuoso } from "react-virtuoso";
 import { LoaderCircle } from "lucide-react";
 import { MemberListItem } from "./MemberListItem";

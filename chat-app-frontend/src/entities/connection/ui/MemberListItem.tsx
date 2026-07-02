@@ -1,4 +1,4 @@
-import type { ConnectionUser } from "@/entities/connection";
+import type { ConnectionUser } from "../model/connection.types";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 
 export function MemberListItem({
