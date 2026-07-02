@@ -11,14 +11,14 @@ import { ContactResults } from "./ContactResults";
 import { useAuth, usePresence } from "@/entities/auth";
 import { useContacts } from "@/entities/connection";
 
-export function ContactList({
-  messageButton: MessageButton,
-}: {
+export interface ContactListProps {
   messageButton: React.ComponentType<{
     text: string;
     targetUserId: string;
   }>;
-}) {
+}
+
+export function ContactList({ messageButton: MessageButton }: ContactListProps) {
   const [query, setQuery] = useState("");
 
   const { authUser } = useAuth();

@@ -7,10 +7,7 @@ import { dateToNow } from "@/shared/utils/date-format";
 import { useAuth } from "@/entities/auth";
 import { UserListItem } from "@/entities/user";
 
-export function ReceivedRequests({
-  acceptButton: AcceptButton,
-  declineButton: DeclineButton,
-}: {
+export interface ReceivedRequestsProps {
   acceptButton: React.ComponentType<{
     text: string;
     connectionRequestId: string;
@@ -20,7 +17,12 @@ export function ReceivedRequests({
     connectionRequestId: string;
     connectionRequestUserId: string;
   }>;
-}) {
+}
+
+export function ReceivedRequests({
+  acceptButton: AcceptButton,
+  declineButton: DeclineButton,
+}: ReceivedRequestsProps) {
   const { authUser } = useAuth();
   const {
     receivedRequests,

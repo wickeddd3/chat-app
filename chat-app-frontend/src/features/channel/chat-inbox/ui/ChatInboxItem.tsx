@@ -6,6 +6,10 @@ import { cn } from "@/shared/lib/utils";
 import { useMarkAsRead } from "../model/useMarkAsRead";
 import type { InboxChannel } from "@/entities/channel";
 
+export interface ChatInboxItemProps {
+  inboxItem: InboxChannel;
+}
+
 export function ChatInboxItem({
   inboxItem: {
     id,
@@ -15,9 +19,7 @@ export function ChatInboxItem({
     online,
     unreadCount = 0,
   },
-}: {
-  inboxItem: InboxChannel;
-}) {
+}: ChatInboxItemProps) {
   const { channelId } = useParams();
   const isActive = channelId === id;
 

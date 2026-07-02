@@ -7,13 +7,7 @@ import { Virtuoso } from "react-virtuoso";
 import { useAuth } from "@/entities/auth";
 import { UserListItem } from "@/entities/user";
 
-export function UserList({
-  messageButton: MessageButton,
-  sendButton: SendButton,
-  cancelButton: CancelButton,
-  declineButton: DeclineButton,
-  acceptButton: AcceptButton,
-}: {
+export interface UserListProps {
   messageButton: React.ComponentType<{
     text: string;
     targetUserId: string;
@@ -36,7 +30,15 @@ export function UserList({
     text: string;
     connectionRequestId: string;
   }>;
-}) {
+}
+
+export function UserList({
+  messageButton: MessageButton,
+  sendButton: SendButton,
+  cancelButton: CancelButton,
+  declineButton: DeclineButton,
+  acceptButton: AcceptButton,
+}: UserListProps) {
   const [query, setQuery] = useState("");
 
   const { authUser } = useAuth();

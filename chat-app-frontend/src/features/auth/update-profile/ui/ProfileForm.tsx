@@ -5,13 +5,12 @@ import { ProfileFormSchema, type ProfileFormSchemaType } from "../model/schema";
 import { useProfile } from "../model/useProfile";
 import { useEffect } from "react";
 
-export function ProfileForm({
-  name,
-  username,
-}: {
+export interface ProfileFormProps {
   name: string;
   username: string;
-}) {
+}
+
+export function ProfileForm({ name, username }: ProfileFormProps) {
   const form = useForm<ProfileFormSchemaType>({
     resolver: zodResolver(ProfileFormSchema),
     defaultValues: {

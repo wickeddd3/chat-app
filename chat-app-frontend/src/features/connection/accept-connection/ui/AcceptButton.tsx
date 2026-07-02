@@ -2,13 +2,12 @@ import { UserRoundCheckIcon } from "lucide-react";
 import { useAcceptConnection } from "../model/useAcceptConnection";
 import { useAuth } from "@/entities/auth";
 
-export function AcceptButton({
-  text,
-  connectionRequestId,
-}: {
+export interface AcceptButtonProps {
   text: string;
   connectionRequestId: string;
-}) {
+}
+
+export function AcceptButton({ text, connectionRequestId }: AcceptButtonProps) {
   const { authUser } = useAuth();
   const { acceptConnectionRequest } = useAcceptConnection(authUser?.id);
 

@@ -1,13 +1,12 @@
 import type { ChannelMember as ChannelMemberType } from "../model/channel.types";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 
-export function ChannelMember({
-  member,
-  online = false,
-}: {
+export interface ChannelMemberProps {
   member: ChannelMemberType;
   online?: boolean;
-}) {
+}
+
+export function ChannelMember({ member, online = false }: ChannelMemberProps) {
   return (
     <div
       key={member.id}

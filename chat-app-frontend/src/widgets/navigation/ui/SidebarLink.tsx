@@ -8,15 +8,17 @@ import { Link } from "react-router";
 import type { NavItem } from "../model/nav.types";
 import { Badge } from "@/shared/ui/shadcn/badge";
 
+export interface SidebarLinkProps {
+  nav: NavItem;
+  isActive: boolean;
+  badgeCount: number;
+}
+
 export function SidebarLink({
   nav: { title, url, icon: Icon },
   isActive,
   badgeCount,
-}: {
-  nav: NavItem;
-  isActive: boolean;
-  badgeCount: number;
-}) {
+}: SidebarLinkProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>

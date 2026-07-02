@@ -1,19 +1,21 @@
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import type { ReactNode } from "react";
 
+export interface UserListItemProps {
+  user: { name: string; username: string; image?: string | null };
+  isOnline?: boolean;
+  isNew?: boolean;
+  date?: string;
+  optionSlot?: ReactNode;
+}
+
 export function UserListItem({
   user: { name, username, image },
   isOnline,
   isNew = false,
   date,
   optionSlot,
-}: {
-  user: { name: string; username: string; image?: string | null };
-  isOnline?: boolean;
-  isNew?: boolean;
-  date?: string;
-  optionSlot?: ReactNode;
-}) {
+}: UserListItemProps) {
   return (
     <article
       className={`

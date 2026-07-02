@@ -2,7 +2,7 @@ import { Component, type ReactNode } from "react";
 import { Button } from "@/shared/ui/shadcn/button";
 import { TriangleAlertIcon } from "lucide-react";
 
-interface ErrorBoundaryProps {
+export interface ErrorBoundaryProps {
   children: ReactNode;
 }
 

@@ -1,15 +1,17 @@
 import type { ConnectionUser } from "../model/connection.types";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 
+export interface MemberListItemProps {
+  user: ConnectionUser;
+  onToggleMember: (value: string) => void;
+  selectedIds: string[];
+}
+
 export function MemberListItem({
   user,
   onToggleMember,
   selectedIds,
-}: {
-  user: ConnectionUser;
-  onToggleMember: (value: string) => void;
-  selectedIds: string[];
-}) {
+}: MemberListItemProps) {
   return (
     <label
       key={user.id}

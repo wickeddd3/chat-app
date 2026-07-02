@@ -3,6 +3,15 @@ import { Virtuoso } from "react-virtuoso";
 import { LoaderCircle } from "lucide-react";
 import { MemberListItem } from "./MemberListItem";
 
+export interface MemberListProps {
+  users: ConnectionUser[];
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  fetchNextPage: () => void;
+  onToggleMember: (value: string) => void;
+  selectedIds: string[];
+}
+
 export function MemberList({
   users,
   hasNextPage,
@@ -10,14 +19,7 @@ export function MemberList({
   fetchNextPage,
   onToggleMember,
   selectedIds,
-}: {
-  users: ConnectionUser[];
-  hasNextPage: boolean;
-  isFetchingNextPage: boolean;
-  fetchNextPage: () => void;
-  onToggleMember: (value: string) => void;
-  selectedIds: string[];
-}) {
+}: MemberListProps) {
   return (
     <Virtuoso
       style={{

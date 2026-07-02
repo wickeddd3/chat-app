@@ -4,6 +4,16 @@ import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { LoaderCircle } from "lucide-react";
 import { NotificationItem, type Notification } from "@/entities/notification";
 
+export interface NotificationResultsProps {
+  isLoading?: boolean;
+  isEmpty?: boolean;
+  results: Notification[];
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  fetchNextPage: () => void;
+  onClick: (notificationIds: string[]) => void;
+}
+
 export function NotificationResults({
   isLoading = false,
   isEmpty = false,
@@ -12,15 +22,7 @@ export function NotificationResults({
   isFetchingNextPage,
   fetchNextPage,
   onClick,
-}: {
-  isLoading?: boolean;
-  isEmpty?: boolean;
-  results: Notification[];
-  hasNextPage: boolean;
-  isFetchingNextPage: boolean;
-  fetchNextPage: () => void;
-  onClick: (notificationIds: string[]) => void;
-}) {
+}: NotificationResultsProps) {
   return (
     <div className="flex-1 w-full overflow-hidden relative">
       {isLoading && <LoadingPlaceholder />}

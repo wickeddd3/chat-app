@@ -36,7 +36,11 @@ import {
   type DeclinedRequestPayload,
 } from "./request-declined.handler";
 
-export function SocketOrchestrator({ authId }: { authId: string | undefined }) {
+export interface SocketOrchestratorProps {
+  authId: string | undefined;
+}
+
+export function SocketOrchestrator({ authId }: SocketOrchestratorProps) {
   const queryClient = useQueryClient();
   const queryKeys = createQueryKeys(authId);
 

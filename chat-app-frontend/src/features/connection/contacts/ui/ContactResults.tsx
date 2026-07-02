@@ -6,15 +6,7 @@ import { isLessThanADayOld } from "@/shared/utils/date-format";
 import type { ConnectionUser } from "@/entities/connection";
 import { UserListItem } from "@/entities/user";
 
-export function ContactResults({
-  isLoading = false,
-  isEmpty = false,
-  results,
-  hasNextPage,
-  isFetchingNextPage,
-  fetchNextPage,
-  messageButton: MessageButton,
-}: {
+export interface ContactResultsProps {
   isLoading?: boolean;
   isEmpty?: boolean;
   results: (ConnectionUser & { online: boolean })[];
@@ -25,7 +17,17 @@ export function ContactResults({
     text: string;
     targetUserId: string;
   }>;
-}) {
+}
+
+export function ContactResults({
+  isLoading = false,
+  isEmpty = false,
+  results,
+  hasNextPage,
+  isFetchingNextPage,
+  fetchNextPage,
+  messageButton: MessageButton,
+}: ContactResultsProps) {
   return (
     <div className="flex-1 h-full overflow-y-auto min-h-0 scrollbar-thin">
       {isLoading && <LoadingPlaceholder />}

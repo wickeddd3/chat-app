@@ -10,15 +10,14 @@ import { ChannelMembers } from "./ChannelMembers";
 import { AttachmentFiles } from "./AttachmentFiles";
 import type { InboxChannel } from "../model/channel.types";
 
-export function ChannelDetails({
-  channel,
-  isOnline,
-}: {
+export interface ChannelDetailsProps {
   channel: InboxChannel | null;
   // Presence is injected from a higher layer so this entity stays decoupled
   // from the auth/presence entity (entities may only depend on shared).
   isOnline: (userId: string) => boolean;
-}) {
+}
+
+export function ChannelDetails({ channel, isOnline }: ChannelDetailsProps) {
   if (!channel) return;
 
   return (

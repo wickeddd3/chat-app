@@ -5,20 +5,19 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/shared/ui/shadcn/tabs";
-import { useAuthProfile } from "@/entities/auth";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { ProfileForm } from "@/features/auth/update-profile";
 import { EmailForm } from "@/features/auth/update-email";
 import { PasswordForm } from "@/features/auth/update-password";
 import { UploadAvatar } from "@/features/auth/upload-avatar";
-import { useAuth } from "@/entities/auth";
+import { useAuth, useAuthProfile, ProfilePageSkeleton } from "@/entities/auth";
 
 export default function ProfilePage() {
   const { authUser } = useAuth();
   const { authProfile, isLoading } = useAuthProfile(authUser?.id);
 
   if (isLoading) {
-    return <p>Loading profile...</p>;
+    return <ProfilePageSkeleton />;
   }
 
   return (

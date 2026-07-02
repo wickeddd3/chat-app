@@ -2,15 +2,17 @@ import type { ReactNode } from "react";
 import type { InboxChannel } from "../model/channel.types";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 
+export interface ChannelHeaderProps {
+  channel: InboxChannel | null;
+  isOnline?: boolean;
+  optionSlot?: ReactNode;
+}
+
 export function ChannelHeader({
   channel,
   isOnline = false,
   optionSlot,
-}: {
-  channel: InboxChannel | null;
-  isOnline?: boolean;
-  optionSlot?: ReactNode;
-}) {
+}: ChannelHeaderProps) {
   if (!channel) return;
 
   return (
