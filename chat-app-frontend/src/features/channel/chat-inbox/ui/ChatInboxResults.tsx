@@ -5,6 +5,15 @@ import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { Virtuoso } from "react-virtuoso";
 import { LoaderCircle } from "lucide-react";
 
+export interface ChatInboxResultsProps {
+  isLoading?: boolean;
+  isEmpty?: boolean;
+  results: InboxChannel[];
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  fetchNextPage: () => void;
+}
+
 export function ChatInboxResults({
   isLoading = false,
   isEmpty = false,
@@ -12,14 +21,7 @@ export function ChatInboxResults({
   hasNextPage,
   isFetchingNextPage,
   fetchNextPage,
-}: {
-  isLoading?: boolean;
-  isEmpty?: boolean;
-  results: InboxChannel[];
-  hasNextPage: boolean;
-  isFetchingNextPage: boolean;
-  fetchNextPage: () => void;
-}) {
+}: ChatInboxResultsProps) {
   return (
     <div className="flex-1 h-full overflow-y-auto min-h-0 scrollbar-thin">
       {isLoading && <LoadingPlaceholder />}

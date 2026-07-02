@@ -9,17 +9,19 @@ import { LoaderCircle } from "lucide-react";
 import { useMemo } from "react";
 import { useScrollToBottom } from "../model/useScrollToBottom";
 
+export interface MessagesProps {
+  messages: (Message | NewMessage)[];
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  fetchNextPage: () => void;
+}
+
 export function Messages({
   messages,
   hasNextPage,
   isFetchingNextPage,
   fetchNextPage,
-}: {
-  messages: (Message | NewMessage)[];
-  hasNextPage: boolean;
-  isFetchingNextPage: boolean;
-  fetchNextPage: () => void;
-}) {
+}: MessagesProps) {
   const { authUser } = useAuth();
   const { virtuosoRef, maxIndex } = useScrollToBottom({ messages });
 

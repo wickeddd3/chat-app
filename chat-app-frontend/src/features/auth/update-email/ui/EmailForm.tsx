@@ -5,7 +5,11 @@ import { EmailFormSchema, type EmailFormSchemaType } from "../model/schema";
 import { useEmail } from "../model/useEmail";
 import { useEffect } from "react";
 
-export function EmailForm({ email }: { email: string }) {
+export interface EmailFormProps {
+  email: string;
+}
+
+export function EmailForm({ email }: EmailFormProps) {
   const form = useForm<EmailFormSchemaType>({
     resolver: zodResolver(EmailFormSchema),
     defaultValues: {

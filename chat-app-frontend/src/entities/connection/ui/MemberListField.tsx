@@ -10,7 +10,7 @@ import { useState } from "react";
 import { useContacts } from "../model/useContacts";
 import { MemberList } from "./MemberList";
 
-interface MemberListFieldProps<T extends FieldValues> {
+export interface MemberListFieldProps<T extends FieldValues> {
   control: Control<T>;
   name: Path<T>;
   label: string;

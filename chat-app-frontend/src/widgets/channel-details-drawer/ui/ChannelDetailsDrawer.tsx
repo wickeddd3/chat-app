@@ -11,11 +11,13 @@ import { ChannelDetails, type InboxChannel } from "@/entities/channel";
 import { UpdateGroupChannel } from "@/features/channel/update-group-channel";
 import { usePresence } from "@/entities/auth";
 
+export interface ChannelDetailsDrawerProps {
+  channel: InboxChannel | null;
+}
+
 export function ChannelDetailsDrawer({
   channel,
-}: {
-  channel: InboxChannel | null;
-}) {
+}: ChannelDetailsDrawerProps) {
   const { isOnline } = usePresence();
 
   if (!channel) return;

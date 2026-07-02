@@ -3,13 +3,15 @@ import { iconType } from "../model/notification-icons";
 import { dateToNow } from "@/shared/utils/date-format";
 import { cn } from "@/shared/lib/utils";
 
+export interface NotificationItemProps {
+  notification: Notification;
+  onClick: () => void;
+}
+
 export function NotificationItem({
   notification,
   onClick,
-}: {
-  notification: Notification;
-  onClick: () => void;
-}) {
+}: NotificationItemProps) {
   const Icon = iconType[notification.type];
 
   return (

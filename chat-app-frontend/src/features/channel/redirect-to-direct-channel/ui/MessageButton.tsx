@@ -1,13 +1,12 @@
 import { MessageCircleIcon } from "lucide-react";
 import { useChatNavigation } from "../model/useChatNavigation";
 
-export function MessageButton({
-  text,
-  targetUserId,
-}: {
+export interface MessageButtonProps {
   text: string;
   targetUserId: string;
-}) {
+}
+
+export function MessageButton({ text, targetUserId }: MessageButtonProps) {
   const { navigateToChannel } = useChatNavigation();
 
   return (

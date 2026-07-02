@@ -13,7 +13,7 @@ import {
 import { Input } from "@/shared/ui/shadcn/input";
 import { cn } from "@/shared/lib/utils";
 
-interface TextInputFieldProps<T extends FieldValues> {
+export interface TextInputFieldProps<T extends FieldValues> {
   control: Control<T>;
   name: Path<T>; // Ensures the name matches a key in the form schema
   id: string;

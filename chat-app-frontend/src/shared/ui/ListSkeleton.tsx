@@ -1,6 +1,10 @@
 import { Skeleton } from "@/shared/ui/shadcn/skeleton";
 
-export function ListSkeleton({ count = 8 }: { count?: number }) {
+export interface ListSkeletonProps {
+  count?: number;
+}
+
+export function ListSkeleton({ count = 8 }: ListSkeletonProps) {
   return (
     <div role="status" aria-label="Loading" className="w-full">
       {Array.from({ length: count }).map((_, index) => (

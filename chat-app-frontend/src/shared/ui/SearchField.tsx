@@ -7,17 +7,19 @@ import {
 import { SearchIcon } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
+export interface SearchFieldProps {
+  value: string;
+  onChange: (value: string) => void;
+  className?: string;
+  ariaLabel?: string;
+}
+
 export function SearchField({
   value,
   onChange = () => {},
   className = "",
   ariaLabel = "Search",
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  className?: string;
-  ariaLabel?: string;
-}) {
+}: SearchFieldProps) {
   return (
     <Field className={cn("", className)}>
       <InputGroup className="rounded-full">

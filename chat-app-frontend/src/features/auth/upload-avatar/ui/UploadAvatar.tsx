@@ -13,7 +13,11 @@ import { useUploadAvatar } from "../model/useUploadAvatar";
 import { Spinner } from "@/shared/ui/shadcn/spinner";
 import { useState } from "react";
 
-export function UploadAvatar({ userId }: { userId: string }) {
+export interface UploadAvatarProps {
+  userId: string;
+}
+
+export function UploadAvatar({ userId }: UploadAvatarProps) {
   const [open, setOpen] = useState(false);
 
   const { previewUrl, isUploading, handleImportAvatar, handleUploadAvatar } =

@@ -14,13 +14,12 @@ import type { InboxChannel } from "@/entities/channel";
 import { useCallback, useEffect } from "react";
 import { useAuth } from "@/entities/auth";
 
-export function GroupChannelForm({
-  channel,
-  onSuccess,
-}: {
+export interface GroupChannelFormProps {
   channel: InboxChannel;
   onSuccess?: () => void;
-}) {
+}
+
+export function GroupChannelForm({ channel, onSuccess }: GroupChannelFormProps) {
   const { authUser } = useAuth();
 
   const form = useForm<GroupChannelFormSchemaType>({

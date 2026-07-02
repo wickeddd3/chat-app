@@ -1,17 +1,19 @@
 import { cn } from "@/shared/lib/utils";
 import { Avatar, AvatarBadge, AvatarImage } from "@/shared/ui/shadcn/avatar";
 
+export interface ProfileAvatarProps {
+  imageSrc: string;
+  size?: "sm" | "default" | "lg" | undefined;
+  isOnline?: boolean;
+  badge?: boolean;
+}
+
 export function ProfileAvatar({
   imageSrc,
   size = "lg",
   isOnline = false,
   badge = false,
-}: {
-  imageSrc: string;
-  size?: "sm" | "default" | "lg" | undefined;
-  isOnline?: boolean;
-  badge?: boolean;
-}) {
+}: ProfileAvatarProps) {
   return (
     <Avatar size={size}>
       <AvatarImage src={imageSrc || "/default-avatar.jpg"} alt="" />

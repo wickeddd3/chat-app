@@ -10,11 +10,11 @@ import { NotificationResults } from "./NotificationResults";
 import { useMemo } from "react";
 import { useAuth } from "@/entities/auth";
 
-export function NotificationList({
-  onClick,
-}: {
+export interface NotificationListProps {
   onClick: (notificationIds: string[]) => void;
-}) {
+}
+
+export function NotificationList({ onClick }: NotificationListProps) {
   const { authUser } = useAuth();
   const {
     notifications,

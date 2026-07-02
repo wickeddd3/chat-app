@@ -12,7 +12,11 @@ import { GroupChannelForm } from "./GroupChannelForm";
 import { useState } from "react";
 import type { InboxChannel } from "@/entities/channel";
 
-export function UpdateGroupChannel({ channel }: { channel: InboxChannel }) {
+export interface UpdateGroupChannelProps {
+  channel: InboxChannel;
+}
+
+export function UpdateGroupChannel({ channel }: UpdateGroupChannelProps) {
   const [open, setOpen] = useState(false);
 
   return (

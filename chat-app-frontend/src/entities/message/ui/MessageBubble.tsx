@@ -3,13 +3,15 @@ import { dateToNow } from "@/shared/utils/date-format";
 import { CheckCheck } from "lucide-react";
 import type { Message, NewMessage } from "../model/message.types";
 
+export interface MessageBubbleProps {
+  message: Message | NewMessage;
+  isAuthorsMessage: boolean;
+}
+
 export function MessageBubble({
   message,
   isAuthorsMessage,
-}: {
-  message: Message | NewMessage;
-  isAuthorsMessage: boolean;
-}) {
+}: MessageBubbleProps) {
   const {
     content,
     createdAt,

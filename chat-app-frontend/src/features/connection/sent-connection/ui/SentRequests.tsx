@@ -7,15 +7,17 @@ import { dateToNow } from "@/shared/utils/date-format";
 import { useAuth } from "@/entities/auth";
 import { UserListItem } from "@/entities/user";
 
-export function SentRequests({
-  cancelButton: CancelButton,
-}: {
+export interface SentRequestsProps {
   cancelButton: React.ComponentType<{
     text: string;
     connectionRequestId: string;
     connectionRequestUserId: string;
   }>;
-}) {
+}
+
+export function SentRequests({
+  cancelButton: CancelButton,
+}: SentRequestsProps) {
   const { authUser } = useAuth();
   const {
     sentRequests,

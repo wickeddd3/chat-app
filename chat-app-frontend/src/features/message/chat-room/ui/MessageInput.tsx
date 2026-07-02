@@ -1,7 +1,11 @@
 import { SendIcon } from "lucide-react";
 import { useSendMessage } from "../model/useSendMessage";
 
-export function MessageInput({ channelId }: { channelId: string }) {
+export interface MessageInputProps {
+  channelId: string;
+}
+
+export function MessageInput({ channelId }: MessageInputProps) {
   const { message, setMessage, sendMessage } = useSendMessage({ channelId });
 
   return (

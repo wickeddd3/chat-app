@@ -3,13 +3,12 @@ import type { InboxChannel } from "@/entities/channel";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { useMemo } from "react";
 
-export function MessageHeader({
-  channel,
-  authId,
-}: {
+export interface MessageHeaderProps {
   channel: InboxChannel | null;
   authId: string;
-}) {
+}
+
+export function MessageHeader({ channel, authId }: MessageHeaderProps) {
   const { isOnline } = usePresence();
 
   const online = useMemo(() => {

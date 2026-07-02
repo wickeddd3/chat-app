@@ -1,13 +1,12 @@
 import type { ChannelMember as ChannelMemberType } from "../model/channel.types";
 import { ChannelMember } from "./ChannelMember";
 
-export function ChannelMembers({
-  members,
-  isOnline,
-}: {
+export interface ChannelMembersProps {
   members: ChannelMemberType[];
   isOnline: (userId: string) => boolean;
-}) {
+}
+
+export function ChannelMembers({ members, isOnline }: ChannelMembersProps) {
   return (
     <div className="flex flex-col gap-2">
       {members.map((member) => (

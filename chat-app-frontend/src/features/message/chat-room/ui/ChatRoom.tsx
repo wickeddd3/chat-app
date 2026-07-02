@@ -6,7 +6,11 @@ import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { useAuth } from "@/entities/auth";
 
-export function ChatRoom({ channelId }: { channelId: string }) {
+export interface ChatRoomProps {
+  channelId: string;
+}
+
+export function ChatRoom({ channelId }: ChatRoomProps) {
   const { authUser } = useAuth();
   const {
     messages,

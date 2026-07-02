@@ -2,15 +2,17 @@ import { UserRoundXIcon } from "lucide-react";
 import { useDeclineConnection } from "../model/useDeclineConnection";
 import { useAuth } from "@/entities/auth";
 
+export interface DeclineButtonProps {
+  text: string;
+  connectionRequestId: string;
+  connectionRequestUserId: string;
+}
+
 export function DeclineButton({
   text,
   connectionRequestId,
   connectionRequestUserId,
-}: {
-  text: string;
-  connectionRequestId: string;
-  connectionRequestUserId: string;
-}) {
+}: DeclineButtonProps) {
   const { authUser } = useAuth();
   const { declineConnectionRequest } = useDeclineConnection(authUser?.id);
 
