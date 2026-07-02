@@ -3,7 +3,7 @@ import { CheckCheck } from "lucide-react";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { dateToNow } from "@/shared/utils/date-format";
 import { cn } from "@/shared/lib/utils";
-import { webSocketClient } from "@/shared/lib/socket-io.client";
+import { useMarkAsRead } from "../model/useMarkAsRead";
 import type { InboxChannel } from "@/entities/channel";
 
 export function ChatInboxItem({
@@ -21,15 +21,12 @@ export function ChatInboxItem({
   const { channelId } = useParams();
   const isActive = channelId === id;
 
+  const { markAsRead } = useMarkAsRead();
+
   const displayMessage =
     unreadCount > 1
       ? `${unreadCount} unread messages`
       : lastMessage?.content || "";
-
-  const handleMarkAsRead = () => {
-    // Mark messages as read
-    webSocketClient.emit("message:mark_as_read", { channelId });
-  };
 
   return (
     <Link
@@ -40,7 +37,7 @@ export function ChatInboxItem({
         overflow-hidden transition-colors`,
         isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "",
       )}
-      onClick={handleMarkAsRead}
+      onClick={() => markAsRead(channelId)}
     >
       <div className="shrink-0">
         <ProfileAvatar imageSrc={displayImage} isOnline={online} badge={true} />
