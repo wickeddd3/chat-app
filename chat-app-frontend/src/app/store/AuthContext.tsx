@@ -3,6 +3,7 @@ import {
   useContext,
   useState,
   useEffect,
+  useMemo,
   type ReactNode,
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
@@ -44,17 +45,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  return (
-    <AuthContext.Provider
-      value={{
-        session,
-        authUser,
-        authUserLoading,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({ session, authUser, authUserLoading }),
+    [session, authUser, authUserLoading],
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
