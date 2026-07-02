@@ -2,6 +2,8 @@ export type { AuthUser } from "./model/auth.types";
 
 export { useAuthProfile } from "./model/useAuthProfile";
 
+export { ProfilePageSkeleton } from "./ui/ProfilePageSkeleton";
+
 export { AuthProvider } from "./model/AuthProvider";
 export { useAuth } from "./model/useAuth";
 
