@@ -100,7 +100,7 @@ export function onSuccess(
       currentUsers[userIndex] = {
         ...currentUsers[userIndex],
         connectionStatus: "STRANGER",
-        connectionId: connectionRequestId,
+        connectionId: null,
       };
 
       return currentUsers;

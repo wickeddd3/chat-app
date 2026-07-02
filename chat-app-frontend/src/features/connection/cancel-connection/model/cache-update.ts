@@ -83,7 +83,6 @@ export function onSuccess(
     position: "bottom-right",
   });
 
-  const connectionRequestId: string = variables.connectionRequestId;
   const connectionRequestUserId: string = variables.connectionRequestUserId;
 
   // Update users list to update user connectionStatus
@@ -100,7 +99,7 @@ export function onSuccess(
       currentUsers[userIndex] = {
         ...currentUsers[userIndex],
         connectionStatus: "STRANGER",
-        connectionId: connectionRequestId,
+        connectionId: null,
       };
 
       return currentUsers;
