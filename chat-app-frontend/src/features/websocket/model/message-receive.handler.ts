@@ -28,6 +28,7 @@ export const handleIncomingMessage = (
       if (!oldData) {
         // Fetch fresh inbox list if inbox cache doesn't exist
         queryClient.invalidateQueries({ queryKey: queryKeys.inbox.list("") });
+        return oldData;
       }
 
       const updatedPages = [...oldData.pages];
