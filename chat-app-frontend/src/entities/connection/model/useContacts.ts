@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getContactsApi } from "../api/connections.api";
-import type { ConnectionUser, PaginatedContacts } from "@/entities/connection";
+import type { ConnectionUser, PaginatedContacts } from "./connection.types";
 import { useEffect, useMemo, useState } from "react";
 import { debounce } from "@/shared/utils/debounce";
 import { createQueryKeys } from "@/shared/config/react-query-keys";

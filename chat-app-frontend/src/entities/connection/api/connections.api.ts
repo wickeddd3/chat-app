@@ -1,4 +1,4 @@
-import type { ConnectionUser, PaginatedContacts } from "@/entities/connection";
+import type { ConnectionUser, PaginatedContacts } from "../model/connection.types";
 import apiRequest from "@/shared/lib/axios.client";
 import type { ApiResponse } from "@/shared/types/api-response.type";
 import { toQueryParams, type QueryParams } from "@/shared/utils/query-params";
