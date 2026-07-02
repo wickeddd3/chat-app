@@ -1,12 +1,13 @@
-import { usePresence } from "@/entities/auth";
-import type { ChannelMember as ChannelMemberType } from "@/entities/channel";
+import type { ChannelMember as ChannelMemberType } from "../model/channel.types";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 
-export function ChannelMember({ member }: { member: ChannelMemberType }) {
-  const { isOnline } = usePresence();
-
-  const online = isOnline(member.user.id);
-
+export function ChannelMember({
+  member,
+  online = false,
+}: {
+  member: ChannelMemberType;
+  online?: boolean;
+}) {
   return (
     <div
       key={member.id}

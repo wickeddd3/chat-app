@@ -7,15 +7,17 @@ import {
   DrawerTrigger,
 } from "@/shared/ui/shadcn/drawer";
 import { InfoIcon } from "lucide-react";
-import type { InboxChannel } from "@/entities/channel";
-import { ChannelDetails } from "@/features/channel/channel-details";
+import { ChannelDetails, type InboxChannel } from "@/entities/channel";
 import { UpdateGroupChannel } from "@/features/channel/update-group-channel";
+import { usePresence } from "@/entities/auth";
 
 export function ChannelDetailsDrawer({
   channel,
 }: {
   channel: InboxChannel | null;
 }) {
+  const { isOnline } = usePresence();
+
   if (!channel) return;
 
   const isGroupChannel = channel.type === "GROUP";
@@ -40,7 +42,7 @@ export function ChannelDetailsDrawer({
             {isGroupChannel && <UpdateGroupChannel channel={channel} />}
           </DrawerDescription>
         </DrawerHeader>
-        <ChannelDetails channel={channel} />
+        <ChannelDetails channel={channel} isOnline={isOnline} />
       </DrawerContent>
     </Drawer>
   );
