@@ -28,19 +28,30 @@ export function SidebarLink({
           aria-label={badgeCount > 0 ? `${title}, ${badgeCount} unread` : title}
           aria-current={isActive ? "page" : undefined}
           className={cn(
-            "relative flex justify-center items-center text-gray-600 p-2 rounded-lg transition-colors duration-200 cursor-pointer",
-            isActive && "bg-gray-200 text-gray-900",
+            "relative flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-1.5 transition-all duration-200 cursor-pointer",
+            "md:size-11 md:gap-0 md:p-0",
+            isActive
+              ? "bg-blue-50 text-blue-600"
+              : "text-gray-500 hover:bg-muted hover:text-gray-900",
           )}
         >
-          <Icon />
-          {badgeCount > 0 && (
-            <Badge className="border-4 py-2.5 rounded-full border-white bg-red-500 text-gray-50 absolute top-0 inset-e-0 -mt-2 -me-3">
-              {badgeCount}
-            </Badge>
-          )}
+          <span className="relative">
+            <Icon className="size-5 md:size-6" />
+            {badgeCount > 0 && (
+              <Badge className="border-4 py-2.5 rounded-full border-white bg-red-500 text-gray-50 absolute top-0 inset-e-0 -mt-4 -me-7">
+                {badgeCount}
+              </Badge>
+            )}
+          </span>
+
+          {/* Mobile-only label under the icon; desktop uses the tooltip */}
+          <span className="text-[10px] font-medium leading-none whitespace-nowrap md:hidden">
+            {title}
+          </span>
         </Link>
       </TooltipTrigger>
-      <TooltipContent side="right">
+      {/* Tooltip is desktop-only; the mobile bar shows the title under the icon */}
+      <TooltipContent side="right" className="hidden md:block">
         <span>{title}</span>
       </TooltipContent>
     </Tooltip>
