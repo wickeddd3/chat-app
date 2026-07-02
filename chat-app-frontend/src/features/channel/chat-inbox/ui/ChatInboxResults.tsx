@@ -3,7 +3,7 @@ import { ChatInboxItem } from "./ChatInboxItem";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { Virtuoso } from "react-virtuoso";
-import { LoaderCircle } from "lucide-react";
+import { FaCircleNotch } from "react-icons/fa6";
 
 export interface ChatInboxResultsProps {
   isLoading?: boolean;
@@ -46,7 +46,7 @@ export function ChatInboxResults({
             Footer: () =>
               isFetchingNextPage ? (
                 <div className="py-4 flex justify-center">
-                  <LoaderCircle
+                  <FaCircleNotch
                     size={20}
                     className="text-blue-500 animate-spin"
                   />

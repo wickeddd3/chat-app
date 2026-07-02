@@ -1,4 +1,4 @@
-import { ChevronLeftIcon } from "lucide-react";
+import { FaChevronLeft } from "react-icons/fa6";
 import { useNavigate } from "react-router";
 
 export function BackButton() {
@@ -12,7 +12,7 @@ export function BackButton() {
       role="button"
       title="Back to inbox"
     >
-      <ChevronLeftIcon className="h-6 w-6 text-muted-foreground" />
+      <FaChevronLeft className="h-4 w-4 text-muted-foreground" />
     </button>
   );
 }

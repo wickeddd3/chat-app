@@ -1,4 +1,4 @@
-import { SendIcon } from "lucide-react";
+import { FaPaperPlane } from "react-icons/fa6";
 import { useSendMessage } from "../model/useSendMessage";
 
 export interface MessageInputProps {
@@ -29,7 +29,7 @@ export function MessageInput({ channelId }: MessageInputProps) {
         aria-label="Send message"
         className="text-blue-500 px-4 rounded-full cursor-pointer hover:text-blue-700"
       >
-        <SendIcon />
+        <FaPaperPlane className="size-6" />
       </button>
     </form>
   );

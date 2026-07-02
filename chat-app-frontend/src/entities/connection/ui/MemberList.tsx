@@ -1,6 +1,6 @@
 import type { ConnectionUser } from "../model/connection.types";
 import { Virtuoso } from "react-virtuoso";
-import { LoaderCircle } from "lucide-react";
+import { FaCircleNotch } from "react-icons/fa6";
 import { MemberListItem } from "./MemberListItem";
 
 export interface MemberListProps {
@@ -45,7 +45,7 @@ export function MemberList({
         Footer: () =>
           isFetchingNextPage ? (
             <div className="py-4 flex justify-center">
-              <LoaderCircle size={20} className="text-blue-500 animate-spin" />
+              <FaCircleNotch size={20} className="text-blue-500 animate-spin" />
             </div>
           ) : null,
       }}

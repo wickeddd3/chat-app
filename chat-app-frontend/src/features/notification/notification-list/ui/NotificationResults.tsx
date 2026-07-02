@@ -1,7 +1,7 @@
 import { Virtuoso } from "react-virtuoso";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
-import { LoaderCircle } from "lucide-react";
+import { FaCircleNotch } from "react-icons/fa6";
 import { NotificationItem, type Notification } from "@/entities/notification";
 
 export interface NotificationResultsProps {
@@ -48,7 +48,7 @@ export function NotificationResults({
             Footer: () =>
               isFetchingNextPage ? (
                 <div className="py-4 flex justify-center w-full">
-                  <LoaderCircle
+                  <FaCircleNotch
                     size={20}
                     className="text-primary animate-spin"
                   />

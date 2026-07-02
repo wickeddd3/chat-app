@@ -1,4 +1,4 @@
-import { UserRoundMinusIcon } from "lucide-react";
+import { FaUserMinus } from "react-icons/fa6";
 import { useCancelConnection } from "../model/useCancelConnection";
 import { useAuth } from "@/entities/auth";
 
@@ -29,7 +29,7 @@ export function CancelButton({
       role="button"
       title="Cancel connection request"
     >
-      <UserRoundMinusIcon size={18} className="text-gray-50" />
+      <FaUserMinus size={18} className="text-gray-50" />
       <span className="text-xs font-medium text-gray-50 hidden sm:inline-block">
         {text}
       </span>

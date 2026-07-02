@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shared/ui/shadcn/dialog";
-import { CameraIcon, CloudUploadIcon } from "lucide-react";
+import { FaCamera, FaCloudArrowUp } from "react-icons/fa6";
 import { useUploadAvatar } from "../model/useUploadAvatar";
 import { Spinner } from "@/shared/ui/shadcn/spinner";
 import { useState } from "react";
@@ -33,7 +33,7 @@ export function UploadAvatar({ userId }: UploadAvatarProps) {
             className="cursor-pointer rounded-lg px-4 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600"
             onClick={() => setOpen(true)}
           >
-            <CameraIcon size={16} />
+            <FaCamera size={16} />
             <span className="text-md font-semibold hidden md:inline-block">
               Change avatar
             </span>
@@ -59,7 +59,7 @@ export function UploadAvatar({ userId }: UploadAvatarProps) {
               className="w-full h-fit flex flex-col items-center justify-center bg-gray-50 border border-dashed border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100"
             >
               <div className="flex flex-col items-center justify-center text-body pt-5 pb-6">
-                <CloudUploadIcon size={50} className="text-gray-500" />
+                <FaCloudArrowUp size={50} className="text-gray-500" />
                 <p className="mb-2 text-sm font-semibold">Click to import</p>
               </div>
               <input

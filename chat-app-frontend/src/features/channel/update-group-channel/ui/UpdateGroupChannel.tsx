@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shared/ui/shadcn/dialog";
-import { SquarePenIcon } from "lucide-react";
+import { FaPenToSquare } from "react-icons/fa6";
 import { GroupChannelForm } from "./GroupChannelForm";
 import { useState } from "react";
 import type { InboxChannel } from "@/entities/channel";
@@ -28,7 +28,7 @@ export function UpdateGroupChannel({ channel }: UpdateGroupChannelProps) {
           className="rounded-full cursor-pointer"
           onClick={() => setOpen(true)}
         >
-          <SquarePenIcon />
+          <FaPenToSquare />
         </Button>
       </DialogTrigger>
       <DialogContent
