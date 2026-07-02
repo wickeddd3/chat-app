@@ -1,4 +1,4 @@
-import { usePresence } from "@/app/store/PresenceContext";
+import { usePresence } from "@/entities/auth";
 import type { ChannelMember as ChannelMemberType } from "@/entities/channel";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 

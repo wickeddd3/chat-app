@@ -1,4 +1,4 @@
-import { useAuth } from "../store/AuthContext";
+import { useAuth } from "@/entities/auth";
 import { Navigate, Outlet } from "react-router";
 
 export const GuestGuard = () => {

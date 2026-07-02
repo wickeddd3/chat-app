@@ -1,6 +1,6 @@
 import { UserRoundPlusIcon } from "lucide-react";
 import { useSendConnection } from "../model/useSendConnection";
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuth } from "@/entities/auth";
 
 export function SendButton({
   text,

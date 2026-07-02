@@ -8,8 +8,7 @@ import { Badge } from "@/shared/ui/shadcn/badge";
 import { SearchField } from "@/shared/ui/SearchField";
 import { ChatInboxResults } from "./ChatInboxResults";
 import { useMemo, useState } from "react";
-import { usePresence } from "@/app/store/PresenceContext";
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuth, usePresence } from "@/entities/auth";
 import { useInbox } from "../model/useInbox";
 
 export function ChatInbox() {

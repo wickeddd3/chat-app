@@ -4,7 +4,7 @@ import { Messages } from "./Messages";
 import { MessageInput } from "./MessageInput";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuth } from "@/entities/auth";
 
 export function ChatRoom({ channelId }: { channelId: string }) {
   const { authUser } = useAuth();

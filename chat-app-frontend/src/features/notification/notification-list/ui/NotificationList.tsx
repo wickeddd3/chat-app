@@ -8,7 +8,7 @@ import { Badge } from "@/shared/ui/shadcn/badge";
 import { useNotifications } from "../model/useNotifications";
 import { NotificationResults } from "./NotificationResults";
 import { useMemo } from "react";
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuth } from "@/entities/auth";
 
 export function NotificationList({
   onClick,

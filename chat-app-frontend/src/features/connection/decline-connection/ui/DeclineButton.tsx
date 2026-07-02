@@ -1,6 +1,6 @@
 import { UserRoundXIcon } from "lucide-react";
 import { useDeclineConnection } from "../model/useDeclineConnection";
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuth } from "@/entities/auth";
 
 export function DeclineButton({
   text,

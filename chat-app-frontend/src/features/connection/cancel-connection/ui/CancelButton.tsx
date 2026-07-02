@@ -1,6 +1,6 @@
 import { UserRoundMinusIcon } from "lucide-react";
 import { useCancelConnection } from "../model/useCancelConnection";
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuth } from "@/entities/auth";
 
 export function CancelButton({
   text,

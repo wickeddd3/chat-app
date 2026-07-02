@@ -1,4 +1,4 @@
-import { usePresence } from "@/app/store/PresenceContext";
+import { usePresence } from "@/entities/auth";
 import type { InboxChannel } from "@/entities/channel";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { useMemo } from "react";

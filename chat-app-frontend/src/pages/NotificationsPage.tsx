@@ -1,6 +1,6 @@
 import { NotificationList } from "@/features/notification/notification-list";
 import { useReadNotification } from "@/features/notification/mark-as-read";
-import { useAuth } from "@/app/store/AuthContext";
+import { useAuth } from "@/entities/auth";
 
 export default function NotificationsPage() {
   const { authUser } = useAuth();
