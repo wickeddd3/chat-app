@@ -19,7 +19,7 @@ export function ChannelDetails({ channel }: { channel: InboxChannel | null }) {
         <Avatar className="w-24 h-24">
           <AvatarImage
             src={channel?.displayImage || "/default-avatar.jpg"}
-            alt="profile-avatar"
+            alt=""
           />
         </Avatar>
       </Card>

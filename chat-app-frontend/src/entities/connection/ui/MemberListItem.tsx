@@ -11,10 +11,9 @@ export function MemberListItem({
   selectedIds: string[];
 }) {
   return (
-    <div
+    <label
       key={user.id}
       className="w-full flex justify-between items-center px-4 py-3 cursor-pointer hover:bg-gray-50"
-      onClick={() => onToggleMember(user.id)}
     >
       <div className="flex-1 flex items-center gap-4">
         <ProfileAvatar imageSrc={user.image || ""} size="lg" />
@@ -27,12 +26,11 @@ export function MemberListItem({
         type="checkbox"
         // Use checked for controlled component
         checked={selectedIds.includes(user.id)}
-        // Stop propagation so clicking the checkbox doesn't trigger the div's onClick
-        onClick={(e) => e.stopPropagation()}
-        // Use onChange to keep the form state in sync
+        // Use onChange to keep the form state in sync; wrapping <label> names the
+        // checkbox by the row's text and makes the whole row keyboard-operable
         onChange={() => onToggleMember(user.id)}
         className="h-4 w-4 cursor-pointer accent-blue-500"
       />
-    </div>
+    </label>
   );
 }

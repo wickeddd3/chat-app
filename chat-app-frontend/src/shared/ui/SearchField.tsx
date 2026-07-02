@@ -11,10 +11,12 @@ export function SearchField({
   value,
   onChange = () => {},
   className = "",
+  ariaLabel = "Search",
 }: {
   value: string;
   onChange: (value: string) => void;
   className?: string;
+  ariaLabel?: string;
 }) {
   return (
     <Field className={cn("", className)}>
@@ -24,6 +26,7 @@ export function SearchField({
           onChange={(e) => onChange(e.target.value)}
           id="input-search-query"
           placeholder="Search"
+          aria-label={ariaLabel}
         />
         <InputGroupAddon align="inline-start">
           <SearchIcon />

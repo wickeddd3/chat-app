@@ -35,6 +35,7 @@ export function UserNav() {
         <Button
           variant="ghost"
           size="icon"
+          aria-label="Open account menu"
           className="rounded-full cursor-pointer"
         >
           <ProfileAvatar imageSrc={authProfile?.image || ""} size={"default"} />
@@ -54,7 +55,10 @@ export function UserNav() {
               <BellIcon />
               Notifications
               {unreadNotificationBadge > 0 && (
-                <Badge className="rounded-full border-white bg-red-500 text-gray-50">
+                <Badge
+                  className="rounded-full border-white bg-red-500 text-gray-50"
+                  aria-label={`${unreadNotificationBadge} unread notifications`}
+                >
                   {unreadNotificationBadge}
                 </Badge>
               )}

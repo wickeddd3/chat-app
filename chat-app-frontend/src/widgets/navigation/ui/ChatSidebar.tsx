@@ -40,7 +40,8 @@ export function ChatSidebar() {
         >
           <MessageCircleDashedIcon />
         </section>
-        <section
+        <nav
+          aria-label="Primary"
           className={`
             flex flex-row md:flex-col items-center gap-1
             md:gap-3 w-full justify-around md:justify-start
@@ -54,7 +55,7 @@ export function ChatSidebar() {
               badgeCount={unreadCounts[nav?.badgeName ?? ""] ?? 0}
             />
           ))}
-        </section>
+        </nav>
       </div>
       <div className="relative flex shrink-0 mr-4 md:mr-0">
         <UserNav />

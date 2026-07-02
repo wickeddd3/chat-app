@@ -31,7 +31,7 @@ export function UserListItem({
 
       <div className="flex-1 flex flex-col items-start min-w-0 gap-1">
         <div className="flex items-center gap-2 w-full min-w-0">
-          <h1 className="text-sm font-medium truncate flex-1">{name}</h1>
+          <p className="text-sm font-medium truncate flex-1">{name}</p>
           {isNew && (
             <span
               className={`
@@ -45,7 +45,7 @@ export function UserListItem({
         </div>
 
         <div className="flex items-center gap-1 min-w-0 w-full text-muted-foreground">
-          <h2 className="text-xs truncate">{`@${username}`}</h2>
+          <span className="text-xs truncate">{`@${username}`}</span>
           {date && (
             <span className="text-xs shrink-0 whitespace-nowrap">• {date}</span>
           )}
