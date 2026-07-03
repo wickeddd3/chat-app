@@ -61,14 +61,14 @@ export function MessageBubble({
           </span>
         </div>
 
-        <p className="text-sm leading-relaxed wrap-break-word whitespace-pre-wrap select-text">
+        <p className="text-xs leading-relaxed wrap-break-word whitespace-pre-wrap select-text md:text-sm">
           {content}
         </p>
 
         {isAuthorsMessage && (
           <div className="flex justify-end w-full mt-0.5 shrink-0">
             <FaCheckDouble
-              size={14}
+              size={12}
               className={isSending ? "opacity-40 animate-pulse" : "opacity-90"}
             />
           </div>
