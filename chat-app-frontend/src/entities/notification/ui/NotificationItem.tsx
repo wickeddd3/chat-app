@@ -27,8 +27,8 @@ export function NotificationItem({
       <Icon
         size={22}
         className={cn(
-          "text-blue-400 shrink-0",
-          notification.isRead ? "" : "text-blue-500",
+          "text-primary/70 shrink-0",
+          notification.isRead ? "" : "text-primary",
         )}
       />
       <div className="flex-1 flex justify-between items-center min-w-0 gap-2">

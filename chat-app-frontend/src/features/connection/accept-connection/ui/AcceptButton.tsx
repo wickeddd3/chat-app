@@ -14,7 +14,7 @@ export function AcceptButton({ text, connectionRequestId }: AcceptButtonProps) {
   return (
     <button
       onClick={() => acceptConnectionRequest(connectionRequestId)}
-      className="bg-blue-500  rounded-lg px-3 py-2 flex items-center justify-center gap-2 cursor-pointer hover:bg-blue-600"
+      className="bg-primary  rounded-lg px-3 py-2 flex items-center justify-center gap-2 cursor-pointer hover:bg-primary/90"
       aria-label="Accept connection request"
       role="button"
       title="Accept connection request"

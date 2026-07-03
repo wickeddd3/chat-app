@@ -5,7 +5,7 @@ export default function SignUpPage() {
   return (
     <div className="flex w-full max-w-md flex-col gap-6">
       <div className="flex items-center gap-2 self-center font-medium">
-        <FaCommentDots className="size-6 text-blue-500" />
+        <FaCommentDots className="size-6 text-primary" />
         Chikamo
       </div>
       <SignUpForm />

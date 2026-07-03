@@ -53,9 +53,9 @@ export function ThemeSelector() {
             <div
               className={cn(
                 "relative rounded-lg border-2 p-1 transition-colors",
-                "peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500/50",
+                "peer-focus-visible:ring-2 peer-focus-visible:ring-primary/50",
                 selected
-                  ? "border-blue-500"
+                  ? "border-primary"
                   : "border-transparent hover:border-border",
               )}
             >
@@ -74,7 +74,7 @@ export function ThemeSelector() {
                 )}
               </div>
               {selected && (
-                <FaCircleCheck className="absolute right-2 top-2 size-4 text-blue-500" />
+                <FaCircleCheck className="absolute right-2 top-2 size-4 text-primary" />
               )}
             </div>
             <div className="mt-2 text-center text-sm font-medium">{label}</div>

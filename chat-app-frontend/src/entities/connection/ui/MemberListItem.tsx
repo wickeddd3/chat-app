@@ -31,7 +31,7 @@ export function MemberListItem({
         // Use onChange to keep the form state in sync; wrapping <label> names the
         // checkbox by the row's text and makes the whole row keyboard-operable
         onChange={() => onToggleMember(user.id)}
-        className="h-4 w-4 cursor-pointer accent-blue-500"
+        className="h-4 w-4 cursor-pointer accent-primary"
       />
     </label>
   );

@@ -37,7 +37,7 @@ export function UserListItem({
           {isNew && (
             <span
               className={`
-              bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300 text-[10px] font-medium px-1.5
+              bg-primary/10 text-primary text-[10px] font-medium px-1.5
                 py-0.5 rounded-sm shrink-0 whitespace-nowrap
               `}
             >

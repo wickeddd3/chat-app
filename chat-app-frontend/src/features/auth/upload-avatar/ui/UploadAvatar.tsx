@@ -30,7 +30,7 @@ export function UploadAvatar({ userId }: UploadAvatarProps) {
       <form id="avatar-form">
         <DialogTrigger asChild>
           <Button
-            className="cursor-pointer rounded-lg px-4 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600"
+            className="cursor-pointer rounded-lg px-4 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90"
             onClick={() => setOpen(true)}
           >
             <FaCamera size={16} />
@@ -75,7 +75,7 @@ export function UploadAvatar({ userId }: UploadAvatarProps) {
           <DialogFooter>
             <div className="w-full flex flex-col gap-2">
               <Button
-                className="w-full font-semibold bg-blue-500 hover:bg-blue-600 cursor-pointer"
+                className="w-full font-semibold bg-primary hover:bg-primary/90 cursor-pointer"
                 disabled={!previewUrl || isUploading}
                 onClick={() =>
                   handleUploadAvatar({ onSuccessUpload: () => setOpen(false) })

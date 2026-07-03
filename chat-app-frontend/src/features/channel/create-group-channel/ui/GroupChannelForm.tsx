@@ -59,7 +59,7 @@ export function GroupChannelForm({ onSuccess }: GroupChannelFormProps) {
       </FieldGroup>
       <Button
         type="submit"
-        className="w-full font-semibold bg-blue-500 hover:bg-blue-600 cursor-pointer"
+        className="w-full font-semibold bg-primary hover:bg-primary/90 cursor-pointer"
         disabled={isPending}
       >
         {isPending && <Spinner data-icon="inline-start" />}

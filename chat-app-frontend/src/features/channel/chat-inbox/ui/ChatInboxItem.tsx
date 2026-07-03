@@ -58,7 +58,7 @@ export function ChatInboxItem({
               </span>
               <FaCheckDouble
                 className={cn(
-                  unreadCount === 0 ? "text-blue-500" : "opacity-40",
+                  unreadCount === 0 ? "text-primary" : "opacity-40",
                 )}
                 size={15}
               />
@@ -80,7 +80,7 @@ export function ChatInboxItem({
 
           {unreadCount > 0 && (
             <span
-              className="shrink-0 text-xs text-blue-500 self-center leading-none"
+              className="shrink-0 text-xs text-primary self-center leading-none"
               aria-label="Unread indicator"
             >
               &#x25CF;
