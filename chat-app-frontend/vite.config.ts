@@ -47,6 +47,14 @@ export default defineConfig({
         "src/main.tsx",
         "src/vite-env.d.ts",
       ],
+      // Regression floors, set just below current coverage so the suite can't
+      // silently slip. Raise these as coverage grows.
+      thresholds: {
+        statements: 40,
+        branches: 48,
+        functions: 43,
+        lines: 40,
+      },
     },
   },
   build: {
