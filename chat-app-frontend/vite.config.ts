@@ -22,6 +22,14 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
     clearMocks: true,
+    // Dummy Supabase env so modules that build the client at import time
+    // (e.g. axios.client -> supabase.client) don't throw when tests run
+    // without a local .env (such as on CI). Tests mock network layers, so
+    // these values are never used to make real requests.
+    env: {
+      VITE_SUPABASE_URL: "http://localhost:54321",
+      VITE_SUPABASE_PUBLISHABLE_KEY: "test-publishable-key",
+    },
   },
   build: {
     rollupOptions: {
