@@ -41,7 +41,7 @@ export function EmailForm({ email }: EmailFormProps) {
           inputClassName="rounded-xl md:rounded-2xl py-5 md:py-7 px-3 md:px-4 text-sm placeholder:font-medium"
           labelClassName="text-md"
         />
-        <button className="bg-blue-500 rounded-xl p-3 text-white font-bold cursor-pointer mt-6 hover:bg-blue-600">
+        <button className="bg-primary rounded-xl p-3 text-white font-bold cursor-pointer mt-6 hover:bg-primary/90">
           Save Changes
         </button>
       </div>

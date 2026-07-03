@@ -35,8 +35,8 @@ export function ChatSidebar() {
         <section
           className={`
             hidden md:flex aspect-square size-12 items-center justify-center
-            rounded-2xl bg-linear-to-br from-blue-500 to-blue-600 text-gray-50
-            shadow-lg shadow-blue-500/30 shrink-0
+            rounded-2xl bg-linear-to-br from-primary to-primary text-gray-50
+            shadow-sm shadow-primary/30 shrink-0
           `}
         >
           <FaCommentDots className="size-6" />
@@ -61,7 +61,7 @@ export function ChatSidebar() {
       <div className="relative flex shrink-0 mr-4 md:mr-0">
         <UserNav />
         {unreadNotificationBadge > 0 && (
-          <Badge className="border-4 py-2.5 rounded-full border-white bg-red-500 text-gray-50 absolute top-0 inset-e-0 -mt-4 -me-4">
+          <Badge className="border-4 py-2.5 rounded-full border-sidebar bg-red-500 text-gray-50 absolute top-0 inset-e-0 -mt-4 -me-4">
             {unreadNotificationBadge}
           </Badge>
         )}

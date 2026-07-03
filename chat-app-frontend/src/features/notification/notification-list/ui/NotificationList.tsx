@@ -40,7 +40,7 @@ export function NotificationList({ onClick }: NotificationListProps) {
           className="px-4 cursor-pointer rounded-full"
         >
           Unread
-          <Badge className="border-4 py-2.5 rounded-full border-white bg-gray-200 text-gray-800 font-bold">
+          <Badge className="border-4 py-2.5 rounded-full border-background bg-muted text-foreground font-bold">
             {filteredByUnread.length}
           </Badge>
         </TabsTrigger>

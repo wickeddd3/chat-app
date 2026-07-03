@@ -91,7 +91,7 @@ export function SignInForm({
             <Field>
               <Button
                 type="submit"
-                className="font-semibold bg-blue-500 hover:bg-blue-600 cursor-pointer"
+                className="font-semibold bg-primary hover:bg-primary/90 cursor-pointer"
                 aria-label="Login account"
                 role="button"
                 title="Login account"

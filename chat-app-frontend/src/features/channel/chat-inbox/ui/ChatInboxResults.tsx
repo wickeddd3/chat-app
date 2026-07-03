@@ -48,7 +48,7 @@ export function ChatInboxResults({
                 <div className="py-4 flex justify-center">
                   <FaCircleNotch
                     size={20}
-                    className="text-blue-500 animate-spin"
+                    className="text-primary animate-spin"
                   />
                 </div>
               ) : null,

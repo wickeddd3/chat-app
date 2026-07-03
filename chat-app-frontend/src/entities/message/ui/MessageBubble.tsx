@@ -35,7 +35,7 @@ export function MessageBubble({
           flex flex-col gap-1.5 p-3 min-w-0 max-w-[85%] sm:max-w-[75%] md:max-w-[70%]
           ${
             isAuthorsMessage
-              ? "bg-blue-500 text-white rounded-l-lg rounded-br-lg"
+              ? "bg-primary text-white rounded-l-lg rounded-br-lg"
               : "bg-muted rounded-r-lg rounded-bl-lg text-foreground"
           }
         `}

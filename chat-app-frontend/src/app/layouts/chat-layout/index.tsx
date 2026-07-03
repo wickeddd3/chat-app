@@ -13,7 +13,7 @@ export function ChatLayout() {
     <div className="flex flex-col-reverse md:flex-row h-screen w-full overflow-hidden bg-background">
       <aside
         className={`
-          flex w-full h-16 border-t flex-col bg-muted/30 shrink-0
+          flex w-full h-16 border-t flex-col bg-sidebar shrink-0
           md:border-r md:border-t-0 md:h-full md:w-20
            ${isInsideChatRoom ? "hidden md:flex" : ""}
         `}
@@ -25,7 +25,7 @@ export function ChatLayout() {
         <Outlet />
       </main>
 
-      <Toaster theme="light" />
+      <Toaster />
 
       <SocketOrchestrator authId={authUser?.id} />
     </div>

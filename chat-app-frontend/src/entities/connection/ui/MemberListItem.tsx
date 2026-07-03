@@ -15,7 +15,7 @@ export function MemberListItem({
   return (
     <label
       key={user.id}
-      className="w-full flex justify-between items-center px-4 py-3 cursor-pointer hover:bg-gray-50"
+      className="w-full flex justify-between items-center px-4 py-3 cursor-pointer hover:bg-muted"
     >
       <div className="flex-1 flex items-center gap-4">
         <ProfileAvatar imageSrc={user.image || ""} size="lg" />
@@ -31,7 +31,7 @@ export function MemberListItem({
         // Use onChange to keep the form state in sync; wrapping <label> names the
         // checkbox by the row's text and makes the whole row keyboard-operable
         onChange={() => onToggleMember(user.id)}
-        className="h-4 w-4 cursor-pointer accent-blue-500"
+        className="h-4 w-4 cursor-pointer accent-primary"
       />
     </label>
   );

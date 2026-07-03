@@ -65,7 +65,7 @@ export function Messages({
         Header: () =>
           isFetchingNextPage ? (
             <div className="py-4 flex justify-center w-full">
-              <FaCircleNotch size={20} className="text-blue-500 animate-spin" />
+              <FaCircleNotch size={20} className="text-primary animate-spin" />
             </div>
           ) : null,
       }}

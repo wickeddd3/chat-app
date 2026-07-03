@@ -55,7 +55,7 @@ export function ContactList({ messageButton: MessageButton }: ContactListProps) 
         <TabsList className="w-fit px-4 bg-transparent shrink-0">
           <TabsTrigger value="all" className="px-4 cursor-pointer rounded-full">
             All
-            <Badge className="border-4 py-2.5 rounded-full border-white bg-gray-200 text-gray-800 font-bold">
+            <Badge className="border-4 py-2.5 rounded-full border-background bg-muted text-foreground font-bold">
               {allContacts.length}
             </Badge>
           </TabsTrigger>
@@ -64,7 +64,7 @@ export function ContactList({ messageButton: MessageButton }: ContactListProps) 
             className="px-4 cursor-pointer rounded-full"
           >
             Online
-            <Badge className="border-4 py-2.5 rounded-full border-white bg-emerald-500 text-gray-50 font-bold">
+            <Badge className="border-4 py-2.5 rounded-full border-background bg-emerald-500 text-gray-50 font-bold">
               {filteredByOnline.length}
             </Badge>
           </TabsTrigger>

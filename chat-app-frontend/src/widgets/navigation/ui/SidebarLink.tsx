@@ -31,14 +31,14 @@ export function SidebarLink({
             "relative flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-1.5 transition-all duration-200 cursor-pointer",
             "md:size-11 md:gap-0 md:p-0",
             isActive
-              ? "bg-blue-50 text-blue-600"
-              : "text-gray-500 hover:bg-muted hover:text-gray-900",
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground",
           )}
         >
           <span className="relative">
             <Icon className="size-5 md:size-6" />
             {badgeCount > 0 && (
-              <Badge className="border-4 py-2.5 rounded-full border-white bg-red-500 text-gray-50 absolute top-0 inset-e-0 -mt-4 -me-7">
+              <Badge className="border-4 py-2.5 rounded-full border-sidebar bg-red-500 text-gray-50 absolute top-0 inset-e-0 -mt-4 -me-7">
                 {badgeCount}
               </Badge>
             )}

@@ -30,7 +30,7 @@ export function UploadAvatar({ userId }: UploadAvatarProps) {
       <form id="avatar-form">
         <DialogTrigger asChild>
           <Button
-            className="cursor-pointer rounded-lg px-4 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600"
+            className="cursor-pointer rounded-lg px-4 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90"
             onClick={() => setOpen(true)}
           >
             <FaCamera size={16} />
@@ -56,10 +56,10 @@ export function UploadAvatar({ userId }: UploadAvatarProps) {
             )}
             <label
               htmlFor="dropzone-file"
-              className="w-full h-fit flex flex-col items-center justify-center bg-gray-50 border border-dashed border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100"
+              className="w-full h-fit flex flex-col items-center justify-center bg-muted border border-dashed border-border rounded-lg cursor-pointer hover:bg-accent"
             >
               <div className="flex flex-col items-center justify-center text-body pt-5 pb-6">
-                <FaCloudArrowUp size={50} className="text-gray-500" />
+                <FaCloudArrowUp size={50} className="text-muted-foreground" />
                 <p className="mb-2 text-sm font-semibold">Click to import</p>
               </div>
               <input
@@ -75,7 +75,7 @@ export function UploadAvatar({ userId }: UploadAvatarProps) {
           <DialogFooter>
             <div className="w-full flex flex-col gap-2">
               <Button
-                className="w-full font-semibold bg-blue-500 hover:bg-blue-600 cursor-pointer"
+                className="w-full font-semibold bg-primary hover:bg-primary/90 cursor-pointer"
                 disabled={!previewUrl || isUploading}
                 onClick={() =>
                   handleUploadAvatar({ onSuccessUpload: () => setOpen(false) })

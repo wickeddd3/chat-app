@@ -27,8 +27,8 @@ export function NotificationItem({
       <Icon
         size={22}
         className={cn(
-          "text-blue-400 shrink-0",
-          notification.isRead ? "" : "text-blue-500",
+          "text-primary/70 shrink-0",
+          notification.isRead ? "" : "text-primary",
         )}
       />
       <div className="flex-1 flex justify-between items-center min-w-0 gap-2">
@@ -36,7 +36,7 @@ export function NotificationItem({
           <p
             className={cn(
               "text-sm text-muted-foreground truncate w-full",
-              notification.isRead ? "" : "font-medium text-gray-900",
+              notification.isRead ? "" : "font-medium text-foreground",
             )}
           >
             {notification.title}
@@ -44,7 +44,7 @@ export function NotificationItem({
           <p
             className={cn(
               "text-xs text-muted-foreground truncate w-full",
-              notification.isRead ? "" : "font-medium text-gray-900",
+              notification.isRead ? "" : "font-medium text-foreground",
             )}
           >
             {notification.content}
