@@ -1,16 +1,24 @@
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { dateToNow } from "@/shared/utils/date-format";
 import { FaCheckDouble } from "react-icons/fa6";
+import { motion } from "framer-motion";
+import { messageBubbleVariants } from "@/shared/lib/motion";
 import type { Message, NewMessage } from "../model/message.types";
 
 export interface MessageBubbleProps {
   message: Message | NewMessage;
   isAuthorsMessage: boolean;
+  /** Play the entrance animation (only for messages that just arrived). */
+  animate?: boolean;
+  /** Fired once the entrance animation settles, so the owner can retire the flag. */
+  onAnimationComplete?: () => void;
 }
 
 export function MessageBubble({
   message,
   isAuthorsMessage,
+  animate = false,
+  onAnimationComplete,
 }: MessageBubbleProps) {
   const {
     content,
@@ -20,7 +28,11 @@ export function MessageBubble({
   } = message;
 
   return (
-    <div
+    <motion.div
+      variants={messageBubbleVariants}
+      initial={animate ? "initial" : false}
+      animate="animate"
+      onAnimationComplete={animate ? onAnimationComplete : undefined}
       className={`
         flex justify-start gap-2 px-4 py-1 w-full min-w-0
         ${isAuthorsMessage ? "flex-row-reverse pl-12" : "pr-12"}
@@ -49,19 +61,19 @@ export function MessageBubble({
           </span>
         </div>
 
-        <p className="text-sm leading-relaxed wrap-break-word whitespace-pre-wrap select-text">
+        <p className="text-xs leading-relaxed wrap-break-word whitespace-pre-wrap select-text md:text-sm">
           {content}
         </p>
 
         {isAuthorsMessage && (
           <div className="flex justify-end w-full mt-0.5 shrink-0">
             <FaCheckDouble
-              size={14}
+              size={12}
               className={isSending ? "opacity-40 animate-pulse" : "opacity-90"}
             />
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

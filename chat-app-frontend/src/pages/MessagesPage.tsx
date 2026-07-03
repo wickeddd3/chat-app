@@ -1,6 +1,8 @@
 import { ChatInbox } from "@/features/channel/chat-inbox";
 import { CreateGroupChannel } from "@/features/channel/create-group-channel";
-import { Outlet, useParams } from "react-router";
+import { useParams } from "react-router";
+import { AnimatedOutlet } from "@/shared/ui/AnimatedOutlet";
+import { fadeVariants } from "@/shared/lib/motion";
 
 export default function MessagesPage() {
   const { channelId } = useParams();
@@ -25,7 +27,10 @@ export default function MessagesPage() {
       <div
         className={`flex-1 ${!isInsideChatRoom ? "hidden md:flex" : "flex"}`}
       >
-        <Outlet />
+        <AnimatedOutlet
+          variants={fadeVariants}
+          className="flex flex-1 min-w-0"
+        />
       </div>
     </div>
   );

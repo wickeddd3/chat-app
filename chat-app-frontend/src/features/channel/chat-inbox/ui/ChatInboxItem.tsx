@@ -60,7 +60,7 @@ export function ChatInboxItem({
                 className={cn(
                   unreadCount === 0 ? "text-primary" : "opacity-40",
                 )}
-                size={15}
+                size={12}
               />
             </div>
           )}

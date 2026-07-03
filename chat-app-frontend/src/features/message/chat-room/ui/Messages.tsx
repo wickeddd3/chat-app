@@ -8,6 +8,10 @@ import { useAuth } from "@/entities/auth";
 import { FaCircleNotch } from "react-icons/fa6";
 import { useMemo } from "react";
 import { useScrollToBottom } from "../model/useScrollToBottom";
+import {
+  useNewMessageAnimation,
+  messageKey,
+} from "../model/useNewMessageAnimation";
 
 export interface MessagesProps {
   messages: (Message | NewMessage)[];
@@ -24,6 +28,7 @@ export function Messages({
 }: MessagesProps) {
   const { authUser } = useAuth();
   const { virtuosoRef, maxIndex } = useScrollToBottom({ messages });
+  const { isNew, markAnimated } = useNewMessageAnimation(messages);
 
   // Dynamically calculate the starting index based on data size.
   // As 'messages' grows, firstItemIndex gets smaller, meaning the older
@@ -54,13 +59,18 @@ export function Messages({
           fetchNextPage();
         }
       }}
-      itemContent={(_, message) => (
-        <MessageBubble
-          key={message.id}
-          message={message}
-          isAuthorsMessage={message.author.id === authUser?.id}
-        />
-      )}
+      itemContent={(_, message) => {
+        const key = messageKey(message);
+        return (
+          <MessageBubble
+            key={key}
+            message={message}
+            isAuthorsMessage={message.author.id === authUser?.id}
+            animate={isNew(key)}
+            onAnimationComplete={() => markAnimated(key)}
+          />
+        );
+      }}
       components={{
         Header: () =>
           isFetchingNextPage ? (
