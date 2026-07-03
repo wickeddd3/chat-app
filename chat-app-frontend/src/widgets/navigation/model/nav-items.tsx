@@ -1,5 +1,4 @@
 import {
-  FaHouse,
   FaComments,
   FaAddressBook,
   FaUsers,
@@ -8,11 +7,6 @@ import {
 import type { NavItem } from "./nav.types";
 
 export const navItems: NavItem[] = [
-  {
-    title: "Home",
-    url: "/",
-    icon: FaHouse,
-  },
   {
     title: "Messages",
     url: "/messages",
