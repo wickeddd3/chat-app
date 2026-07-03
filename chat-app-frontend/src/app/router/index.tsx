@@ -32,6 +32,13 @@ export const router = createBrowserRouter([
             },
           },
           {
+            path: "settings",
+            lazy: async () => {
+              const module = await import("@/pages/SettingsPage");
+              return { Component: module.default };
+            },
+          },
+          {
             path: "messages",
             lazy: async () => {
               const module = await import("@/pages/MessagesPage");
