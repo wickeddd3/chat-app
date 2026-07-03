@@ -59,9 +59,11 @@ export function UserNav() {
               )}
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem disabled>
-            <FaGear />
-            Settings
+          <DropdownMenuItem asChild className="cursor-pointer">
+            <Link to={"/settings"}>
+              <FaGear />
+              Settings
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
