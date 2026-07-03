@@ -61,7 +61,7 @@ export function ChatSidebar() {
       <div className="relative flex shrink-0 mr-4 md:mr-0">
         <UserNav />
         {unreadNotificationBadge > 0 && (
-          <Badge className="border-4 py-2.5 rounded-full border-background bg-red-500 text-gray-50 absolute top-0 inset-e-0 -mt-4 -me-4">
+          <Badge className="border-4 py-2.5 rounded-full border-sidebar bg-red-500 text-gray-50 absolute top-0 inset-e-0 -mt-4 -me-4">
             {unreadNotificationBadge}
           </Badge>
         )}

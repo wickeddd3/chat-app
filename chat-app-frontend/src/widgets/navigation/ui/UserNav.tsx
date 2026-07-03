@@ -51,7 +51,7 @@ export function UserNav() {
               Notifications
               {unreadNotificationBadge > 0 && (
                 <Badge
-                  className="rounded-full border-background bg-red-500 text-gray-50"
+                  className="rounded-full border-popover bg-red-500 text-gray-50"
                   aria-label={`${unreadNotificationBadge} unread notifications`}
                 >
                   {unreadNotificationBadge}
