@@ -30,6 +30,24 @@ export default defineConfig({
       VITE_SUPABASE_URL: "http://localhost:54321",
       VITE_SUPABASE_PUBLISHABLE_KEY: "test-publishable-key",
     },
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html", "lcov"],
+      reportsDirectory: "./coverage",
+      // With `include` set, every matched source file is measured (even
+      // untested ones), for an honest picture.
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: [
+        "src/**/*.test.{ts,tsx}",
+        "src/test/**",
+        "src/**/*.types.ts",
+        "src/**/*.docs.ts",
+        "src/**/index.ts", // barrels are re-export only
+        "src/shared/ui/shadcn/**", // vendored primitives
+        "src/main.tsx",
+        "src/vite-env.d.ts",
+      ],
+    },
   },
   build: {
     rollupOptions: {
