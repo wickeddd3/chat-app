@@ -57,6 +57,12 @@ export const staggerItem: Variants = {
   animate: { opacity: 1, y: 0, transition: baseTransition },
 };
 
+/** Incoming/outgoing chat bubble: fade + rise + a touch of scale. */
+export const messageBubbleVariants: Variants = {
+  initial: { opacity: 0, y: 12, scale: 0.98 },
+  animate: { opacity: 1, y: 0, scale: 1, transition: baseTransition },
+};
+
 /** Subtle press feedback for interactive elements. */
 export const tapScale = { scale: 0.94 } as const;
 export const hoverScale = { scale: 1.05 } as const;

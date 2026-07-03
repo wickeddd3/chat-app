@@ -7,6 +7,7 @@ export {
   fadeInUp,
   staggerContainer,
   staggerItem,
+  messageBubbleVariants,
   tapScale,
   hoverScale,
 } from "./transitions";
