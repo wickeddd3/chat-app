@@ -22,6 +22,40 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
     clearMocks: true,
+    // Dummy Supabase env so modules that build the client at import time
+    // (e.g. axios.client -> supabase.client) don't throw when tests run
+    // without a local .env (such as on CI). Tests mock network layers, so
+    // these values are never used to make real requests.
+    env: {
+      VITE_SUPABASE_URL: "http://localhost:54321",
+      VITE_SUPABASE_PUBLISHABLE_KEY: "test-publishable-key",
+    },
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html", "lcov"],
+      reportsDirectory: "./coverage",
+      // With `include` set, every matched source file is measured (even
+      // untested ones), for an honest picture.
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: [
+        "src/**/*.test.{ts,tsx}",
+        "src/test/**",
+        "src/**/*.types.ts",
+        "src/**/*.docs.ts",
+        "src/**/index.ts", // barrels are re-export only
+        "src/shared/ui/shadcn/**", // vendored primitives
+        "src/main.tsx",
+        "src/vite-env.d.ts",
+      ],
+      // Regression floors, set just below current coverage so the suite can't
+      // silently slip. Raise these as coverage grows.
+      thresholds: {
+        statements: 40,
+        branches: 48,
+        functions: 43,
+        lines: 40,
+      },
+    },
   },
   build: {
     rollupOptions: {
