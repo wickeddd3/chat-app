@@ -1,16 +1,24 @@
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { dateToNow } from "@/shared/utils/date-format";
 import { FaCheckDouble } from "react-icons/fa6";
+import { motion } from "framer-motion";
+import { messageBubbleVariants } from "@/shared/lib/motion";
 import type { Message, NewMessage } from "../model/message.types";
 
 export interface MessageBubbleProps {
   message: Message | NewMessage;
   isAuthorsMessage: boolean;
+  /** Play the entrance animation (only for messages that just arrived). */
+  animate?: boolean;
+  /** Fired once the entrance animation settles, so the owner can retire the flag. */
+  onAnimationComplete?: () => void;
 }
 
 export function MessageBubble({
   message,
   isAuthorsMessage,
+  animate = false,
+  onAnimationComplete,
 }: MessageBubbleProps) {
   const {
     content,
@@ -20,7 +28,11 @@ export function MessageBubble({
   } = message;
 
   return (
-    <div
+    <motion.div
+      variants={messageBubbleVariants}
+      initial={animate ? "initial" : false}
+      animate="animate"
+      onAnimationComplete={animate ? onAnimationComplete : undefined}
       className={`
         flex justify-start gap-2 px-4 py-1 w-full min-w-0
         ${isAuthorsMessage ? "flex-row-reverse pl-12" : "pr-12"}
@@ -62,6 +74,6 @@ export function MessageBubble({
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
