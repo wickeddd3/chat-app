@@ -15,20 +15,19 @@ export function CreateGroupChannel() {
   const [open, setOpen] = useState(false);
 
   return (
-    <Dialog open={open}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
           className="rounded-full cursor-pointer"
-          onClick={() => setOpen(true)}
         >
           <FaPenToSquare />
         </Button>
       </DialogTrigger>
       <DialogContent
         className="sm:max-w-lg flex flex-col gap-3"
-        showCloseButton={false}
+        onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader className="pb-4">
           <DialogTitle>New Group</DialogTitle>
@@ -38,13 +37,6 @@ export function CreateGroupChannel() {
         </DialogHeader>
         {/* Form for creating group channel */}
         <GroupChannelForm onSuccess={() => setOpen(false)} />
-        <Button
-          variant="outline"
-          className="w-full font-semibold cursor-pointer"
-          onClick={() => setOpen(false)}
-        >
-          Cancel
-        </Button>
       </DialogContent>
     </Dialog>
   );
