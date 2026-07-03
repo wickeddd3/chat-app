@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, redirect } from "react-router";
 import { AuthGuard } from "./AuthGuard";
 import { GuestGuard } from "./GuestGuard";
 import { AuthLayout } from "../layouts/auth-layout";
@@ -19,10 +19,7 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            lazy: async () => {
-              const module = await import("@/pages/HomePage");
-              return { Component: module.default };
-            },
+            loader: () => redirect("/messages"),
           },
           {
             path: "profile",
