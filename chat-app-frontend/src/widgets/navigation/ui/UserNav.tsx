@@ -1,13 +1,19 @@
-import { FaCircleUser, FaBell, FaGear, FaRightFromBracket } from "react-icons/fa6";
+import {
+  FaCircleUser,
+  FaBell,
+  FaGear,
+  FaRightFromBracket,
+} from "react-icons/fa6";
 import { Button } from "@/shared/ui/shadcn/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/shared/ui/shadcn/dropdown-menu";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/shared/ui/shadcn/dialog";
 import { Link } from "react-router";
 import { useSignOut } from "@/features/auth/sign-out";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
@@ -25,8 +31,8 @@ export function UserNav() {
   const unreadNotificationBadge = unreadCounts["unreadNotificationsCount"];
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <Dialog>
+      <DialogTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
@@ -35,43 +41,75 @@ export function UserNav() {
         >
           <ProfileAvatar imageSrc={authProfile?.image || ""} size={"default"} />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" sideOffset={8} className="w-44">
-        <DropdownMenuGroup>
-          <DropdownMenuItem asChild className="cursor-pointer">
-            <Link to={"/profile"}>
-              <FaCircleUser />
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-sm" aria-describedby={undefined}>
+        <DialogHeader className="flex-row items-center gap-3 space-y-0">
+          <ProfileAvatar imageSrc={authProfile?.image || ""} size={"lg"} />
+          <div className="flex flex-col gap-1 text-left min-w-0">
+            <DialogTitle className="truncate">
+              {authProfile?.name || authProfile?.username || "Account"}
+            </DialogTitle>
+            {authProfile?.email && (
+              <DialogDescription className="truncate">
+                {authProfile.email}
+              </DialogDescription>
+            )}
+          </div>
+        </DialogHeader>
+
+        <nav className="flex flex-col gap-1">
+          <DialogClose asChild>
+            <Link
+              to={"/profile"}
+              className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-muted transition-colors cursor-pointer"
+            >
+              <FaCircleUser className="size-4 text-muted-foreground" />
               Account
             </Link>
-          </DropdownMenuItem>
+          </DialogClose>
 
-          <DropdownMenuItem asChild className="cursor-pointer">
-            <Link to={"/notifications"}>
-              <FaBell />
+          <DialogClose asChild>
+            <Link
+              to={"/notifications"}
+              className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-muted transition-colors cursor-pointer"
+            >
+              <FaBell className="size-4 text-muted-foreground" />
               Notifications
               {unreadNotificationBadge > 0 && (
                 <Badge
-                  className="rounded-full border-popover bg-red-500 text-gray-50"
+                  className="ml-auto rounded-full border-popover bg-red-500 text-gray-50"
                   aria-label={`${unreadNotificationBadge} unread notifications`}
                 >
                   {unreadNotificationBadge}
                 </Badge>
               )}
             </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild className="cursor-pointer">
-            <Link to={"/settings"}>
-              <FaGear />
+          </DialogClose>
+
+          <DialogClose asChild>
+            <Link
+              to={"/settings"}
+              className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-muted transition-colors cursor-pointer"
+            >
+              <FaGear className="size-4 text-muted-foreground" />
               Settings
             </Link>
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer" onClick={logout}>
-          <FaRightFromBracket />
-          Sign Out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          </DialogClose>
+
+          <div className="my-1 h-px bg-border" />
+
+          <DialogClose asChild>
+            <button
+              type="button"
+              onClick={logout}
+              className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-muted transition-colors cursor-pointer text-left"
+            >
+              <FaRightFromBracket className="size-4 text-muted-foreground" />
+              Sign Out
+            </button>
+          </DialogClose>
+        </nav>
+      </DialogContent>
+    </Dialog>
   );
 }
