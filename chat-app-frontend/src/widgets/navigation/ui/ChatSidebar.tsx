@@ -36,7 +36,7 @@ export function ChatSidebar() {
           className={`
             hidden md:flex aspect-square size-12 items-center justify-center
             rounded-2xl bg-linear-to-br from-primary to-primary text-gray-50
-            shadow-lg shadow-primary/30 shrink-0
+            shadow-sm shadow-primary/30 shrink-0
           `}
         >
           <FaCommentDots className="size-6" />
