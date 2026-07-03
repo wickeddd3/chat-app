@@ -1,0 +1,14 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:5173",
+      "localStorage": [
+        {
+          "name": "sb-ysbjtfxvazsppcrqnnsw-auth-token",
+          "value": "{\"access_token\":\"eyJhbGciOiJFUzz1NiIsImtpZCI6IjEZwmFlNjU4LTJmYjtENDJkYy1iZWFlLWI3MjdiYzA1ZTYxZiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3lzYmp0Znh2YXpzdHRjcnFtbXN3LnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJiN2FkYzM1My00ZWI3LTRhNzQtOWUzMC1iMTg3Zjk5ZTU2YzYiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzgzMTA0Nzg1LCJpYXQiOjE3ODMxMDExODUsImVtYWlsIjoianVsZXNfYm95ZXIyQGV4YW1wbGUuY29tIiwicGhvbmUiOiIiLCJhcHBfbWV0YWRhdGEiOnsicHJvdmlkZXIiOiJlbWFpbCIsInByb3ZpZGVycyI6WyJlbWFpbCJdfSwidXNlcl9tZXRhZGF0YSI6eyJlbWFpbF92ZXJpZmllZCI6dHJ1ZX0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3ODMxMDExODV9XSwic2Vzc2lvbl9pZCI6IjU4ZDRjZTYzLWY2MGQtNDYwNC1iYjU4LTI1Yjc4NzA5NDMyMiIsImlzX2Fub255bW91cyI6ZmFsc2V9.3TmpLHNvT0MeUTGvvZNZUGFbSt8nW5Ug73DknChGunj8JjYz8qHX0C3ilh0WrV4v2wHW9sArH5tuKXgX8jFCnw\",\"token_type\":\"bearer\",\"expires_in\":3600,\"expires_at\":1783104785,\"refresh_token\":\"o33t6blf2bno\",\"user\":{\"id\":\"b7adc353-4eb7-4a74-9e30-b187f99e56c6\",\"aud\":\"authenticated\",\"role\":\"authenticated\",\"email\":\"jules_boyer2@example.com\",\"email_confirmed_at\":\"2026-06-13T12:58:55.503306Z\",\"phone\":\"\",\"confirmed_at\":\"2026-06-13T12:58:55.503306Z\",\"last_sign_in_at\":\"2026-07-03T17:53:05.610179522Z\",\"app_metadata\":{\"provider\":\"email\",\"providers\":[\"email\"]},\"user_metadata\":{\"email_verified\":true},\"identities\":[{\"identity_id\":\"60ba262e-c5fc-4aee-b086-4ce98d4357c0\",\"id\":\"b7adc353-4eb7-4a74-9e30-b187f99e56c6\",\"user_id\":\"b7adc353-4eb7-4a74-9e30-b187f99e56c6\",\"identity_data\":{\"email\":\"jules_boyer2@example.com\",\"email_verified\":false,\"phone_verified\":false,\"sub\":\"b7adc353-4eb7-4a74-9e30-b187f99e56c6\"},\"provider\":\"email\",\"last_sign_in_at\":\"2026-06-13T12:58:55.50083Z\",\"created_at\":\"2026-06-13T12:58:55.500883Z\",\"updated_at\":\"2026-06-13T12:58:55.500883Z\",\"email\":\"jules_boyer2@example.com\"}],\"created_at\":\"2026-06-13T12:58:55.498281Z\",\"updated_at\":\"2026-07-03T17:53:05.626446Z\",\"is_anonymous\":false},\"weak_password\":null}"
+        }
+      ]
+    }
+  ]
+}
