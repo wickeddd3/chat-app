@@ -1,10 +1,10 @@
 import { Toaster } from "@/shared/ui/shadcn/sonner";
-import { Outlet } from "react-router";
+import { AnimatedOutlet } from "@/shared/ui/AnimatedOutlet";
 
 export function AuthLayout() {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
-      <Outlet />
+      <AnimatedOutlet className="flex w-full flex-col items-center" />
       <Toaster />
     </div>
   );
