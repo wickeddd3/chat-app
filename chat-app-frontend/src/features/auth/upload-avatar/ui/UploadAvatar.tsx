@@ -56,10 +56,10 @@ export function UploadAvatar({ userId }: UploadAvatarProps) {
             )}
             <label
               htmlFor="dropzone-file"
-              className="w-full h-fit flex flex-col items-center justify-center bg-gray-50 border border-dashed border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100"
+              className="w-full h-fit flex flex-col items-center justify-center bg-muted border border-dashed border-border rounded-lg cursor-pointer hover:bg-accent"
             >
               <div className="flex flex-col items-center justify-center text-body pt-5 pb-6">
-                <FaCloudArrowUp size={50} className="text-gray-500" />
+                <FaCloudArrowUp size={50} className="text-muted-foreground" />
                 <p className="mb-2 text-sm font-semibold">Click to import</p>
               </div>
               <input

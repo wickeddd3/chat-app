@@ -9,7 +9,7 @@ export function ProfilePageSkeleton() {
     >
       <div className="h-full max-w-2xl w-full md:w-2xl flex flex-col gap-8 rounded-lg">
         {/* Profile Header */}
-        <div className="bg-gray-100 rounded-lg flex justify-between items-center gap-4 px-4 py-6">
+        <div className="bg-muted rounded-lg flex justify-between items-center gap-4 px-4 py-6">
           <div className="flex-1 flex items-center gap-4 min-w-0">
             <Skeleton className="h-12 w-12 rounded-full shrink-0" />
             <div className="flex-1 flex flex-col gap-2 min-w-0">

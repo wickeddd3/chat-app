@@ -11,7 +11,7 @@ export function MessageInput({ channelId }: MessageInputProps) {
   return (
     <form
       onSubmit={sendMessage}
-      className="w-full flex gap-2 bg-gray-100 rounded-full"
+      className="w-full flex gap-2 bg-muted rounded-full"
     >
       <label htmlFor="message-input" className="sr-only">
         Message

@@ -15,7 +15,7 @@ export function MemberListItem({
   return (
     <label
       key={user.id}
-      className="w-full flex justify-between items-center px-4 py-3 cursor-pointer hover:bg-gray-50"
+      className="w-full flex justify-between items-center px-4 py-3 cursor-pointer hover:bg-muted"
     >
       <div className="flex-1 flex items-center gap-4">
         <ProfileAvatar imageSrc={user.image || ""} size="lg" />

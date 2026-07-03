@@ -124,7 +124,7 @@ export const router = createBrowserRouter([
   {
     path: "*",
     element: (
-      <div className="flex justify-center items-center min-h-screen bg-black text-white">
+      <div className="flex justify-center items-center min-h-screen bg-background text-foreground">
         <h1>404 | Page Not Found</h1>
       </div>
     ),

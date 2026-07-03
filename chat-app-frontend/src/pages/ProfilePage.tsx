@@ -24,7 +24,7 @@ export default function ProfilePage() {
     <div className="h-full w-full flex justify-center items-center p-4 overflow-auto">
       <div className="h-full max-w-2xl w-full md:w-2xl flex flex-col gap-8 rounded-lg">
         {/* Profile Header */}
-        <div className="bg-gray-100 rounded-lg flex justify-between items-center gap-4 px-4 py-6">
+        <div className="bg-muted rounded-lg flex justify-between items-center gap-4 px-4 py-6">
           <div className="flex-1 flex items-center gap-4 min-w-0">
             <ProfileAvatar imageSrc={authProfile?.image || ""} />
             <div className="flex-1 flex flex-col min-w-0">
@@ -38,10 +38,10 @@ export default function ProfilePage() {
         </div>
 
         <div className="flex flex-col">
-          <h2 className="text-md md:text-lg font-semibold text-gray-800">
+          <h2 className="text-md md:text-lg font-semibold text-foreground">
             Update Profile
           </h2>
-          <p className="text-sm md:text-md font-light text-gray-800">
+          <p className="text-sm md:text-md font-light text-foreground">
             Manage profile details and password
           </p>
         </div>

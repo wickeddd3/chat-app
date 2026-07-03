@@ -36,7 +36,7 @@ export function NotificationItem({
           <p
             className={cn(
               "text-sm text-muted-foreground truncate w-full",
-              notification.isRead ? "" : "font-medium text-gray-900",
+              notification.isRead ? "" : "font-medium text-foreground",
             )}
           >
             {notification.title}
@@ -44,7 +44,7 @@ export function NotificationItem({
           <p
             className={cn(
               "text-xs text-muted-foreground truncate w-full",
-              notification.isRead ? "" : "font-medium text-gray-900",
+              notification.isRead ? "" : "font-medium text-foreground",
             )}
           >
             {notification.content}
