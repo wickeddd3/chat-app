@@ -4,6 +4,8 @@ import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { Virtuoso } from "react-virtuoso";
 import { FaCircleNotch } from "react-icons/fa6";
+import { motion } from "framer-motion";
+import { fadeVariants } from "@/shared/lib/motion";
 
 export interface ChatInboxResultsProps {
   isLoading?: boolean;
@@ -23,7 +25,12 @@ export function ChatInboxResults({
   fetchNextPage,
 }: ChatInboxResultsProps) {
   return (
-    <div className="flex-1 h-full overflow-y-auto min-h-0 scrollbar-thin">
+    <motion.div
+      variants={fadeVariants}
+      initial="initial"
+      animate="animate"
+      className="flex-1 h-full overflow-y-auto min-h-0 scrollbar-thin"
+    >
       {isLoading && <LoadingPlaceholder />}
 
       {!isEmpty && (
@@ -57,6 +64,6 @@ export function ChatInboxResults({
       )}
 
       {isEmpty && <EmptyPlaceholder />}
-    </div>
+    </motion.div>
   );
 }
