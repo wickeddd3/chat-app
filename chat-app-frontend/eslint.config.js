@@ -13,6 +13,10 @@ export default defineConfig([
     ".next",
     "build",
     "src/shared/ui/shadcn",
+    // Generated / tool output
+    "coverage",
+    "playwright-report",
+    "test-results",
   ]),
   {
     files: ["**/*.{ts,tsx}"],
@@ -153,6 +157,16 @@ export default defineConfig([
           ],
         },
       ],
+    },
+  },
+  {
+    // Playwright e2e specs are not React; disable the React-specific rules.
+    // (The `use` fixture param trips react-hooks/rules-of-hooks otherwise.)
+    // Placed last so it overrides the shared rules above for these files.
+    files: ["e2e/**/*.ts", "playwright.config.ts"],
+    rules: {
+      "react-hooks/rules-of-hooks": "off",
+      "react-refresh/only-export-components": "off",
     },
   },
 ]);

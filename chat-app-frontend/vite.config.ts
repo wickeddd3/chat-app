@@ -22,6 +22,8 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
     clearMocks: true,
+    // Unit tests live under src/; keep Vitest away from Playwright e2e specs.
+    include: ["src/**/*.{test,spec}.{ts,tsx}"],
     // Dummy Supabase env so modules that build the client at import time
     // (e.g. axios.client -> supabase.client) don't throw when tests run
     // without a local .env (such as on CI). Tests mock network layers, so

@@ -42,6 +42,38 @@ jobs:
           cd chat-app-frontend
           npm run test:run
 
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('chat-app-frontend/package-lock.json') }}
+
+      - name: Install Playwright Browser
+        run: |
+          cd chat-app-frontend
+          npx playwright install --with-deps chromium
+
+      - name: E2E Tests
+        run: |
+          cd chat-app-frontend
+          npm run e2e
+        # The app requires these to boot; the e2e suite mocks the session and
+        # stubs the backend, so dummy values are sufficient and no secrets or
+        # live services are needed. They must stay consistent with what the
+        # tests derive (Supabase storage key, backend origin for route stubs).
+        env:
+          VITE_SUPABASE_URL: https://dummy.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: dummy-publishable-key
+          VITE_API_URL: http://localhost:4000
+
+      - name: Upload Playwright Report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: chat-app-frontend/playwright-report/
+          retention-days: 7
+
       - name: Install Vercel CLI Globally
         run: npm install --global vercel
 
