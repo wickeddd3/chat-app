@@ -5,8 +5,12 @@ import {
 } from "@/shared/ui/shadcn/tooltip";
 import { cn } from "@/shared/lib/utils";
 import { Link } from "react-router";
+import { motion } from "framer-motion";
 import type { NavItem } from "../model/nav.types";
 import { Badge } from "@/shared/ui/shadcn/badge";
+import { tapScale } from "@/shared/lib/motion";
+
+const MotionLink = motion.create(Link);
 
 export interface SidebarLinkProps {
   nav: NavItem;
@@ -22,9 +26,10 @@ export function SidebarLink({
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Link
+        <MotionLink
           key={url}
           to={url}
+          whileTap={tapScale}
           aria-label={badgeCount > 0 ? `${title}, ${badgeCount} unread` : title}
           aria-current={isActive ? "page" : undefined}
           className={cn(
@@ -48,7 +53,7 @@ export function SidebarLink({
           <span className="text-[10px] font-medium leading-none whitespace-nowrap md:hidden">
             {title}
           </span>
-        </Link>
+        </MotionLink>
       </TooltipTrigger>
       {/* Tooltip is desktop-only; the mobile bar shows the title under the icon */}
       <TooltipContent side="right" className="hidden md:block">
