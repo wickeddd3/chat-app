@@ -25,21 +25,11 @@ export default defineConfig({
     baseURL,
     trace: "on-first-retry",
   },
-  projects: [
-    {
-      name: "chromium",
-      // Public/unauthenticated specs live at the top level of e2e/.
-      testIgnore: ["**/authenticated/**"],
-      use: { ...devices["Desktop Chrome"] },
-    },
-    {
-      // Authenticated specs mock the Supabase session in-browser, so they need
-      // no real user or backend (see e2e/support/authenticated-test.ts).
-      name: "authenticated",
-      testDir: "./e2e/authenticated",
-      use: { ...devices["Desktop Chrome"] },
-    },
-  ],
+  // One project runs every spec under e2e/. Public specs use the base test;
+  // authenticated specs import a fixture that mocks the Supabase session
+  // in-browser (see e2e/support/authenticated-test.ts) — no separate project,
+  // storage state, or credentials needed.
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   // Boots the Vite dev server for the run; locally it reuses an already
   // running server (e.g. the Docker/dev instance on 5173) instead of spawning
   // a second one.
