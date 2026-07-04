@@ -1,34 +1,27 @@
 import type { ExtendedError, Socket } from "socket.io";
-import { supabase } from "@/lib/supabase";
+import { verifySupabaseToken } from "@/lib/jwt";
 
-export const socketAuthMiddleware = async (socket: Socket, next: (err?: ExtendedError) => void) => {
+export const socketAuthMiddleware = async (socket: Socket, next: (err?: ExtendedError) => void): Promise<void> => {
   try {
     const authObject = socket.handshake.auth as { token?: string };
     const authHeader = authObject.token;
 
-    if (!authHeader?.startsWith("Bearer ")) {
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.split(" ")[1] : undefined;
+
+    if (!token) {
       next(new Error("Missing or malformed authorization header"));
-    }
-
-    const token = authHeader?.split(" ")[1];
-
-    // Authenticate the token against Supabase infrastructure directly
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser(token);
-
-    if (error || !user) {
-      next(new Error("Invalid or expired auth token session"));
       return;
     }
 
+    // Verify the JWT locally (signature + expiry + audience) — no network call.
+    const { authId } = await verifySupabaseToken(token);
+
     // Attach user info to socket data
     const socketData = socket.data as Record<string, unknown>;
-    socketData.authId = user.id;
+    socketData.authId = authId;
 
     next();
   } catch {
-    next(new Error("Authentication failed"));
+    next(new Error("Invalid or expired auth token session"));
   }
 };

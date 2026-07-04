@@ -1,27 +1,22 @@
 import { Request, Response, NextFunction } from "express";
 import { HttpException } from "@/utils/http.exception";
-import { supabase } from "@/lib/supabase";
+import { verifySupabaseToken } from "@/lib/jwt";
 
-export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+export const authMiddleware = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
   try {
-    const authHeader = req.headers.authorization;
+    const token = req.headers.authorization?.split(" ")[1];
 
-    const token = authHeader?.split(" ")[1];
-
-    // Authenticate the token against Supabase infrastructure directly
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser(token);
-
-    if (error || !user) {
-      next(new HttpException(401, "Invalid or expired auth token session"));
+    if (!token) {
+      next(new HttpException(401, "Missing or malformed authorization header"));
       return;
     }
 
-    req.authId = user.id;
+    // Verify the JWT locally (signature + expiry + audience) — no network call.
+    const { authId } = await verifySupabaseToken(token);
+
+    req.authId = authId;
     next();
   } catch {
-    next(new HttpException(401, "Authentication failed"));
+    next(new HttpException(401, "Invalid or expired auth token session"));
   }
 };
