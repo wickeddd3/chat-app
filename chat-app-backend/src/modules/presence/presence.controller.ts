@@ -49,10 +49,7 @@ export class PresenceController extends BaseController {
       if (!channelCacheExists) {
         log.warn({ channelId: activeChannelId }, "Rebuilding channel cache");
         // Fetch raw string member IDs from your channel/prisma repository layer
-        const channelMemberIds = await this.channelsRepository.getRawMemberIds(
-          authUserId,
-          parseInt(activeChannelId, 10),
-        );
+        const channelMemberIds = await this.channelsRepository.getRawMemberIds(authUserId, activeChannelId);
 
         await this.presenceService.setChannelMembersLookup(activeChannelId, channelMemberIds);
       }

@@ -25,7 +25,7 @@ export class SendMessageCommand implements WebSocketCommand {
   ) {}
 
   public async execute(socket: Socket, authId: string, data: SendMessagePayload): Promise<void> {
-    const targetChannelId = parseInt(data.channelId, 10);
+    const targetChannelId = data.channelId;
 
     // 1. Persist to Database
     const savedMessage = await this.messagesService.saveMessage({

@@ -8,7 +8,7 @@ import { HttpException } from "@/utils/http.exception";
 export class MessagesRepository {
   constructor(@inject(TYPES.PrismaClient) private db: PrismaClient) {}
 
-  public async create(data: { content: string; channelId: number; authorId: string }): Promise<MessageWithAuthor> {
+  public async create(data: { content: string; channelId: string; authorId: string }): Promise<MessageWithAuthor> {
     try {
       return await this.db.message.create({
         data,
@@ -32,9 +32,9 @@ export class MessagesRepository {
     limit = 20,
     cursor,
   }: {
-    channelId: number;
+    channelId: string;
     limit?: number;
-    cursor?: number;
+    cursor?: string;
   }): Promise<PaginatedMessages> {
     try {
       const messages = await this.db.message.findMany({
@@ -55,7 +55,7 @@ export class MessagesRepository {
         ...(cursor && { cursor: { id: cursor } }),
       });
 
-      let nextCursor: number | null = null;
+      let nextCursor: string | null = null;
       let finalMessages = messages;
 
       if (cursor) {
@@ -84,7 +84,7 @@ export class MessagesRepository {
     }
   }
 
-  public async getUnreadMessages(channelId: number, userId: string): Promise<UnreadMessage[]> {
+  public async getUnreadMessages(channelId: string, userId: string): Promise<UnreadMessage[]> {
     try {
       const messages = await this.db.message.findMany({
         where: {

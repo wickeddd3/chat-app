@@ -141,7 +141,7 @@ export class ChannelsRepository {
     }
   }
 
-  public async getChannel(userId: string, channelId: number): Promise<InboxChannel | null> {
+  public async getChannel(userId: string, channelId: string): Promise<InboxChannel | null> {
     try {
       return await this.db.channel.findFirst({
         where: {
@@ -177,7 +177,7 @@ export class ChannelsRepository {
     }
   }
 
-  public async getRawMemberIds(userId: string, channelId: number): Promise<string[]> {
+  public async getRawMemberIds(userId: string, channelId: string): Promise<string[]> {
     try {
       const channel = await this.db.channel.findFirst({
         where: {
@@ -285,7 +285,7 @@ export class ChannelsRepository {
 
   public async updateGroupChannel(
     userId: string,
-    channelId: number,
+    channelId: string,
     data: { name: string; memberIds: string[] },
   ): Promise<Channel> {
     try {
@@ -340,7 +340,7 @@ export class ChannelsRepository {
     }
   }
 
-  public async updateChannel(channelId: number): Promise<Channel> {
+  public async updateChannel(channelId: string): Promise<Channel> {
     try {
       return await this.db.channel.update({
         where: { id: channelId },

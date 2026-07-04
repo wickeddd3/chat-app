@@ -21,7 +21,7 @@ export class ReadMessageCommand implements WebSocketCommand {
   ) {}
 
   public async execute(socket: Socket, authId: string, data: ReadMessagePayload): Promise<void> {
-    const targetChannelId = parseInt(data.channelId, 10);
+    const targetChannelId = data.channelId;
 
     // 1. Find all messages in this channel NOT authored by the user
     // and NOT already read by the user
@@ -38,6 +38,6 @@ export class ReadMessageCommand implements WebSocketCommand {
     }
 
     // 3. Tell the user's frontend to clear the badge locally
-    await this.broadcaster.emitToUser(authId, "message:read", { channelId: String(targetChannelId), readMessageCount });
+    await this.broadcaster.emitToUser(authId, "message:read", { channelId: targetChannelId, readMessageCount });
   }
 }
