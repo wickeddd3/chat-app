@@ -1,148 +1,42 @@
 import "reflect-metadata";
 import { Container } from "inversify";
-import { TYPES } from "./types";
 
-import { prisma } from "@/lib/prisma";
-import { PrismaClient } from "@/prisma/client";
+import { infrastructureModule } from "./modules/infrastructure.container";
+import { realtimeModule } from "./modules/realtime.container";
+import { subscribersModule } from "./modules/subscribers.container";
 
-import type { Redis } from "ioredis";
-import { pubClient, redisClient, subClient } from "@/lib/redis";
+import { authModule } from "@/modules/auth/auth.container";
+import { usersModule } from "@/modules/user/users.container";
+import { channelsModule } from "@/modules/channel/channels.container";
+import { messagesModule } from "@/modules/message/messages.container";
+import { messageReceiptsModule } from "@/modules/message-receipt/message-receipts.container";
+import { connectionsModule } from "@/modules/connection/connections.container";
+import { notificationsModule } from "@/modules/notification/notifications.container";
+import { presenceModule } from "@/modules/presence/presence.container";
+import { statsModule } from "@/modules/stats/stats.container";
 
-import { eventDispatcher } from "@/lib/event-dispatcher";
-
-import { AuthRouter } from "@/modules/auth/auth.router";
-import { AuthController } from "@/modules/auth/auth.controller";
-import { AuthService } from "@/modules/auth/auth.service";
-import { AuthRepository } from "@/modules/auth/auth.repository";
-
-import { UsersRouter } from "@/modules/user/users.router";
-import { UsersController } from "@/modules/user/users.controller";
-import { UsersRepository } from "@/modules/user/users.repository";
-import { UsersService } from "@/modules/user/users.service";
-
-import { ChannelsRouter } from "@/modules/channel/channels.router";
-import { ChannelsController } from "@/modules/channel/channels.controller";
-import { ChannelsService } from "@/modules/channel/channels.service";
-import { ChannelsRepository } from "@/modules/channel/channels.repository";
-
-import { MessagesRouter } from "@/modules/message/messages.router";
-import { MessagesController } from "@/modules/message/messages.controller";
-import { MessagesService } from "@/modules/message/messages.service";
-import { MessagesRepository } from "@/modules/message/messages.repository";
-
-import { MessageReceiptsService } from "@/modules/message-receipt/message-receipts.service";
-import { MessageReceiptsRepository } from "@/modules/message-receipt/message-receipts.repository";
-
-import { ConnectionsRouter } from "@/modules/connection/connections.router";
-import { ConnectionsController } from "@/modules/connection/connections.controller";
-import { ConnectionsService } from "@/modules/connection/connections.service";
-import { ConnectionsRepository } from "@/modules/connection/connections.repository";
-
-import { NotificationsRouter } from "@/modules/notification/notifications.router";
-import { NotificationsController } from "@/modules/notification/notifications.controller";
-import { NotificationsRepository } from "@/modules/notification/notifications.repository";
-import { NotificationsService } from "@/modules/notification/notifications.service";
-
-import { PresenceRouter } from "@/modules/presence/presence.router";
-import { PresenceController } from "@/modules/presence/presence.controller";
-
-import { StatsRouter } from "@/modules/stats/stats.router";
-import { StatsController } from "@/modules/stats/stats.controller";
-
-import { Server as SocketServer } from "socket.io";
-import { SocketServerProvider } from "@/web-socket/socket-server.provider";
-import { WebSocketServer } from "@/web-socket/web-socket.server";
-import { PresenceService } from "@/services/presence.service";
-
-import { WebSocketCommand } from "@/interfaces/ws-command.interface";
-import { SendMessageCommand } from "@/web-socket/commands/send-message.command";
-import { ReadMessageCommand } from "@/web-socket/commands/read-message.command";
-import { JoinChannelCommand } from "@/web-socket/commands/join-channel.command";
-import { LeaveChannelCommand } from "@/web-socket/commands/leave-channel.command";
-import { DisconnectCommand } from "@/web-socket/commands/disconnect.command";
-import { HeartbeatCommand } from "@/web-socket/commands/heartbeat.command";
-
-import { BroadcasterService } from "@/services/broadcaster.service";
-
-import { NotificationSubscriber } from "@/subscribers/notification.subscriber";
-import { RequestSubscriber } from "@/subscribers/request.subscriber";
-
+/**
+ * Central DI composition root. Each domain owns its own ContainerModule
+ * (`<name>.container.ts`); this file just composes them. To add a module,
+ * create its container module + add its symbol to types.ts, then load it here.
+ */
 const container = new Container();
 
-// Bind Prisma Client as a structural constant value singleton
-container.bind<PrismaClient>(TYPES.PrismaClient).toConstantValue(prisma);
-container.bind(TYPES.EventDispatcher).toConstantValue(eventDispatcher);
-
-// Main operational caching engine
-container.bind<Redis>(TYPES.RedisMainClient).toConstantValue(redisClient);
-// High performance outward cluster event pipeline
-container.bind<Redis>(TYPES.RedisPubClient).toConstantValue(pubClient);
-// Isolated internal inbound adapter sync listener
-container.bind<Redis>(TYPES.RedisSubClient).toConstantValue(subClient);
-
-// Bind domain layers
-container.bind<AuthRouter>(TYPES.AuthRouter).to(AuthRouter);
-container.bind<AuthController>(TYPES.AuthController).to(AuthController);
-container.bind<AuthService>(TYPES.AuthService).to(AuthService);
-container.bind<AuthRepository>(TYPES.AuthRepository).to(AuthRepository);
-
-container.bind<UsersRouter>(TYPES.UsersRouter).to(UsersRouter);
-container.bind<UsersController>(TYPES.UsersController).to(UsersController);
-container.bind<UsersService>(TYPES.UsersService).to(UsersService);
-container.bind<UsersRepository>(TYPES.UsersRepository).to(UsersRepository);
-
-container.bind<ChannelsRouter>(TYPES.ChannelsRouter).to(ChannelsRouter);
-container.bind<ChannelsController>(TYPES.ChannelsController).to(ChannelsController);
-container.bind<ChannelsService>(TYPES.ChannelsService).to(ChannelsService);
-container.bind<ChannelsRepository>(TYPES.ChannelsRepository).to(ChannelsRepository);
-
-container.bind<MessagesRouter>(TYPES.MessagesRouter).to(MessagesRouter);
-container.bind<MessagesController>(TYPES.MessagesController).to(MessagesController);
-container.bind<MessagesService>(TYPES.MessagesService).to(MessagesService);
-container.bind<MessagesRepository>(TYPES.MessagesRepository).to(MessagesRepository);
-
-container.bind<MessageReceiptsService>(TYPES.MessageReceiptsService).to(MessageReceiptsService);
-container.bind<MessageReceiptsRepository>(TYPES.MessageReceiptsRepository).to(MessageReceiptsRepository);
-
-container.bind<ConnectionsRouter>(TYPES.ConnectionsRouter).to(ConnectionsRouter);
-container.bind<ConnectionsController>(TYPES.ConnectionsController).to(ConnectionsController);
-container.bind<ConnectionsService>(TYPES.ConnectionsService).to(ConnectionsService);
-container.bind<ConnectionsRepository>(TYPES.ConnectionsRepository).to(ConnectionsRepository);
-
-container.bind<NotificationsRouter>(TYPES.NotificationsRouter).to(NotificationsRouter);
-container.bind<NotificationsController>(TYPES.NotificationsController).to(NotificationsController);
-container.bind<NotificationsService>(TYPES.NotificationsService).to(NotificationsService);
-container.bind<NotificationsRepository>(TYPES.NotificationsRepository).to(NotificationsRepository);
-
-container.bind<PresenceRouter>(TYPES.PresenceRouter).to(PresenceRouter);
-container.bind<PresenceController>(TYPES.PresenceController).to(PresenceController);
-
-container.bind<StatsRouter>(TYPES.StatsRouter).to(StatsRouter);
-container.bind<StatsController>(TYPES.StatsController).to(StatsController);
-
-container.bind<SocketServerProvider>(TYPES.SocketServerProvider).to(SocketServerProvider).inSingletonScope();
-container.bind<PresenceService>(TYPES.PresenceService).to(PresenceService).inSingletonScope();
-
-// Bind subscriber class handler
-container.bind<NotificationSubscriber>(TYPES.NotificationSubscriber).to(NotificationSubscriber).inSingletonScope();
-container.bind<RequestSubscriber>(TYPES.RequestSubscriber).to(RequestSubscriber).inSingletonScope();
-
-// Bind the actual SocketServer token using a dynamic Inversify Factory Provider resolution lookup
-container.bind<SocketServer>(TYPES.SocketServer).toDynamicValue((context) => {
-  return context.get<SocketServerProvider>(TYPES.SocketServerProvider).getInstance();
-});
-
-// Multi-bind Strategy Event Commands
-container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(SendMessageCommand);
-container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(ReadMessageCommand);
-container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(JoinChannelCommand);
-container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(LeaveChannelCommand);
-container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(DisconnectCommand);
-container.bind<WebSocketCommand>(TYPES.WebSocketCommand).to(HeartbeatCommand);
-
-container.bind<BroadcasterService>(TYPES.BroadcasterService).to(BroadcasterService);
-
-// Bind main service orchestration driver engine
-container.bind<WebSocketServer>(TYPES.WebSocketServer).to(WebSocketServer);
+container.load(
+  // Cross-cutting infrastructure + real-time + event subscribers.
+  infrastructureModule,
+  realtimeModule,
+  subscribersModule,
+  // Domain modules.
+  authModule,
+  usersModule,
+  channelsModule,
+  messagesModule,
+  messageReceiptsModule,
+  connectionsModule,
+  notificationsModule,
+  presenceModule,
+  statsModule,
+);
 
 export { container };
