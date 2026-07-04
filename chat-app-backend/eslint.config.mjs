@@ -4,7 +4,7 @@ import nodePlugin from "eslint-plugin-n";
 import eslintConfigPrettier from "eslint-config-prettier";
 
 export default tseslint.config(
-  { ignores: ["node_modules", "dist", "prisma/generated"] },
+  { ignores: ["node_modules", "dist", "prisma/generated", "coverage"] },
   {
     files: ["**/*.ts"], // Apply these rules only to TypeScript files
     extends: [
@@ -60,6 +60,8 @@ export default tseslint.config(
     rules: {
       "no-console": "off",
       "@typescript-eslint/no-explicit-any": "off",
+      // Empty stub classes are a common mock pattern (e.g. jest.mock factories).
+      "@typescript-eslint/no-extraneous-class": "off",
     },
   },
   // MUST BE LAST: Disables all stylistic ESLint rules that conflict with Prettier
