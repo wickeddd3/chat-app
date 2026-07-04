@@ -81,8 +81,8 @@ services:
       redis:
         condition: service_healthy
     command: >
-      sh -c "npx prisma generate && 
-            npx prisma db push &&
+      sh -c "npx prisma generate &&
+            npx prisma migrate deploy &&
             npm run dev"
     volumes:
       - ./chat-app-backend:/app
