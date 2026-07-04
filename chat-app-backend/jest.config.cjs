@@ -14,9 +14,10 @@ module.exports = {
   },
 
   // swc transpile — decoupled from the TS version and supports the decorator
-  // metadata InversifyJS relies on.
+  // metadata InversifyJS relies on. Also matches .js so ESM-only deps
+  // (inversify) can be down-leveled (see transformIgnorePatterns).
   transform: {
-    "^.+\\.ts$": [
+    "^.+\\.[jt]s$": [
       "@swc/jest",
       {
         jsc: {
@@ -29,6 +30,10 @@ module.exports = {
     ],
   },
 
+  // inversify 8 (+ @inversifyjs/*) ship ESM; transform them instead of ignoring
+  // all of node_modules, so Jest (CJS) can require them.
+  transformIgnorePatterns: ["node_modules/(?!(inversify|@inversifyjs)/)"],
+
   clearMocks: true,
   // Exclude entrypoints, generated code, and pure type/docs modules from coverage.
   collectCoverageFrom: [
@@ -39,4 +44,15 @@ module.exports = {
     "!src/**/*.types.ts",
     "!src/test/**",
   ],
+
+  // Regression floor — pinned just below current coverage so it can't backslide.
+  // Ratchet these upward as tests are added (enforced by `npm run test:coverage`).
+  coverageThreshold: {
+    global: {
+      statements: 10,
+      branches: 5,
+      functions: 6,
+      lines: 10,
+    },
+  },
 };
