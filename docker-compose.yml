@@ -61,7 +61,9 @@ services:
       - chat-app-network
 
   backend:
-    build: ./chat-app-backend
+    build:
+      context: ./chat-app-backend
+      target: development
     container_name: chat-app-backend
     ports:
       - "4000:4000"
