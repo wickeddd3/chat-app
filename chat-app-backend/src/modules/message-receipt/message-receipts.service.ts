@@ -7,7 +7,7 @@ import { HttpException } from "@/utils/http.exception";
 export class MessageReceiptsService {
   constructor(@inject(TYPES.MessageReceiptsRepository) private messageReceiptsRepository: MessageReceiptsRepository) {}
 
-  public async createMessageReceipts(userId: string, ids: number[]) {
+  public async createMessageReceipts(userId: string, ids: string[]) {
     try {
       return await this.messageReceiptsRepository.createMessageReceipts(userId, ids);
     } catch (error) {
