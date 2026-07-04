@@ -51,9 +51,10 @@ USER node
 
 EXPOSE 4000
 
-# Liveness probe for the container runtime (Node 22 has global fetch).
+# Liveness probe for the container runtime (Node 22 has global fetch). Uses the
+# runtime PORT (Render injects its own) and falls back to 4000 for local runs.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-  CMD node -e "fetch('http://localhost:4000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+  CMD node -e "const p=process.env.PORT||4000; fetch('http://localhost:'+p+'/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 
 # node as PID 1 receives SIGTERM directly, so graceful shutdown works.
 CMD ["node", "dist/src/index.js"]
