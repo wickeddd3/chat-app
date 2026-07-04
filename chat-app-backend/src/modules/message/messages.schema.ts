@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 export const messagesParamsSchema = z.object({
-  channelId: z.string().regex(/^\d+$/, "channelId must be a positive integer"),
+  channelId: z.uuid("channelId must be a valid UUID"),
 });
 
 export const messagesQuerySchema = z.object({
-  // Cursor is a numeric message id when present; omitted means "from the start".
-  cursor: z.string().regex(/^\d+$/, "cursor must be a positive integer").optional(),
+  // Cursor is a message id (uuid) when present; omitted means "from the start".
+  cursor: z.uuid("cursor must be a valid UUID").optional(),
 });

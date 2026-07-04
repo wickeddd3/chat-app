@@ -4,7 +4,7 @@ import type { ChannelMember as ChannelMemberType } from "../model/channel.types"
 
 function member(id: string): ChannelMemberType {
   return {
-    id: Number(id),
+    id,
     role: "MEMBER",
     user: { id: `user-${id}`, name: `User ${id}`, image: null, username: id },
   };

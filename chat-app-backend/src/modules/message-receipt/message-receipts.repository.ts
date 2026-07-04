@@ -7,7 +7,7 @@ import { HttpException } from "@/utils/http.exception";
 export class MessageReceiptsRepository {
   constructor(@inject(TYPES.PrismaClient) private db: PrismaClient) {}
 
-  public async createMessageReceipts(userId: string, ids: number[]) {
+  public async createMessageReceipts(userId: string, ids: string[]) {
     try {
       return await this.db.messageReceipt.createMany({
         data: ids.map((id) => ({

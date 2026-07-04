@@ -9,7 +9,7 @@ export interface Message {
   content: string;
   createdAt: string;
   authorId: string;
-  channelId: number;
+  channelId: string;
   parentId: string;
   clientId?: string;
   isSending?: boolean;

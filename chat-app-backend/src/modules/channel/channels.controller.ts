@@ -32,7 +32,7 @@ export class ChannelsController extends BaseController {
   public getChannel = async (req: Request, res: Response): Promise<void> => {
     const authUserId = req.authId ?? "";
     const channelId = typeof req.params.channelId === "string" ? req.params.channelId : "";
-    const channel = await this.channelsService.getChannel(authUserId, parseInt(channelId));
+    const channel = await this.channelsService.getChannel(authUserId, channelId);
 
     const transformedChannel = channel ? channelToChannelDetails(channel, authUserId) : null;
 
@@ -66,7 +66,7 @@ export class ChannelsController extends BaseController {
     const name = typeof body.name === "string" ? body.name : "";
     const memberIds = Array.isArray(body.memberIds) ? (body.memberIds as string[]) : [];
 
-    const channel = await this.channelsService.updateGroupChannel(authUserId, parseInt(channelId), {
+    const channel = await this.channelsService.updateGroupChannel(authUserId, channelId, {
       name,
       memberIds,
     });

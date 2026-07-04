@@ -8,7 +8,7 @@ import { HttpException } from "@/utils/http.exception";
 export class MessagesService {
   constructor(@inject(TYPES.MessagesRepository) private messagesRepository: MessagesRepository) {}
 
-  public async saveMessage(data: { content: string; channelId: number; authorId: string }): Promise<MessageWithAuthor> {
+  public async saveMessage(data: { content: string; channelId: string; authorId: string }): Promise<MessageWithAuthor> {
     try {
       return await this.messagesRepository.create(data);
     } catch (error) {
@@ -21,9 +21,9 @@ export class MessagesService {
     limit = 20,
     cursor,
   }: {
-    channelId: number;
+    channelId: string;
     limit?: number;
-    cursor?: number;
+    cursor?: string;
   }): Promise<PaginatedMessages> {
     try {
       return await this.messagesRepository.getMessages({
@@ -36,7 +36,7 @@ export class MessagesService {
     }
   }
 
-  public async getUnreadMessages(channelId: number, userId: string): Promise<UnreadMessage[]> {
+  public async getUnreadMessages(channelId: string, userId: string): Promise<UnreadMessage[]> {
     try {
       return await this.messagesRepository.getUnreadMessages(channelId, userId);
     } catch (error) {

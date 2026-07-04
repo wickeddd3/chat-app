@@ -16,9 +16,9 @@ export class MessagesController extends BaseController {
     const cursor = typeof req.query.cursor === "string" ? req.query.cursor : "";
 
     const { messages, nextCursor, hasMore } = await this.messagesService.getMessages({
-      channelId: parseInt(channelId),
+      channelId,
       limit,
-      cursor: parseInt(cursor),
+      cursor,
     });
 
     this.sendSuccess(res, messages, "Messages fetched successfully", 200, {

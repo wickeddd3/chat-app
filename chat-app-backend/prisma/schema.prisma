@@ -100,7 +100,7 @@ model Notification {
 }
 
 model Channel {
-  id        Int       @id @default(autoincrement())
+  id        String    @id @default(uuid())
   name      String
   type      ChannelType
   authorId  String
@@ -111,14 +111,13 @@ model Channel {
   channelMembers  ChannelMember[]
   messages  Message[]
 
-  @@index([id])
   @@index([updatedAt])
   @@map("channels")
 }
 
 model ChannelMember {
-  id          Int       @id @default(autoincrement())
-  channelId   Int
+  id          String    @id @default(uuid())
+  channelId   String
   channel     Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
   userId      String
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -130,15 +129,15 @@ model ChannelMember {
 }
 
 model Message {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   content   String
   createdAt DateTime @default(now())
-  channelId Int
+  channelId String
   channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
   authorId  String
   author    User     @relation(fields: [authorId], references: [id])
 
-  parentId  Int?
+  parentId  String?
   parent    Message?  @relation("MessageToMessage", fields: [parentId], references: [id])
   replies   Message[] @relation("MessageToMessage")
 
@@ -149,8 +148,8 @@ model Message {
 }
 
 model MessageReceipt {
-  id        Int      @id @default(autoincrement())
-  messageId Int
+  id        String   @id @default(uuid())
+  messageId String
   message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -9,7 +9,7 @@ function message(overrides: Partial<Message> = {}): Message {
     content: "Hello there",
     createdAt: "2026-01-01T00:00:00.000Z",
     authorId: "user-1",
-    channelId: 1,
+    channelId: "channel-1",
     parentId: "",
     ...overrides,
   };

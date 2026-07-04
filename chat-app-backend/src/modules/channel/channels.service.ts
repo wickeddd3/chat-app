@@ -27,7 +27,7 @@ export class ChannelsService {
     }
   }
 
-  public async getChannel(userId: string, channelId: number): Promise<InboxChannel | null> {
+  public async getChannel(userId: string, channelId: string): Promise<InboxChannel | null> {
     try {
       return await this.channelsRepository.getChannel(userId, channelId);
     } catch (error) {
@@ -62,7 +62,7 @@ export class ChannelsService {
 
   public async updateGroupChannel(
     userId: string,
-    channelId: number,
+    channelId: string,
     data: { name: string; memberIds: string[] },
   ): Promise<Channel | null> {
     try {
@@ -72,7 +72,7 @@ export class ChannelsService {
     }
   }
 
-  public async updateChannel(channelId: number): Promise<Channel> {
+  public async updateChannel(channelId: string): Promise<Channel> {
     try {
       return await this.channelsRepository.updateChannel(channelId);
     } catch (error) {

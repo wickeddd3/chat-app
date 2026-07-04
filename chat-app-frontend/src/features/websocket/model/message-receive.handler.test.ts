@@ -16,7 +16,7 @@ describe("handleIncomingMessage", () => {
       id: "message-1",
       author: { id: "user-2", name: "Jane", image: null },
       authorId: "user-2",
-      channelId: 1,
+      channelId: "channel-1",
       parentId: "",
       clientId: "client-1",
       content: "hey",
