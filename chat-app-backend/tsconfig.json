@@ -18,7 +18,9 @@
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "target": "ES2020",
+    // ES2022 gives us Error `cause` / `ErrorOptions` (used by HttpException) and
+    // is fully supported by the Node 22 runtime this service targets.
+    "target": "ES2022",
     "types": ["reflect-metadata"],
     // For nodejs:
     // "lib": ["esnext"],
