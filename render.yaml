@@ -1,0 +1,37 @@
+# Render Blueprint (Infrastructure as Code) for the chat-app backend.
+#
+# Uses the Docker runtime so the multi-stage Dockerfile controls the build.
+# This is what fixes production builds under NODE_ENV=production: the image's
+# `build` stage runs a full `npm ci` (dev deps included) to compile TypeScript,
+# and only the compiled `dist/` is carried into the slim production stage.
+#
+# To adopt: Render Dashboard → Blueprints → New Blueprint Instance (point at this
+# repo). Secret values (sync: false) are set once in the dashboard, not committed.
+services:
+  - type: web
+    name: chat-app-backend
+    runtime: docker
+    dockerfilePath: ./chat-app-backend/Dockerfile
+    dockerContext: ./chat-app-backend
+    # The Dockerfile's final stage is `production`; Render builds it by default.
+    healthCheckPath: /health
+    autoDeploy: false # Deploys are triggered by the GitHub Actions deploy hook.
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: info
+      # PORT is injected automatically by Render; the app reads it from env.
+      # Secrets — set these in the Render dashboard (never committed):
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: API_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
