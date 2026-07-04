@@ -35,7 +35,7 @@ function hookState(isPending = false) {
 
 function member(id: string): ChannelMember {
   return {
-    id: Number(id.replace(/\D/g, "")) || 0,
+    id,
     role: "MEMBER",
     user: { id, name: `User ${id}`, image: null, username: id },
   };

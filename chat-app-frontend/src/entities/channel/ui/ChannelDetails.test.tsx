@@ -5,7 +5,7 @@ import type { ChannelMember, InboxChannel } from "../model/channel.types";
 
 function member(id: string): ChannelMember {
   return {
-    id: Number(id),
+    id,
     role: "MEMBER",
     user: { id: `user-${id}`, name: `User ${id}`, image: null, username: id },
   };

@@ -16,7 +16,7 @@ function message(id: string, clientId: string): Message {
     clientId,
     author: { id: "author-1", name: "Jane" },
     authorId: "author-1",
-    channelId: 1,
+    channelId: "channel-1",
     parentId: "",
     content: `content-${id}`,
     createdAt: "2026-01-01T00:00:00.000Z",

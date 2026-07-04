@@ -12,7 +12,7 @@ export interface ChannelRecipient {
 }
 
 export interface ChannelMember {
-  id: number;
+  id: string;
   role: string;
   user: ChannelRecipient;
 }
@@ -26,7 +26,7 @@ export interface InboxChannel extends Channel {
     createdAt: string;
   };
   messages: {
-    id: number;
+    id: string;
     content: string;
     createdAt: string;
   }[];
