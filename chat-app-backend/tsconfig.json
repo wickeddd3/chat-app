@@ -4,10 +4,13 @@
     // File Layout
     "rootDirs": ["./src", "./prisma/generated"],
     "outDir": "./dist",
-    "baseUrl": "./src",
+    // baseUrl anchored at the project root so path aliases map cleanly onto the
+    // emitted output tree (dist/src, dist/prisma/generated) — this is what lets
+    // tsc-alias rewrite them to correct relative requires for `node dist`.
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["*"],
-      "@/prisma/*": ["../prisma/generated/*"]
+      "@/*": ["src/*"],
+      "@/prisma/*": ["prisma/generated/*"]
     },
     "ignoreDeprecations": "6.0",
 
