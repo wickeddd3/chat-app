@@ -2,6 +2,14 @@ import { injectable, inject, multiInject } from "inversify";
 import { TYPES } from "@/config/types";
 import { Server as SocketServer, type Socket } from "socket.io";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("WebSocket");
+
+// Shape populated by socketAuthMiddleware; socket.data is otherwise untyped (any).
+interface AuthedSocketData {
+  authId: string;
+}
 
 @injectable()
 export class WebSocketServer {
@@ -14,7 +22,7 @@ export class WebSocketServer {
     // Build the dynamic command routing index map automatically
     commands.forEach((command) => {
       this.commandRegistry.set(command.eventName, command);
-      console.log(`📡 [WebSocketService] Registered Strategy Router for: [${command.eventName}]`);
+      log.debug({ eventName: command.eventName }, "📡 Registered command router");
     });
   }
 
@@ -23,8 +31,8 @@ export class WebSocketServer {
    */
   public start(): void {
     this.webSocketServer.on("connection", (socket: Socket) => {
-      const authId = socket.data.authId;
-      console.log(`🟩 Connected: ${authId} (${socket.id})`);
+      const { authId } = socket.data as AuthedSocketData;
+      log.info({ authId, socketId: socket.id }, "🟩 Client connected");
 
       // Join a private notification room unique to this specific user profile instance
       void socket.join(`user:${authId}`);
@@ -35,7 +43,7 @@ export class WebSocketServer {
           try {
             await command.execute(socket, authId, data);
           } catch (error) {
-            console.error(`❌ Command runtime crash on event [${eventName}]:`, error);
+            log.error({ err: error, eventName, authId }, "❌ Command runtime crash");
             socket.emit("error", {
               message: `Internal server failure handling action: ${eventName}`,
             });
