@@ -13,8 +13,8 @@ export function HelpAlert() {
             purposes.
           </p>
           <ul className="list-disc md:list-inside">
-            <li>doug_welch97@example.com - password123</li>
-            <li>lynette.haley84@example.com - password123</li>
+            <li>loraine_rolfson@example.com - password123</li>
+            <li>hank.johns80@example.com - password123</li>
           </ul>
         </AlertDescription>
       </Alert>
