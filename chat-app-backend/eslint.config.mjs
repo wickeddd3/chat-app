@@ -43,6 +43,14 @@ export default tseslint.config(
       "n/no-unpublished-import": "off", // Allows importing of devDependencies for testing and seeding scripts without false positives
     },
   },
+  {
+    // Seed scripts are dev-only tooling run manually from the CLI; console
+    // output is their primary UX, so the app-wide no-console rule doesn't apply.
+    files: ["prisma/**/*.ts"],
+    rules: {
+      "no-console": "off",
+    },
+  },
   // MUST BE LAST: Disables all stylistic ESLint rules that conflict with Prettier
   eslintConfigPrettier,
 );
