@@ -1,15 +1,12 @@
 import { z } from "zod";
 
-// A channel id is a positive integer surfaced as a path string (repo parseInts it).
-const numericId = z.string().regex(/^\d+$/, "channelId must be a positive integer");
-
 export const listChannelsQuerySchema = z.object({
   cursor: z.string().optional(),
   query: z.string().optional(),
 });
 
 export const channelIdParamsSchema = z.object({
-  channelId: numericId,
+  channelId: z.uuid("channelId must be a valid UUID"),
 });
 
 export const targetUserIdParamsSchema = z.object({
