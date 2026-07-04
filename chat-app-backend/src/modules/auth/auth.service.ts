@@ -12,32 +12,32 @@ export class AuthService {
   public async createUser(data: SignUpSchemaType): Promise<User | null> {
     try {
       return await this.authRepository.create(data);
-    } catch {
-      throw new HttpException(500, "Failed to create user.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to create user.", null, { cause: error });
     }
   }
 
   public async getUserById(authId: string): Promise<User | null> {
     try {
       return await this.authRepository.getById(authId);
-    } catch {
-      throw new HttpException(500, "Failed to retrieve auth user.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve auth user.", null, { cause: error });
     }
   }
 
   public async updateUserProfile(authId: string, data: ProfileSchemaType): Promise<User | null> {
     try {
       return await this.authRepository.updateProfile(authId, data);
-    } catch {
-      throw new HttpException(500, "Failed to update user profile.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to update user profile.", null, { cause: error });
     }
   }
 
   public async updateUserImage(authId: string, data: { image: string }): Promise<User | null> {
     try {
       return await this.authRepository.updateImage(authId, data);
-    } catch {
-      throw new HttpException(500, "Failed to update user image.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to update user image.", null, { cause: error });
     }
   }
 }

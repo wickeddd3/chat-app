@@ -39,11 +39,6 @@ async function createProfile(userId: string, username: string, name: string) {
       },
     });
 
-    if (!profile) {
-      console.error(`❌ Failed to upsert profile for ${username}`);
-      return null;
-    }
-
     console.log(`📝 Profile upserted for ${name} (${username})`);
     return profile;
   } catch (err) {

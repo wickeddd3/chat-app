@@ -16,7 +16,31 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # Define variables here once for all steps
+    # Live dependencies for the boot smoke test (see "Boot Smoke Test" step).
+    # These run only on the runner; the deployed service uses Render's own infra.
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: chat_app_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -33,17 +57,74 @@ jobs:
           cd chat-app-backend
           npm ci
 
-      - name: Prisma Generate
-        run: |
-          cd chat-app-backend
-          npx prisma generate
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
       - name: Build Check
         run: |
           cd chat-app-backend
           npm run build
+        env:
+          # `npm run build` runs prisma generate (+ tsc + tsc-alias). Prisma
+          # resolves DATABASE_URL from prisma.config.ts but does not connect at
+          # generate/compile time, so a placeholder is sufficient here. The real
+          # URL is injected at runtime by the deploy target (Render).
+          DATABASE_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
+
+      - name: Lint & Format Check
+        # Runs after Build Check so the generated Prisma client exists for
+        # type-aware lint rules. NODE_ENV=production makes no-console an error
+        # (its strictest setting). eslint does not execute app code, so it needs
+        # no runtime env or database.
+        run: |
+          cd chat-app-backend
+          npm run format:check
+          npm run lint
+        env:
+          NODE_ENV: production
+
+      - name: Boot Smoke Test
+        # Boot the compiled production artifact exactly as Render runs it and
+        # assert it comes up healthy. This catches boot-time failures a build
+        # check can't see: ESM/CJS interop crashes, missing runtime deps, and
+        # broken DI wiring. /ready additionally proves DB + Redis connectivity.
+        run: |
+          cd chat-app-backend
+          node dist/src/index.js &
+          SERVER_PID=$!
+
+          # Wait up to 30s for liveness, failing early if the process dies.
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:4000/health > /dev/null; then
+              echo "✅ /health is up"
+              break
+            fi
+            if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+              echo "💥 Server exited during boot"
+              exit 1
+            fi
+            sleep 1
+          done
+
+          # Liveness must report ok.
+          curl -sf http://localhost:4000/health | grep -q '"status":"ok"' \
+            || { echo "💥 /health did not report ok"; kill "$SERVER_PID" 2>/dev/null; exit 1; }
+
+          # Readiness must be 200 (DB + Redis reachable).
+          READY_CODE=$(curl -s -o /tmp/ready.json -w "%{http_code}" http://localhost:4000/ready)
+          echo "Readiness response ($READY_CODE): $(cat /tmp/ready.json)"
+          [ "$READY_CODE" = "200" ] \
+            || { echo "💥 /ready returned $READY_CODE"; kill "$SERVER_PID" 2>/dev/null; exit 1; }
+
+          echo "✅ Boot smoke test passed"
+          kill "$SERVER_PID" 2>/dev/null || true
+        env:
+          NODE_ENV: production
+          PORT: 4000
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/chat_app_test
+          REDIS_URL: redis://localhost:6379
+          APP_URL: http://localhost:5173
+          # /health and /ready never call Supabase, so placeholders satisfy the
+          # fail-fast env validation without needing real credentials.
+          SUPABASE_URL: https://placeholder.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
 
       - name: Deploy to Render
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'

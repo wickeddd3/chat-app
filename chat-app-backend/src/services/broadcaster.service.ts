@@ -2,6 +2,9 @@ import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import type { Redis } from "ioredis";
 import notepack from "notepack.io";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("Broadcaster");
 
 @injectable()
 export class BroadcasterService {
@@ -33,7 +36,7 @@ export class BroadcasterService {
       // Publish directly into the Socket.io adapter cluster bus channel
       await this.pubClient.publish("socket.io#/#", binaryPayload);
     } catch (error) {
-      console.error(`❌ IPC Cluster Publish Failed for event [${eventName}]:`, error);
+      log.error({ err: error, eventName, room }, "❌ IPC cluster publish failed");
     }
   }
 

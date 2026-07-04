@@ -50,8 +50,8 @@ export class AuthRepository {
   public async getById(authId: string): Promise<User | null> {
     try {
       return await this.db.user.findUnique({ where: { id: authId } });
-    } catch {
-      throw new HttpException(500, "Failed to retrieve auth user.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve auth user.", null, { cause: error });
     }
   }
 
@@ -61,8 +61,8 @@ export class AuthRepository {
         where: { id: authId },
         data,
       });
-    } catch {
-      throw new HttpException(500, "Failed to update user profile.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to update user profile.", null, { cause: error });
     }
   }
 
@@ -72,8 +72,8 @@ export class AuthRepository {
         where: { id: authId },
         data,
       });
-    } catch {
-      throw new HttpException(500, "Failed to update user image.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to update user image.", null, { cause: error });
     }
   }
 }

@@ -1,10 +1,13 @@
 export class HttpException extends Error {
-  constructor(
-    public readonly statusCode: number,
-    message: string,
-    public readonly details: unknown = null,
-  ) {
-    super(message);
+  public readonly statusCode: number;
+  public readonly details: unknown;
+
+  constructor(statusCode: number, message: string, details: unknown = null, options?: ErrorOptions) {
+    // Forward ErrorOptions (notably `cause`) to Error so the underlying error is
+    // preserved for logging instead of being swallowed at the throw site.
+    super(message, options);
+    this.statusCode = statusCode;
+    this.details = details;
     Object.setPrototypeOf(this, new.target.prototype); // Restore prototype chain
   }
 }

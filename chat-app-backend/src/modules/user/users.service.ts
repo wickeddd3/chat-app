@@ -60,16 +60,16 @@ export class UsersService {
       }
 
       return suggestedUsers;
-    } catch {
-      throw new HttpException(500, "Failed to retrieve suggested users.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve suggested users.", null, { cause: error });
     }
   }
 
   public async getUserByUsername(username: string): Promise<Partial<User> | null> {
     try {
       return await this.usersRepository.getByUsername(username);
-    } catch {
-      throw new HttpException(500, "Failed to retrieve user.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve user.", null, { cause: error });
     }
   }
 }

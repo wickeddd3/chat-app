@@ -6,6 +6,9 @@ import { BaseController } from "@/utils/base.controller";
 import { PresenceService } from "@/services/presence.service";
 import { ConnectionsRepository } from "@/modules/connection/connections.repository";
 import { ChannelsRepository } from "@/modules/channel/channels.repository";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("Presence");
 
 @injectable()
 export class PresenceController extends BaseController {
@@ -28,7 +31,7 @@ export class PresenceController extends BaseController {
       const baseCacheExists = await this.redis.exists(contactKey);
 
       if (!baseCacheExists) {
-        console.warn(`[PresenceController] Rebuilding contacts cache for ${authUserId}`);
+        log.warn({ authId: authUserId }, "Rebuilding contacts cache");
         const databaseContacts = await this.connectionsRepository.getRawContactIds(authUserId);
 
         if (databaseContacts.length > 0) {
@@ -45,7 +48,7 @@ export class PresenceController extends BaseController {
         const channelCacheExists = await this.presenceService.checkChannelCacheExists(activeChannelId);
 
         if (!channelCacheExists) {
-          console.warn(`[PresenceController] Rebuilding channel cache for room: ${activeChannelId}`);
+          log.warn({ channelId: activeChannelId }, "Rebuilding channel cache");
           // Fetch raw string member IDs from your channel/prisma repository layer
           const channelMemberIds = await this.channelsRepository.getRawMemberIds(
             authUserId,

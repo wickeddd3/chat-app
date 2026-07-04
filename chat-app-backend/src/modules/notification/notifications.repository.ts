@@ -18,8 +18,10 @@ export class NotificationsRepository {
       });
 
       return unreadCount;
-    } catch {
-      throw new HttpException(500, "An error occurred while retrieving notifications unread count");
+    } catch (error) {
+      throw new HttpException(500, "An error occurred while retrieving notifications unread count", null, {
+        cause: error,
+      });
     }
   }
 
@@ -95,8 +97,10 @@ export class NotificationsRepository {
         nextCursor,
         hasMore,
       };
-    } catch {
-      throw new HttpException(500, "An error occurred while compiling your notification timeline feed.");
+    } catch (error) {
+      throw new HttpException(500, "An error occurred while compiling your notification timeline feed.", null, {
+        cause: error,
+      });
     }
   }
 
@@ -120,8 +124,10 @@ export class NotificationsRepository {
           isRead: true,
         },
       });
-    } catch {
-      throw new HttpException(500, "Failed to update notification read statuses. Please try again.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to update notification read statuses. Please try again.", null, {
+        cause: error,
+      });
     }
   }
 }

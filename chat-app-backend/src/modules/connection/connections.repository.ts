@@ -63,8 +63,8 @@ export class ConnectionsRepository {
         hasMore,
         nextCursor: nextCursor ?? null,
       };
-    } catch {
-      throw new HttpException(500, "Failed to retrieve connection contacts.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve connection contacts.", null, { cause: error });
     }
   }
 
@@ -93,8 +93,8 @@ export class ConnectionsRepository {
       const contacts = connections.map((conn) => (conn.senderId === authUserId ? conn.receiver.id : conn.sender.id));
 
       return contacts;
-    } catch {
-      throw new HttpException(500, "Failed to retrieve contacts.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve contacts.", null, { cause: error });
     }
   }
 
@@ -153,8 +153,8 @@ export class ConnectionsRepository {
         hasMore,
         nextCursor: nextCursor ?? null,
       };
-    } catch {
-      throw new HttpException(500, "Failed to retrieve sent connection requests.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve sent connection requests.", null, { cause: error });
     }
   }
 
@@ -212,8 +212,8 @@ export class ConnectionsRepository {
         hasMore,
         nextCursor: nextCursor ?? null,
       };
-    } catch {
-      throw new HttpException(500, "Failed to retrieve received connection requests.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve received connection requests.", null, { cause: error });
     }
   }
 
@@ -227,8 +227,8 @@ export class ConnectionsRepository {
       });
 
       return pendingRequestsCount;
-    } catch {
-      throw new HttpException(500, "Failed to retrieve received connection requests count.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve received connection requests count.", null, { cause: error });
     }
   }
 
@@ -288,8 +288,8 @@ export class ConnectionsRepository {
       });
 
       return result;
-    } catch {
-      throw new HttpException(500, "Failed to send connection request.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to send connection request.", null, { cause: error });
     }
   }
 
@@ -348,8 +348,8 @@ export class ConnectionsRepository {
           notification,
         };
       });
-    } catch {
-      throw new HttpException(500, "Failed to accept connection request.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to accept connection request.", null, { cause: error });
     }
   }
 
@@ -395,8 +395,8 @@ export class ConnectionsRepository {
       ]);
 
       return connection.senderId;
-    } catch {
-      throw new HttpException(500, "Failed to decline connection request.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to decline connection request.", null, { cause: error });
     }
   }
 
@@ -441,8 +441,8 @@ export class ConnectionsRepository {
       ]);
 
       return connection.receiverId;
-    } catch {
-      throw new HttpException(500, "Failed to cancel connection request.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to cancel connection request.", null, { cause: error });
     }
   }
 }

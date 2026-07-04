@@ -1,7 +1,10 @@
 import { REDIS_URL } from "@/config/app.config";
+import { createLogger } from "@/lib/logger";
 import { Redis } from "ioredis";
 
-const redisUrl = REDIS_URL ?? "redis://localhost:6379";
+const log = createLogger("Redis");
+
+const redisUrl = REDIS_URL;
 
 // Existing presence/caching client
 export const redisClient = new Redis(redisUrl);
@@ -22,12 +25,15 @@ export const connectRedis = async (): Promise<void> => {
       // Only call .connect() if the specific instance state is 'wait'
       if (client.instance.status === "wait") {
         await client.instance.connect();
-        console.log(`📡 [Redis] ${client.name} successfully connected`);
+        log.info(`📡 ${client.name} successfully connected`);
       } else {
-        console.log(`ℹ️ [Redis] ${client.name} bypasses manual trigger (Status: ${client.instance.status})`);
+        log.info(`ℹ️ ${client.name} bypasses manual trigger (Status: ${client.instance.status})`);
       }
     }
   } catch (error) {
-    console.error("Failed to connect to Redis infrastructure:", error);
+    // Redis backs presence, pub/sub, and the websocket adapter — the app cannot
+    // function without it, so fail fast rather than boot into a broken state.
+    log.error({ err: error }, "Failed to connect to Redis infrastructure");
+    throw error;
   }
 };

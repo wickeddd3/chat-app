@@ -11,8 +11,8 @@ export class MessagesService {
   public async saveMessage(data: { content: string; channelId: number; authorId: string }): Promise<MessageWithAuthor> {
     try {
       return await this.messagesRepository.create(data);
-    } catch {
-      throw new HttpException(500, "Failed to save message.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to save message.", null, { cause: error });
     }
   }
 
@@ -31,16 +31,16 @@ export class MessagesService {
         limit,
         ...(cursor !== undefined ? { cursor } : {}),
       });
-    } catch {
-      throw new HttpException(500, "Failed to retrieve messages.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve messages.", null, { cause: error });
     }
   }
 
   public async getUnreadMessages(channelId: number, userId: string): Promise<UnreadMessage[]> {
     try {
       return await this.messagesRepository.getUnreadMessages(channelId, userId);
-    } catch {
-      throw new HttpException(500, "Failed to retrieve unread messages.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve unread messages.", null, { cause: error });
     }
   }
 }

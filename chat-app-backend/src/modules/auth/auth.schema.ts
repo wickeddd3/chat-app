@@ -2,7 +2,11 @@ import { z } from "zod";
 
 export const SignUpSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
-  email: z.string().trim().min(1, "Email is required").email({ pattern: z.regexes.email }),
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email is required")
+    .pipe(z.email({ pattern: z.regexes.email })),
   username: z
     .string()
     .trim()
