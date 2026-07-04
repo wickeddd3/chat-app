@@ -4,7 +4,10 @@ import { createAdapter } from "@socket.io/redis-adapter";
 import { pubClient, subClient } from "@/lib/redis";
 import { APP_URL } from "@/config/app.config";
 import { socketAuthMiddleware } from "@/middlewares/socket-auth.middleware";
+import { createLogger } from "@/lib/logger";
 import type { Server as HttpServer } from "http";
+
+const log = createLogger("SocketServer");
 
 @injectable()
 export class SocketServerProvider {
@@ -26,7 +29,7 @@ export class SocketServerProvider {
 
     this.instance.use(socketAuthMiddleware);
 
-    console.log("⚡ [SocketServerProvider] Socket.io Engine successfully initialized");
+    log.info("⚡ Socket.io engine successfully initialized");
     return this.instance;
   }
 
