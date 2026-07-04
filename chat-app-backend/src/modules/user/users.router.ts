@@ -4,6 +4,8 @@ import { TYPES } from "@/config/types";
 import { HttpRouter } from "@/interfaces/router.interface";
 import { UsersController } from "./users.controller";
 import { authMiddleware } from "@/middlewares/auth.middleware";
+import { validate } from "@/middlewares/request.middleware";
+import { suggestedUsersQuerySchema, usernameParamsSchema } from "./users.schema";
 
 @injectable()
 export class UsersRouter implements HttpRouter {
@@ -15,8 +17,16 @@ export class UsersRouter implements HttpRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.get(this.path, [authMiddleware], this.usersController.getSuggestedUsers);
+    this.router.get(
+      this.path,
+      [authMiddleware, validate({ query: suggestedUsersQuerySchema })],
+      this.usersController.getSuggestedUsers,
+    );
 
-    this.router.get(`${this.path}/profile/:username`, [authMiddleware], this.usersController.getUserByUsername);
+    this.router.get(
+      `${this.path}/profile/:username`,
+      [authMiddleware, validate({ params: usernameParamsSchema })],
+      this.usersController.getUserByUsername,
+    );
   }
 }
