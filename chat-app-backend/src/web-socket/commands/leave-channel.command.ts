@@ -1,6 +1,9 @@
 import { injectable } from "inversify";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
+import { createLogger } from "@/lib/logger";
 import type { Socket } from "socket.io";
+
+const log = createLogger("WebSocket");
 
 interface LeaveChannelPayload {
   channelId: string;
@@ -12,7 +15,7 @@ export class LeaveChannelCommand implements WebSocketCommand {
 
   public async execute(socket: Socket, authId: string, data: LeaveChannelPayload): Promise<void> {
     const { channelId } = data;
-    console.log(`User ${authId} left channel: ${channelId}`);
+    log.debug({ authId, channelId }, "User left channel");
     await socket.leave(channelId);
   }
 }
