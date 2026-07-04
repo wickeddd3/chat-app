@@ -6,14 +6,21 @@ export function errorMiddleware(error: Error, req: Request, res: Response, _next
   let message = "An unexpected internal server error occurred";
   let details: unknown = null;
 
-  // If it's an expected operational domain exception, unpack it
+  // If it's an expected operational domain exception, unpack it.
   if (error instanceof HttpException) {
     statusCode = error.statusCode;
     message = error.message;
     details = error.details;
-  } else {
-    // Log unexpected code crashes securely for internal diagnostics (Sentry, CloudWatch)
-    console.error("💥 Critical Uncaught Application Exception:", error);
+  }
+
+  // pino-http attaches a per-request child logger (tagged with a request id).
+  const log = req.log;
+
+  // Log every server-side failure (5xx) with the full error — including the
+  // preserved `cause` chain — so nothing is silently swallowed. Client errors
+  // (4xx) are expected/operational and already captured by request logging.
+  if (statusCode >= 500) {
+    log.error({ err: error, method: req.method, url: req.url }, "💥 Request failed");
   }
 
   res.status(statusCode).json({
