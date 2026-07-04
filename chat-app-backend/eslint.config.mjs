@@ -4,7 +4,7 @@ import nodePlugin from "eslint-plugin-n";
 import eslintConfigPrettier from "eslint-config-prettier";
 
 export default tseslint.config(
-  { ignores: ["node_modules", "dist", "prisma/generated"] },
+  { ignores: ["node_modules", "dist", "prisma/generated", "coverage"] },
   {
     files: ["**/*.ts"], // Apply these rules only to TypeScript files
     extends: [
@@ -49,6 +49,19 @@ export default tseslint.config(
     files: ["prisma/**/*.ts"],
     rules: {
       "no-console": "off",
+    },
+  },
+  {
+    // Test files are transpiled by Jest (swc), excluded from the tsconfig
+    // project, so type-aware rules don't apply. Supertest response bodies are
+    // `any`, and console is fine in tests.
+    files: ["**/*.test.ts", "**/*.spec.ts", "src/test/**/*.ts"],
+    extends: [tseslint.configs.disableTypeChecked],
+    rules: {
+      "no-console": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      // Empty stub classes are a common mock pattern (e.g. jest.mock factories).
+      "@typescript-eslint/no-extraneous-class": "off",
     },
   },
   // MUST BE LAST: Disables all stylistic ESLint rules that conflict with Prettier

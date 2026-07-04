@@ -80,6 +80,14 @@ jobs:
         env:
           NODE_ENV: production
 
+      - name: Unit & Integration Tests
+        # Jest (swc) unit + supertest tests. Infra (prisma/redis) is mocked and
+        # src/test/setup.ts seeds dummy env, so no database/services are needed.
+        # Runs with coverage so the regression thresholds are enforced.
+        run: |
+          cd chat-app-backend
+          npm run test:coverage
+
       - name: Boot Smoke Test
         # Boot the compiled production artifact exactly as Render runs it and
         # assert it comes up healthy. This catches boot-time failures a build

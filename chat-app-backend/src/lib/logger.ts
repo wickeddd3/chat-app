@@ -1,5 +1,5 @@
 import pino, { type Logger } from "pino";
-import { IS_PRODUCTION, LOG_LEVEL } from "@/config/app.config";
+import { IS_PRODUCTION, IS_TEST, LOG_LEVEL } from "@/config/app.config";
 
 /**
  * Root application logger.
@@ -24,7 +24,7 @@ export const logger: Logger = pino({
     ],
     censor: "[REDACTED]",
   },
-  ...(IS_PRODUCTION
+  ...(IS_PRODUCTION || IS_TEST
     ? {}
     : {
         transport: {
