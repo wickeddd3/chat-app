@@ -50,8 +50,8 @@ export class ChannelsRepository {
       const unreadCount = channels.reduce((total, channel) => total + channel._count.messages, 0);
 
       return unreadCount;
-    } catch {
-      throw new HttpException(500, "Failed to retrieve unread messages count.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve unread messages count.", null, { cause: error });
     }
   }
 
@@ -136,8 +136,8 @@ export class ChannelsRepository {
         hasMore,
         nextCursor: nextCursor ?? null,
       };
-    } catch {
-      throw new HttpException(500, "Failed to retrieve channels.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve channels.", null, { cause: error });
     }
   }
 
@@ -172,8 +172,8 @@ export class ChannelsRepository {
           },
         },
       });
-    } catch {
-      throw new HttpException(500, "Failed to retrieve channel.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve channel.", null, { cause: error });
     }
   }
 
@@ -198,8 +198,8 @@ export class ChannelsRepository {
       const channelMembers: string[] = channel?.channelMembers.map((member) => member.user.id) ?? [];
 
       return channelMembers;
-    } catch {
-      throw new HttpException(500, "Failed to retrieve channel member ids.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve channel member ids.", null, { cause: error });
     }
   }
 
@@ -216,8 +216,8 @@ export class ChannelsRepository {
       });
 
       return existing;
-    } catch {
-      throw new HttpException(500, "Failed to find direct channel.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to find direct channel.", null, { cause: error });
     }
   }
 
@@ -243,8 +243,8 @@ export class ChannelsRepository {
 
         return channel;
       });
-    } catch {
-      throw new HttpException(500, "Failed to create direct channel.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to create direct channel.", null, { cause: error });
     }
   }
 
@@ -278,8 +278,8 @@ export class ChannelsRepository {
 
         return channel;
       });
-    } catch {
-      throw new HttpException(500, "Failed to create group channel.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to create group channel.", null, { cause: error });
     }
   }
 
@@ -335,8 +335,8 @@ export class ChannelsRepository {
 
         return updatedChannel;
       });
-    } catch {
-      throw new HttpException(500, "Failed to update group channel.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to update group channel.", null, { cause: error });
     }
   }
 
@@ -346,8 +346,8 @@ export class ChannelsRepository {
         where: { id: channelId },
         data: { updatedAt: new Date() },
       });
-    } catch {
-      throw new HttpException(500, "Failed to update channel.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to update channel.", null, { cause: error });
     }
   }
 }

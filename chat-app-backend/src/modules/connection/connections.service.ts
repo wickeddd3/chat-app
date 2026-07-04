@@ -6,6 +6,9 @@ import type { ConnectionRequestResponse, PaginatedConnections, PaginatedContacts
 import { HttpException } from "@/utils/http.exception";
 import { EventEmitter } from "events";
 import { PresenceService } from "@/services/presence.service";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("Connections");
 
 @injectable()
 export class ConnectionsService {
@@ -28,8 +31,8 @@ export class ConnectionsService {
   }): Promise<PaginatedContacts> {
     try {
       return await this.connectionsRepository.getUserContacts({ authUserId, limit, cursor, query });
-    } catch {
-      throw new HttpException(500, "Failed to retrieve connection contacts.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve connection contacts.", null, { cause: error });
     }
   }
 
@@ -46,8 +49,8 @@ export class ConnectionsService {
   }): Promise<PaginatedConnections> {
     try {
       return await this.connectionsRepository.getSentConnections({ authUserId, limit, cursor, status });
-    } catch {
-      throw new HttpException(500, "Failed to retrieve sent connection requests.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve sent connection requests.", null, { cause: error });
     }
   }
 
@@ -64,8 +67,8 @@ export class ConnectionsService {
   }): Promise<PaginatedConnections> {
     try {
       return await this.connectionsRepository.getReceivedConnections({ authUserId, limit, cursor, status });
-    } catch {
-      throw new HttpException(500, "Failed to retrieve received connection requests.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve received connection requests.", null, { cause: error });
     }
   }
 
@@ -77,8 +80,8 @@ export class ConnectionsService {
       this.dispatcher.emit("request:new", { receiverId, connection: result.receivedConnection });
 
       return result;
-    } catch {
-      throw new HttpException(500, "Failed to send connection request.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to send connection request.", null, { cause: error });
     }
   }
 
@@ -87,14 +90,19 @@ export class ConnectionsService {
       const result = await this.connectionsRepository.acceptRequest(receiverId, connectionId);
 
       const senderId = result.notification.userId; // The original requester
-      this.presenceService.setPresenceLookup(senderId, receiverId);
+
+      // Fire-and-forget presence cache warming: a failure here must not fail the
+      // (already-committed) accept, but shouldn't be silent either.
+      this.presenceService.setPresenceLookup(senderId, receiverId).catch((error: unknown) => {
+        log.error({ err: error, senderId, receiverId }, "Failed to warm presence cache");
+      });
 
       this.dispatcher.emit("notification:new", result.notification);
       this.dispatcher.emit("request:accepted", { senderId, connection: result.sentConnection });
 
       return result;
-    } catch {
-      throw new HttpException(500, "Failed to accept connection request.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to accept connection request.", null, { cause: error });
     }
   }
 
@@ -105,8 +113,8 @@ export class ConnectionsService {
       this.dispatcher.emit("request:declined", { senderId, receiverId, connectionId });
 
       return connectionId;
-    } catch {
-      throw new HttpException(500, "Failed to decline connection request.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to decline connection request.", null, { cause: error });
     }
   }
 
@@ -117,8 +125,8 @@ export class ConnectionsService {
       this.dispatcher.emit("request:canceled", { receiverId, senderId, connectionId });
 
       return connectionId;
-    } catch {
-      throw new HttpException(500, "Failed to cancel connection request.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to cancel connection request.", null, { cause: error });
     }
   }
 }

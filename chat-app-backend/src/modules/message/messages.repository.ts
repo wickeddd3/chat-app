@@ -22,8 +22,8 @@ export class MessagesRepository {
           },
         },
       });
-    } catch {
-      throw new HttpException(500, "Failed to create message.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to create message.", null, { cause: error });
     }
   }
 
@@ -79,8 +79,8 @@ export class MessagesRepository {
         hasMore: nextCursor !== null,
         nextCursor: nextCursor ?? null,
       };
-    } catch {
-      throw new HttpException(500, "Failed to retrieve messages.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve messages.", null, { cause: error });
     }
   }
 
@@ -96,8 +96,8 @@ export class MessagesRepository {
       });
 
       return messages;
-    } catch {
-      throw new HttpException(500, "Failed to retrieve unread messages.");
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve unread messages.", null, { cause: error });
     }
   }
 }
