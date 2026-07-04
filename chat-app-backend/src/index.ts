@@ -2,10 +2,13 @@ import "dotenv/config";
 import "reflect-metadata";
 // Importing app.config validates the environment (cleanEnv) and fails fast.
 import { PORT } from "@/config/app.config";
+import { createLogger } from "@/lib/logger";
 import { App } from "@/app";
 import { container } from "@/config/inversify.config";
 import { TYPES } from "@/config/types";
 import { HttpRouter } from "@/interfaces/router.interface";
+
+const log = createLogger("Bootstrap");
 
 // Dynamically resolve routers out from the central DI container instance.
 const activeRouters: HttpRouter[] = [
@@ -33,17 +36,17 @@ async function main(): Promise<void> {
 
   // Last-resort guards: log and shut down rather than dying silently.
   process.on("unhandledRejection", (reason) => {
-    console.error("💥 Unhandled promise rejection:", reason);
+    log.error({ err: reason }, "💥 Unhandled promise rejection");
     void app.shutdown("unhandledRejection");
   });
   process.on("uncaughtException", (error) => {
-    console.error("💥 Uncaught exception:", error);
+    log.error({ err: error }, "💥 Uncaught exception");
     void app.shutdown("uncaughtException");
   });
 }
 
 main().catch((error: unknown) => {
-  console.error("💥 Fatal error during startup:", error);
+  log.error({ err: error }, "💥 Fatal error during startup");
   // eslint-disable-next-line n/no-process-exit -- intentional at process boundary
   process.exit(1);
 });
