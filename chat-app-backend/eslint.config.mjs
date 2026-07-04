@@ -51,6 +51,17 @@ export default tseslint.config(
       "no-console": "off",
     },
   },
+  {
+    // Test files are transpiled by Jest (swc), excluded from the tsconfig
+    // project, so type-aware rules don't apply. Supertest response bodies are
+    // `any`, and console is fine in tests.
+    files: ["**/*.test.ts", "**/*.spec.ts", "src/test/**/*.ts"],
+    extends: [tseslint.configs.disableTypeChecked],
+    rules: {
+      "no-console": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
   // MUST BE LAST: Disables all stylistic ESLint rules that conflict with Prettier
   eslintConfigPrettier,
 );
