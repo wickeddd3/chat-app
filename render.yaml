@@ -1,19 +1,21 @@
 # Render Blueprint (Infrastructure as Code) for the chat-app backend.
 #
-# Uses the Docker runtime so the multi-stage Dockerfile controls the build.
-# This is what fixes production builds under NODE_ENV=production: the image's
-# `build` stage runs a full `npm ci` (dev deps included) to compile TypeScript,
-# and only the compiled `dist/` is carried into the slim production stage.
+# Docker runtime — the multi-stage Dockerfile is the single build definition,
+# shared with docker-compose (which builds the `development` stage). Render
+# builds the Dockerfile's final `production` stage by default:
+#   - `build` stage runs a full `npm ci` (dev deps included) and compiles TS,
+#     so NODE_ENV=production never breaks the build.
+#   - `production` stage installs runtime deps only and copies `dist/`.
 #
-# To adopt: Render Dashboard → Blueprints → New Blueprint Instance (point at this
-# repo). Secret values (sync: false) are set once in the dashboard, not committed.
+# NOTE: a Blueprint does NOT retroactively take over a service created manually
+# in the dashboard. For a dashboard-created Docker service, set the same
+# Dockerfile Path / Docker Build Context in its Settings instead.
 services:
   - type: web
     name: chat-app-backend
     runtime: docker
     dockerfilePath: ./chat-app-backend/Dockerfile
     dockerContext: ./chat-app-backend
-    # The Dockerfile's final stage is `production`; Render builds it by default.
     healthCheckPath: /health
     autoDeploy: false # Deploys are triggered by the GitHub Actions deploy hook.
     envVars:
@@ -21,7 +23,8 @@ services:
         value: production
       - key: LOG_LEVEL
         value: info
-      # PORT is injected automatically by Render; the app reads it from env.
+      # PORT is injected automatically by Render; the app reads it from env and
+      # the Dockerfile HEALTHCHECK honors it.
       # Secrets — set these in the Render dashboard (never committed):
       - key: DATABASE_URL
         sync: false
