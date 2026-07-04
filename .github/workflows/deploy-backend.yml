@@ -33,17 +33,16 @@ jobs:
           cd chat-app-backend
           npm ci
 
-      - name: Prisma Generate
-        run: |
-          cd chat-app-backend
-          npx prisma generate
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
       - name: Build Check
         run: |
           cd chat-app-backend
           npm run build
+        env:
+          # `npm run build` runs prisma generate (+ tsc + tsc-alias). Prisma
+          # resolves DATABASE_URL from prisma.config.ts but does not connect at
+          # generate/compile time, so a placeholder is sufficient here. The real
+          # URL is injected at runtime by the deploy target (Render).
+          DATABASE_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
 
       - name: Deploy to Render
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
