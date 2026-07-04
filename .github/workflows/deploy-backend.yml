@@ -68,6 +68,18 @@ jobs:
           # URL is injected at runtime by the deploy target (Render).
           DATABASE_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
 
+      - name: Lint & Format Check
+        # Runs after Build Check so the generated Prisma client exists for
+        # type-aware lint rules. NODE_ENV=production makes no-console an error
+        # (its strictest setting). eslint does not execute app code, so it needs
+        # no runtime env or database.
+        run: |
+          cd chat-app-backend
+          npm run format:check
+          npm run lint
+        env:
+          NODE_ENV: production
+
       - name: Boot Smoke Test
         # Boot the compiled production artifact exactly as Render runs it and
         # assert it comes up healthy. This catches boot-time failures a build
