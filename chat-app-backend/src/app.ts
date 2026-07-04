@@ -11,7 +11,9 @@ import { swaggerSpecs } from "@/config/swagger";
 import { HttpRouter } from "@/interfaces/router.interface";
 import { ALLOWED_ORIGINS } from "@/config/cors-origins";
 
-import { connectRedis } from "@/lib/redis";
+import { connectRedis, redisClient, pubClient, subClient } from "@/lib/redis";
+import { prisma } from "@/lib/prisma";
+import { createHealthRouter } from "@/lib/health";
 import { EventEmitter } from "events";
 
 import { container } from "@/config/inversify.config";
@@ -21,49 +23,104 @@ import { errorMiddleware } from "@/middlewares/error.middleware";
 
 import { SocketServerProvider } from "@/web-socket/socket-server.provider";
 import { WebSocketServer } from "@/web-socket/web-socket.server";
+import type { Server as SocketServer } from "socket.io";
 
 import { NotificationSubscriber } from "@/subscribers/notification.subscriber";
 import { RequestSubscriber } from "@/subscribers/request.subscriber";
+
+// How long to wait for in-flight work to drain before forcing exit.
+const SHUTDOWN_TIMEOUT_MS = 10_000;
 
 export class App {
   public express: Application;
   public port: number;
   public server: HttpServer;
 
+  private io: SocketServer | null = null;
+  private isShuttingDown = false;
+
   constructor(routers: HttpRouter[], port: number) {
     this.express = express();
     this.port = port;
     this.server = createServer(this.express);
 
+    // Construction is side-effect free (no I/O); everything async happens in
+    // start(). This keeps the app importable/testable and lets start() control
+    // ordering (connect infra before serving traffic).
     this.initializeMiddlewares();
+    this.initializeHealthChecks();
     this.initializeRouters(routers);
-
-    // Error middleware MUST be loaded LAST in the express chain to capture bubble-ups
-    this.express.use(errorMiddleware);
-
-    // API documentation
     this.initializeSwagger();
 
-    // Establish Redis connection before starting the WebSocket server
-    void connectRedis();
-
-    // Register WebSocket event handlers before starting the WebSocket server
-    this.initializeEventSubscribers();
-
-    // Initialize and start the WebSocket server
-    // Fetch the provider and pass the server instance to it
-    const serverProvider = container.get<SocketServerProvider>(TYPES.SocketServerProvider);
-    serverProvider.create(this.server);
-
-    // Resolve and start the WebSocket server wrapper cleanly
-    const webSocketServer = container.get<WebSocketServer>(TYPES.WebSocketServer);
-    webSocketServer.start();
+    // Error middleware MUST be registered LAST so it can capture bubble-ups.
+    this.express.use(errorMiddleware);
   }
 
-  public start(): void {
-    this.server.listen(this.port, () => {
-      console.log(`Server running on port ${String(this.port)}`);
+  /**
+   * Boots infrastructure in order, then begins accepting traffic.
+   */
+  public async start(): Promise<void> {
+    // 1. Connect Redis before anything that depends on it (websocket adapter).
+    await connectRedis();
+
+    // 2. Bring up the realtime layer.
+    this.initializeWebSocket();
+
+    // 3. Wire domain-event subscribers.
+    this.initializeEventSubscribers();
+
+    // 4. Start listening.
+    await new Promise<void>((resolve) => {
+      this.server.listen(this.port, () => {
+        console.log(`🚀 Server running on port ${String(this.port)}`);
+        resolve();
+      });
     });
+  }
+
+  /**
+   * Graceful shutdown: stop taking traffic, drain sockets, close infra.
+   * Idempotent — safe to call once per signal.
+   */
+  public async shutdown(signal: string): Promise<void> {
+    if (this.isShuttingDown) return;
+    this.isShuttingDown = true;
+    console.log(`🛑 [${signal}] Graceful shutdown initiated`);
+
+    // Force-exit if draining hangs, so we never block a deploy indefinitely.
+    const forceExit = setTimeout(() => {
+      console.error("⏱️  Shutdown timed out — forcing exit");
+      // eslint-disable-next-line n/no-process-exit -- intentional at process boundary
+      process.exit(1);
+    }, SHUTDOWN_TIMEOUT_MS);
+    forceExit.unref();
+
+    try {
+      // Disconnect websocket clients (frees keep-alive conns holding the server).
+      if (this.io) {
+        this.io.disconnectSockets(true);
+      }
+
+      // Stop accepting new HTTP connections and wait for in-flight to finish.
+      await new Promise<void>((resolve, reject) => {
+        this.server.close((err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+
+      // Close infrastructure connections.
+      await Promise.allSettled([redisClient.quit(), pubClient.quit(), subClient.quit(), prisma.$disconnect()]);
+
+      clearTimeout(forceExit);
+      console.log("✅ Shutdown complete");
+      // eslint-disable-next-line n/no-process-exit -- intentional at process boundary
+      process.exit(0);
+    } catch (error) {
+      console.error("💥 Error during shutdown:", error);
+      // eslint-disable-next-line n/no-process-exit -- intentional at process boundary
+      process.exit(1);
+    }
   }
 
   private initializeMiddlewares(): void {
@@ -77,6 +134,11 @@ export class App {
     );
     this.express.use(morgan("dev"));
     this.express.use(compression());
+  }
+
+  private initializeHealthChecks(): void {
+    // Root-level (unprefixed, unauthenticated) so probes are stable + cheap.
+    this.express.use(createHealthRouter(() => this.isShuttingDown));
   }
 
   private initializeRouters(routers: HttpRouter[]): void {
@@ -97,13 +159,19 @@ export class App {
     );
   }
 
+  private initializeWebSocket(): void {
+    const serverProvider = container.get<SocketServerProvider>(TYPES.SocketServerProvider);
+    this.io = serverProvider.create(this.server);
+
+    const webSocketServer = container.get<WebSocketServer>(TYPES.WebSocketServer);
+    webSocketServer.start();
+  }
+
   private initializeEventSubscribers(): void {
-    // Extract the dispatcher instance and subscriber class from the DI environment
     const dispatcher = container.get<EventEmitter>(TYPES.EventDispatcher);
     const notificationSubscriber = container.get<NotificationSubscriber>(TYPES.NotificationSubscriber);
     const requestSubscriber = container.get<RequestSubscriber>(TYPES.RequestSubscriber);
 
-    // Register the handler using injectable class context instance
     dispatcher.on("notification:new", notificationSubscriber.handleNotificationCreated);
     dispatcher.on("request:new", requestSubscriber.handleRequestSent);
     dispatcher.on("request:accepted", requestSubscriber.handleRequestAccepted);
