@@ -13,9 +13,9 @@ export interface MessageWithAuthor extends Message {
 export interface PaginatedMessages {
   messages: Partial<MessageWithAuthor>[];
   hasMore: boolean;
-  nextCursor: number | null;
+  nextCursor: string | null;
 }
 
 export interface UnreadMessage {
-  id: number;
+  id: string;
 }
