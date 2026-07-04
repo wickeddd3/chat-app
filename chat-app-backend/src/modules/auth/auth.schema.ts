@@ -29,3 +29,9 @@ export const ProfileSchema = z.object({
 });
 
 export type ProfileSchemaType = z.infer<typeof ProfileSchema>;
+
+export const UpdateImageSchema = z.object({
+  image: z.string().trim().min(1, "Image is required"),
+});
+
+export type UpdateImageSchemaType = z.infer<typeof UpdateImageSchema>;
