@@ -4,6 +4,8 @@ import { TYPES } from "@/config/types";
 import { HttpRouter } from "@/interfaces/router.interface";
 import { NotificationsController } from "./notifications.controller";
 import { authMiddleware } from "@/middlewares/auth.middleware";
+import { validate } from "@/middlewares/request.middleware";
+import { markAsReadBodySchema, notificationsQuerySchema } from "./notifications.schema";
 
 @injectable()
 export class NotificationsRouter implements HttpRouter {
@@ -15,8 +17,16 @@ export class NotificationsRouter implements HttpRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.get(this.path, [authMiddleware], this.notificationsController.getNotifications);
+    this.router.get(
+      this.path,
+      [authMiddleware, validate({ query: notificationsQuerySchema })],
+      this.notificationsController.getNotifications,
+    );
 
-    this.router.post(`${this.path}/mark-as-read`, [authMiddleware], this.notificationsController.markAsRead);
+    this.router.post(
+      `${this.path}/mark-as-read`,
+      [authMiddleware, validate({ body: markAsReadBodySchema })],
+      this.notificationsController.markAsRead,
+    );
   }
 }

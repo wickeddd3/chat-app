@@ -4,6 +4,8 @@ import { TYPES } from "@/config/types";
 import { HttpRouter } from "@/interfaces/router.interface";
 import { MessagesController } from "./messages.controller";
 import { authMiddleware } from "@/middlewares/auth.middleware";
+import { validate } from "@/middlewares/request.middleware";
+import { messagesParamsSchema, messagesQuerySchema } from "./messages.schema";
 
 @injectable()
 export class MessagesRouter implements HttpRouter {
@@ -15,6 +17,10 @@ export class MessagesRouter implements HttpRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.get(`${this.path}/:channelId`, [authMiddleware], this.messagesController.getMessages);
+    this.router.get(
+      `${this.path}/:channelId`,
+      [authMiddleware, validate({ params: messagesParamsSchema, query: messagesQuerySchema })],
+      this.messagesController.getMessages,
+    );
   }
 }

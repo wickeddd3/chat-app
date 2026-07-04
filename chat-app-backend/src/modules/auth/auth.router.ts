@@ -4,8 +4,8 @@ import { TYPES } from "@/config/types";
 import { HttpRouter } from "@/interfaces/router.interface";
 import { AuthController } from "./auth.controller";
 import { authMiddleware } from "@/middlewares/auth.middleware";
-import { requestMiddleware } from "@/middlewares/request.middleware";
-import { ProfileSchema, SignUpSchema } from "./auth.schema";
+import { validate } from "@/middlewares/request.middleware";
+import { ProfileSchema, SignUpSchema, UpdateImageSchema } from "./auth.schema";
 
 @injectable()
 export class AuthRouter implements HttpRouter {
@@ -19,14 +19,18 @@ export class AuthRouter implements HttpRouter {
   private initializeRoutes(): void {
     this.router.get(this.path, [authMiddleware], this.authController.getAuthUser);
 
-    this.router.post(`${this.path}/sign-up`, [requestMiddleware(SignUpSchema)], this.authController.signUp);
+    this.router.post(`${this.path}/sign-up`, [validate({ body: SignUpSchema })], this.authController.signUp);
 
     this.router.post(
       `${this.path}/profile`,
-      [authMiddleware, requestMiddleware(ProfileSchema)],
+      [authMiddleware, validate({ body: ProfileSchema })],
       this.authController.updateUserProfile,
     );
 
-    this.router.post(`${this.path}/image`, [authMiddleware], this.authController.updateUserImage);
+    this.router.post(
+      `${this.path}/image`,
+      [authMiddleware, validate({ body: UpdateImageSchema })],
+      this.authController.updateUserImage,
+    );
   }
 }

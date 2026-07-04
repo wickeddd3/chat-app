@@ -4,6 +4,8 @@ import { TYPES } from "@/config/types";
 import { HttpRouter } from "@/interfaces/router.interface";
 import { PresenceController } from "./presence.controller";
 import { authMiddleware } from "@/middlewares/auth.middleware";
+import { validate } from "@/middlewares/request.middleware";
+import { syncSnapshotQuerySchema } from "./presence.schema";
 
 @injectable()
 export class PresenceRouter implements HttpRouter {
@@ -15,6 +17,10 @@ export class PresenceRouter implements HttpRouter {
   }
 
   private initializeRoutes(): void {
-    this.router.get(`${this.path}/sync-snapshot`, [authMiddleware], this.presenceController.syncSnapshot);
+    this.router.get(
+      `${this.path}/sync-snapshot`,
+      [authMiddleware, validate({ query: syncSnapshotQuerySchema })],
+      this.presenceController.syncSnapshot,
+    );
   }
 }
