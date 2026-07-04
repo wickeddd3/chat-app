@@ -2,7 +2,7 @@ import express, { type Application } from "express";
 import { createServer, type Server as HttpServer } from "http";
 import cors from "cors";
 import helmet from "helmet";
-import morgan from "morgan";
+import { pinoHttp } from "pino-http";
 import compression from "compression";
 
 import swaggerUi from "swagger-ui-express";
@@ -14,6 +14,7 @@ import { ALLOWED_ORIGINS } from "@/config/cors-origins";
 import { connectRedis, redisClient, pubClient, subClient } from "@/lib/redis";
 import { prisma } from "@/lib/prisma";
 import { createHealthRouter } from "@/lib/health";
+import { logger, createLogger } from "@/lib/logger";
 import { EventEmitter } from "events";
 
 import { container } from "@/config/inversify.config";
@@ -30,6 +31,8 @@ import { RequestSubscriber } from "@/subscribers/request.subscriber";
 
 // How long to wait for in-flight work to drain before forcing exit.
 const SHUTDOWN_TIMEOUT_MS = 10_000;
+
+const log = createLogger("App");
 
 export class App {
   public express: Application;
@@ -72,7 +75,7 @@ export class App {
     // 4. Start listening.
     await new Promise<void>((resolve) => {
       this.server.listen(this.port, () => {
-        console.log(`🚀 Server running on port ${String(this.port)}`);
+        log.info({ port: this.port }, "🚀 Server running");
         resolve();
       });
     });
@@ -85,11 +88,11 @@ export class App {
   public async shutdown(signal: string): Promise<void> {
     if (this.isShuttingDown) return;
     this.isShuttingDown = true;
-    console.log(`🛑 [${signal}] Graceful shutdown initiated`);
+    log.info({ signal }, "🛑 Graceful shutdown initiated");
 
     // Force-exit if draining hangs, so we never block a deploy indefinitely.
     const forceExit = setTimeout(() => {
-      console.error("⏱️  Shutdown timed out — forcing exit");
+      log.error("⏱️  Shutdown timed out — forcing exit");
       // eslint-disable-next-line n/no-process-exit -- intentional at process boundary
       process.exit(1);
     }, SHUTDOWN_TIMEOUT_MS);
@@ -113,11 +116,11 @@ export class App {
       await Promise.allSettled([redisClient.quit(), pubClient.quit(), subClient.quit(), prisma.$disconnect()]);
 
       clearTimeout(forceExit);
-      console.log("✅ Shutdown complete");
+      log.info("✅ Shutdown complete");
       // eslint-disable-next-line n/no-process-exit -- intentional at process boundary
       process.exit(0);
     } catch (error) {
-      console.error("💥 Error during shutdown:", error);
+      log.error({ err: error }, "💥 Error during shutdown");
       // eslint-disable-next-line n/no-process-exit -- intentional at process boundary
       process.exit(1);
     }
@@ -132,7 +135,21 @@ export class App {
         credentials: true,
       }),
     );
-    this.express.use(morgan("dev"));
+    // Structured per-request logging with a generated request id (available as
+    // req.log). Health probes are noisy and uninteresting, so skip them.
+    this.express.use(
+      pinoHttp({
+        logger,
+        autoLogging: {
+          ignore: (req) => req.url === "/health" || req.url === "/ready",
+        },
+        customLogLevel: (_req, res, err) => {
+          if (res.statusCode >= 500 || err) return "error";
+          if (res.statusCode >= 400) return "warn";
+          return "info";
+        },
+      }),
+    );
     this.express.use(compression());
   }
 
@@ -178,6 +195,6 @@ export class App {
     dispatcher.on("request:canceled", requestSubscriber.handleRequestCanceled);
     dispatcher.on("request:declined", requestSubscriber.handleRequestDeclined);
 
-    console.log("🔔 [App] Successfully registered domain event subscribers");
+    log.info("🔔 Successfully registered domain event subscribers");
   }
 }
