@@ -2,7 +2,7 @@ import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { BaseController } from "@/utils/base.controller";
 import { UsersService } from "./users.service";
-import type { Request, Response, NextFunction } from "express";
+import type { Request, Response } from "express";
 import { NotFoundException } from "@/utils/http.exception";
 
 @injectable()
@@ -11,32 +11,23 @@ export class UsersController extends BaseController {
     super();
   }
 
-  public getSuggestedUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const authUserId = req.authId ?? "";
-      const limit = 20;
-      const query = (req.query.query as string) || "";
-      const responseData = await this.usersService.getSuggestedUsers({ authUserId, limit, query });
+  public getSuggestedUsers = async (req: Request, res: Response): Promise<void> => {
+    const authUserId = req.authId ?? "";
+    const limit = 20;
+    const query = (req.query.query as string) || "";
+    const responseData = await this.usersService.getSuggestedUsers({ authUserId, limit, query });
 
-      this.sendSuccess(res, responseData, "Suggested users fetched successfully");
-    } catch (error: unknown) {
-      // Directly triggers errorMiddleware instantly
-      next(error);
-    }
+    this.sendSuccess(res, responseData, "Suggested users fetched successfully");
   };
 
-  public getUserByUsername = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-      const username = req.params.username as string;
-      const user = await this.usersService.getUserByUsername(username);
+  public getUserByUsername = async (req: Request, res: Response): Promise<void> => {
+    const username = req.params.username as string;
+    const user = await this.usersService.getUserByUsername(username);
 
-      if (!user) {
-        throw new NotFoundException(`User profile '@${username}' could not be found`);
-      }
-
-      this.sendSuccess(res, user, "User profile retrieved successfully");
-    } catch (error: unknown) {
-      next(error);
+    if (!user) {
+      throw new NotFoundException(`User profile '@${username}' could not be found`);
     }
+
+    this.sendSuccess(res, user, "User profile retrieved successfully");
   };
 }
