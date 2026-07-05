@@ -4,6 +4,7 @@ import { PrismaClient } from "@/prisma/client";
 import type { ConnectionStatus } from "@/prisma/enums";
 import type { ConnectionRequestResponse, PaginatedConnections, PaginatedContacts } from "./connections.types";
 import { HttpException } from "@/utils/http.exception";
+import { decodeCursor, encodeCursor } from "@/utils/cursor";
 
 @injectable()
 export class ConnectionsRepository {
@@ -21,10 +22,13 @@ export class ConnectionsRepository {
     query?: string;
   }): Promise<PaginatedContacts> {
     try {
+      const decoded = decodeCursor(cursor);
       // Fetch all accepted connections where the user is either sender or receiver
       const connections = await this.db.connection.findMany({
         where: {
           status: "ACCEPTED",
+          // The search filter and the keyset cursor are separate OR-groups, so
+          // they must be combined under AND (a single object can hold one OR).
           AND: [
             {
               OR: [
@@ -32,36 +36,50 @@ export class ConnectionsRepository {
                 { receiverId: authUserId, sender: { name: { contains: query, mode: "insensitive" } } },
               ],
             },
+            // Keyset cursor: (updatedAt, id) strictly before the boundary.
+            ...(decoded
+              ? [
+                  {
+                    OR: [
+                      { updatedAt: { lt: decoded.timestamp } },
+                      { updatedAt: decoded.timestamp, id: { lt: decoded.id } },
+                    ],
+                  },
+                ]
+              : []),
           ],
-          ...(cursor ? { updatedAt: { lt: new Date(cursor) } } : {}),
         },
         select: {
+          id: true,
           updatedAt: true,
           senderId: true,
           receiverId: true,
           sender: { select: { id: true, name: true, username: true, image: true } },
           receiver: { select: { id: true, name: true, username: true, image: true } },
         },
-        take: limit,
-        orderBy: { updatedAt: "desc" },
+        // Fetch one extra to reliably determine hasMore.
+        take: limit + 1,
+        orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
       });
 
+      const hasMore = connections.length > limit;
+      const pageItems = hasMore ? connections.slice(0, limit) : connections;
+
       // Map the connection payload down to just the opposing User profile object
-      const contacts = connections.map((conn) => {
+      const contacts = pageItems.map((conn) => {
         return {
           ...(conn.senderId === authUserId ? conn.receiver : conn.sender),
           updatedAt: conn.updatedAt,
         };
       });
 
-      const hasMore = connections.length === limit;
-      const lastItem = connections[connections.length - 1];
-      const nextCursor = hasMore && lastItem ? lastItem.updatedAt.toISOString() : null;
+      const lastItem = pageItems.at(-1);
+      const nextCursor = hasMore && lastItem ? encodeCursor(lastItem.updatedAt, lastItem.id) : null;
 
       return {
         contacts: contacts,
         hasMore,
-        nextCursor: nextCursor ?? null,
+        nextCursor,
       };
     } catch (error) {
       throw new HttpException(500, "Failed to retrieve connection contacts.", null, { cause: error });
@@ -115,11 +133,15 @@ export class ConnectionsRepository {
     status?: ConnectionStatus;
   }): Promise<PaginatedConnections> {
     try {
+      const decoded = decodeCursor(cursor);
       const connections = await this.db.connection.findMany({
         where: {
           senderId: authUserId,
           status,
-          ...(cursor ? { updatedAt: { lt: new Date(cursor) } } : {}),
+          // Keyset cursor: (updatedAt, id) strictly before the boundary.
+          ...(decoded && {
+            OR: [{ updatedAt: { lt: decoded.timestamp } }, { updatedAt: decoded.timestamp, id: { lt: decoded.id } }],
+          }),
         },
         include: {
           receiver: {
@@ -131,12 +153,16 @@ export class ConnectionsRepository {
             },
           },
         },
-        take: limit,
-        orderBy: { updatedAt: "desc" },
+        // Fetch one extra to reliably determine hasMore.
+        take: limit + 1,
+        orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
       });
 
+      const hasMore = connections.length > limit;
+      const pageItems = hasMore ? connections.slice(0, limit) : connections;
+
       // Flatten payload so it yields cleanly: { connectionId, status, user: receiverProfile }
-      const sentConnections = connections.map((conn) => ({
+      const sentConnections = pageItems.map((conn) => ({
         id: conn.id,
         status: conn.status,
         createdAt: conn.createdAt,
@@ -144,14 +170,13 @@ export class ConnectionsRepository {
         user: conn.receiver,
       }));
 
-      const hasMore = connections.length === limit;
-      const lastItem = connections[connections.length - 1];
-      const nextCursor = hasMore && lastItem ? lastItem.updatedAt.toISOString() : null;
+      const lastItem = pageItems.at(-1);
+      const nextCursor = hasMore && lastItem ? encodeCursor(lastItem.updatedAt, lastItem.id) : null;
 
       return {
         connections: sentConnections,
         hasMore,
-        nextCursor: nextCursor ?? null,
+        nextCursor,
       };
     } catch (error) {
       throw new HttpException(500, "Failed to retrieve sent connection requests.", null, { cause: error });
@@ -174,11 +199,15 @@ export class ConnectionsRepository {
     status?: ConnectionStatus;
   }): Promise<PaginatedConnections> {
     try {
+      const decoded = decodeCursor(cursor);
       const connections = await this.db.connection.findMany({
         where: {
           receiverId: authUserId,
           status,
-          ...(cursor ? { updatedAt: { lt: new Date(cursor) } } : {}),
+          // Keyset cursor: (updatedAt, id) strictly before the boundary.
+          ...(decoded && {
+            OR: [{ updatedAt: { lt: decoded.timestamp } }, { updatedAt: decoded.timestamp, id: { lt: decoded.id } }],
+          }),
         },
         include: {
           sender: {
@@ -190,12 +219,16 @@ export class ConnectionsRepository {
             },
           },
         },
-        take: limit,
-        orderBy: { updatedAt: "desc" },
+        // Fetch one extra to reliably determine hasMore.
+        take: limit + 1,
+        orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
       });
 
+      const hasMore = connections.length > limit;
+      const pageItems = hasMore ? connections.slice(0, limit) : connections;
+
       // Flatten payload so it yields cleanly: { connectionId, status, user: senderProfile }
-      const receivedConnections = connections.map((conn) => ({
+      const receivedConnections = pageItems.map((conn) => ({
         id: conn.id,
         status: conn.status,
         createdAt: conn.createdAt,
@@ -203,14 +236,13 @@ export class ConnectionsRepository {
         user: conn.sender,
       }));
 
-      const hasMore = connections.length === limit;
-      const lastItem = connections[connections.length - 1];
-      const nextCursor = hasMore && lastItem ? lastItem.updatedAt.toISOString() : null;
+      const lastItem = pageItems.at(-1);
+      const nextCursor = hasMore && lastItem ? encodeCursor(lastItem.updatedAt, lastItem.id) : null;
 
       return {
         connections: receivedConnections,
         hasMore,
-        nextCursor: nextCursor ?? null,
+        nextCursor,
       };
     } catch (error) {
       throw new HttpException(500, "Failed to retrieve received connection requests.", null, { cause: error });
