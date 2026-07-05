@@ -3,6 +3,7 @@
   // transpiles those via swc). Used by `npm run build` so tests never land in
   // dist/. The base tsconfig.json still includes tests for editor + eslint.
   "extends": "./tsconfig.json",
-  "include": ["src/**/*", "prisma/seed/*", "prisma.config.ts", "src/types/express.d.ts"],
-  "exclude": ["node_modules", "dist", "src/**/*.test.ts", "src/**/*.spec.ts", "src/test"]
+  "include": ["src/**/*", "prisma.config.ts", "src/types/express.d.ts"],
+  // Seed tooling is dev-only (run via tsx), so it's kept out of the emitted build.
+  "exclude": ["node_modules", "dist", "src/**/*.test.ts", "src/**/*.spec.ts", "src/test", "prisma/seed"]
 }
