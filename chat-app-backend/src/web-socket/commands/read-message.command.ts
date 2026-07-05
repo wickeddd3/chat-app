@@ -23,6 +23,11 @@ export class ReadMessageCommand implements WebSocketCommand {
   public async execute(socket: Socket, authId: string, data: ReadMessagePayload): Promise<void> {
     const targetChannelId = data.channelId;
 
+    // Guard: without a channel id, the unread query below would drop its
+    // `channelId` filter (Prisma ignores `undefined`) and mark EVERY channel's
+    // messages as read. Never let a missing id fan out across all channels.
+    if (!targetChannelId) return;
+
     // 1. Find all messages in this channel NOT authored by the user
     // and NOT already read by the user
     const unreadMessages = await this.messagesService.getUnreadMessages(targetChannelId, authId);
