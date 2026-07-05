@@ -21,7 +21,9 @@
     "migrate:dev": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
     "migrate:status": "prisma migrate status",
-    "seed": "tsx prisma/seed/index.ts"
+    "seed": "tsx prisma/seed/index.ts",
+    "seed:prod": "tsx prisma/seed/index.ts --reuse-auth",
+    "seed:clean": "tsx prisma/seed/clean.ts"
   },
   "keywords": [],
   "author": "",
