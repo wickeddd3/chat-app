@@ -197,6 +197,22 @@ export class ChannelsRepository {
     }
   }
 
+  /**
+   * Authoritative membership check for authorization on message read/write paths.
+   * Uses the (channelId, userId) unique index for a fast, exact lookup.
+   */
+  public async isMember(userId: string, channelId: string): Promise<boolean> {
+    try {
+      const member = await this.db.channelMember.findUnique({
+        where: { channelId_userId: { channelId, userId } },
+        select: { id: true },
+      });
+      return member !== null;
+    } catch (error) {
+      throw new HttpException(500, "Failed to verify channel membership.", null, { cause: error });
+    }
+  }
+
   public async getRawMemberIds(userId: string, channelId: string): Promise<string[]> {
     try {
       const channel = await this.db.channel.findFirst({

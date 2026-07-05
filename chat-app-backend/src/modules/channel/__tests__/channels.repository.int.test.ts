@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { ChannelsRepository } from "@/modules/channel/channels.repository";
 import { prisma } from "@/test/helpers/db.helper";
 import { addMember, createChannel, createMessage, createReceipt, createUser } from "@/test/factories";
@@ -22,6 +23,22 @@ describe("ChannelsRepository (integration, real DB)", () => {
 
       expect((await repo.findExistingDirectChannel(a.id, b.id))?.id).toBe(created.id);
       expect((await repo.findExistingDirectChannel(b.id, a.id))?.id).toBe(created.id);
+    });
+  });
+
+  describe("isMember (authorization guard)", () => {
+    it("returns true for a member and false for a non-member", async () => {
+      const [member, outsider] = [await createUser(), await createUser()];
+      const channel = await createChannel({ authorId: member.id, type: "GROUP" });
+      await addMember(channel.id, member.id);
+
+      expect(await repo.isMember(member.id, channel.id)).toBe(true);
+      expect(await repo.isMember(outsider.id, channel.id)).toBe(false);
+    });
+
+    it("returns false for a non-existent channel", async () => {
+      const user = await createUser();
+      expect(await repo.isMember(user.id, randomUUID())).toBe(false);
     });
   });
 

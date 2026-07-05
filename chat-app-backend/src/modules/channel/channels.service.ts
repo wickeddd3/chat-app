@@ -35,6 +35,24 @@ export class ChannelsService {
     }
   }
 
+  /** Authorization guard: is `userId` a member of `channelId`? */
+  public async isMember(userId: string, channelId: string): Promise<boolean> {
+    try {
+      return await this.channelsRepository.isMember(userId, channelId);
+    } catch (error) {
+      throw new HttpException(500, "Failed to verify channel membership.", null, { cause: error });
+    }
+  }
+
+  /** Returns every member id of a channel the requester belongs to (used for realtime fan-out). */
+  public async getMemberIds(userId: string, channelId: string): Promise<string[]> {
+    try {
+      return await this.channelsRepository.getRawMemberIds(userId, channelId);
+    } catch (error) {
+      throw new HttpException(500, "Failed to retrieve channel members.", null, { cause: error });
+    }
+  }
+
   public async findChannelOrCreate(userId: string, targetUserId: string): Promise<Channel | null> {
     try {
       const existing = await this.channelsRepository.findExistingDirectChannel(userId, targetUserId);

@@ -2,6 +2,7 @@ import express, { type Application } from "express";
 import { createServer, type Server as HttpServer } from "http";
 import cors from "cors";
 import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { pinoHttp } from "pino-http";
 import compression from "compression";
 
@@ -127,6 +128,9 @@ export class App {
   }
 
   private initializeMiddlewares(): void {
+    // Behind Render's proxy — trust the first hop so req.ip (and the rate
+    // limiter's per-client keying) reflect the real client, not the proxy.
+    this.express.set("trust proxy", 1);
     this.express.use(express.json({ limit: "10mb" }));
     this.express.use(helmet());
     this.express.use(
@@ -159,6 +163,17 @@ export class App {
   }
 
   private initializeRouters(routers: HttpRouter[]): void {
+    // Per-client rate limit on the API surface (health probes are mounted
+    // separately and stay unthrottled). Caps abuse/DoS bursts.
+    const apiLimiter = rateLimit({
+      windowMs: 60_000,
+      limit: 120, // requests per IP per minute
+      standardHeaders: "draft-7",
+      legacyHeaders: false,
+      message: { success: false, message: "Too many requests, please try again later." },
+    });
+    this.express.use("/api", apiLimiter);
+
     routers.forEach((routerItem: HttpRouter) => {
       this.express.use("/api", routerItem.router);
     });
