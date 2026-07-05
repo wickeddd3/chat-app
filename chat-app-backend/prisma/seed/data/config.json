@@ -1,0 +1,11 @@
+{
+  "password": "password123",
+  "generatedPrefix": "member",
+  "contacts": 110,
+  "receivedRequests": 110,
+  "sentRequests": 110,
+  "authConcurrency": 8,
+  "directMessages": { "min": 3, "max": 9 },
+  "showcaseMessages": 150,
+  "unreadTail": 3
+}

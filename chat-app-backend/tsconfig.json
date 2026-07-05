@@ -49,6 +49,7 @@
     "jsx": "react-jsx",
     // "verbatimModuleSyntax": true,
     "isolatedModules": true,
+    "resolveJsonModule": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
@@ -58,7 +59,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "include": ["src/**/*", "prisma/seed/*", "prisma.config.ts", "src/types/express.d.ts"],
+  "include": ["src/**/*", "prisma/seed/**/*", "prisma.config.ts", "src/types/express.d.ts"],
   // Includes tests so the editor + eslint resolve aliases/jest types for them.
   // The emitting build uses tsconfig.build.json, which excludes tests.
   "exclude": ["node_modules", "dist"]
