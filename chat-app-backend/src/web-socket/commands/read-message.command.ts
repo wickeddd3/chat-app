@@ -5,6 +5,7 @@ import type { Socket } from "socket.io";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import { MessagesService } from "@/modules/message/messages.service";
 import { MessageReceiptsService } from "@/modules/message-receipt/message-receipts.service";
+import { ChannelsService } from "@/modules/channel/channels.service";
 import { BroadcasterService } from "@/services/broadcaster.service";
 
 const readMessageSchema = z.object({ channelId: z.uuid() });
@@ -20,16 +21,22 @@ export class ReadMessageCommand implements WebSocketCommand<ReadMessagePayload> 
   constructor(
     @inject(TYPES.MessagesService) private messagesService: MessagesService,
     @inject(TYPES.MessageReceiptsService) private messageReceiptsService: MessageReceiptsService,
+    @inject(TYPES.ChannelsService) private channelsService: ChannelsService,
     @inject(TYPES.BroadcasterService) private broadcaster: BroadcasterService,
   ) {}
 
   public async execute(socket: Socket, authId: string, data: ReadMessagePayload): Promise<void> {
     const targetChannelId = data.channelId;
 
-    // Guard: without a channel id, the unread query below would drop its
-    // `channelId` filter (Prisma ignores `undefined`) and mark EVERY channel's
-    // messages as read. Never let a missing id fan out across all channels.
-    if (!targetChannelId) return;
+    // Authorization: only members may mark a channel's messages as read.
+    if (!(await this.channelsService.isMember(authId, targetChannelId))) {
+      socket.emit("error", {
+        code: "FORBIDDEN",
+        event: this.eventName,
+        message: "You are not a member of this channel.",
+      });
+      return;
+    }
 
     // 1. Find all messages in this channel NOT authored by the user
     // and NOT already read by the user
