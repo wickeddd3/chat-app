@@ -1,4 +1,5 @@
 import { injectable, inject } from "inversify";
+import { z } from "zod";
 import { TYPES } from "@/config/types";
 import type { Socket } from "socket.io";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
@@ -6,13 +7,15 @@ import { MessagesService } from "@/modules/message/messages.service";
 import { MessageReceiptsService } from "@/modules/message-receipt/message-receipts.service";
 import { BroadcasterService } from "@/services/broadcaster.service";
 
-interface ReadMessagePayload {
-  channelId: string;
-}
+const readMessageSchema = z.object({ channelId: z.uuid() });
+type ReadMessagePayload = z.infer<typeof readMessageSchema>;
 
 @injectable()
-export class ReadMessageCommand implements WebSocketCommand {
+export class ReadMessageCommand implements WebSocketCommand<ReadMessagePayload> {
   public readonly eventName = "message:mark_as_read";
+  // Schema guarantees a valid channelId — this also closes the old footgun where
+  // a missing/undefined id made the unread query mark EVERY channel read.
+  public readonly schema = readMessageSchema;
 
   constructor(
     @inject(TYPES.MessagesService) private messagesService: MessagesService,

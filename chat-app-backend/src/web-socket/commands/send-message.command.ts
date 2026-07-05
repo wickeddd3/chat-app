@@ -1,4 +1,5 @@
 import { injectable, inject } from "inversify";
+import { z } from "zod";
 import { TYPES } from "@/config/types";
 import type { Socket } from "socket.io";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
@@ -7,15 +8,17 @@ import { ChannelsService } from "@/modules/channel/channels.service";
 import { BroadcasterService } from "@/services/broadcaster.service";
 import type { Redis } from "ioredis";
 
-interface SendMessagePayload {
-  content: string;
-  channelId: string;
-  clientId: string;
-}
+const sendMessageSchema = z.object({
+  content: z.string().min(1).max(4000),
+  channelId: z.uuid(),
+  clientId: z.string().min(1),
+});
+type SendMessagePayload = z.infer<typeof sendMessageSchema>;
 
 @injectable()
-export class SendMessageCommand implements WebSocketCommand {
+export class SendMessageCommand implements WebSocketCommand<SendMessagePayload> {
   public readonly eventName = "message:send_message";
+  public readonly schema = sendMessageSchema;
 
   constructor(
     @inject(TYPES.MessagesService) private messagesService: MessagesService,
