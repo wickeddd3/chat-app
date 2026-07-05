@@ -30,6 +30,16 @@ export class SendMessageCommand implements WebSocketCommand<SendMessagePayload> 
   public async execute(socket: Socket, authId: string, data: SendMessagePayload): Promise<void> {
     const targetChannelId = data.channelId;
 
+    // 0. Authorization: only members may post to a channel.
+    if (!(await this.channelsService.isMember(authId, targetChannelId))) {
+      socket.emit("error", {
+        code: "FORBIDDEN",
+        event: this.eventName,
+        message: "You are not a member of this channel.",
+      });
+      return;
+    }
+
     // 1. Persist to Database
     const savedMessage = await this.messagesService.saveMessage({
       content: data.content,
