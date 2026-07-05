@@ -39,7 +39,7 @@ export function ChatInboxItem({
         overflow-hidden transition-colors`,
         isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "",
       )}
-      onClick={() => markAsRead(channelId)}
+      onClick={() => markAsRead(id)}
     >
       <div className="shrink-0">
         <ProfileAvatar imageSrc={displayImage} isOnline={online} badge={true} />
