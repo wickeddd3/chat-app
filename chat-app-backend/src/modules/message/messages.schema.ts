@@ -5,6 +5,6 @@ export const messagesParamsSchema = z.object({
 });
 
 export const messagesQuerySchema = z.object({
-  // Cursor is a message id (uuid) when present; omitted means "from the start".
-  cursor: z.uuid("cursor must be a valid UUID").optional(),
+  // Opaque keyset cursor (base64url); omitted means "from the latest".
+  cursor: z.string().optional(),
 });

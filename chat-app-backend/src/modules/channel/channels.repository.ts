@@ -4,6 +4,7 @@ import { PrismaClient } from "@/prisma/client";
 import type { Channel } from "@/prisma/client";
 import type { InboxChannel, PaginatedChannels } from "./channels.types";
 import { HttpException } from "@/utils/http.exception";
+import { decodeCursor, encodeCursor } from "@/utils/cursor";
 
 @injectable()
 export class ChannelsRepository {
@@ -67,41 +68,59 @@ export class ChannelsRepository {
     query?: string;
   }): Promise<PaginatedChannels> {
     try {
+      const decoded = decodeCursor(cursor);
       const channels = await this.db.channel.findMany({
-        take: limit,
+        // Fetch one extra to reliably determine hasMore.
+        take: limit + 1,
         where: {
           channelMembers: { some: { userId: authUserId } },
-          OR: [
+          // The search filter and the keyset cursor are separate OR-groups, so
+          // they must be combined under AND (a single object can hold one OR).
+          AND: [
             {
-              type: "GROUP", // If it's a group channel, search by the channel name
-              name: {
-                contains: query,
-                mode: "insensitive",
-              },
-            }, // Groups are always visible
-            {
-              AND: [
-                { type: "DIRECT" },
+              OR: [
                 {
-                  messages: { some: {} }, // If it's a direct message, search by the names of the OTHER members in that channel
-                  channelMembers: {
-                    some: {
-                      userId: { not: authUserId }, // Exclude current user from name matching
-                      user: {
-                        name: {
-                          contains: query,
-                          mode: "insensitive",
+                  type: "GROUP", // If it's a group channel, search by the channel name
+                  name: {
+                    contains: query,
+                    mode: "insensitive",
+                  },
+                }, // Groups are always visible
+                {
+                  AND: [
+                    { type: "DIRECT" },
+                    {
+                      messages: { some: {} }, // If it's a direct message, search by the names of the OTHER members in that channel
+                      channelMembers: {
+                        some: {
+                          userId: { not: authUserId }, // Exclude current user from name matching
+                          user: {
+                            name: {
+                              contains: query,
+                              mode: "insensitive",
+                            },
+                          },
                         },
                       },
-                    },
-                  },
-                }, // DMs only visible if messages exist
+                    }, // DMs only visible if messages exist
+                  ],
+                },
               ],
             },
+            // Keyset cursor: (updatedAt, id) strictly before the boundary.
+            ...(decoded
+              ? [
+                  {
+                    OR: [
+                      { updatedAt: { lt: decoded.timestamp } },
+                      { updatedAt: decoded.timestamp, id: { lt: decoded.id } },
+                    ],
+                  },
+                ]
+              : []),
           ],
-          ...(cursor ? { updatedAt: { lt: new Date(cursor) } } : {}),
         },
-        orderBy: { updatedAt: "desc" },
+        orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
         include: {
           channelMembers: {
             include: {
@@ -127,14 +146,15 @@ export class ChannelsRepository {
         },
       });
 
-      const hasMore = channels.length === limit;
-      const lastItem = channels[channels.length - 1];
-      const nextCursor = hasMore && lastItem ? lastItem.updatedAt.toISOString() : null;
+      const hasMore = channels.length > limit;
+      const pageItems = hasMore ? channels.slice(0, limit) : channels;
+      const lastItem = pageItems.at(-1);
+      const nextCursor = hasMore && lastItem ? encodeCursor(lastItem.updatedAt, lastItem.id) : null;
 
       return {
-        channels,
+        channels: pageItems,
         hasMore,
-        nextCursor: nextCursor ?? null,
+        nextCursor,
       };
     } catch (error) {
       throw new HttpException(500, "Failed to retrieve channels.", null, { cause: error });

@@ -3,6 +3,7 @@ import { TYPES } from "@/config/types";
 import { PrismaClient } from "@/prisma/client";
 import type { MessageWithAuthor, PaginatedMessages, UnreadMessage } from "./messages.types";
 import { HttpException } from "@/utils/http.exception";
+import { decodeCursor, encodeCursor } from "@/utils/cursor";
 
 @injectable()
 export class MessagesRepository {
@@ -37,8 +38,17 @@ export class MessagesRepository {
     cursor?: string;
   }): Promise<PaginatedMessages> {
     try {
+      // Chat history loads newest-first (scroll up for older). Fetch descending
+      // via a (createdAt, id) keyset, then reverse the page to ascending order.
+      const decoded = decodeCursor(cursor);
       const messages = await this.db.message.findMany({
-        where: { channelId },
+        where: {
+          channelId,
+          // Keyset cursor: (createdAt, id) strictly before (older than) the boundary.
+          ...(decoded && {
+            OR: [{ createdAt: { lt: decoded.timestamp } }, { createdAt: decoded.timestamp, id: { lt: decoded.id } }],
+          }),
+        },
         include: {
           author: {
             select: {
@@ -48,36 +58,24 @@ export class MessagesRepository {
             },
           },
         },
-        orderBy: { createdAt: "asc" },
-        // Fetch one extra item if a cursor is present to act as our boundary check
-        take: cursor ? -(limit + 1) : -limit,
-        // Inclue cursor to query only if exist
-        ...(cursor && { cursor: { id: cursor } }),
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        // Fetch one extra to reliably determine hasMore.
+        take: limit + 1,
       });
 
-      let nextCursor: string | null = null;
-      let finalMessages = messages;
+      const hasMore = messages.length > limit;
+      const pageItems = hasMore ? messages.slice(0, limit) : messages;
 
-      if (cursor) {
-        // If a cursor was passed, the last item in the returned array is
-        // actually the cursor item itself (the duplicate).
-        if (messages.length > limit) {
-          // Remove the duplicate boundary item from the end of the array
-          finalMessages = messages.slice(1);
-          // The very first item in the array is now our next oldest cursor
-          nextCursor = messages[0]?.id ?? null;
-        } else {
-          nextCursor = null;
-        }
-      } else {
-        // Initial load (no cursor)
-        nextCursor = (messages.length === limit ? messages[0]?.id : null) ?? null;
-      }
+      // The oldest item in this (descending) page is the boundary for the next
+      // (older) page.
+      const oldest = pageItems.at(-1);
+      const nextCursor = hasMore && oldest ? encodeCursor(oldest.createdAt, oldest.id) : null;
 
       return {
-        messages: finalMessages,
-        hasMore: nextCursor !== null,
-        nextCursor: nextCursor ?? null,
+        // Reverse to ascending (oldest first) for display.
+        messages: [...pageItems].reverse(),
+        hasMore,
+        nextCursor,
       };
     } catch (error) {
       throw new HttpException(500, "Failed to retrieve messages.", null, { cause: error });
