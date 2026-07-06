@@ -13,6 +13,7 @@ import { DisconnectCommand } from "@/web-socket/commands/disconnect.command";
 import { HeartbeatCommand } from "@/web-socket/commands/heartbeat.command";
 
 import { PresenceService } from "@/services/presence.service";
+import { PresencePruneWorker } from "@/services/presence-prune.worker";
 import { BroadcasterService } from "@/services/broadcaster.service";
 
 /**
@@ -24,6 +25,7 @@ import { BroadcasterService } from "@/services/broadcaster.service";
 export const realtimeModule = new ContainerModule(({ bind }) => {
   bind<SocketServerProvider>(TYPES.SocketServerProvider).to(SocketServerProvider).inSingletonScope();
   bind<PresenceService>(TYPES.PresenceService).to(PresenceService).inSingletonScope();
+  bind<PresencePruneWorker>(TYPES.PresencePruneWorker).to(PresencePruneWorker).inSingletonScope();
   bind<BroadcasterService>(TYPES.BroadcasterService).to(BroadcasterService);
   bind<WebSocketServer>(TYPES.WebSocketServer).to(WebSocketServer);
 

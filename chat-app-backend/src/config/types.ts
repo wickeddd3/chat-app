@@ -51,6 +51,7 @@ export const TYPES = {
   RedisPubClient: Symbol.for("RedisPubClient"), // Specifically for pushing data to the MessagePack bus
   RedisSubClient: Symbol.for("RedisSubClient"), // reserved exclusively for Socket.io internal horizontal syncing
   PresenceService: Symbol.for("PresenceService"),
+  PresencePruneWorker: Symbol.for("PresencePruneWorker"),
 
   EventDispatcher: Symbol.for("EventDispatcher"),
   NotificationSubscriber: Symbol.for("NotificationSubscriber"),

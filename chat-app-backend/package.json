@@ -26,7 +26,9 @@
     "migrate:status": "prisma migrate status",
     "seed": "tsx prisma/seed/index.ts",
     "seed:prod": "tsx prisma/seed/index.ts --reuse-auth",
-    "seed:clean": "tsx prisma/seed/clean.ts"
+    "seed:clean": "tsx prisma/seed/clean.ts",
+    "prune:presence": "node dist/src/jobs/presence-prune.job.js",
+    "prune:presence:dev": "tsx src/jobs/presence-prune.job.ts"
   },
   "keywords": [],
   "author": "",

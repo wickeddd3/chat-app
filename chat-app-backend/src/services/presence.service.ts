@@ -135,7 +135,25 @@ export class PresenceService {
   }
 
   /**
-   * Prunes missed heartbeats. Run this via a cron or a periodic background worker.
+   * Returns the id set of everyone registered to observe this user's presence.
+   * Used to fan out an "offline" delta when a user's heartbeat lapses.
+   */
+  public async getFollowers(userId: string): Promise<string[]> {
+    const followers = await this.redis.smembers(`${this.followersPrefix}${userId}`);
+    // Strip the anti-stampede placeholder and any self-reference.
+    return followers.filter((id) => id !== "EMPTY_MARKER" && id !== userId);
+  }
+
+  /**
+   * Evicts users whose heartbeat lease has lapsed and returns their ids so
+   * callers can broadcast the resulting "offline" transition. Run this from a
+   * periodic worker.
+   *
+   * Not strictly atomic: a heartbeat landing in the tiny window between the
+   * range read and the eviction could briefly report a boundary user offline,
+   * but that self-heals on their next heartbeat (which re-LOGINs them), and a
+   * duplicate offline delta across a multi-instance cluster is harmless (the
+   * client just re-applies the same status). Kept simple deliberately.
    */
   public async pruneExpiredUsers(): Promise<string[]> {
     const deadzone = Date.now() - 60000; // Missed heartbeat threshold (60s)
