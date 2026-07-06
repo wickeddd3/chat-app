@@ -7,9 +7,9 @@ import {
   DrawerTrigger,
 } from "@/shared/ui/shadcn/drawer";
 import { FaEllipsisVertical } from "react-icons/fa6";
-import { ChannelDetails, type InboxChannel } from "@/entities/channel";
+import { ChannelDetails, isChannelAdmin, type InboxChannel } from "@/entities/channel";
 import { UpdateGroupChannel } from "@/features/channel/update-group-channel";
-import { usePresence } from "@/entities/auth";
+import { useAuth, usePresence } from "@/entities/auth";
 
 export interface ChannelDetailsDrawerProps {
   channel: InboxChannel | null;
@@ -17,10 +17,15 @@ export interface ChannelDetailsDrawerProps {
 
 export function ChannelDetailsDrawer({ channel }: ChannelDetailsDrawerProps) {
   const { isOnline } = usePresence();
+  const { authUser } = useAuth();
 
   if (!channel) return;
 
   const isGroupChannel = channel.type === "GROUP";
+
+  // Only a group ADMIN may edit the channel; hide the control for everyone else
+  // (the backend enforces this too, returning 403).
+  const isAdmin = isChannelAdmin(channel, authUser?.id);
 
   return (
     <Drawer direction="right">
@@ -39,7 +44,7 @@ export function ChannelDetailsDrawer({ channel }: ChannelDetailsDrawerProps) {
           <DrawerTitle>Info</DrawerTitle>
           <DrawerDescription className="flex justify-between items-center">
             <span className="text-sm">Channel details</span>
-            {isGroupChannel && <UpdateGroupChannel channel={channel} />}
+            {isGroupChannel && isAdmin && <UpdateGroupChannel channel={channel} />}
           </DrawerDescription>
         </DrawerHeader>
         <ChannelDetails channel={channel} isOnline={isOnline} />
