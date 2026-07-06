@@ -2,6 +2,7 @@ import { useAuth } from "@/entities/auth";
 import { useAuthProfile } from "@/entities/auth";
 import type { Message, NewMessage } from "@/entities/message";
 import { webSocketClient } from "@/shared/lib/socket-io.client";
+import { createQueryKeys } from "@/shared/config/react-query-keys";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -9,11 +10,15 @@ export function useSendMessage({ channelId }: { channelId: string }) {
   const { authUser } = useAuth();
   const { authProfile } = useAuthProfile(authUser?.id);
   const queryClient = useQueryClient();
+  const keys = createQueryKeys(authUser?.id);
   const [message, setMessage] = useState("");
 
   const handleOptimisticMessage = (newMessage: NewMessage) => {
     queryClient.setQueryData(
-      ["messages", channelId],
+      // Must match the timeline key useMessages reads + handleIncomingMessage
+      // reconciles against, or the optimistic message writes to a phantom cache
+      // entry and the sender never sees their own message.
+      keys.messages.timeline(channelId),
       (oldData: { pages: { messages: (Message | NewMessage)[] }[] }) => {
         if (!oldData) return oldData;
 
