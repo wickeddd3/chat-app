@@ -24,7 +24,7 @@ export interface InboxChannel extends Channel {
   lastMessage: {
     content: string;
     createdAt: string;
-  };
+  } | null;
   messages: {
     id: string;
     content: string;
