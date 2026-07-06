@@ -25,6 +25,7 @@ import { errorMiddleware } from "@/middlewares/error.middleware";
 
 import { SocketServerProvider } from "@/web-socket/socket-server.provider";
 import { WebSocketServer } from "@/web-socket/web-socket.server";
+import { PresencePruneWorker } from "@/services/presence-prune.worker";
 import type { Server as SocketServer } from "socket.io";
 
 import { NotificationSubscriber } from "@/subscribers/notification.subscriber";
@@ -41,6 +42,7 @@ export class App {
   public server: HttpServer;
 
   private io: SocketServer | null = null;
+  private presencePruneWorker: PresencePruneWorker | null = null;
   private isShuttingDown = false;
 
   constructor(routers: HttpRouter[], port: number) {
@@ -70,10 +72,14 @@ export class App {
     // 2. Bring up the realtime layer.
     this.initializeWebSocket();
 
-    // 3. Wire domain-event subscribers.
+    // 3. Start the in-process presence prune sweep (single-instance / free tier;
+    //    swap for the dedicated cron job when scaling to multiple instances).
+    this.initializePresenceWorker();
+
+    // 4. Wire domain-event subscribers.
     this.initializeEventSubscribers();
 
-    // 4. Start listening.
+    // 5. Start listening.
     await new Promise<void>((resolve) => {
       this.server.listen(this.port, () => {
         log.info({ port: this.port }, "🚀 Server running");
@@ -100,6 +106,9 @@ export class App {
     forceExit.unref();
 
     try {
+      // Stop the background presence sweep before tearing down infra it uses.
+      this.presencePruneWorker?.stop();
+
       // Disconnect websocket clients (frees keep-alive conns holding the server).
       if (this.io) {
         this.io.disconnectSockets(true);
@@ -197,6 +206,11 @@ export class App {
 
     const webSocketServer = container.get<WebSocketServer>(TYPES.WebSocketServer);
     webSocketServer.start();
+  }
+
+  private initializePresenceWorker(): void {
+    this.presencePruneWorker = container.get<PresencePruneWorker>(TYPES.PresencePruneWorker);
+    this.presencePruneWorker.start();
   }
 
   private initializeEventSubscribers(): void {
