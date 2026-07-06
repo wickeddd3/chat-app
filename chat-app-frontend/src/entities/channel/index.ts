@@ -10,3 +10,10 @@ export type {
 } from "./model/channel.types";
 
 export { useChannel } from "./model/useChannel";
+
+export {
+  inboxListPrefix,
+  buildOptimisticGroupChannel,
+  prependInboxChannel,
+  patchInboxChannel,
+} from "./model/inbox-cache";
