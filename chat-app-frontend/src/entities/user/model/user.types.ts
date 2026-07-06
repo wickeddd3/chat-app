@@ -4,9 +4,6 @@ export interface User {
   username: string;
   image?: string;
   connectionStatus:
-    | "STRANGER"
-    | "CONTACT"
-    | "PENDING_SENT"
-    | "PENDING_RECEIVED";
+    "STRANGER" | "CONTACT" | "PENDING_SENT" | "PENDING_RECEIVED";
   connectionId: string | null;
 }

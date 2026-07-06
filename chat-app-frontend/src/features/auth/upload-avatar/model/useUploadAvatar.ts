@@ -47,9 +47,7 @@ export function useUploadAvatar({ userId }: { userId: string }) {
       });
       setIsUploading(false);
       onSuccessUpload?.();
-      toast.success("Profile avatar uploaded successfully", {
-        position: "bottom-right",
-      });
+      toast.success("Profile avatar uploaded successfully");
     } finally {
       setIsUploading(false);
     }

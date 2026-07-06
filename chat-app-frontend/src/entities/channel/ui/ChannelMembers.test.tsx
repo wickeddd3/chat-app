@@ -27,7 +27,10 @@ describe("ChannelMembers", () => {
     const isOnline = vi.fn((id: string) => id === "user-2");
 
     render(
-      <ChannelMembers members={[member("1"), member("2")]} isOnline={isOnline} />,
+      <ChannelMembers
+        members={[member("1"), member("2")]}
+        isOnline={isOnline}
+      />,
     );
 
     expect(isOnline).toHaveBeenCalledWith("user-1");

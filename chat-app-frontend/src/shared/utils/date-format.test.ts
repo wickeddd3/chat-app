@@ -26,7 +26,9 @@ describe("dateToNow", () => {
   });
 
   it("describes a past date relative to now, with a suffix", () => {
-    const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000).toISOString();
+    const fiveMinutesAgo = new Date(
+      now.getTime() - 5 * 60 * 1000,
+    ).toISOString();
 
     expect(dateToNow(fiveMinutesAgo)).toBe("5 minutes ago");
   });
@@ -49,13 +51,17 @@ describe("isLessThanADayOld", () => {
   });
 
   it("returns true for a date less than 24 hours old", () => {
-    const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString();
+    const twoHoursAgo = new Date(
+      now.getTime() - 2 * 60 * 60 * 1000,
+    ).toISOString();
 
     expect(isLessThanADayOld(twoHoursAgo)).toBe(true);
   });
 
   it("returns false for a date 24 hours old or older", () => {
-    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+    const oneDayAgo = new Date(
+      now.getTime() - 24 * 60 * 60 * 1000,
+    ).toISOString();
 
     expect(isLessThanADayOld(oneDayAgo)).toBe(false);
   });

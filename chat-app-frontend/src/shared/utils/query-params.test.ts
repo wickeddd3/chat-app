@@ -12,9 +12,9 @@ describe("toQueryParams", () => {
   });
 
   it("omits keys whose value is null or undefined", () => {
-    expect(toQueryParams({ query: "jane", cursor: null, page: undefined })).toBe(
-      "?query=jane",
-    );
+    expect(
+      toQueryParams({ query: "jane", cursor: null, page: undefined }),
+    ).toBe("?query=jane");
   });
 
   it("returns an empty string when every value is null or undefined", () => {
@@ -25,9 +25,7 @@ describe("toQueryParams", () => {
     // The QueryParams type doesn't declare array values, but toQueryParams handles them at runtime
     const params = { memberIds: ["a", "b", "c"] } as unknown as QueryParams;
 
-    expect(toQueryParams(params)).toBe(
-      "?memberIds=a&memberIds=b&memberIds=c",
-    );
+    expect(toQueryParams(params)).toBe("?memberIds=a&memberIds=b&memberIds=c");
   });
 
   it("URL-encodes special characters in values", () => {

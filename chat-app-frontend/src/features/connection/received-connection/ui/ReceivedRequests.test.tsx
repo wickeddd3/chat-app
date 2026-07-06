@@ -61,7 +61,10 @@ function DeclineButton({
 
 function renderReceived() {
   return render(
-    <ReceivedRequests acceptButton={AcceptButton} declineButton={DeclineButton} />,
+    <ReceivedRequests
+      acceptButton={AcceptButton}
+      declineButton={DeclineButton}
+    />,
   );
 }
 
@@ -75,7 +78,9 @@ function request(id: string): Connection {
   };
 }
 
-function hookState(overrides: Partial<ReturnType<typeof useReceivedConnectionRequests>> = {}) {
+function hookState(
+  overrides: Partial<ReturnType<typeof useReceivedConnectionRequests>> = {},
+) {
   return {
     receivedRequests: [],
     isLoading: false,

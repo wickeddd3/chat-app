@@ -14,13 +14,10 @@ export function useProfile(): {
     onError: () => {
       toast.error("Profile update failed", {
         description: "Error occurred while updating profile",
-        position: "bottom-right",
       });
     },
     onSuccess: () => {
-      toast.success("Profile updated successfully", {
-        position: "bottom-right",
-      });
+      toast.success("Profile updated successfully");
     },
   });
 

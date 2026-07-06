@@ -42,14 +42,11 @@ export function useCreateGroupChannel(): {
         keys,
         buildOptimisticGroupChannel(channel.id, formData.name),
       );
-      toast.success("Group created successfully", {
-        position: "bottom-right",
-      });
+      toast.success("Group created successfully");
     },
     onError: (error) => {
       toast.error("Group creation failed", {
         description: error?.message || "Error occurred while creating group",
-        position: "bottom-right",
       });
     },
     onSettled: () => {

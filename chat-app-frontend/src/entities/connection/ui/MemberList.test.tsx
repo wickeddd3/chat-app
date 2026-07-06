@@ -37,9 +37,7 @@ const baseProps = {
 
 describe("MemberList", () => {
   it("renders a selectable row per user", () => {
-    render(
-      <MemberList {...baseProps} users={[contact("1"), contact("2")]} />,
-    );
+    render(<MemberList {...baseProps} users={[contact("1"), contact("2")]} />);
 
     expect(screen.getByText("User 1")).toBeInTheDocument();
     expect(screen.getByText("User 2")).toBeInTheDocument();

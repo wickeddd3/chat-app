@@ -35,9 +35,12 @@ const mockedUseUsers = vi.mocked(useUsers);
 const SendButton = ({ receiverId }: { text: string; receiverId: string }) => (
   <button type="button" data-testid={`send-${receiverId}`} />
 );
-const MessageButton = ({ targetUserId }: { text: string; targetUserId: string }) => (
-  <button type="button" data-testid={`message-${targetUserId}`} />
-);
+const MessageButton = ({
+  targetUserId,
+}: {
+  text: string;
+  targetUserId: string;
+}) => <button type="button" data-testid={`message-${targetUserId}`} />;
 const CancelButton = ({
   connectionRequestId,
   connectionRequestUserId,
@@ -64,9 +67,12 @@ const DeclineButton = ({
     data-testid={`decline-${connectionRequestId}-${connectionRequestUserId}`}
   />
 );
-const AcceptButton = ({ connectionRequestId }: { text: string; connectionRequestId: string }) => (
-  <button type="button" data-testid={`accept-${connectionRequestId}`} />
-);
+const AcceptButton = ({
+  connectionRequestId,
+}: {
+  text: string;
+  connectionRequestId: string;
+}) => <button type="button" data-testid={`accept-${connectionRequestId}`} />;
 
 function renderUserList() {
   return render(
@@ -91,7 +97,10 @@ function user(id: string, overrides: Partial<User> = {}): User {
   };
 }
 
-function usersState(users: User[], overrides: Partial<ReturnType<typeof useUsers>> = {}) {
+function usersState(
+  users: User[],
+  overrides: Partial<ReturnType<typeof useUsers>> = {},
+) {
   return {
     users,
     isLoading: false,
@@ -103,7 +112,9 @@ function usersState(users: User[], overrides: Partial<ReturnType<typeof useUsers
 
 describe("UserList", () => {
   it("shows the loading skeleton while loading", () => {
-    mockedUseUsers.mockReturnValue(usersState([], { isLoading: true, isEmpty: false }));
+    mockedUseUsers.mockReturnValue(
+      usersState([], { isLoading: true, isEmpty: false }),
+    );
 
     renderUserList();
 

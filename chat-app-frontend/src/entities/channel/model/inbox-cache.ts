@@ -24,7 +24,10 @@ export function inboxListPrefix(keys: ScopedQueryKeys): unknown[] {
  * row never renders it (only used to derive the online dot, where `[]` reads as
  * offline), and it's reconciled by the follow-up invalidation.
  */
-export function buildOptimisticGroupChannel(id: string, name: string): InboxChannel {
+export function buildOptimisticGroupChannel(
+  id: string,
+  name: string,
+): InboxChannel {
   return {
     id,
     type: "GROUP",
@@ -45,21 +48,33 @@ export function buildOptimisticGroupChannel(id: string, name: string): InboxChan
  * lists that already contain the id are left untouched, so it's safe against a
  * racing background refetch.
  */
-export function prependInboxChannel(queryClient: QueryClient, keys: ScopedQueryKeys, channel: InboxChannel): void {
-  queryClient.setQueriesData<InboxInfiniteData>({ queryKey: inboxListPrefix(keys) }, (data) => {
-    if (!data) return data;
+export function prependInboxChannel(
+  queryClient: QueryClient,
+  keys: ScopedQueryKeys,
+  channel: InboxChannel,
+): void {
+  queryClient.setQueriesData<InboxInfiniteData>(
+    { queryKey: inboxListPrefix(keys) },
+    (data) => {
+      if (!data) return data;
 
-    const alreadyPresent = data.pages.some((page) => page.channels.some((c) => c.id === channel.id));
-    if (alreadyPresent) return data;
+      const alreadyPresent = data.pages.some((page) =>
+        page.channels.some((c) => c.id === channel.id),
+      );
+      if (alreadyPresent) return data;
 
-    const [firstPage, ...restPages] = data.pages;
-    if (!firstPage) return data;
+      const [firstPage, ...restPages] = data.pages;
+      if (!firstPage) return data;
 
-    return {
-      ...data,
-      pages: [{ ...firstPage, channels: [channel, ...firstPage.channels] }, ...restPages],
-    };
-  });
+      return {
+        ...data,
+        pages: [
+          { ...firstPage, channels: [channel, ...firstPage.channels] },
+          ...restPages,
+        ],
+      };
+    },
+  );
 }
 
 /**
@@ -72,15 +87,20 @@ export function patchInboxChannel(
   channelId: string,
   patch: Partial<InboxChannel>,
 ): void {
-  queryClient.setQueriesData<InboxInfiniteData>({ queryKey: inboxListPrefix(keys) }, (data) => {
-    if (!data) return data;
+  queryClient.setQueriesData<InboxInfiniteData>(
+    { queryKey: inboxListPrefix(keys) },
+    (data) => {
+      if (!data) return data;
 
-    return {
-      ...data,
-      pages: data.pages.map((page) => ({
-        ...page,
-        channels: page.channels.map((c) => (c.id === channelId ? { ...c, ...patch } : c)),
-      })),
-    };
-  });
+      return {
+        ...data,
+        pages: data.pages.map((page) => ({
+          ...page,
+          channels: page.channels.map((c) =>
+            c.id === channelId ? { ...c, ...patch } : c,
+          ),
+        })),
+      };
+    },
+  );
 }

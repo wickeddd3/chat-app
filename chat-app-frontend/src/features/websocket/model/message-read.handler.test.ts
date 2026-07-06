@@ -6,7 +6,10 @@ import type { InboxChannel } from "@/entities/channel";
 describe("handleClearUnread", () => {
   const queryKeys = createQueryKeys("auth-user");
 
-  function seedInbox(queryClient: QueryClient, channels: Partial<InboxChannel>[]) {
+  function seedInbox(
+    queryClient: QueryClient,
+    channels: Partial<InboxChannel>[],
+  ) {
     queryClient.setQueryData(queryKeys.inbox.list(""), {
       pages: [{ channels }],
     });

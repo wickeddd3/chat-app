@@ -23,7 +23,10 @@ function message(id: string, clientId: string): Message {
   };
 }
 
-function page(messages: Message[], nextCursor: string | null = null): PaginatedMessage {
+function page(
+  messages: Message[],
+  nextCursor: string | null = null,
+): PaginatedMessage {
   return { messages, hasMore: !!nextCursor, nextCursor };
 }
 

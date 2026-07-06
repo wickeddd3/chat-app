@@ -10,8 +10,7 @@ vi.mock("@/entities/auth", () => ({
 // Keep the real zod schema; only stub the heavy member picker (data fetch +
 // virtualized list) so the form's own validation/submit logic is under test.
 vi.mock("@/entities/connection", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@/entities/connection")>();
+  const actual = await importOriginal<typeof import("@/entities/connection")>();
   return {
     ...actual,
     MemberListField: ({ label }: { label: string }) => <div>{label}</div>,
@@ -81,6 +80,8 @@ describe("create GroupChannelForm", () => {
 
     render(<GroupChannelForm />);
 
-    expect(screen.getByRole("button", { name: /create group/i })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: /create group/i }),
+    ).toBeDisabled();
   });
 });

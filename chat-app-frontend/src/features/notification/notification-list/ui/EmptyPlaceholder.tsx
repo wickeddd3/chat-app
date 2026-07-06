@@ -4,7 +4,9 @@ export function EmptyPlaceholder() {
   return (
     <div className="w-full h-full flex flex-col justify-center items-center gap-4">
       <FaBell size={60} className="text-muted-foreground" />
-      <p className="text-lg font-medium text-muted-foreground">No notifications</p>
+      <p className="text-lg font-medium text-muted-foreground">
+        No notifications
+      </p>
     </div>
   );
 }

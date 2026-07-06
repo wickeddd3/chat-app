@@ -10,5 +10,7 @@ export function isChannelAdmin(
   userId: string | undefined,
 ): boolean {
   if (!userId) return false;
-  return channel.channelMembers.some((member) => member.user.id === userId && member.role === "ADMIN");
+  return channel.channelMembers.some(
+    (member) => member.user.id === userId && member.role === "ADMIN",
+  );
 }

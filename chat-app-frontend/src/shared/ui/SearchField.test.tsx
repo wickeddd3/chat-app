@@ -22,7 +22,9 @@ describe("SearchField", () => {
   it("renders the controlled value", () => {
     render(<SearchField value="hello" onChange={vi.fn()} />);
 
-    expect(screen.getByRole("textbox", { name: "Search" })).toHaveValue("hello");
+    expect(screen.getByRole("textbox", { name: "Search" })).toHaveValue(
+      "hello",
+    );
   });
 
   it("emits the typed value through onChange", async () => {

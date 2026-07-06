@@ -70,7 +70,6 @@ export function onError(
 
   toast.error("Failed to cancel request", {
     description: "Error occurred while canceling connection request",
-    position: "bottom-right",
   });
 }
 
@@ -79,9 +78,7 @@ export function onSuccess(
   variables: TVariables,
   context: TContext | undefined,
 ) {
-  toast.success("Connection request canceled", {
-    position: "bottom-right",
-  });
+  toast.success("Connection request canceled");
 
   const connectionRequestUserId: string = variables.connectionRequestUserId;
 

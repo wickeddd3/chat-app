@@ -1,6 +1,15 @@
-import { useMutation, useQueryClient, type QueryKey } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  type QueryKey,
+} from "@tanstack/react-query";
 import { updateGroupChannelApi } from "../api/channels.api";
-import { type Channel, type InboxChannel, patchInboxChannel, inboxListPrefix } from "@/entities/channel";
+import {
+  type Channel,
+  type InboxChannel,
+  patchInboxChannel,
+  inboxListPrefix,
+} from "@/entities/channel";
 import { useAuth } from "@/entities/auth";
 import { createQueryKeys } from "@/shared/config/react-query-keys";
 import { toast } from "sonner";
@@ -37,8 +46,11 @@ export function useUpdateGroupChannel(channelId: string): {
       ]);
 
       // Snapshot both caches for rollback.
-      const previousInbox = queryClient.getQueriesData({ queryKey: inboxListPrefix(keys) });
-      const previousDetails = queryClient.getQueryData<InboxChannel>(detailsKey);
+      const previousInbox = queryClient.getQueriesData({
+        queryKey: inboxListPrefix(keys),
+      });
+      const previousDetails =
+        queryClient.getQueryData<InboxChannel>(detailsKey);
 
       // For a group, displayName === name — patch both the inbox row and the
       // open channel-details view (header/drawer) so the rename shows instantly.
@@ -55,18 +67,18 @@ export function useUpdateGroupChannel(channelId: string): {
     },
     onError: (error, _formData, context) => {
       // Roll back to the pre-mutation snapshots.
-      context?.previousInbox.forEach(([key, data]) => queryClient.setQueryData(key, data));
-      if (context) queryClient.setQueryData(detailsKey, context.previousDetails);
+      context?.previousInbox.forEach(([key, data]) =>
+        queryClient.setQueryData(key, data),
+      );
+      if (context)
+        queryClient.setQueryData(detailsKey, context.previousDetails);
 
       toast.error("Group updating failed", {
         description: error?.message || "Error occurred while updating group",
-        position: "bottom-right",
       });
     },
     onSuccess: () => {
-      toast.success("Group updated successfully", {
-        position: "bottom-right",
-      });
+      toast.success("Group updated successfully");
     },
     onSettled: () => {
       // Reconcile server-computed fields (member list, ordering).

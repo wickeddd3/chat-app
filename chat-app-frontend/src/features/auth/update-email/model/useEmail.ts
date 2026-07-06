@@ -9,14 +9,11 @@ export function useEmail() {
     if (error) {
       toast.error("Email update failed", {
         description: "Error occurred while updating email",
-        position: "bottom-right",
       });
       return;
     }
 
-    toast.success("Email updated successfully", {
-      position: "bottom-right",
-    });
+    toast.success("Email updated successfully");
   };
 
   return { updateAccountEmail };
