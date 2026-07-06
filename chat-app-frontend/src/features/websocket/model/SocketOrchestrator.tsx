@@ -81,7 +81,7 @@ export function SocketOrchestrator({ authId }: SocketOrchestratorProps) {
       handleStatusChange(queryClient, queryKeys, payload);
 
     const onIncomingMessage = (payload: IncomingMessagePayload) =>
-      handleIncomingMessage(queryClient, queryKeys, payload);
+      handleIncomingMessage(queryClient, queryKeys, payload, authId);
 
     const onClearUnread = (payload: UnreadMessagePayload) =>
       handleClearUnread(queryClient, queryKeys, payload);

@@ -1,8 +1,17 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createQueryKeys } from "@/shared/config/react-query-keys";
 import { handleIncomingMessage } from "./message-receive.handler";
+import { setActiveChannel } from "@/shared/utils/active-channel";
 import type { InboxChannel } from "@/entities/channel";
 import type { Message } from "@/entities/message";
+
+vi.mock("@/shared/lib/socket-io.client", () => ({
+  webSocketClient: { emit: vi.fn() },
+}));
+
+import { webSocketClient } from "@/shared/lib/socket-io.client";
+
+const emitSpy = vi.mocked(webSocketClient).emit;
 
 describe("handleIncomingMessage", () => {
   const queryKeys = createQueryKeys("auth-user");
@@ -24,6 +33,15 @@ describe("handleIncomingMessage", () => {
     } as Message,
   };
 
+  beforeEach(() => {
+    emitSpy.mockClear();
+    setActiveChannel(null);
+  });
+
+  afterEach(() => {
+    setActiveChannel(null);
+  });
+
   it("bumps unread count and sets the preview on the matching inbox channel", () => {
     const queryClient = new QueryClient();
     queryClient.setQueryData(queryKeys.inbox.list(""), {
@@ -33,7 +51,7 @@ describe("handleIncomingMessage", () => {
       pages: [{ messages: [] }],
     });
 
-    handleIncomingMessage(queryClient, queryKeys, basePayload);
+    handleIncomingMessage(queryClient, queryKeys, basePayload, "auth-user");
 
     const inbox = queryClient.getQueryData<{
       pages: { channels: InboxChannel[] }[];
@@ -50,7 +68,7 @@ describe("handleIncomingMessage", () => {
     const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
     expect(() =>
-      handleIncomingMessage(queryClient, queryKeys, basePayload),
+      handleIncomingMessage(queryClient, queryKeys, basePayload, "auth-user"),
     ).not.toThrow();
 
     expect(invalidateSpy).toHaveBeenCalledWith({
@@ -77,7 +95,7 @@ describe("handleIncomingMessage", () => {
       ],
     });
 
-    handleIncomingMessage(queryClient, queryKeys, basePayload);
+    handleIncomingMessage(queryClient, queryKeys, basePayload, "auth-user");
 
     const timeline = queryClient.getQueryData<{
       pages: { messages: Message[] }[];
@@ -95,7 +113,7 @@ describe("handleIncomingMessage", () => {
       pages: [{ messages: [] }],
     });
 
-    handleIncomingMessage(queryClient, queryKeys, basePayload);
+    handleIncomingMessage(queryClient, queryKeys, basePayload, "auth-user");
 
     const timeline = queryClient.getQueryData<{
       pages: { messages: Message[] }[];
@@ -110,10 +128,56 @@ describe("handleIncomingMessage", () => {
       unreadMessagesCount: 2,
     });
 
-    handleIncomingMessage(queryClient, queryKeys, basePayload);
+    handleIncomingMessage(queryClient, queryKeys, basePayload, "auth-user");
 
     expect(queryClient.getQueryData(queryKeys.dashboard.badges())).toEqual({
       unreadMessagesCount: 3,
     });
+  });
+
+  it("does not count your own echoed message as unread", () => {
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(queryKeys.inbox.list(""), {
+      pages: [{ channels: [{ id: "channel-1", unreadCount: 1 }] }],
+    });
+    queryClient.setQueryData(queryKeys.dashboard.badges(), {
+      unreadMessagesCount: 2,
+    });
+
+    // authId matches the message author => own message
+    handleIncomingMessage(queryClient, queryKeys, basePayload, "user-2");
+
+    const inbox = queryClient.getQueryData<{
+      pages: { channels: InboxChannel[] }[];
+    }>(queryKeys.inbox.list(""));
+    // preview refreshed, unread untouched
+    expect(inbox?.pages[0]?.channels[0]).toMatchObject({
+      unreadCount: 1,
+      lastMessage: basePayload.channelPayload.lastMessage,
+    });
+    expect(queryClient.getQueryData(queryKeys.dashboard.badges())).toEqual({
+      unreadMessagesCount: 2,
+    });
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
+  it("auto-marks a message read when it arrives in the channel you're viewing", () => {
+    setActiveChannel("channel-1");
+    const queryClient = new QueryClient();
+
+    handleIncomingMessage(queryClient, queryKeys, basePayload, "auth-user");
+
+    expect(emitSpy).toHaveBeenCalledWith("message:mark_as_read", {
+      channelId: "channel-1",
+    });
+  });
+
+  it("does not auto-mark read for a channel you're not viewing", () => {
+    setActiveChannel("some-other-channel");
+    const queryClient = new QueryClient();
+
+    handleIncomingMessage(queryClient, queryKeys, basePayload, "auth-user");
+
+    expect(emitSpy).not.toHaveBeenCalled();
   });
 });
