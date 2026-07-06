@@ -37,11 +37,15 @@ export function onError(
 }
 
 export function onSuccess(
-  _data: TData,
+  data: TData,
   variables: TVariables,
   context: TContext | undefined,
 ) {
   const notificationIds = variables;
+
+  // The server reports how many were actually flipped from unread → read.
+  // Clicking an already-read notification returns 0, so the badge stays put.
+  const newlyReadCount = data.count;
 
   // Update notifications cache data to mark notification as read
   context?.client.setQueryData(
@@ -70,15 +74,21 @@ export function onSuccess(
     },
   );
 
-  // Decrement unread notification count
+  // Decrement the unread notification badge by the number actually marked read
+  // (0 when the notification was already read — this is the bug fix). Nothing to
+  // do when none were newly read.
+  if (newlyReadCount <= 0) return;
+
   context?.client.setQueryData(
     context.keys.dashboard.badges(),
     (old: Record<string, number>) => {
       if (!old) return old;
 
       const currentUnreadCountStats = { ...old };
-      currentUnreadCountStats["unreadNotificationsCount"] =
-        currentUnreadCountStats["unreadNotificationsCount"] - 1;
+      currentUnreadCountStats["unreadNotificationsCount"] = Math.max(
+        0,
+        currentUnreadCountStats["unreadNotificationsCount"] - newlyReadCount,
+      );
 
       return currentUnreadCountStats;
     },

@@ -92,5 +92,22 @@ describe("mark-as-read cache-update", () => {
         unreadNotificationsCount: 3,
       });
     });
+
+    it("leaves the badge untouched when the server marked nothing new (already read)", () => {
+      const queryClient = new QueryClient();
+      queryClient.setQueryData(queryKeys.dashboard.badges(), {
+        unreadNotificationsCount: 4,
+      });
+
+      onSuccess({ count: 0 }, ["notif-1"], {
+        previousRequests: undefined,
+        client: queryClient,
+        keys: queryKeys,
+      });
+
+      expect(queryClient.getQueryData(queryKeys.dashboard.badges())).toEqual({
+        unreadNotificationsCount: 4,
+      });
+    });
   });
 });

@@ -84,5 +84,16 @@ describe("NotificationsRepository (integration, real DB)", () => {
       expect((await prisma.notification.findUniqueOrThrow({ where: { id: n2.id } })).isRead).toBe(true);
       expect((await prisma.notification.findUniqueOrThrow({ where: { id: foreign.id } })).isRead).toBe(false);
     });
+
+    it("counts only newly-read notifications (already-read ones yield 0)", async () => {
+      const me = await createUser();
+      const alreadyRead = await createNotification({ userId: me.id, isRead: true });
+      const unread = await createNotification({ userId: me.id, isRead: false });
+
+      // Re-marking an already-read notification changes nothing.
+      expect((await repo.markAsRead({ userId: me.id, notificationIds: [alreadyRead.id] })).count).toBe(0);
+      // A mixed batch counts only the ones actually flipped.
+      expect((await repo.markAsRead({ userId: me.id, notificationIds: [alreadyRead.id, unread.id] })).count).toBe(1);
+    });
   });
 });
