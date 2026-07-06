@@ -81,13 +81,25 @@ export class PresenceService {
   }
 
   /**
-   * Drops the cached channel roster so it is rebuilt from the database on the
-   * next lookup. Call this whenever a channel's membership changes (add/remove) —
-   * `setChannelMembersLookup` only ever adds ids, so a stale set would otherwise
-   * keep fanning out to removed members and skip newly added ones until its TTL.
+   * Authoritatively replaces the cached channel roster with `memberIds`.
+   *
+   * Call this whenever a channel's membership changes (add/remove). Unlike
+   * `setChannelMembersLookup`, which only ever *adds* ids (so it can't drop a
+   * removed member), this deletes the set and rewrites it in one pipeline — so
+   * the cache reflects exactly the new membership immediately, with no empty
+   * window for a concurrent lookup to race into.
    */
-  public async invalidateChannelMembersLookup(channelId: string): Promise<void> {
-    await this.redis.del(`${this.channelPrefix}${channelId}`);
+  public async refreshChannelMembersLookup(channelId: string, memberIds: string[]): Promise<void> {
+    const key = `${this.channelPrefix}${channelId}`;
+    const pipeline = this.redis.pipeline();
+
+    pipeline.del(key);
+    if (memberIds.length > 0) {
+      pipeline.sadd(key, ...memberIds);
+      pipeline.expire(key, 86400); // 24-hour retention window
+    }
+
+    await pipeline.exec();
   }
 
   /**
