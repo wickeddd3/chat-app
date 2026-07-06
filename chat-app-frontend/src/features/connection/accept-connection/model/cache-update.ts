@@ -67,7 +67,6 @@ export function onError(
 
   toast.error("Failed to accept request", {
     description: "Error occurred while accepting connection request",
-    position: "bottom-right",
   });
 }
 
@@ -76,9 +75,7 @@ export function onSuccess(
   _variables: TVariables,
   context: TContext | undefined,
 ) {
-  toast.success("Connection request accepted", {
-    position: "bottom-right",
-  });
+  toast.success("Connection request accepted");
 
   const newContact: ConnectionUser = {
     id: data?.user.id || "",

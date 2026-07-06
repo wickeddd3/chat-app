@@ -14,13 +14,10 @@ export function useSignUp(options?: { onSuccess?: (email: string) => void }): {
     onError: () => {
       toast.error("Account creation failed", {
         description: "Error occurred while creating account",
-        position: "bottom-right",
       });
     },
     onSuccess: (_user, variables) => {
-      toast.success("Account created successfully", {
-        position: "bottom-right",
-      });
+      toast.success("Account created successfully");
       options?.onSuccess?.(variables.email);
     },
   });

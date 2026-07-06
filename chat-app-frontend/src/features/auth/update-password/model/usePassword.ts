@@ -9,14 +9,11 @@ export function usePassword() {
     if (error) {
       toast.error("Password update failed", {
         description: "Error occurred while updating password",
-        position: "bottom-right",
       });
       return;
     }
 
-    toast.success("Password updated successfully", {
-      position: "bottom-right",
-    });
+    toast.success("Password updated successfully");
   };
 
   return { updateAccountPassword };

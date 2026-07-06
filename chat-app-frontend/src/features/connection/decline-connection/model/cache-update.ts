@@ -70,7 +70,6 @@ export function onError(
   }
   toast.error("Failed to decline request", {
     description: "Error occurred while declining connection request",
-    position: "bottom-right",
   });
 }
 
@@ -79,9 +78,7 @@ export function onSuccess(
   variables: TVariables,
   context: TContext | undefined,
 ) {
-  toast.success("Connection request declined", {
-    position: "bottom-right",
-  });
+  toast.success("Connection request declined");
 
   const connectionRequestId: string = variables.connectionRequestId;
   const connectionRequestUserId: string = variables.connectionRequestUserId;

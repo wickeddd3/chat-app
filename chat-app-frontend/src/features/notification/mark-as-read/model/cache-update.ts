@@ -32,7 +32,6 @@ export function onError(
 ) {
   toast.error("Marking notification as read failed", {
     description: "Error occurred while marking notification as read",
-    position: "bottom-right",
   });
 }
 

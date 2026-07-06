@@ -33,7 +33,6 @@ export function onError(
 ) {
   toast.error("Connection request failed", {
     description: "Error occurred while sending connection request",
-    position: "bottom-right",
   });
 }
 
@@ -42,9 +41,7 @@ export function onSuccess(
   _variables: TVariables,
   context: TContext | undefined,
 ) {
-  toast.success("Connection request sent", {
-    position: "bottom-right",
-  });
+  toast.success("Connection request sent");
 
   const newRequest: Connection = data;
 

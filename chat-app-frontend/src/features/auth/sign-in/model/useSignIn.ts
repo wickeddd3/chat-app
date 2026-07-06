@@ -14,18 +14,14 @@ export function useSignIn() {
       if (error) {
         toast.error("Login Failed", {
           description: "Invalid email or password",
-          position: "bottom-right",
         });
         return;
       }
 
-      toast.success("Login Successful", {
-        position: "bottom-right",
-      });
+      toast.success("Login Successful");
     } catch {
       toast.error("Login Failed", {
         description: "Invalid email or password",
-        position: "bottom-right",
       });
     } finally {
       setLoading(false);
