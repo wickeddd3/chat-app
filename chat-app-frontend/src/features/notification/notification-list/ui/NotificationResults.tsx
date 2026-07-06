@@ -41,7 +41,10 @@ export function NotificationResults({
             <NotificationItem
               key={notification.id}
               notification={notification}
-              onClick={() => onClick([notification.id])}
+              // Already-read notifications have nothing to mark — skip the call.
+              onClick={() => {
+                if (!notification.isRead) onClick([notification.id]);
+              }}
             />
           )}
           components={{
