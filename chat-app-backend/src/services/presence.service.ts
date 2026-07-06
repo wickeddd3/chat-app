@@ -103,6 +103,15 @@ export class PresenceService {
   }
 
   /**
+   * Returns the cached member roster for a channel — the message fan-out target
+   * set. An empty array means the cache is cold; callers should rebuild it from
+   * the database and re-warm via `setChannelMembersLookup`.
+   */
+  public async getChannelMembersLookup(channelId: string): Promise<string[]> {
+    return await this.redis.smembers(`${this.channelPrefix}${channelId}`);
+  }
+
+  /**
    * Checks if a channel cache exists in Redis memory.
    */
   public async checkChannelCacheExists(channelId: string): Promise<boolean> {
