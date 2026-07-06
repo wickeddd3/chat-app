@@ -95,6 +95,7 @@ export class NotificationsRepository {
         where: {
           userId, // Safety mechanism: ensure users can only modify their own items
           id: { in: notificationIds },
+          isRead: false, // Only flip unread ones, so `count` = number actually newly read
         },
         data: {
           isRead: true,
