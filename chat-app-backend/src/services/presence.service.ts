@@ -81,6 +81,16 @@ export class PresenceService {
   }
 
   /**
+   * Drops the cached channel roster so it is rebuilt from the database on the
+   * next lookup. Call this whenever a channel's membership changes (add/remove) —
+   * `setChannelMembersLookup` only ever adds ids, so a stale set would otherwise
+   * keep fanning out to removed members and skip newly added ones until its TTL.
+   */
+  public async invalidateChannelMembersLookup(channelId: string): Promise<void> {
+    await this.redis.del(`${this.channelPrefix}${channelId}`);
+  }
+
+  /**
    * Checks if a channel cache exists in Redis memory.
    */
   public async checkChannelCacheExists(channelId: string): Promise<boolean> {
