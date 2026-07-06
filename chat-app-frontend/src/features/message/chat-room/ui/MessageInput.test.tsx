@@ -57,4 +57,15 @@ describe("MessageInput", () => {
 
     expect(sendMessageMock).toHaveBeenCalled();
   });
+
+  it("inserts a picked emoji into the draft", async () => {
+    const user = userEvent.setup();
+    render(<MessageInput channelId="c-1" />);
+
+    await user.click(screen.getByRole("button", { name: "Insert emoji" }));
+    await user.click(screen.getByRole("button", { name: "😀" }));
+
+    // message is "" (mocked), so the emoji is inserted at the start.
+    expect(setMessageMock).toHaveBeenCalledWith("😀");
+  });
 });
