@@ -1,7 +1,6 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import type { Request, Response } from "express";
-import type { Redis } from "ioredis";
 import { BaseController } from "@/utils/base.controller";
 import { PresenceService } from "@/services/presence.service";
 import { ConnectionsRepository } from "@/modules/connection/connections.repository";
@@ -16,7 +15,6 @@ export class PresenceController extends BaseController {
     @inject(TYPES.PresenceService) private presenceService: PresenceService,
     @inject(TYPES.ConnectionsRepository) private connectionsRepository: ConnectionsRepository,
     @inject(TYPES.ChannelsRepository) private channelsRepository: ChannelsRepository,
-    @inject(TYPES.RedisMainClient) private redis: Redis,
   ) {
     super();
   }
@@ -26,8 +24,7 @@ export class PresenceController extends BaseController {
     const activeChannelId = typeof req.query.channelId === "string" ? req.query.channelId : "";
 
     // 1. Check if our base contact cache exists
-    const contactKey = `presence:contacts:${authUserId}`;
-    const baseCacheExists = await this.redis.exists(contactKey);
+    const baseCacheExists = await this.presenceService.checkContactCacheExists(authUserId);
 
     if (!baseCacheExists) {
       log.warn({ authId: authUserId }, "Rebuilding contacts cache");
