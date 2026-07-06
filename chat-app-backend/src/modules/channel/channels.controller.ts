@@ -4,6 +4,7 @@ import { BaseController } from "@/utils/base.controller";
 import { ChannelsService } from "./channels.service";
 import type { Request, Response } from "express";
 import { channelToChannelDetails, channelToInboxChannel } from "./channels.transformer";
+import { HttpException } from "@/utils/http.exception";
 
 @injectable()
 export class ChannelsController extends BaseController {
@@ -65,6 +66,11 @@ export class ChannelsController extends BaseController {
     const body = req.body as { name?: unknown; memberIds?: unknown };
     const name = typeof body.name === "string" ? body.name : "";
     const memberIds = Array.isArray(body.memberIds) ? (body.memberIds as string[]) : [];
+
+    // Authorization: only a group ADMIN may update the channel.
+    if (!(await this.channelsService.isChannelAdmin(authUserId, channelId))) {
+      throw new HttpException(403, "Only group admins can update this channel.");
+    }
 
     const channel = await this.channelsService.updateGroupChannel(authUserId, channelId, {
       name,
