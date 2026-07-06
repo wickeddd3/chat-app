@@ -120,6 +120,14 @@ export class PresenceService {
   }
 
   /**
+   * Checks whether a user's base contact presence graph exists in Redis.
+   */
+  public async checkContactCacheExists(userId: string): Promise<boolean> {
+    const result = await this.redis.exists(`${this.contactPrefix}${userId}`);
+    return result === 1;
+  }
+
+  /**
    * Seeds an empty placeholder marker into Redis to protect against Cache Stampedes.
    */
   public async setEmptyPresenceMarker(userId: string): Promise<void> {
