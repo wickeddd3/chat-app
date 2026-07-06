@@ -93,12 +93,18 @@ export class ChannelsService {
     try {
       const updated = await this.channelsRepository.updateGroupChannel(userId, channelId, data);
 
-      // Membership may have changed — drop the cached roster so the next
-      // message send rebuilds it from the DB (add/remove aware). Fire-and-forget:
-      // a cache-invalidation failure must not fail the already-committed update.
-      this.presenceService.invalidateChannelMembersLookup(channelId).catch((error: unknown) => {
-        log.error({ err: error, channelId }, "Failed to invalidate channel members cache");
-      });
+      // Membership may have changed — authoritatively rewrite the cached roster
+      // (message fan-out reads it) to exactly the new set so removed members stop
+      // receiving and added members start immediately. Mirrors the DB write in
+      // the repo: the admin is always a member. Awaited so the cache is correct
+      // before we respond; a Redis failure is logged but must not fail the
+      // already-committed update.
+      const memberIds = [userId, ...data.memberIds.filter((id) => id !== userId)];
+      try {
+        await this.presenceService.refreshChannelMembersLookup(channelId, memberIds);
+      } catch (error) {
+        log.error({ err: error, channelId }, "Failed to refresh channel members cache");
+      }
 
       return updated;
     } catch (error) {
