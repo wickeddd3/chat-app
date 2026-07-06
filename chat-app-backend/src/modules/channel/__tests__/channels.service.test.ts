@@ -14,7 +14,7 @@ describe("ChannelsService (DI container + mocked repository)", () => {
     createGroupChannel: jest.Mock;
     updateGroupChannel: jest.Mock;
   };
-  let presence: { invalidateChannelMembersLookup: jest.Mock };
+  let presence: { refreshChannelMembersLookup: jest.Mock };
   let service: ChannelsService;
 
   beforeEach(() => {
@@ -25,7 +25,7 @@ describe("ChannelsService (DI container + mocked repository)", () => {
       createGroupChannel: jest.fn(),
       updateGroupChannel: jest.fn(),
     };
-    presence = { invalidateChannelMembersLookup: jest.fn().mockResolvedValue(undefined) };
+    presence = { refreshChannelMembersLookup: jest.fn().mockResolvedValue(undefined) };
     const container = buildTestContainer([
       [TYPES.ChannelsRepository, repo],
       [TYPES.PresenceService, presence],
@@ -71,17 +71,17 @@ describe("ChannelsService (DI container + mocked repository)", () => {
   });
 
   describe("updateGroupChannel", () => {
-    it("invalidates the cached channel roster so membership changes take effect", async () => {
+    it("rewrites the cached roster (admin + members, deduped) so membership changes take effect", async () => {
       repo.updateGroupChannel.mockResolvedValue({ id: "c1" });
 
-      await service.updateGroupChannel("admin", "c1", { name: "Team", memberIds: ["u2", "u3"] });
+      await service.updateGroupChannel("admin", "c1", { name: "Team", memberIds: ["admin", "u2", "u3"] });
 
-      expect(presence.invalidateChannelMembersLookup).toHaveBeenCalledWith("c1");
+      expect(presence.refreshChannelMembersLookup).toHaveBeenCalledWith("c1", ["admin", "u2", "u3"]);
     });
 
-    it("does not fail the update when cache invalidation rejects", async () => {
+    it("does not fail the update when the cache refresh rejects", async () => {
       repo.updateGroupChannel.mockResolvedValue({ id: "c1" });
-      presence.invalidateChannelMembersLookup.mockRejectedValue(new Error("redis down"));
+      presence.refreshChannelMembersLookup.mockRejectedValue(new Error("redis down"));
 
       await expect(
         service.updateGroupChannel("admin", "c1", { name: "Team", memberIds: ["u2"] }),
