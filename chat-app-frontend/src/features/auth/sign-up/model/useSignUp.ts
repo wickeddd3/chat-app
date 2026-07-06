@@ -4,7 +4,7 @@ import type { SignUpFormSchemaType } from "./schema";
 import { signUpApi } from "../api/auth.api";
 import { toast } from "sonner";
 
-export function useSignUp(): {
+export function useSignUp(options?: { onSuccess?: (email: string) => void }): {
   register: UseMutateFunction<User, Error, SignUpFormSchemaType, unknown>;
   isPending: boolean;
   error: unknown;
@@ -17,10 +17,11 @@ export function useSignUp(): {
         position: "bottom-right",
       });
     },
-    onSuccess: () => {
+    onSuccess: (_user, variables) => {
       toast.success("Account created successfully", {
         position: "bottom-right",
       });
+      options?.onSuccess?.(variables.email);
     },
   });
 
