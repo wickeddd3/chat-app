@@ -4,10 +4,17 @@ import { ChannelsRepository } from "./channels.repository";
 import type { InboxChannel, PaginatedChannels } from "./channels.types";
 import type { Channel } from "@/prisma/client";
 import { HttpException } from "@/utils/http.exception";
+import { PresenceService } from "@/services/presence.service";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("Channels");
 
 @injectable()
 export class ChannelsService {
-  constructor(@inject(TYPES.ChannelsRepository) private channelsRepository: ChannelsRepository) {}
+  constructor(
+    @inject(TYPES.ChannelsRepository) private channelsRepository: ChannelsRepository,
+    @inject(TYPES.PresenceService) private presenceService: PresenceService,
+  ) {}
 
   public async getChannels({
     authUserId,
@@ -84,7 +91,16 @@ export class ChannelsService {
     data: { name: string; memberIds: string[] },
   ): Promise<Channel | null> {
     try {
-      return await this.channelsRepository.updateGroupChannel(userId, channelId, data);
+      const updated = await this.channelsRepository.updateGroupChannel(userId, channelId, data);
+
+      // Membership may have changed — drop the cached roster so the next
+      // message send rebuilds it from the DB (add/remove aware). Fire-and-forget:
+      // a cache-invalidation failure must not fail the already-committed update.
+      this.presenceService.invalidateChannelMembersLookup(channelId).catch((error: unknown) => {
+        log.error({ err: error, channelId }, "Failed to invalidate channel members cache");
+      });
+
+      return updated;
     } catch (error) {
       throw new HttpException(500, "Failed to update group channel.", null, { cause: error });
     }
