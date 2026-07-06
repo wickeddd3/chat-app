@@ -81,10 +81,49 @@ export class PresenceService {
   }
 
   /**
+   * Authoritatively replaces the cached channel roster with `memberIds`.
+   *
+   * Call this whenever a channel's membership changes (add/remove). Unlike
+   * `setChannelMembersLookup`, which only ever *adds* ids (so it can't drop a
+   * removed member), this deletes the set and rewrites it in one pipeline — so
+   * the cache reflects exactly the new membership immediately, with no empty
+   * window for a concurrent lookup to race into.
+   */
+  public async refreshChannelMembersLookup(channelId: string, memberIds: string[]): Promise<void> {
+    const key = `${this.channelPrefix}${channelId}`;
+    const pipeline = this.redis.pipeline();
+
+    pipeline.del(key);
+    if (memberIds.length > 0) {
+      pipeline.sadd(key, ...memberIds);
+      pipeline.expire(key, 86400); // 24-hour retention window
+    }
+
+    await pipeline.exec();
+  }
+
+  /**
+   * Returns the cached member roster for a channel — the message fan-out target
+   * set. An empty array means the cache is cold; callers should rebuild it from
+   * the database and re-warm via `setChannelMembersLookup`.
+   */
+  public async getChannelMembersLookup(channelId: string): Promise<string[]> {
+    return await this.redis.smembers(`${this.channelPrefix}${channelId}`);
+  }
+
+  /**
    * Checks if a channel cache exists in Redis memory.
    */
   public async checkChannelCacheExists(channelId: string): Promise<boolean> {
     const result = await this.redis.exists(`${this.channelPrefix}${channelId}`);
+    return result === 1;
+  }
+
+  /**
+   * Checks whether a user's base contact presence graph exists in Redis.
+   */
+  public async checkContactCacheExists(userId: string): Promise<boolean> {
+    const result = await this.redis.exists(`${this.contactPrefix}${userId}`);
     return result === 1;
   }
 

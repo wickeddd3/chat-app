@@ -7,7 +7,6 @@ import { MessagesService } from "@/modules/message/messages.service";
 import { ChannelsService } from "@/modules/channel/channels.service";
 import { BroadcasterService } from "@/services/broadcaster.service";
 import { PresenceService } from "@/services/presence.service";
-import type { Redis } from "ioredis";
 
 const sendMessageSchema = z.object({
   content: z.string().min(1).max(4000),
@@ -26,7 +25,6 @@ export class SendMessageCommand implements WebSocketCommand<SendMessagePayload> 
     @inject(TYPES.ChannelsService) private channelsService: ChannelsService,
     @inject(TYPES.BroadcasterService) private broadcaster: BroadcasterService,
     @inject(TYPES.PresenceService) private presenceService: PresenceService,
-    @inject(TYPES.RedisMainClient) private redis: Redis,
   ) {}
 
   public async execute(socket: Socket, authId: string, data: SendMessagePayload): Promise<void> {
@@ -68,7 +66,7 @@ export class SendMessageCommand implements WebSocketCommand<SendMessagePayload> 
     // 3. Fan-out to every channel member. Prefer the hot Redis member set; on a
     // cache miss (TTL'd / never warmed) fall back to the DB and re-warm it —
     // otherwise the message would be saved but delivered to nobody in realtime.
-    let memberIds = await this.redis.smembers(`presence:channel_members:${targetChannelId}`);
+    let memberIds = await this.presenceService.getChannelMembersLookup(targetChannelId);
     if (memberIds.length === 0) {
       memberIds = await this.channelsService.getMemberIds(authId, targetChannelId);
       await this.presenceService.setChannelMembersLookup(targetChannelId, memberIds);

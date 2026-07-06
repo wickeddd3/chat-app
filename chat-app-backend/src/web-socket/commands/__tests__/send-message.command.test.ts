@@ -10,7 +10,6 @@ import type { MessagesService } from "@/modules/message/messages.service";
 import type { ChannelsService } from "@/modules/channel/channels.service";
 import type { BroadcasterService } from "@/services/broadcaster.service";
 import type { PresenceService } from "@/services/presence.service";
-import type { Redis } from "ioredis";
 
 const payload = { content: "hello", channelId: "c1", clientId: "tmp-1" };
 
@@ -28,8 +27,7 @@ describe("SendMessageCommand", () => {
   let messagesService: { saveMessage: jest.Mock };
   let channelsService: { isMember: jest.Mock; updateChannel: jest.Mock; getMemberIds: jest.Mock };
   let broadcaster: { emitToUser: jest.Mock };
-  let presence: { setChannelMembersLookup: jest.Mock };
-  let redis: { smembers: jest.Mock };
+  let presence: { setChannelMembersLookup: jest.Mock; getChannelMembersLookup: jest.Mock };
   let socket: { emit: jest.Mock };
   let command: SendMessageCommand;
 
@@ -41,8 +39,10 @@ describe("SendMessageCommand", () => {
       getMemberIds: jest.fn(),
     };
     broadcaster = { emitToUser: jest.fn().mockResolvedValue(undefined) };
-    presence = { setChannelMembersLookup: jest.fn().mockResolvedValue(undefined) };
-    redis = { smembers: jest.fn() };
+    presence = {
+      setChannelMembersLookup: jest.fn().mockResolvedValue(undefined),
+      getChannelMembersLookup: jest.fn(),
+    };
     socket = { emit: jest.fn() };
 
     command = new SendMessageCommand(
@@ -50,7 +50,6 @@ describe("SendMessageCommand", () => {
       channelsService as unknown as ChannelsService,
       broadcaster as unknown as BroadcasterService,
       presence as unknown as PresenceService,
-      redis as unknown as Redis,
     );
   });
 
@@ -66,7 +65,7 @@ describe("SendMessageCommand", () => {
 
   it("fans out to the cached member set on a cache hit (no DB fallback)", async () => {
     channelsService.isMember.mockResolvedValue(true);
-    redis.smembers.mockResolvedValue(["u1", "u2"]);
+    presence.getChannelMembersLookup.mockResolvedValue(["u1", "u2"]);
 
     await command.execute(socket as unknown as Socket, "u1", payload);
 
@@ -78,7 +77,7 @@ describe("SendMessageCommand", () => {
 
   it("falls back to the DB and re-warms the cache on a cache miss", async () => {
     channelsService.isMember.mockResolvedValue(true);
-    redis.smembers.mockResolvedValue([]); // cache miss
+    presence.getChannelMembersLookup.mockResolvedValue([]); // cache miss
     channelsService.getMemberIds.mockResolvedValue(["u1", "u2", "u3"]);
 
     await command.execute(socket as unknown as Socket, "u1", payload);

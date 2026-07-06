@@ -4,10 +4,17 @@ import { ChannelsRepository } from "./channels.repository";
 import type { InboxChannel, PaginatedChannels } from "./channels.types";
 import type { Channel } from "@/prisma/client";
 import { HttpException } from "@/utils/http.exception";
+import { PresenceService } from "@/services/presence.service";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("Channels");
 
 @injectable()
 export class ChannelsService {
-  constructor(@inject(TYPES.ChannelsRepository) private channelsRepository: ChannelsRepository) {}
+  constructor(
+    @inject(TYPES.ChannelsRepository) private channelsRepository: ChannelsRepository,
+    @inject(TYPES.PresenceService) private presenceService: PresenceService,
+  ) {}
 
   public async getChannels({
     authUserId,
@@ -84,7 +91,22 @@ export class ChannelsService {
     data: { name: string; memberIds: string[] },
   ): Promise<Channel | null> {
     try {
-      return await this.channelsRepository.updateGroupChannel(userId, channelId, data);
+      const updated = await this.channelsRepository.updateGroupChannel(userId, channelId, data);
+
+      // Membership may have changed — authoritatively rewrite the cached roster
+      // (message fan-out reads it) to exactly the new set so removed members stop
+      // receiving and added members start immediately. Mirrors the DB write in
+      // the repo: the admin is always a member. Awaited so the cache is correct
+      // before we respond; a Redis failure is logged but must not fail the
+      // already-committed update.
+      const memberIds = [userId, ...data.memberIds.filter((id) => id !== userId)];
+      try {
+        await this.presenceService.refreshChannelMembersLookup(channelId, memberIds);
+      } catch (error) {
+        log.error({ err: error, channelId }, "Failed to refresh channel members cache");
+      }
+
+      return updated;
     } catch (error) {
       throw new HttpException(500, "Failed to update group channel.", null, { cause: error });
     }

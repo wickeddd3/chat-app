@@ -12,7 +12,9 @@ describe("ChannelsService (DI container + mocked repository)", () => {
     findExistingDirectChannel: jest.Mock;
     createDirectChannel: jest.Mock;
     createGroupChannel: jest.Mock;
+    updateGroupChannel: jest.Mock;
   };
+  let presence: { refreshChannelMembersLookup: jest.Mock };
   let service: ChannelsService;
 
   beforeEach(() => {
@@ -21,8 +23,13 @@ describe("ChannelsService (DI container + mocked repository)", () => {
       findExistingDirectChannel: jest.fn(),
       createDirectChannel: jest.fn(),
       createGroupChannel: jest.fn(),
+      updateGroupChannel: jest.fn(),
     };
-    const container = buildTestContainer([[TYPES.ChannelsRepository, repo]]);
+    presence = { refreshChannelMembersLookup: jest.fn().mockResolvedValue(undefined) };
+    const container = buildTestContainer([
+      [TYPES.ChannelsRepository, repo],
+      [TYPES.PresenceService, presence],
+    ]);
     container.bind<ChannelsService>(TYPES.ChannelsService).to(ChannelsService);
     service = container.get<ChannelsService>(TYPES.ChannelsService);
   });
@@ -61,5 +68,24 @@ describe("ChannelsService (DI container + mocked repository)", () => {
 
     await expect(service.getChannels({ authUserId: "u1" })).resolves.toBe(payload);
     expect(repo.getChannels).toHaveBeenCalledWith({ authUserId: "u1", limit: 20, cursor: "", query: "" });
+  });
+
+  describe("updateGroupChannel", () => {
+    it("rewrites the cached roster (admin + members, deduped) so membership changes take effect", async () => {
+      repo.updateGroupChannel.mockResolvedValue({ id: "c1" });
+
+      await service.updateGroupChannel("admin", "c1", { name: "Team", memberIds: ["admin", "u2", "u3"] });
+
+      expect(presence.refreshChannelMembersLookup).toHaveBeenCalledWith("c1", ["admin", "u2", "u3"]);
+    });
+
+    it("does not fail the update when the cache refresh rejects", async () => {
+      repo.updateGroupChannel.mockResolvedValue({ id: "c1" });
+      presence.refreshChannelMembersLookup.mockRejectedValue(new Error("redis down"));
+
+      await expect(
+        service.updateGroupChannel("admin", "c1", { name: "Team", memberIds: ["u2"] }),
+      ).resolves.toMatchObject({ id: "c1" });
+    });
   });
 });

@@ -1,7 +1,6 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import type { Socket } from "socket.io";
-import type { Redis } from "ioredis";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import { PresenceService } from "@/services/presence.service";
 import { BroadcasterService } from "@/services/broadcaster.service";
@@ -15,7 +14,6 @@ export class HeartbeatCommand implements WebSocketCommand {
     @inject(TYPES.PresenceService) private presenceService: PresenceService,
     @inject(TYPES.BroadcasterService) private broadcaster: BroadcasterService,
     @inject(TYPES.ConnectionsRepository) private connectionsRepository: ConnectionsRepository,
-    @inject(TYPES.RedisMainClient) private redis: Redis,
   ) {}
 
   public async execute(socket: Socket, authId: string, _data: unknown): Promise<void> {
@@ -23,15 +21,12 @@ export class HeartbeatCommand implements WebSocketCommand {
 
     // TARGETED MULTI-CAST: Only notify followers if they transitioned from offline -> online
     if (stateTransition === "LOGIN") {
-      const followerKey = `presence:followers_of:${authId}`;
-
       // 1. Fetch live active observers from Redis cache
-      let observerIds = await this.redis.smembers(followerKey);
+      let observerIds = await this.presenceService.getFollowers(authId);
 
       // 2. CRITICAL HEARTBEAT SELF-HEALING BRIDGE:
-      // If the followers index set is missing, look up relational bounds in Postgres
-      const followerSetExists = await this.redis.exists(followerKey);
-      if (!followerSetExists || observerIds.length === 0) {
+      // If the followers index set is missing/empty, look up relational bounds in Postgres
+      if (observerIds.length === 0) {
         const persistedContacts = await this.connectionsRepository.getRawContactIds(authId);
 
         if (persistedContacts.length > 0) {
