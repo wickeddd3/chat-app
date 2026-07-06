@@ -91,7 +91,7 @@ describe("SentRequests", () => {
 
     renderSent();
 
-    expect(screen.getByText("Empty")).toBeInTheDocument();
+    expect(screen.getByText("No requests sent")).toBeInTheDocument();
     expect(screen.queryByTestId("virtuoso")).not.toBeInTheDocument();
   });
 

@@ -66,6 +66,6 @@ test.describe("authenticated people list (stubbed API)", () => {
 
     await page.goto("/people");
 
-    await expect(page.getByText("Empty")).toBeVisible();
+    await expect(page.getByText("No people found")).toBeVisible();
   });
 });

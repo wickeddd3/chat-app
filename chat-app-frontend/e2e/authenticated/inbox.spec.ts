@@ -71,7 +71,7 @@ test.describe("authenticated inbox (stubbed API)", () => {
 
     await page.goto("/messages");
 
-    await expect(page.getByText("Empty")).toBeVisible();
+    await expect(page.getByText("No conversations yet")).toBeVisible();
     await expect(page.getByText("Alice Doe")).toBeHidden();
   });
 });

@@ -93,6 +93,6 @@ test.describe("authenticated chat room (stubbed API)", () => {
 
     await page.goto("/messages/chan-1");
 
-    await expect(page.getByText("Start a conversation")).toBeVisible();
+    await expect(page.getByText("No messages yet")).toBeVisible();
   });
 });
