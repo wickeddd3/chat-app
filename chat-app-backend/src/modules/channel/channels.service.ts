@@ -51,6 +51,15 @@ export class ChannelsService {
     }
   }
 
+  /** Authorization guard: is `userId` an ADMIN of `channelId`? (group management) */
+  public async isChannelAdmin(userId: string, channelId: string): Promise<boolean> {
+    try {
+      return await this.channelsRepository.isChannelAdmin(userId, channelId);
+    } catch (error) {
+      throw new HttpException(500, "Failed to verify channel admin role.", null, { cause: error });
+    }
+  }
+
   /** Returns every member id of a channel the requester belongs to (used for realtime fan-out). */
   public async getMemberIds(userId: string, channelId: string): Promise<string[]> {
     try {

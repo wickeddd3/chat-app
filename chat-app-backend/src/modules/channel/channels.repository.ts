@@ -213,6 +213,22 @@ export class ChannelsRepository {
     }
   }
 
+  /**
+   * Authoritative admin check for authorization on group-management paths (e.g.
+   * updating the channel). Uses the (channelId, userId) unique index.
+   */
+  public async isChannelAdmin(userId: string, channelId: string): Promise<boolean> {
+    try {
+      const member = await this.db.channelMember.findUnique({
+        where: { channelId_userId: { channelId, userId } },
+        select: { role: true },
+      });
+      return member?.role === "ADMIN";
+    } catch (error) {
+      throw new HttpException(500, "Failed to verify channel admin role.", null, { cause: error });
+    }
+  }
+
   public async getRawMemberIds(userId: string, channelId: string): Promise<string[]> {
     try {
       const channel = await this.db.channel.findFirst({

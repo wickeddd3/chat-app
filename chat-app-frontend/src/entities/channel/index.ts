@@ -17,3 +17,5 @@ export {
   prependInboxChannel,
   patchInboxChannel,
 } from "./model/inbox-cache";
+
+export { isChannelAdmin } from "./model/channel-permissions";

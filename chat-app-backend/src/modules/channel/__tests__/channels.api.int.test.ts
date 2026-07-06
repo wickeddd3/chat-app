@@ -8,6 +8,7 @@ jest.mock("@/lib/redis", () => ({ redisClient: {}, pubClient: {}, subClient: {},
 
 import { verifySupabaseToken } from "@/lib/jwt";
 import { buildApiTestApp } from "@/test/helpers/app.helper";
+import { prisma } from "@/test/helpers/db.helper";
 import { addMember, createChannel, createUser } from "@/test/factories";
 
 const mockVerify = verifySupabaseToken as jest.Mock;
@@ -49,5 +50,44 @@ describe("Channels API (HTTP integration: real app + DB, mocked auth)", () => {
     const res = await request(app).get("/channels/not-a-uuid").set("Authorization", "Bearer valid");
     expect(res.status).toBe(400);
     expect(res.body.success).toBe(false);
+  });
+
+  describe("POST /channels/group/:channelId (admin-only update)", () => {
+    it("returns 403 when a non-admin member tries to update the group", async () => {
+      const [admin, member] = [await createUser(), await createUser()];
+      const channel = await createChannel({ authorId: admin.id, type: "GROUP", name: "Original" });
+      await addMember(channel.id, admin.id, "ADMIN");
+      await addMember(channel.id, member.id, "MEMBER");
+
+      mockVerify.mockResolvedValue({ authId: member.id });
+      const res = await request(app)
+        .post(`/channels/group/${channel.id}`)
+        .set("Authorization", "Bearer valid")
+        .send({ name: "Hijacked", memberIds: [member.id] });
+
+      expect(res.status).toBe(403);
+      expect(res.body.success).toBe(false);
+      // The name must be unchanged.
+      const unchanged = await prisma.channel.findUniqueOrThrow({ where: { id: channel.id } });
+      expect(unchanged.name).toBe("Original");
+    });
+
+    it("returns 200 and updates when an admin makes the request", async () => {
+      const [admin, member] = [await createUser(), await createUser()];
+      const channel = await createChannel({ authorId: admin.id, type: "GROUP", name: "Original" });
+      await addMember(channel.id, admin.id, "ADMIN");
+      await addMember(channel.id, member.id, "MEMBER");
+
+      mockVerify.mockResolvedValue({ authId: admin.id });
+      const res = await request(app)
+        .post(`/channels/group/${channel.id}`)
+        .set("Authorization", "Bearer valid")
+        .send({ name: "Renamed", memberIds: [member.id] });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      const updated = await prisma.channel.findUniqueOrThrow({ where: { id: channel.id } });
+      expect(updated.name).toBe("Renamed");
+    });
   });
 });
