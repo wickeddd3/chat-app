@@ -106,7 +106,7 @@ describe("ReceivedRequests", () => {
 
     renderReceived();
 
-    expect(screen.getByText("Empty")).toBeInTheDocument();
+    expect(screen.getByText("No requests received")).toBeInTheDocument();
     expect(screen.queryByTestId("virtuoso")).not.toBeInTheDocument();
   });
 

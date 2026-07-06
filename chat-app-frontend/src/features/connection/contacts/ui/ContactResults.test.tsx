@@ -68,7 +68,7 @@ describe("ContactResults", () => {
   it("shows the empty placeholder when there are no contacts", () => {
     render(<ContactResults {...baseProps} results={[]} isEmpty />);
 
-    expect(screen.getByText("Empty")).toBeInTheDocument();
+    expect(screen.getByText("No contacts yet")).toBeInTheDocument();
     expect(screen.queryByTestId("virtuoso")).not.toBeInTheDocument();
   });
 
@@ -83,7 +83,7 @@ describe("ContactResults", () => {
     // The injected message button is wired to each contact's id.
     expect(screen.getByTestId("message-1")).toBeInTheDocument();
     expect(screen.getByTestId("message-2")).toBeInTheDocument();
-    expect(screen.queryByText("Empty")).not.toBeInTheDocument();
+    expect(screen.queryByText("No contacts yet")).not.toBeInTheDocument();
   });
 
   it("renders the loading footer while fetching the next page", () => {

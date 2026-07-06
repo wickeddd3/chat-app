@@ -126,7 +126,7 @@ describe("UserList", () => {
 
     renderUserList();
 
-    expect(screen.getByText("Empty")).toBeInTheDocument();
+    expect(screen.getByText("No people found")).toBeInTheDocument();
     expect(screen.queryByTestId("virtuoso")).not.toBeInTheDocument();
   });
 

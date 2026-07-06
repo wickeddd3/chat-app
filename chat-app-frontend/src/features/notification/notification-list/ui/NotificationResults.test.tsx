@@ -54,13 +54,13 @@ describe("NotificationResults", () => {
 
     expect(screen.getByRole("status", { name: "Loading" })).toBeInTheDocument();
     expect(screen.queryByTestId("virtuoso")).not.toBeInTheDocument();
-    expect(screen.queryByText("Empty")).not.toBeInTheDocument();
+    expect(screen.queryByText("You're all caught up")).not.toBeInTheDocument();
   });
 
   it("shows the empty placeholder when there are no notifications", () => {
     render(<NotificationResults {...baseProps} results={[]} isEmpty />);
 
-    expect(screen.getByText("No notifications")).toBeInTheDocument();
+    expect(screen.getByText("You're all caught up")).toBeInTheDocument();
     expect(screen.queryByTestId("virtuoso")).not.toBeInTheDocument();
   });
 
