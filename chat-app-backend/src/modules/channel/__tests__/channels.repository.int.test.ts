@@ -42,6 +42,19 @@ describe("ChannelsRepository (integration, real DB)", () => {
     });
   });
 
+  describe("isChannelAdmin (group-management guard)", () => {
+    it("returns true only for an ADMIN member", async () => {
+      const [admin, member, outsider] = [await createUser(), await createUser(), await createUser()];
+      const channel = await createChannel({ authorId: admin.id, type: "GROUP" });
+      await addMember(channel.id, admin.id, "ADMIN");
+      await addMember(channel.id, member.id, "MEMBER");
+
+      expect(await repo.isChannelAdmin(admin.id, channel.id)).toBe(true);
+      expect(await repo.isChannelAdmin(member.id, channel.id)).toBe(false);
+      expect(await repo.isChannelAdmin(outsider.id, channel.id)).toBe(false);
+    });
+  });
+
   describe("getChannels (inbox)", () => {
     it("hides a DIRECT channel until it has messages, then shows it", async () => {
       const [me, other] = [await createUser(), await createUser()];
