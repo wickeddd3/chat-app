@@ -18,7 +18,10 @@ function inboxItem(overrides: Partial<InboxChannel> = {}): InboxChannel {
     displayName: "Jane Doe",
     displayImage: "",
     channelMembers: [],
-    lastMessage: { content: "See you soon", createdAt: "2026-01-01T00:00:00.000Z" },
+    lastMessage: {
+      content: "See you soon",
+      createdAt: "2026-01-01T00:00:00.000Z",
+    },
     messages: [],
     recipient: null,
     unreadCount: 0,

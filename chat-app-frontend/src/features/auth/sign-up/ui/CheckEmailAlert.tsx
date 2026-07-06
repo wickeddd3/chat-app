@@ -1,4 +1,9 @@
-import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/shared/ui/shadcn/alert";
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from "@/shared/ui/shadcn/alert";
 import { FaEnvelope, FaXmark } from "react-icons/fa6";
 
 export interface CheckEmailAlertProps {
@@ -21,8 +26,8 @@ export function CheckEmailAlert({ email, onDismiss }: CheckEmailAlertProps) {
       <AlertTitle className="text-xs">Confirm your email</AlertTitle>
       <AlertDescription className="text-xs text-cyan-900/90 dark:text-cyan-50/90">
         <p className="text-pretty">
-          We sent a confirmation link to <strong>{email}</strong>. Check your inbox (and spam folder) to activate your
-          account before signing in.
+          We sent a confirmation link to <strong>{email}</strong>. Check your
+          inbox (and spam folder) to activate your account before signing in.
         </p>
       </AlertDescription>
       {onDismiss && (

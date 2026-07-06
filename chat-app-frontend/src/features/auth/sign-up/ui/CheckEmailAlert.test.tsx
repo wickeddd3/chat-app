@@ -23,6 +23,8 @@ describe("CheckEmailAlert", () => {
   it("omits the close button when no onDismiss is provided", () => {
     render(<CheckEmailAlert email="john@example.com" />);
 
-    expect(screen.queryByRole("button", { name: "Dismiss" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Dismiss" }),
+    ).not.toBeInTheDocument();
   });
 });

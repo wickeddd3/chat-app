@@ -18,7 +18,9 @@ function notification(overrides: Partial<Notification> = {}): Notification {
 
 describe("NotificationItem", () => {
   it("renders the title and content", () => {
-    render(<NotificationItem notification={notification()} onClick={vi.fn()} />);
+    render(
+      <NotificationItem notification={notification()} onClick={vi.fn()} />,
+    );
 
     expect(screen.getByText("New connection request")).toBeInTheDocument();
     expect(screen.getByText("Jane wants to connect")).toBeInTheDocument();
@@ -27,7 +29,9 @@ describe("NotificationItem", () => {
   it("calls onClick when activated", async () => {
     const onClick = vi.fn();
     const user = userEvent.setup();
-    render(<NotificationItem notification={notification()} onClick={onClick} />);
+    render(
+      <NotificationItem notification={notification()} onClick={onClick} />,
+    );
 
     await user.click(screen.getByRole("button"));
 

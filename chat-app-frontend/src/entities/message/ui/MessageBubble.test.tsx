@@ -37,10 +37,7 @@ describe("MessageBubble", () => {
 
   it("pulses the check icon while the message is still sending", () => {
     const { container } = render(
-      <MessageBubble
-        message={message({ isSending: true })}
-        isAuthorsMessage
-      />,
+      <MessageBubble message={message({ isSending: true })} isAuthorsMessage />,
     );
 
     expect(container.querySelector("svg.animate-pulse")).toBeInTheDocument();
@@ -54,7 +51,9 @@ describe("MessageBubble", () => {
       />,
     );
 
-    expect(container.querySelector("svg.animate-pulse")).not.toBeInTheDocument();
+    expect(
+      container.querySelector("svg.animate-pulse"),
+    ).not.toBeInTheDocument();
   });
 
   it("renders with the entrance animation enabled without crashing", () => {

@@ -33,8 +33,6 @@ describe("UserListItem", () => {
       />,
     );
 
-    expect(
-      screen.getByRole("button", { name: "Message" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Message" })).toBeInTheDocument();
   });
 });

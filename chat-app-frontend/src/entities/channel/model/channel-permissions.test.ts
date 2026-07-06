@@ -9,7 +9,9 @@ function member(userId: string, role: string): ChannelMember {
   };
 }
 
-function channel(members: ChannelMember[]): Pick<InboxChannel, "channelMembers"> {
+function channel(
+  members: ChannelMember[],
+): Pick<InboxChannel, "channelMembers"> {
   return { channelMembers: members };
 }
 

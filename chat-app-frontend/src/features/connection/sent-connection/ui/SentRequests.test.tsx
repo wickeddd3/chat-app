@@ -63,7 +63,9 @@ function request(id: string): Connection {
   };
 }
 
-function hookState(overrides: Partial<ReturnType<typeof useSentConnectionRequests>> = {}) {
+function hookState(
+  overrides: Partial<ReturnType<typeof useSentConnectionRequests>> = {},
+) {
   return {
     sentRequests: [],
     isLoading: false,

@@ -50,11 +50,15 @@ describe("send-connection cache-update", () => {
         pages: [{ connections: [] }, { connections: [] }],
       });
 
-      onSuccess(newRequest, { receiverId: "user-2" }, {
-        previousRequests: undefined,
-        client: queryClient,
-        keys: queryKeys,
-      });
+      onSuccess(
+        newRequest,
+        { receiverId: "user-2" },
+        {
+          previousRequests: undefined,
+          client: queryClient,
+          keys: queryKeys,
+        },
+      );
 
       const sent = queryClient.getQueryData<{
         pages: { connections: Connection[] }[];
@@ -76,11 +80,15 @@ describe("send-connection cache-update", () => {
       ];
       queryClient.setQueryData(queryKeys.users.recommended(""), users);
 
-      onSuccess(newRequest, { receiverId: "user-2" }, {
-        previousRequests: undefined,
-        client: queryClient,
-        keys: queryKeys,
-      });
+      onSuccess(
+        newRequest,
+        { receiverId: "user-2" },
+        {
+          previousRequests: undefined,
+          client: queryClient,
+          keys: queryKeys,
+        },
+      );
 
       expect(
         queryClient.getQueryData<User[]>(queryKeys.users.recommended("")),

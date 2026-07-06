@@ -18,7 +18,9 @@ export interface ContactListProps {
   }>;
 }
 
-export function ContactList({ messageButton: MessageButton }: ContactListProps) {
+export function ContactList({
+  messageButton: MessageButton,
+}: ContactListProps) {
   const [query, setQuery] = useState("");
 
   const { authUser } = useAuth();

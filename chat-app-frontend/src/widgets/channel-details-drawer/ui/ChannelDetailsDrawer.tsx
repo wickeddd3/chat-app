@@ -7,7 +7,11 @@ import {
   DrawerTrigger,
 } from "@/shared/ui/shadcn/drawer";
 import { FaEllipsisVertical } from "react-icons/fa6";
-import { ChannelDetails, isChannelAdmin, type InboxChannel } from "@/entities/channel";
+import {
+  ChannelDetails,
+  isChannelAdmin,
+  type InboxChannel,
+} from "@/entities/channel";
 import { UpdateGroupChannel } from "@/features/channel/update-group-channel";
 import { useAuth, usePresence } from "@/entities/auth";
 
@@ -44,7 +48,9 @@ export function ChannelDetailsDrawer({ channel }: ChannelDetailsDrawerProps) {
           <DrawerTitle>Info</DrawerTitle>
           <DrawerDescription className="flex justify-between items-center">
             <span className="text-sm">Channel details</span>
-            {isGroupChannel && isAdmin && <UpdateGroupChannel channel={channel} />}
+            {isGroupChannel && isAdmin && (
+              <UpdateGroupChannel channel={channel} />
+            )}
           </DrawerDescription>
         </DrawerHeader>
         <ChannelDetails channel={channel} isOnline={isOnline} />

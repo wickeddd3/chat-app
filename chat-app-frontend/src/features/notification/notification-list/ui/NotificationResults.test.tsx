@@ -23,7 +23,10 @@ vi.mock("react-virtuoso", () => ({
   ),
 }));
 
-function notification(id: string, overrides: Partial<Notification> = {}): Notification {
+function notification(
+  id: string,
+  overrides: Partial<Notification> = {},
+): Notification {
   return {
     id,
     type: "CONNECTION_REQUEST",

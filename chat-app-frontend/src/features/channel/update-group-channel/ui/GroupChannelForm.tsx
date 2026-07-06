@@ -19,7 +19,10 @@ export interface GroupChannelFormProps {
   onSuccess?: () => void;
 }
 
-export function GroupChannelForm({ channel, onSuccess }: GroupChannelFormProps) {
+export function GroupChannelForm({
+  channel,
+  onSuccess,
+}: GroupChannelFormProps) {
   const { authUser } = useAuth();
 
   const form = useForm<GroupChannelFormSchemaType>({

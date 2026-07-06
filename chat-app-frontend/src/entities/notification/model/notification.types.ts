@@ -1,7 +1,5 @@
 export type NotificationType =
-  | "CONNECTION_REQUEST"
-  | "CONNECTION_ACCEPTED"
-  | "CHANNEL_INVITE";
+  "CONNECTION_REQUEST" | "CONNECTION_ACCEPTED" | "CHANNEL_INVITE";
 
 export interface Notification {
   id: string;

@@ -50,7 +50,10 @@ describe("prependInboxChannel", () => {
 
     prependInboxChannel(qc, keys, channel("new"));
 
-    expect(readInbox(qc)?.pages[0].channels.map((c) => c.id)).toEqual(["new", "existing"]);
+    expect(readInbox(qc)?.pages[0].channels.map((c) => c.id)).toEqual([
+      "new",
+      "existing",
+    ]);
   });
 
   it("is idempotent — does not duplicate an already-present channel", () => {
@@ -77,12 +80,18 @@ describe("prependInboxChannel", () => {
 describe("patchInboxChannel", () => {
   it("applies the patch to the matching channel and leaves others untouched", () => {
     const qc = new QueryClient();
-    qc.setQueryData(keys.inbox.list(""), inboxData([channel("c1", "Old"), channel("c2", "Other")]));
+    qc.setQueryData(
+      keys.inbox.list(""),
+      inboxData([channel("c1", "Old"), channel("c2", "Other")]),
+    );
 
     patchInboxChannel(qc, keys, "c1", { name: "New", displayName: "New" });
 
     const channels = readInbox(qc)?.pages[0].channels ?? [];
-    expect(channels.find((c) => c.id === "c1")).toMatchObject({ name: "New", displayName: "New" });
+    expect(channels.find((c) => c.id === "c1")).toMatchObject({
+      name: "New",
+      displayName: "New",
+    });
     expect(channels.find((c) => c.id === "c2")?.name).toBe("Other");
   });
 });

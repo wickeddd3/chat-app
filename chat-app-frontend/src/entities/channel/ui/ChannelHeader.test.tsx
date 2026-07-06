@@ -40,8 +40,6 @@ describe("ChannelHeader", () => {
       />,
     );
 
-    expect(
-      screen.getByRole("button", { name: "Details" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Details" })).toBeInTheDocument();
   });
 });
