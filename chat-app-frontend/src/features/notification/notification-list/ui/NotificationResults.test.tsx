@@ -88,4 +88,20 @@ describe("NotificationResults", () => {
 
     expect(onClick).toHaveBeenCalledWith(["2"]);
   });
+
+  it("does not fire onClick for an already-read notification", async () => {
+    const onClick = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <NotificationResults
+        {...baseProps}
+        onClick={onClick}
+        results={[notification("1", { isRead: true })]}
+      />,
+    );
+
+    await user.click(screen.getByText("Title 1"));
+
+    expect(onClick).not.toHaveBeenCalled();
+  });
 });
