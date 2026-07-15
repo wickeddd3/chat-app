@@ -3,6 +3,7 @@ import { z } from "zod";
 export const listChannelsQuerySchema = z.object({
   cursor: z.string().optional(),
   query: z.string().optional(),
+  filter: z.enum(["all", "unread", "groups"]).optional().default("all"),
 });
 
 export const channelIdParamsSchema = z.object({

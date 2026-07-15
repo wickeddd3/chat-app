@@ -17,16 +17,18 @@ export class ChannelsController extends BaseController {
     const limit = 20;
     const cursor = typeof req.query.cursor === "string" ? req.query.cursor : "";
     const query = typeof req.query.query === "string" ? req.query.query : "";
+    const filter = req.query.filter === "unread" || req.query.filter === "groups" ? req.query.filter : "all";
 
-    const data = await this.channelsService.getChannels({ authUserId, limit, cursor, query });
+    const data = await this.channelsService.getChannels({ authUserId, limit, cursor, query, filter });
 
     const transformedChannels = data.channels.map((channel) => channelToInboxChannel(channel, authUserId));
-    const { channels, nextCursor, hasMore } = { ...data, channels: transformedChannels };
+    const { channels, nextCursor, hasMore, total } = { ...data, channels: transformedChannels };
 
     this.sendSuccess(res, channels, "Channels fetched successfully", 200, {
       limit,
       nextCursor,
       hasMore,
+      total,
     });
   };
 

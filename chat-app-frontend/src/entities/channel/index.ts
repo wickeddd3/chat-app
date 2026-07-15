@@ -13,6 +13,7 @@ export { useChannel } from "./model/useChannel";
 
 export {
   inboxListPrefix,
+  invalidateInboxFilters,
   buildOptimisticGroupChannel,
   prependInboxChannel,
   patchInboxChannel,

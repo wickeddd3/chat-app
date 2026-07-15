@@ -1,6 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { Message } from "@/entities/message";
-import type { InboxChannel } from "@/entities/channel";
+import { invalidateInboxFilters, type InboxChannel } from "@/entities/channel";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 import { webSocketClient } from "@/shared/lib/socket-io.client";
 import { getActiveChannel } from "@/shared/utils/active-channel";
@@ -140,6 +140,11 @@ export const handleIncomingMessage = (
         return currentUnreadCountStats;
       },
     );
+
+    // The channel may have just entered the Unread tab's set — refetch that
+    // server-filtered list (and its badge total) from the source of truth. The
+    // optimistically-patched "all" list is intentionally left untouched.
+    invalidateInboxFilters(queryClient, ["unread"]);
   }
 
   // Auto-read: a message that arrives while you're viewing its channel is marked

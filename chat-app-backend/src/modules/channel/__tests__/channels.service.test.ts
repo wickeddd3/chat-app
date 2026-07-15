@@ -63,11 +63,17 @@ describe("ChannelsService (DI container + mocked repository)", () => {
   });
 
   it("getChannels passes defaults through to the repository", async () => {
-    const payload = { channels: [], hasMore: false, nextCursor: null };
+    const payload = { channels: [], hasMore: false, nextCursor: null, total: 0 };
     repo.getChannels.mockResolvedValue(payload);
 
     await expect(service.getChannels({ authUserId: "u1" })).resolves.toBe(payload);
-    expect(repo.getChannels).toHaveBeenCalledWith({ authUserId: "u1", limit: 20, cursor: "", query: "" });
+    expect(repo.getChannels).toHaveBeenCalledWith({
+      authUserId: "u1",
+      limit: 20,
+      cursor: "",
+      query: "",
+      filter: "all",
+    });
   });
 
   describe("updateGroupChannel", () => {

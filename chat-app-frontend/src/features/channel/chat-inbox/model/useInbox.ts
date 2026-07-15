@@ -3,15 +3,20 @@ import { getInboxApi } from "../api/channels.api";
 import type { InboxChannel, PaginatedInboxChannel } from "@/entities/channel";
 import { useEffect, useMemo, useState } from "react";
 import { debounce } from "@/shared/utils/debounce";
-import { createQueryKeys } from "@/shared/config/react-query-keys";
+import {
+  createQueryKeys,
+  type InboxFilter,
+} from "@/shared/config/react-query-keys";
 
 export function useInbox(
   authId?: string,
   query?: string,
+  filter: InboxFilter = "all",
 ): {
   inbox: InboxChannel[];
   isLoading: boolean;
   isEmpty: boolean;
+  total: number;
   error: unknown;
   fetchNextPage: () => void;
   hasNextPage: boolean;
@@ -37,26 +42,33 @@ export function useInbox(
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery<PaginatedInboxChannel, unknown, InboxChannel[]>({
-    queryKey: keys.inbox.list(debouncedQuery),
+  } = useInfiniteQuery<PaginatedInboxChannel>({
+    queryKey: keys.inbox.list(debouncedQuery, filter),
     queryFn: ({ pageParam }) =>
       getInboxApi({
         params: {
           cursor: pageParam as string | number | null,
           ...(debouncedQuery && { query: debouncedQuery }),
+          ...(filter !== "all" && { filter }),
         },
       }),
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
-    select: (data) => data.pages.flatMap((page) => page.channels),
   });
 
-  const inbox = data ?? [];
+  const inbox = useMemo(
+    () => data?.pages.flatMap((page) => page.channels) ?? [],
+    [data],
+  );
+
+  // Every page reports the same filter-wide total; read it off the first page.
+  const total = data?.pages[0]?.total ?? 0;
 
   return {
     inbox,
     isLoading,
     isEmpty: !isLoading && inbox.length === 0,
+    total,
     error,
     fetchNextPage,
     hasNextPage,

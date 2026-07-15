@@ -1,7 +1,7 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { ChannelsRepository } from "./channels.repository";
-import type { InboxChannel, PaginatedChannels } from "./channels.types";
+import type { ChannelFilter, InboxChannel, PaginatedChannels } from "./channels.types";
 import type { Channel } from "@/prisma/client";
 import { HttpException } from "@/utils/http.exception";
 import { PresenceService } from "@/services/presence.service";
@@ -21,14 +21,16 @@ export class ChannelsService {
     limit = 20,
     cursor = "",
     query = "",
+    filter = "all",
   }: {
     authUserId: string;
     limit?: number;
     cursor?: string;
     query?: string;
+    filter?: ChannelFilter;
   }): Promise<PaginatedChannels> {
     try {
-      return await this.channelsRepository.getChannels({ authUserId, limit, cursor, query });
+      return await this.channelsRepository.getChannels({ authUserId, limit, cursor, query, filter });
     } catch (error) {
       throw new HttpException(500, "Failed to retrieve channels.", null, { cause: error });
     }

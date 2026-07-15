@@ -6,6 +6,7 @@ export interface ApiResponse<T = unknown> {
     limit: number;
     nextCursor: string | null;
     hasMore: boolean;
+    total?: number;
   };
   timestamp: string;
 }

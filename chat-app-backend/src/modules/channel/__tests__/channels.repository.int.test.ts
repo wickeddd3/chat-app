@@ -79,6 +79,52 @@ describe("ChannelsRepository (integration, real DB)", () => {
       expect(filtered.channels.map((c) => c.name)).toEqual(["Weekend Trip"]);
     });
 
+    it("filter=groups returns only GROUP channels, with a matching total", async () => {
+      const [me, other] = [await createUser(), await createUser()];
+      const group = await createChannel({ authorId: me.id, type: "GROUP", name: "Team" });
+      await addMember(group.id, me.id);
+      const direct = await repo.createDirectChannel(me.id, other.id);
+      await createMessage({ channelId: direct.id, authorId: other.id });
+
+      const res = await repo.getChannels({ authUserId: me.id, filter: "groups" });
+      expect(res.channels.map((c) => c.id)).toEqual([group.id]);
+      expect(res.total).toBe(1);
+    });
+
+    it("filter=unread returns only channels with unread messages from others; total drops after reading", async () => {
+      const [me, other] = [await createUser(), await createUser()];
+      const direct = await repo.createDirectChannel(me.id, other.id);
+      const msg = await createMessage({ channelId: direct.id, authorId: other.id });
+
+      // A group where the only message is my own → never counts as unread.
+      const group = await createChannel({ authorId: me.id, type: "GROUP", name: "Solo" });
+      await addMember(group.id, me.id);
+      await createMessage({ channelId: group.id, authorId: me.id });
+
+      const unread = await repo.getChannels({ authUserId: me.id, filter: "unread" });
+      expect(unread.channels.map((c) => c.id)).toEqual([direct.id]);
+      expect(unread.total).toBe(1);
+
+      // Reading the message removes the channel from the unread set.
+      await createReceipt(msg.id, me.id);
+      const afterRead = await repo.getChannels({ authUserId: me.id, filter: "unread" });
+      expect(afterRead.channels).toHaveLength(0);
+      expect(afterRead.total).toBe(0);
+    });
+
+    it("reports the full filtered total even when a page is capped by the limit", async () => {
+      const me = await createUser();
+      for (let i = 0; i < 3; i++) {
+        const g = await createChannel({ authorId: me.id, type: "GROUP", name: `G${i}` });
+        await addMember(g.id, me.id);
+      }
+
+      const firstPage = await repo.getChannels({ authUserId: me.id, filter: "groups", limit: 2 });
+      expect(firstPage.channels).toHaveLength(2);
+      expect(firstPage.hasMore).toBe(true);
+      expect(firstPage.total).toBe(3);
+    });
+
     it("excludes channels the user is not a member of", async () => {
       const [me, stranger] = [await createUser(), await createUser()];
       await createChannel({ authorId: stranger.id, type: "GROUP" }).then((c) => addMember(c.id, stranger.id));

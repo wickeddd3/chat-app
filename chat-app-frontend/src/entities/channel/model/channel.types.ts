@@ -39,4 +39,6 @@ export interface PaginatedInboxChannel {
   channels: InboxChannel[];
   hasMore: boolean;
   nextCursor: string | null;
+  /** Total channels matching the filter, across all pages (for tab badges). */
+  total: number;
 }
