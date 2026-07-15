@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const notificationsQuerySchema = z.object({
   cursor: z.string().optional(),
+  filter: z.enum(["all", "unread"]).optional().default("all"),
 });
 
 export const markAsReadBodySchema = z.object({

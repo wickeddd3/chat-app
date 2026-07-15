@@ -56,6 +56,37 @@ describe("NotificationsRepository (integration, real DB)", () => {
       const mine = await repo.getByUserId({ userId: me.id });
       expect(mine.notifications).toHaveLength(1);
     });
+
+    it("reports a total that matches the isRead filter", async () => {
+      const user = await createUser();
+      await createNotification({ userId: user.id, isRead: false });
+      await createNotification({ userId: user.id, isRead: false });
+      await createNotification({ userId: user.id, isRead: true });
+
+      expect((await repo.getByUserId({ userId: user.id })).total).toBe(3);
+      expect((await repo.getByUserId({ userId: user.id, isRead: false })).total).toBe(2);
+      expect((await repo.getByUserId({ userId: user.id, isRead: true })).total).toBe(1);
+    });
+
+    it("reports the full filtered total even when a page is capped by the limit", async () => {
+      const user = await createUser();
+      for (let i = 0; i < 3; i++) {
+        await createNotification({ userId: user.id, isRead: false });
+      }
+
+      const firstPage = await repo.getByUserId({ userId: user.id, isRead: false, limit: 2 });
+      expect(firstPage.notifications).toHaveLength(2);
+      expect(firstPage.hasMore).toBe(true);
+      expect(firstPage.total).toBe(3);
+    });
+
+    it("excludes another user's notifications from the total", async () => {
+      const [me, other] = [await createUser(), await createUser()];
+      await createNotification({ userId: me.id });
+      await createNotification({ userId: other.id });
+
+      expect((await repo.getByUserId({ userId: me.id })).total).toBe(1);
+    });
   });
 
   describe("getUnreadNotificationsCount", () => {

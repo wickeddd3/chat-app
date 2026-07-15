@@ -55,6 +55,9 @@ function makeDb(rows: Row[]) {
         });
         return filtered.slice(0, args.take);
       }),
+      count: jest.fn(async (args: { where: Record<string, unknown> }) => {
+        return rows.filter((row) => matchesWhere(row, args.where)).length;
+      }),
     },
   };
 }

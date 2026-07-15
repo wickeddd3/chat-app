@@ -16,6 +16,13 @@ describe("createQueryKeys", () => {
       "user-1",
       "notifications",
       "list",
+      "all",
+    ]);
+    expect(keys.notifications.list("unread")).toEqual([
+      "user-1",
+      "notifications",
+      "list",
+      "unread",
     ]);
   });
 
