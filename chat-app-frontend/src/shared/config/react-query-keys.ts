@@ -1,3 +1,6 @@
+/** Inbox tab filters. `all` is the default, unfiltered list. */
+export type InboxFilter = "all" | "unread" | "groups";
+
 export const createQueryKeys = (authId: string | undefined) => {
   // If the user isn't authenticated yet, we use a fallback string
   // to ensure keys don't accidentally merge or break arrays
@@ -19,7 +22,8 @@ export const createQueryKeys = (authId: string | undefined) => {
         [scope, "channel", "details", channelId] as const,
     },
     inbox: {
-      list: (query: string) => [scope, "inbox", "list", query] as const,
+      list: (query: string, filter: InboxFilter = "all") =>
+        [scope, "inbox", "list", query, filter] as const,
     },
     messages: {
       timeline: (channelId: string) =>
