@@ -4,6 +4,7 @@ import {
   buildOptimisticGroupChannel,
   prependInboxChannel,
   patchInboxChannel,
+  invalidateInboxFilters,
 } from "./inbox-cache";
 import type { InboxChannel, PaginatedInboxChannel } from "./channel.types";
 
@@ -13,7 +14,9 @@ type InboxData = InfiniteData<PaginatedInboxChannel>;
 
 function inboxData(channels: InboxChannel[]): InboxData {
   return {
-    pages: [{ channels, hasMore: false, nextCursor: null }],
+    pages: [
+      { channels, hasMore: false, nextCursor: null, total: channels.length },
+    ],
     pageParams: [null],
   };
 }
@@ -74,6 +77,27 @@ describe("prependInboxChannel", () => {
 
     expect(readInbox(qc, "")?.pages[0].channels).toHaveLength(1);
     expect(readInbox(qc, "we")?.pages[0].channels).toHaveLength(1);
+  });
+});
+
+describe("invalidateInboxFilters", () => {
+  it("invalidates only the named filter lists, leaving 'all' untouched", () => {
+    const qc = new QueryClient();
+    const spy = vi.spyOn(qc, "invalidateQueries");
+
+    invalidateInboxFilters(qc, ["unread"]);
+
+    const predicate = spy.mock.calls[0][0]?.predicate as
+      | ((q: { queryKey: readonly unknown[] }) => boolean)
+      | undefined;
+    expect(predicate).toBeTypeOf("function");
+
+    const matches = (key: readonly unknown[]) => predicate!({ queryKey: key });
+
+    expect(matches(keys.inbox.list("", "unread"))).toBe(true);
+    expect(matches(keys.inbox.list("jane", "unread"))).toBe(true);
+    expect(matches(keys.inbox.list("", "all"))).toBe(false);
+    expect(matches(keys.inbox.list("", "groups"))).toBe(false);
   });
 });
 

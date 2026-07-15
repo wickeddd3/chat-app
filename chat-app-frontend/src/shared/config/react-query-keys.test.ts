@@ -60,6 +60,14 @@ describe("createQueryKeys", () => {
         "inbox",
         "list",
         "jane",
+        "all",
+      ]);
+      expect(keys.inbox.list("jane", "unread")).toEqual([
+        "user-1",
+        "inbox",
+        "list",
+        "jane",
+        "unread",
       ]);
       expect(keys.connections.contacts("jane")).toEqual([
         "user-1",

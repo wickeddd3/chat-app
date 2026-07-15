@@ -14,7 +14,12 @@ function page(
   channels: InboxChannel[],
   nextCursor: string | null = null,
 ): PaginatedInboxChannel {
-  return { channels, hasMore: !!nextCursor, nextCursor };
+  return {
+    channels,
+    hasMore: !!nextCursor,
+    nextCursor,
+    total: channels.length,
+  };
 }
 
 describe("useInbox", () => {
@@ -55,5 +60,29 @@ describe("useInbox", () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.isEmpty).toBe(true);
+  });
+
+  it("passes a non-default filter through to the API and exposes the total", async () => {
+    const channels = [{ id: "g-1" } as InboxChannel];
+    mockedGetInboxApi.mockResolvedValue({
+      channels,
+      hasMore: false,
+      nextCursor: null,
+      total: 7,
+    });
+    const { Wrapper } = createQueryClientWrapper();
+
+    const { result } = renderHook(() => useInbox("auth-user", "", "groups"), {
+      wrapper: Wrapper,
+    });
+
+    await waitFor(() =>
+      expect(mockedGetInboxApi).toHaveBeenCalledWith({
+        params: { cursor: null, filter: "groups" },
+      }),
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    // total reflects the full filtered set, independent of the loaded page size.
+    expect(result.current.total).toBe(7);
   });
 });
