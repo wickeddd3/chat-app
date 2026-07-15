@@ -1,5 +1,8 @@
 import type { QueryClient } from "@tanstack/react-query";
-import type { Notification } from "@/entities/notification";
+import {
+  invalidateNotificationFilters,
+  type Notification,
+} from "@/entities/notification";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 import { toast } from "sonner";
 
@@ -44,6 +47,10 @@ export const handleIncomingNotification = (
       return currentUnreadCountStats;
     },
   );
+
+  // A new notification arrives unread, so it just entered the Unread tab's set —
+  // refetch that server-filtered list and its badge total.
+  invalidateNotificationFilters(queryClient, ["unread"]);
 
   // Show notification toast
   toast.info(notification.title, { description: notification.content });

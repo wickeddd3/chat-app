@@ -1,4 +1,7 @@
-import type { Notification } from "@/entities/notification";
+import {
+  invalidateNotificationFilters,
+  type Notification,
+} from "@/entities/notification";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 import type { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -75,8 +78,15 @@ export function onSuccess(
 
   // Decrement the unread notification badge by the number actually marked read
   // (0 when the notification was already read — this is the bug fix). Nothing to
-  // do when none were newly read.
+  // do when none were newly read: the unread set is unchanged, so the filtered
+  // list and its total still hold.
   if (newlyReadCount <= 0) return;
+
+  // Those notifications just left the Unread tab's set — refetch that
+  // server-filtered list and its badge total.
+  if (context?.client) {
+    invalidateNotificationFilters(context.client, ["unread"]);
+  }
 
   context?.client.setQueryData(
     context.keys.dashboard.badges(),

@@ -1,5 +1,8 @@
 import type { Connection } from "@/entities/connection";
-import type { Notification } from "@/entities/notification";
+import {
+  invalidateNotificationFilters,
+  type Notification,
+} from "@/entities/notification";
 import type { User } from "@/entities/user";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 import type { QueryClient } from "@tanstack/react-query";
@@ -140,4 +143,10 @@ export function onSuccess(
       return currentUnreadCountStats;
     },
   );
+
+  // The request notification was removed above, so it also left the Unread tab's
+  // set — refetch that server-filtered list and its badge total.
+  if (context?.client) {
+    invalidateNotificationFilters(context.client, ["unread"]);
+  }
 }
