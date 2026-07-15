@@ -1,8 +1,8 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
-import { PrismaClient } from "@/prisma/client";
+import { PrismaClient, Prisma } from "@/prisma/client";
 import type { Channel } from "@/prisma/client";
-import type { InboxChannel, PaginatedChannels } from "./channels.types";
+import type { ChannelFilter, InboxChannel, PaginatedChannels } from "./channels.types";
 import { HttpException } from "@/utils/http.exception";
 import { decodeCursor, encodeCursor } from "@/utils/cursor";
 
@@ -56,95 +56,129 @@ export class ChannelsRepository {
     }
   }
 
+  /**
+   * Builds the filter-and-search predicate for the inbox list, shared by the
+   * page query and the total count so the badge always matches the list.
+   * The keyset cursor is layered on separately (only the page query paginates).
+   */
+  private buildInboxWhere(authUserId: string, query: string, filter: ChannelFilter): Prisma.ChannelWhereInput {
+    return {
+      channelMembers: { some: { userId: authUserId } },
+      AND: [
+        {
+          OR: [
+            {
+              type: "GROUP", // If it's a group channel, search by the channel name
+              name: {
+                contains: query,
+                mode: "insensitive",
+              },
+            }, // Groups are always visible
+            {
+              AND: [
+                { type: "DIRECT" },
+                {
+                  messages: { some: {} }, // If it's a direct message, search by the names of the OTHER members in that channel
+                  channelMembers: {
+                    some: {
+                      userId: { not: authUserId }, // Exclude current user from name matching
+                      user: {
+                        name: {
+                          contains: query,
+                          mode: "insensitive",
+                        },
+                      },
+                    },
+                  },
+                }, // DMs only visible if messages exist
+              ],
+            },
+          ],
+        },
+        // Tab filters narrow the base set: groups-only, or channels that have at
+        // least one message from someone else that this user hasn't read.
+        ...(filter === "groups" ? [{ type: "GROUP" as const }] : []),
+        ...(filter === "unread"
+          ? [
+              {
+                messages: {
+                  some: {
+                    authorId: { not: authUserId },
+                    readBy: { none: { userId: authUserId } },
+                  },
+                },
+              },
+            ]
+          : []),
+      ],
+    };
+  }
+
   public async getChannels({
     authUserId,
     limit = 20,
     cursor,
     query = "",
+    filter = "all",
   }: {
     authUserId: string;
     limit?: number;
     cursor?: string;
     query?: string;
+    filter?: ChannelFilter;
   }): Promise<PaginatedChannels> {
     try {
       const decoded = decodeCursor(cursor);
-      const channels = await this.db.channel.findMany({
-        // Fetch one extra to reliably determine hasMore.
-        take: limit + 1,
-        where: {
-          channelMembers: { some: { userId: authUserId } },
-          // The search filter and the keyset cursor are separate OR-groups, so
-          // they must be combined under AND (a single object can hold one OR).
-          AND: [
-            {
-              OR: [
-                {
-                  type: "GROUP", // If it's a group channel, search by the channel name
-                  name: {
-                    contains: query,
-                    mode: "insensitive",
-                  },
-                }, // Groups are always visible
-                {
-                  AND: [
-                    { type: "DIRECT" },
-                    {
-                      messages: { some: {} }, // If it's a direct message, search by the names of the OTHER members in that channel
-                      channelMembers: {
-                        some: {
-                          userId: { not: authUserId }, // Exclude current user from name matching
-                          user: {
-                            name: {
-                              contains: query,
-                              mode: "insensitive",
-                            },
-                          },
-                        },
-                      },
-                    }, // DMs only visible if messages exist
-                  ],
-                },
-              ],
-            },
+      const baseWhere = this.buildInboxWhere(authUserId, query, filter);
+
+      const [channels, total] = await Promise.all([
+        this.db.channel.findMany({
+          // Fetch one extra to reliably determine hasMore.
+          take: limit + 1,
+          where: {
+            ...baseWhere,
             // Keyset cursor: (updatedAt, id) strictly before the boundary.
-            ...(decoded
-              ? [
-                  {
-                    OR: [
-                      { updatedAt: { lt: decoded.timestamp } },
-                      { updatedAt: decoded.timestamp, id: { lt: decoded.id } },
-                    ],
-                  },
-                ]
-              : []),
-          ],
-        },
-        orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
-        include: {
-          channelMembers: {
-            include: {
-              user: {
-                select: { id: true, name: true, image: true, username: true },
+            AND: [
+              ...(baseWhere.AND as Prisma.ChannelWhereInput[]),
+              ...(decoded
+                ? [
+                    {
+                      OR: [
+                        { updatedAt: { lt: decoded.timestamp } },
+                        { updatedAt: decoded.timestamp, id: { lt: decoded.id } },
+                      ],
+                    },
+                  ]
+                : []),
+            ],
+          },
+          orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+          include: {
+            channelMembers: {
+              include: {
+                user: {
+                  select: { id: true, name: true, image: true, username: true },
+                },
               },
             },
-          },
-          messages: {
-            orderBy: { createdAt: "desc" },
-            take: 1, // Get last message for the inbox
-          },
-          _count: {
-            select: {
-              messages: {
-                where: {
-                  authorId: { not: authUserId },
-                  readBy: { none: { userId: authUserId } }, // Count messages where auth user have NO receipt
+            messages: {
+              orderBy: { createdAt: "desc" },
+              take: 1, // Get last message for the inbox
+            },
+            _count: {
+              select: {
+                messages: {
+                  where: {
+                    authorId: { not: authUserId },
+                    readBy: { none: { userId: authUserId } }, // Count messages where auth user have NO receipt
+                  },
                 },
               },
             },
           },
-        },
-      });
+        }),
+        this.db.channel.count({ where: baseWhere }),
+      ]);
 
       const hasMore = channels.length > limit;
       const pageItems = hasMore ? channels.slice(0, limit) : channels;
@@ -155,6 +189,7 @@ export class ChannelsRepository {
         channels: pageItems,
         hasMore,
         nextCursor,
+        total,
       };
     } catch (error) {
       throw new HttpException(500, "Failed to retrieve channels.", null, { cause: error });

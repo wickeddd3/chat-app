@@ -77,6 +77,13 @@ export const channelsPaths: OpenAPIV3.PathsObject = {
           required: false,
           schema: { type: "string", example: "Project" },
         },
+        {
+          name: "filter",
+          in: "query",
+          description: "Tab filter: all channels, only those with unread messages, or only group channels",
+          required: false,
+          schema: { type: "string", enum: ["all", "unread", "groups"], default: "all" },
+        },
       ],
       responses: {
         200: {
@@ -98,6 +105,7 @@ export const channelsPaths: OpenAPIV3.PathsObject = {
                       limit: { type: "integer", example: 20 },
                       nextCursor: { type: "string", nullable: true, example: "eyJjcmVhdGVkQXQiOiIyMDI2..." },
                       hasMore: { type: "boolean", example: true },
+                      total: { type: "integer", example: 42, description: "Total channels matching the filter" },
                     },
                   },
                   timestamp: { type: "string", format: "date-time", example: "2026-06-14T14:26:00.000Z" },

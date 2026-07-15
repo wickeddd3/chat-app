@@ -7,6 +7,7 @@ export interface ApiResponse<T = unknown> {
     limit: number;
     nextCursor: string | number | null;
     hasMore: boolean;
+    total?: number; // Total items matching the query, across all pages
   };
   timestamp: string; // ISO string useful for client-side caching/debugging
 }

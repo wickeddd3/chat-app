@@ -12,8 +12,12 @@ export interface InboxChannel extends Channel {
   };
 }
 
+export type ChannelFilter = "all" | "unread" | "groups";
+
 export interface PaginatedChannels {
   channels: InboxChannel[];
   hasMore: boolean;
   nextCursor: string | null;
+  /** Total channels matching the filter (across all pages), for tab badges. */
+  total: number;
 }
