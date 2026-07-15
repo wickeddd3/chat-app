@@ -14,7 +14,12 @@ function page(
   contacts: ConnectionUser[],
   nextCursor: string | null = null,
 ): PaginatedContacts {
-  return { contacts, hasMore: !!nextCursor, nextCursor };
+  return {
+    contacts,
+    hasMore: !!nextCursor,
+    nextCursor,
+    total: contacts.length,
+  };
 }
 
 describe("useContacts", () => {
@@ -73,6 +78,24 @@ describe("useContacts", () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.contacts).toEqual(contacts);
     expect(result.current.isEmpty).toBe(false);
+  });
+
+  it("exposes the server-reported total, independent of the loaded page size", async () => {
+    mockedGetContactsApi.mockResolvedValue({
+      contacts: [{ id: "user-1", name: "Jane", username: "jane" }],
+      hasMore: true,
+      nextCursor: "cursor-2",
+      total: 42,
+    });
+    const { Wrapper } = createQueryClientWrapper();
+
+    const { result } = renderHook(() => useContacts("auth-user"), {
+      wrapper: Wrapper,
+    });
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.contacts).toHaveLength(1);
+    expect(result.current.total).toBe(42);
   });
 
   it("reports isEmpty once loading finishes with no results", async () => {
