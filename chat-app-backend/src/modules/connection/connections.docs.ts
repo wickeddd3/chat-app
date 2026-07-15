@@ -63,6 +63,7 @@ export const connectionsPaths: OpenAPIV3.PathsObject = {
                       limit: { type: "integer", example: 20 },
                       nextCursor: { type: "string", nullable: true, example: "eyJjcmVhdGVkQXQiOiIyMDI2..." },
                       hasMore: { type: "boolean", example: true },
+                      total: { type: "integer", example: 42, description: "Total contacts matching the search" },
                     },
                   },
                   timestamp: { type: "string", format: "date-time", example: "2026-06-14T15:00:00.000Z" },

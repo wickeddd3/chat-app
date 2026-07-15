@@ -23,44 +23,53 @@ export class ConnectionsRepository {
   }): Promise<PaginatedContacts> {
     try {
       const decoded = decodeCursor(cursor);
-      // Fetch all accepted connections where the user is either sender or receiver
-      const connections = await this.db.connection.findMany({
-        where: {
-          status: "ACCEPTED",
-          // The search filter and the keyset cursor are separate OR-groups, so
-          // they must be combined under AND (a single object can hold one OR).
-          AND: [
-            {
-              OR: [
-                { senderId: authUserId, receiver: { name: { contains: query, mode: "insensitive" } } },
-                { receiverId: authUserId, sender: { name: { contains: query, mode: "insensitive" } } },
-              ],
-            },
-            // Keyset cursor: (updatedAt, id) strictly before the boundary.
-            ...(decoded
-              ? [
-                  {
-                    OR: [
-                      { updatedAt: { lt: decoded.timestamp } },
-                      { updatedAt: decoded.timestamp, id: { lt: decoded.id } },
-                    ],
-                  },
-                ]
-              : []),
-          ],
-        },
-        select: {
-          id: true,
-          updatedAt: true,
-          senderId: true,
-          receiverId: true,
-          sender: { select: { id: true, name: true, username: true, image: true } },
-          receiver: { select: { id: true, name: true, username: true, image: true } },
-        },
-        // Fetch one extra to reliably determine hasMore.
-        take: limit + 1,
-        orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
-      });
+      // Accepted connections where the user is either sender or receiver, narrowed
+      // by the name search. Shared by the page query and the total count so the
+      // badge always agrees with the list it labels (including while searching).
+      // The keyset cursor is layered on separately — only the page query paginates.
+      const baseWhere = {
+        status: "ACCEPTED" as const,
+        OR: [
+          { senderId: authUserId, receiver: { name: { contains: query, mode: "insensitive" as const } } },
+          { receiverId: authUserId, sender: { name: { contains: query, mode: "insensitive" as const } } },
+        ],
+      };
+
+      const [connections, total] = await Promise.all([
+        this.db.connection.findMany({
+          where: {
+            status: baseWhere.status,
+            // The search filter and the keyset cursor are separate OR-groups, so
+            // they must be combined under AND (a single object can hold one OR).
+            AND: [
+              { OR: baseWhere.OR },
+              // Keyset cursor: (updatedAt, id) strictly before the boundary.
+              ...(decoded
+                ? [
+                    {
+                      OR: [
+                        { updatedAt: { lt: decoded.timestamp } },
+                        { updatedAt: decoded.timestamp, id: { lt: decoded.id } },
+                      ],
+                    },
+                  ]
+                : []),
+            ],
+          },
+          select: {
+            id: true,
+            updatedAt: true,
+            senderId: true,
+            receiverId: true,
+            sender: { select: { id: true, name: true, username: true, image: true } },
+            receiver: { select: { id: true, name: true, username: true, image: true } },
+          },
+          // Fetch one extra to reliably determine hasMore.
+          take: limit + 1,
+          orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+        }),
+        this.db.connection.count({ where: baseWhere }),
+      ]);
 
       const hasMore = connections.length > limit;
       const pageItems = hasMore ? connections.slice(0, limit) : connections;
@@ -80,6 +89,7 @@ export class ConnectionsRepository {
         contacts: contacts,
         hasMore,
         nextCursor,
+        total,
       };
     } catch (error) {
       throw new HttpException(500, "Failed to retrieve connection contacts.", null, { cause: error });

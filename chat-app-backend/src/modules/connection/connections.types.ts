@@ -10,6 +10,8 @@ export interface PaginatedContacts {
   contacts: Partial<User>[];
   hasMore: boolean;
   nextCursor: string | null;
+  /** Total contacts matching the search (across all pages), for the tab badge. */
+  total: number;
 }
 
 export interface ConnectionUser {
