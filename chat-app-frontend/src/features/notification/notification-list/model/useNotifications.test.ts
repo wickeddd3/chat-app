@@ -29,7 +29,12 @@ function page(
   notifications: Notification[],
   nextCursor: string | null = null,
 ): PaginatedNotifications {
-  return { notifications, hasMore: !!nextCursor, nextCursor };
+  return {
+    notifications,
+    hasMore: !!nextCursor,
+    nextCursor,
+    total: notifications.length,
+  };
 }
 
 describe("useNotifications", () => {
@@ -68,6 +73,30 @@ describe("useNotifications", () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.isEmpty).toBe(true);
+  });
+
+  it("passes a non-default filter through to the API and exposes the total", async () => {
+    mockedApi.mockResolvedValue({
+      notifications: [notification("1")],
+      hasMore: false,
+      nextCursor: null,
+      total: 7,
+    });
+    const { Wrapper } = createQueryClientWrapper();
+
+    const { result } = renderHook(
+      () => useNotifications("auth-user", "unread"),
+      { wrapper: Wrapper },
+    );
+
+    await waitFor(() =>
+      expect(mockedApi).toHaveBeenCalledWith({
+        params: { cursor: null, filter: "unread" },
+      }),
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    // total reflects the full filtered set, independent of the loaded page size.
+    expect(result.current.total).toBe(7);
   });
 
   it("requests the next page using the previous page's cursor", async () => {

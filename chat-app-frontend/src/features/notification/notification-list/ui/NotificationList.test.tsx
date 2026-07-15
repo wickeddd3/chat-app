@@ -54,6 +54,7 @@ function hookState(
     notifications,
     isLoading: false,
     isEmpty: notifications.length === 0,
+    total: notifications.length,
     hasNextPage: false,
     isFetchingNextPage: false,
     fetchNextPage: vi.fn(),
@@ -61,35 +62,49 @@ function hookState(
   } as ReturnType<typeof useNotifications>;
 }
 
+/** Each tab drives its own server-filtered query, so mock per filter. */
+function mockFilters(
+  all: Notification[],
+  unread: Notification[],
+  unreadOverrides: Partial<ReturnType<typeof useNotifications>> = {},
+) {
+  mockedHook.mockImplementation((_authId, filter = "all") =>
+    filter === "unread" ? hookState(unread, unreadOverrides) : hookState(all),
+  );
+}
+
 describe("NotificationList", () => {
-  it("shows the unread count in the Unread tab", () => {
-    mockedHook.mockReturnValue(
-      hookState([
+  it("shows the server-reported unread total in the Unread tab", () => {
+    // The loaded unread page holds 2, but the server says there are 7 in total —
+    // the badge must report the total, not the loaded length.
+    mockFilters(
+      [
         notification("1", false),
         notification("2", false),
         notification("3", true),
-      ]),
+      ],
+      [notification("1", false), notification("2", false)],
+      { total: 7 },
     );
 
     render(<NotificationList onClick={vi.fn()} />);
 
-    expect(screen.getByRole("tab", { name: /unread/i })).toHaveTextContent("2");
+    expect(screen.getByRole("tab", { name: /unread/i })).toHaveTextContent("7");
   });
 
-  it("scopes the notifications query to the authenticated user", () => {
-    mockedHook.mockReturnValue(hookState([]));
+  it("scopes a query per tab to the authenticated user", () => {
+    mockFilters([], []);
 
     render(<NotificationList onClick={vi.fn()} />);
 
-    expect(mockedHook).toHaveBeenCalledWith("auth-1");
+    expect(mockedHook).toHaveBeenCalledWith("auth-1", "all");
+    expect(mockedHook).toHaveBeenCalledWith("auth-1", "unread");
   });
 
   it("forwards a clicked notification's id to onClick", async () => {
     const onClick = vi.fn();
     const user = userEvent.setup();
-    mockedHook.mockReturnValue(
-      hookState([notification("1", false), notification("2", false)]),
-    );
+    mockFilters([notification("1", false), notification("2", false)], []);
 
     render(<NotificationList onClick={onClick} />);
 
