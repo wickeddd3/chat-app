@@ -7,7 +7,6 @@ import {
 import { Badge } from "@/shared/ui/shadcn/badge";
 import { useNotifications } from "../model/useNotifications";
 import { NotificationResults } from "./NotificationResults";
-import { useMemo } from "react";
 import { useAuth } from "@/entities/auth";
 
 export interface NotificationListProps {
@@ -16,18 +15,12 @@ export interface NotificationListProps {
 
 export function NotificationList({ onClick }: NotificationListProps) {
   const { authUser } = useAuth();
-  const {
-    notifications,
-    isLoading,
-    isEmpty,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-  } = useNotifications(authUser?.id);
 
-  const filteredByUnread = useMemo(() => {
-    return notifications.filter((item) => !item.isRead);
-  }, [notifications]);
+  // One server-filtered query per tab: the list content and the badge total both
+  // come from the backend, so an unread notification on a later page is no longer
+  // hidden just because it hasn't been paged into the "all" list yet.
+  const all = useNotifications(authUser?.id, "all");
+  const unread = useNotifications(authUser?.id, "unread");
 
   return (
     <Tabs defaultValue="all" className="flex-1 flex flex-col min-h-0">
@@ -41,7 +34,7 @@ export function NotificationList({ onClick }: NotificationListProps) {
         >
           Unread
           <Badge className="border-4 py-2.5 rounded-full border-background bg-muted text-foreground font-bold">
-            {filteredByUnread.length}
+            {unread.total}
           </Badge>
         </TabsTrigger>
       </TabsList>
@@ -50,12 +43,12 @@ export function NotificationList({ onClick }: NotificationListProps) {
         className="flex-1 min-h-0 data-[state=active]:flex flex-col m-0"
       >
         <NotificationResults
-          results={notifications}
-          isLoading={isLoading}
-          isEmpty={isEmpty}
-          hasNextPage={hasNextPage}
-          isFetchingNextPage={isFetchingNextPage}
-          fetchNextPage={fetchNextPage}
+          results={all.notifications}
+          isLoading={all.isLoading}
+          isEmpty={all.isEmpty}
+          hasNextPage={all.hasNextPage}
+          isFetchingNextPage={all.isFetchingNextPage}
+          fetchNextPage={all.fetchNextPage}
           onClick={onClick}
         />
       </TabsContent>
@@ -64,12 +57,12 @@ export function NotificationList({ onClick }: NotificationListProps) {
         className="flex-1 min-h-0 data-[state=active]:flex flex-col m-0"
       >
         <NotificationResults
-          results={filteredByUnread}
-          isLoading={isLoading}
-          isEmpty={!filteredByUnread.length}
-          hasNextPage={hasNextPage}
-          isFetchingNextPage={isFetchingNextPage}
-          fetchNextPage={fetchNextPage}
+          results={unread.notifications}
+          isLoading={unread.isLoading}
+          isEmpty={unread.isEmpty}
+          hasNextPage={unread.hasNextPage}
+          isFetchingNextPage={unread.isFetchingNextPage}
+          fetchNextPage={unread.fetchNextPage}
           onClick={onClick}
         />
       </TabsContent>
