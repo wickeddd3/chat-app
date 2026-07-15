@@ -1,17 +1,46 @@
 import type { InfiniteData, QueryClient } from "@tanstack/react-query";
-import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
+import type {
+  InboxFilter,
+  ScopedQueryKeys,
+} from "@/shared/config/react-query-keys";
 import type { InboxChannel, PaginatedInboxChannel } from "./channel.types";
 
 type InboxInfiniteData = InfiniteData<PaginatedInboxChannel>;
 
 /**
  * Partial query key matching every cached inbox list for the scope — i.e. all
- * search-query variants (`[scope, "inbox", "list", <query>]`). Dropping the
- * trailing query segment turns the exact key into a prefix filter that
+ * search-query and filter variants (`[scope, "inbox", "list", …]`). Dropping the
+ * trailing segments turns the exact key into a prefix filter that
  * `setQueriesData` / `invalidateQueries` match against.
  */
 export function inboxListPrefix(keys: ScopedQueryKeys): unknown[] {
   return keys.inbox.list("").slice(0, 3);
+}
+
+/**
+ * Invalidates only the given tab-filter inbox lists (across every search-query
+ * variant), leaving the others — notably the optimistically-patched "all" list —
+ * untouched. Used when a realtime event changes a channel's membership in a
+ * filtered set (e.g. a new message makes a channel unread, or a read clears it),
+ * so both the list content and the server-driven badge total reconcile.
+ */
+export function invalidateInboxFilters(
+  queryClient: QueryClient,
+  filters: InboxFilter[],
+): void {
+  const wanted = new Set<InboxFilter>(filters);
+  queryClient.invalidateQueries({
+    predicate: (query) => {
+      const key = query.queryKey;
+      return (
+        Array.isArray(key) &&
+        key[1] === "inbox" &&
+        key[2] === "list" &&
+        typeof key[4] === "string" &&
+        wanted.has(key[4] as InboxFilter)
+      );
+    },
+  });
 }
 
 /**

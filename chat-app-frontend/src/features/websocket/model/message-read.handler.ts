@@ -1,5 +1,5 @@
 import type { QueryClient } from "@tanstack/react-query";
-import type { InboxChannel } from "@/entities/channel";
+import { invalidateInboxFilters, type InboxChannel } from "@/entities/channel";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 
 export interface UnreadMessagePayload {
@@ -60,4 +60,8 @@ export const handleClearUnread = (
       return currentUnreadCountStats;
     },
   );
+
+  // The channel just left the Unread tab's set — refetch that server-filtered
+  // list and its badge total so the tab and count reconcile with the server.
+  invalidateInboxFilters(queryClient, ["unread"]);
 };
