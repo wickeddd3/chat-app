@@ -12,6 +12,7 @@ export function useContacts(
   contacts: ConnectionUser[];
   isLoading: boolean;
   isEmpty: boolean;
+  total: number;
   error: unknown;
   fetchNextPage: () => void;
   hasNextPage: boolean;
@@ -37,7 +38,7 @@ export function useContacts(
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery<PaginatedContacts, unknown, ConnectionUser[]>({
+  } = useInfiniteQuery<PaginatedContacts>({
     queryKey: keys.connections.contacts(debouncedQuery),
     queryFn: ({ pageParam }) =>
       getContactsApi({
@@ -48,15 +49,21 @@ export function useContacts(
       }),
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
-    select: (data) => data.pages.flatMap((page) => page.contacts),
   });
 
-  const contacts = data ?? [];
+  const contacts = useMemo(
+    () => data?.pages.flatMap((page) => page.contacts) ?? [],
+    [data],
+  );
+
+  // Every page reports the same search-wide total; read it off the first page.
+  const total = data?.pages[0]?.total ?? 0;
 
   return {
     contacts,
     isLoading,
     isEmpty: !isLoading && contacts.length === 0,
+    total,
     error,
     fetchNextPage,
     hasNextPage,

@@ -16,7 +16,7 @@ export class ConnectionsController extends BaseController {
     const cursor = typeof req.query.cursor === "string" ? req.query.cursor : "";
     const query = typeof req.query.query === "string" ? req.query.query : "";
 
-    const { contacts, nextCursor, hasMore } = await this.connectionsService.getUserContacts({
+    const { contacts, nextCursor, hasMore, total } = await this.connectionsService.getUserContacts({
       authUserId,
       limit,
       cursor,
@@ -27,6 +27,7 @@ export class ConnectionsController extends BaseController {
       limit,
       nextCursor,
       hasMore,
+      total,
     });
   };
 

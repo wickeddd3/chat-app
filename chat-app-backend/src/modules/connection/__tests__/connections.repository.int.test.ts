@@ -98,6 +98,51 @@ describe("ConnectionsRepository (integration, real DB)", () => {
       const { contacts } = await repo.getUserContacts({ authUserId: me.id });
       expect(contacts).toHaveLength(0);
     });
+
+    it("counts accepted contacts in both directions and ignores non-accepted ones", async () => {
+      const me = await createUser();
+      const [a, b, pending] = [await createUser(), await createUser(), await createUser()];
+      // Accepted in both directions — both are contacts.
+      await createConnection({ senderId: me.id, receiverId: a.id, status: "ACCEPTED" });
+      await createConnection({ senderId: b.id, receiverId: me.id, status: "ACCEPTED" });
+      await createConnection({ senderId: me.id, receiverId: pending.id, status: "PENDING" });
+
+      expect((await repo.getUserContacts({ authUserId: me.id })).total).toBe(2);
+    });
+
+    it("reports the full total even when a page is capped by the limit", async () => {
+      const me = await createUser();
+      for (let i = 0; i < 3; i++) {
+        const other = await createUser();
+        await createConnection({ senderId: me.id, receiverId: other.id, status: "ACCEPTED" });
+      }
+
+      const firstPage = await repo.getUserContacts({ authUserId: me.id, limit: 2 });
+      expect(firstPage.contacts).toHaveLength(2);
+      expect(firstPage.hasMore).toBe(true);
+      expect(firstPage.total).toBe(3);
+    });
+
+    it("narrows the total to the name search, so the badge matches the filtered list", async () => {
+      const me = await createUser();
+      const jane = await createUser({ name: "Jane Doe" });
+      const alex = await createUser({ name: "Alex Roe" });
+      await createConnection({ senderId: me.id, receiverId: jane.id, status: "ACCEPTED" });
+      await createConnection({ senderId: alex.id, receiverId: me.id, status: "ACCEPTED" });
+
+      expect((await repo.getUserContacts({ authUserId: me.id })).total).toBe(2);
+
+      const searched = await repo.getUserContacts({ authUserId: me.id, query: "jane" });
+      expect(searched.contacts.map((c) => c.name)).toEqual(["Jane Doe"]);
+      expect(searched.total).toBe(1);
+    });
+
+    it("excludes another user's contacts from the total", async () => {
+      const [me, stranger, theirFriend] = [await createUser(), await createUser(), await createUser()];
+      await createConnection({ senderId: stranger.id, receiverId: theirFriend.id, status: "ACCEPTED" });
+
+      expect((await repo.getUserContacts({ authUserId: me.id })).total).toBe(0);
+    });
   });
 
   describe("sent/received filtering", () => {

@@ -19,7 +19,11 @@ export async function getContactsApi({
   const {
     data: {
       data,
-      meta: { hasMore, nextCursor } = { hasMore: false, nextCursor: null },
+      meta: { hasMore, nextCursor, total } = {
+        hasMore: false,
+        nextCursor: null,
+        total: 0,
+      },
     },
   } = response;
 
@@ -27,5 +31,6 @@ export async function getContactsApi({
     contacts: data,
     hasMore,
     nextCursor,
+    total: total ?? 0,
   };
 }
