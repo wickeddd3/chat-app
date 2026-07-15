@@ -15,4 +15,6 @@ export interface PaginatedNotifications {
   notifications: Notification[];
   hasMore: boolean;
   nextCursor: string | null;
+  /** Total notifications matching the filter, across all pages (for tab badges). */
+  total: number;
 }

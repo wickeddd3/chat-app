@@ -1,6 +1,9 @@
 /** Inbox tab filters. `all` is the default, unfiltered list. */
 export type InboxFilter = "all" | "unread" | "groups";
 
+/** Notification tab filters. `all` is the default, unfiltered list. */
+export type NotificationFilter = "all" | "unread";
+
 export const createQueryKeys = (authId: string | undefined) => {
   // If the user isn't authenticated yet, we use a fallback string
   // to ensure keys don't accidentally merge or break arrays
@@ -40,7 +43,8 @@ export const createQueryKeys = (authId: string | undefined) => {
         [scope, "users", "recommended", query] as const,
     },
     notifications: {
-      list: () => [scope, "notifications", "list"] as const,
+      list: (filter: NotificationFilter = "all") =>
+        [scope, "notifications", "list", filter] as const,
     },
   };
 };
