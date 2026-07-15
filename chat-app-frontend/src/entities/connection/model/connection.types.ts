@@ -26,4 +26,6 @@ export interface PaginatedContacts {
   contacts: ConnectionUser[];
   hasMore: boolean;
   nextCursor: string | null;
+  /** Total contacts matching the search, across all pages (for the tab badge). */
+  total: number;
 }

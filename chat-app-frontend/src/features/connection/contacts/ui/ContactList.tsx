@@ -28,6 +28,7 @@ export function ContactList({
     contacts,
     isLoading,
     isEmpty,
+    total,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
@@ -42,6 +43,9 @@ export function ContactList({
     }));
   }, [contacts, isOnline]);
 
+  // Online has no server-side equivalent — presence lives in Redis and is pushed
+  // to the client live — so this stays derived from the loaded pages. It trades
+  // exactness for instant updates when someone connects or disconnects.
   const filteredByOnline = useMemo(() => {
     return allContacts.filter((item) => item.online);
   }, [allContacts]);
@@ -58,7 +62,7 @@ export function ContactList({
           <TabsTrigger value="all" className="px-4 cursor-pointer rounded-full">
             All
             <Badge className="border-4 py-2.5 rounded-full border-background bg-muted text-foreground font-bold">
-              {allContacts.length}
+              {total}
             </Badge>
           </TabsTrigger>
           <TabsTrigger
