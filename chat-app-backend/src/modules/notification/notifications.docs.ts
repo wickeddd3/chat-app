@@ -36,6 +36,13 @@ export const notificationsPaths: OpenAPIV3.PathsObject = {
           required: false,
           schema: { type: "string", example: "eyJjcmVhdGVkQXQiOiIyMDI2LTA2LTE0VDE2..." },
         },
+        {
+          name: "filter",
+          in: "query",
+          description: "Tab filter: all notifications, or only unread ones",
+          required: false,
+          schema: { type: "string", enum: ["all", "unread"], default: "all" },
+        },
       ],
       responses: {
         200: {
@@ -61,6 +68,7 @@ export const notificationsPaths: OpenAPIV3.PathsObject = {
                         example: "eyJjcmVhdGVkQXQiOiIyMDI2LTA2LTE0VDE1...",
                       },
                       hasMore: { type: "boolean", example: true },
+                      total: { type: "integer", example: 42, description: "Total notifications matching the filter" },
                     },
                   },
                   timestamp: { type: "string", format: "date-time", example: "2026-06-14T16:25:00.000Z" },

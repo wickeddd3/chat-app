@@ -14,17 +14,22 @@ export class NotificationsController extends BaseController {
     const authUserId = req.authId ?? "";
     const limit = 20;
     const cursor = typeof req.query.cursor === "string" ? req.query.cursor : "";
+    // The HTTP tab filter maps onto the domain-level isRead flag; "all" omits it
+    // entirely so both read and unread records are returned.
+    const unreadOnly = req.query.filter === "unread";
 
-    const { notifications, nextCursor, hasMore } = await this.notificationsService.getByUserId({
+    const { notifications, nextCursor, hasMore, total } = await this.notificationsService.getByUserId({
       userId: authUserId,
       limit,
       cursor,
+      ...(unreadOnly && { isRead: false }),
     });
 
     this.sendSuccess(res, notifications, "Notifications fetched successfully", 200, {
       limit,
       nextCursor,
       hasMore,
+      total,
     });
   };
 

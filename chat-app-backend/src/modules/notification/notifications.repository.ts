@@ -43,22 +43,32 @@ export class NotificationsRepository {
   }): Promise<PaginatedNotifications> {
     try {
       const decoded = decodeCursor(cursor);
-      const notifications = await this.db.notification.findMany({
-        where: {
-          userId,
-          // If isRead is explicitly provided (true/false), apply the filter.
-          // Otherwise, fetch both read and unread records.
-          ...(typeof isRead === "boolean" && { isRead }),
-          // Keyset cursor: (createdAt, id) strictly before (older than) the boundary.
-          ...(decoded && {
-            OR: [{ createdAt: { lt: decoded.timestamp } }, { createdAt: decoded.timestamp, id: { lt: decoded.id } }],
-          }),
-        },
-        // Order by createdAt first, then id as a deterministic tiebreaker.
-        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-        // Fetch one extra to reliably determine hasMore.
-        take: limit + 1,
-      });
+      // Shared by the page query and the total count, so the badge always agrees
+      // with the list it labels. The cursor is layered on separately below —
+      // only the page query paginates.
+      const baseWhere = {
+        userId,
+        // If isRead is explicitly provided (true/false), apply the filter.
+        // Otherwise, fetch both read and unread records.
+        ...(typeof isRead === "boolean" && { isRead }),
+      };
+
+      const [notifications, total] = await Promise.all([
+        this.db.notification.findMany({
+          where: {
+            ...baseWhere,
+            // Keyset cursor: (createdAt, id) strictly before (older than) the boundary.
+            ...(decoded && {
+              OR: [{ createdAt: { lt: decoded.timestamp } }, { createdAt: decoded.timestamp, id: { lt: decoded.id } }],
+            }),
+          },
+          // Order by createdAt first, then id as a deterministic tiebreaker.
+          orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+          // Fetch one extra to reliably determine hasMore.
+          take: limit + 1,
+        }),
+        this.db.notification.count({ where: baseWhere }),
+      ]);
 
       const hasMore = notifications.length > limit;
       const pageItems = hasMore ? notifications.slice(0, limit) : notifications;
@@ -72,6 +82,7 @@ export class NotificationsRepository {
         notifications: pageItems,
         nextCursor,
         hasMore,
+        total,
       };
     } catch (error) {
       throw new HttpException(500, "An error occurred while compiling your notification timeline feed.", null, {
