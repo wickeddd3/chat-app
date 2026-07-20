@@ -10,6 +10,7 @@ export function useContacts(
   query?: string,
 ): {
   contacts: ConnectionUser[];
+  appliedQuery: string;
   isLoading: boolean;
   isEmpty: boolean;
   total: number;
@@ -61,6 +62,7 @@ export function useContacts(
 
   return {
     contacts,
+    appliedQuery: debouncedQuery,
     isLoading,
     isEmpty: !isLoading && contacts.length === 0,
     total,

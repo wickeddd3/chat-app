@@ -66,6 +66,27 @@ test.describe("authenticated people list (stubbed API)", () => {
 
     await page.goto("/people");
 
+    await expect(page.getByText("No one to show yet")).toBeVisible();
+  });
+
+  test("shows the search-specific empty state when a search finds nobody", async ({
+    page,
+  }) => {
+    // Everyone is returned until a query is sent, so the list is only empty
+    // because of the search — which is the distinction being asserted.
+    await page.route(`${API_URL}/api/users*`, (route) => {
+      const hasQuery = new URL(route.request().url()).searchParams.has("query");
+      return route.fulfill({ json: envelope(hasQuery ? [] : users) });
+    });
+
+    await page.goto("/people");
+    await expect(page.getByText("Stranger One")).toBeVisible();
+
+    await page.getByRole("textbox", { name: "Search" }).fill("zzzz");
+
+    // The search is debounced, so Playwright waits this out on its own.
     await expect(page.getByText("No people found")).toBeVisible();
+    await expect(page.getByText(/zzzz/)).toBeVisible();
+    await expect(page.getByText("No one to show yet")).toBeHidden();
   });
 });

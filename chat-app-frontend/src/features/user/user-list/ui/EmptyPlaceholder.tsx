@@ -1,6 +1,16 @@
 import { UsersThreeIcon } from "@phosphor-icons/react";
+import { NoSearchResults } from "@/shared/ui/NoSearchResults";
 
-export function EmptyPlaceholder() {
+export interface EmptyPlaceholderProps {
+  /** The active search, if the list is empty because of one. */
+  searchQuery?: string;
+}
+
+export function EmptyPlaceholder({ searchQuery }: EmptyPlaceholderProps) {
+  if (searchQuery) {
+    return <NoSearchResults query={searchQuery} noun="people" />;
+  }
+
   return (
     <div className="w-full h-full flex flex-col justify-center items-center gap-4 p-6 text-center">
       <UsersThreeIcon
@@ -8,9 +18,11 @@ export function EmptyPlaceholder() {
         className="size-14 text-muted-foreground"
       />
       <div className="flex flex-col gap-1">
-        <p className="text-lg font-semibold text-foreground">No people found</p>
+        <p className="text-lg font-semibold text-foreground">
+          No one to show yet
+        </p>
         <p className="text-sm text-muted-foreground max-w-xs">
-          Try a different name, or check back later as more people join.
+          Check back later as more people join.
         </p>
       </div>
     </div>

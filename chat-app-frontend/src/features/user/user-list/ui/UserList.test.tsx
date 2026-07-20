@@ -103,6 +103,7 @@ function usersState(
 ) {
   return {
     users,
+    appliedQuery: "",
     isLoading: false,
     isEmpty: users.length === 0,
     error: null,
@@ -126,8 +127,19 @@ describe("UserList", () => {
 
     renderUserList();
 
-    expect(screen.getByText("No people found")).toBeInTheDocument();
+    expect(screen.getByText("No one to show yet")).toBeInTheDocument();
     expect(screen.queryByTestId("virtuoso")).not.toBeInTheDocument();
+  });
+
+  it("shows the search-specific placeholder when a search came back empty", () => {
+    mockedUseUsers.mockReturnValue(usersState([], { appliedQuery: "zzz" }));
+
+    renderUserList();
+
+    expect(screen.getByText("No people found")).toBeInTheDocument();
+    expect(screen.getByText(/zzz/)).toBeInTheDocument();
+    // The outright-empty copy must not appear -- it would suggest nobody exists.
+    expect(screen.queryByText("No one to show yet")).not.toBeInTheDocument();
   });
 
   it("renders an Add Contact button for strangers", () => {

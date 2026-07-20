@@ -32,6 +32,7 @@ export function ContactList({
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
+    appliedQuery,
   } = useContacts(authUser?.id, query);
 
   const { isOnline } = usePresence();
@@ -83,6 +84,7 @@ export function ContactList({
             results={allContacts}
             isLoading={isLoading}
             isEmpty={isEmpty}
+            searchQuery={appliedQuery}
             hasNextPage={hasNextPage}
             isFetchingNextPage={isFetchingNextPage}
             fetchNextPage={fetchNextPage}
@@ -97,6 +99,7 @@ export function ContactList({
             results={filteredByOnline}
             isLoading={isLoading}
             isEmpty={!filteredByOnline.length}
+            searchQuery={appliedQuery}
             hasNextPage={hasNextPage}
             isFetchingNextPage={isFetchingNextPage}
             fetchNextPage={fetchNextPage}
