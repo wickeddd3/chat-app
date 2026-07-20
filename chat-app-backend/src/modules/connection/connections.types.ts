@@ -4,6 +4,8 @@ export interface PaginatedConnections {
   connections: Partial<Connection>[];
   hasMore: boolean;
   nextCursor: string | null;
+  /** Total connections matching the status (across all pages), for tab badges. */
+  total: number;
 }
 
 export interface PaginatedContacts {

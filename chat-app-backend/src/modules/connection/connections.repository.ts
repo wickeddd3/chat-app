@@ -144,29 +144,36 @@ export class ConnectionsRepository {
   }): Promise<PaginatedConnections> {
     try {
       const decoded = decodeCursor(cursor);
-      const connections = await this.db.connection.findMany({
-        where: {
-          senderId: authUserId,
-          status,
-          // Keyset cursor: (updatedAt, id) strictly before the boundary.
-          ...(decoded && {
-            OR: [{ updatedAt: { lt: decoded.timestamp } }, { updatedAt: decoded.timestamp, id: { lt: decoded.id } }],
-          }),
-        },
-        include: {
-          receiver: {
-            select: {
-              id: true,
-              name: true,
-              username: true,
-              image: true,
+      // Shared by the page query and the total count so the badge always agrees
+      // with the list it labels. The cursor is layered on separately below —
+      // only the page query paginates.
+      const baseWhere = { senderId: authUserId, status };
+
+      const [connections, total] = await Promise.all([
+        this.db.connection.findMany({
+          where: {
+            ...baseWhere,
+            // Keyset cursor: (updatedAt, id) strictly before the boundary.
+            ...(decoded && {
+              OR: [{ updatedAt: { lt: decoded.timestamp } }, { updatedAt: decoded.timestamp, id: { lt: decoded.id } }],
+            }),
+          },
+          include: {
+            receiver: {
+              select: {
+                id: true,
+                name: true,
+                username: true,
+                image: true,
+              },
             },
           },
-        },
-        // Fetch one extra to reliably determine hasMore.
-        take: limit + 1,
-        orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
-      });
+          // Fetch one extra to reliably determine hasMore.
+          take: limit + 1,
+          orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+        }),
+        this.db.connection.count({ where: baseWhere }),
+      ]);
 
       const hasMore = connections.length > limit;
       const pageItems = hasMore ? connections.slice(0, limit) : connections;
@@ -187,6 +194,7 @@ export class ConnectionsRepository {
         connections: sentConnections,
         hasMore,
         nextCursor,
+        total,
       };
     } catch (error) {
       throw new HttpException(500, "Failed to retrieve sent connection requests.", null, { cause: error });
@@ -210,29 +218,36 @@ export class ConnectionsRepository {
   }): Promise<PaginatedConnections> {
     try {
       const decoded = decodeCursor(cursor);
-      const connections = await this.db.connection.findMany({
-        where: {
-          receiverId: authUserId,
-          status,
-          // Keyset cursor: (updatedAt, id) strictly before the boundary.
-          ...(decoded && {
-            OR: [{ updatedAt: { lt: decoded.timestamp } }, { updatedAt: decoded.timestamp, id: { lt: decoded.id } }],
-          }),
-        },
-        include: {
-          sender: {
-            select: {
-              id: true,
-              name: true,
-              username: true,
-              image: true,
+      // Shared by the page query and the total count so the badge always agrees
+      // with the list it labels. The cursor is layered on separately below —
+      // only the page query paginates.
+      const baseWhere = { receiverId: authUserId, status };
+
+      const [connections, total] = await Promise.all([
+        this.db.connection.findMany({
+          where: {
+            ...baseWhere,
+            // Keyset cursor: (updatedAt, id) strictly before the boundary.
+            ...(decoded && {
+              OR: [{ updatedAt: { lt: decoded.timestamp } }, { updatedAt: decoded.timestamp, id: { lt: decoded.id } }],
+            }),
+          },
+          include: {
+            sender: {
+              select: {
+                id: true,
+                name: true,
+                username: true,
+                image: true,
+              },
             },
           },
-        },
-        // Fetch one extra to reliably determine hasMore.
-        take: limit + 1,
-        orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
-      });
+          // Fetch one extra to reliably determine hasMore.
+          take: limit + 1,
+          orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
+        }),
+        this.db.connection.count({ where: baseWhere }),
+      ]);
 
       const hasMore = connections.length > limit;
       const pageItems = hasMore ? connections.slice(0, limit) : connections;
@@ -253,6 +268,7 @@ export class ConnectionsRepository {
         connections: receivedConnections,
         hasMore,
         nextCursor,
+        total,
       };
     } catch (error) {
       throw new HttpException(500, "Failed to retrieve received connection requests.", null, { cause: error });

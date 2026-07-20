@@ -160,6 +160,42 @@ describe("ConnectionsRepository (integration, real DB)", () => {
       expect(sent.connections).toHaveLength(1);
       expect(received.connections).toHaveLength(2);
       expect(count).toBe(2);
+      // Totals mirror each direction independently.
+      expect(sent.total).toBe(1);
+      expect(received.total).toBe(2);
+    });
+
+    it("scopes sent/received totals to PENDING only", async () => {
+      const me = await createUser();
+      const [a, b, c] = [await createUser(), await createUser(), await createUser()];
+      await createConnection({ senderId: me.id, receiverId: a.id, status: "PENDING" });
+      // Accepted/declined are contacts or dead requests — never pending-request badges.
+      await createConnection({ senderId: me.id, receiverId: b.id, status: "ACCEPTED" });
+      await createConnection({ senderId: c.id, receiverId: me.id, status: "ACCEPTED" });
+
+      expect((await repo.getSentConnections({ authUserId: me.id })).total).toBe(1);
+      expect((await repo.getReceivedConnections({ authUserId: me.id })).total).toBe(0);
+    });
+
+    it("reports the full total even when a page is capped by the limit", async () => {
+      const me = await createUser();
+      for (let i = 0; i < 3; i++) {
+        const other = await createUser();
+        await createConnection({ senderId: other.id, receiverId: me.id, status: "PENDING" });
+      }
+
+      const firstPage = await repo.getReceivedConnections({ authUserId: me.id, limit: 2 });
+      expect(firstPage.connections).toHaveLength(2);
+      expect(firstPage.hasMore).toBe(true);
+      expect(firstPage.total).toBe(3);
+    });
+
+    it("excludes another user's requests from the totals", async () => {
+      const [me, stranger, other] = [await createUser(), await createUser(), await createUser()];
+      await createConnection({ senderId: stranger.id, receiverId: other.id, status: "PENDING" });
+
+      expect((await repo.getSentConnections({ authUserId: me.id })).total).toBe(0);
+      expect((await repo.getReceivedConnections({ authUserId: me.id })).total).toBe(0);
     });
   });
 

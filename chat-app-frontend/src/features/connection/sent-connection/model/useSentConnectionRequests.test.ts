@@ -24,7 +24,12 @@ function page(
   connections: Connection[],
   nextCursor: string | null = null,
 ): PaginatedConnections {
-  return { connections, hasMore: !!nextCursor, nextCursor };
+  return {
+    connections,
+    hasMore: !!nextCursor,
+    nextCursor,
+    total: connections.length,
+  };
 }
 
 describe("useSentConnectionRequests", () => {
@@ -94,5 +99,24 @@ describe("useSentConnectionRequests", () => {
     await waitFor(() =>
       expect(result.current.sentRequests).toEqual([...pageOne, ...pageTwo]),
     );
+  });
+
+  it("exposes the server-reported total, independent of the loaded page size", async () => {
+    mockedApi.mockResolvedValue({
+      connections: [],
+      hasMore: true,
+      nextCursor: "cursor-2",
+      total: 42,
+    });
+    const { Wrapper } = createQueryClientWrapper();
+
+    const { result } = renderHook(
+      () => useSentConnectionRequests("auth-user"),
+      {
+        wrapper: Wrapper,
+      },
+    );
+
+    await waitFor(() => expect(result.current.total).toBe(42));
   });
 });
