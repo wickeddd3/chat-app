@@ -14,6 +14,7 @@ export function useInbox(
   filter: InboxFilter = "all",
 ): {
   inbox: InboxChannel[];
+  appliedQuery: string;
   isLoading: boolean;
   isEmpty: boolean;
   total: number;
@@ -66,6 +67,7 @@ export function useInbox(
 
   return {
     inbox,
+    appliedQuery: debouncedQuery,
     isLoading,
     isEmpty: !isLoading && inbox.length === 0,
     total,

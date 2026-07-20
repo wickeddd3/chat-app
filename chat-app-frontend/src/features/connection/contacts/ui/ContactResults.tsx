@@ -9,6 +9,8 @@ import { UserListItem } from "@/entities/user";
 export interface ContactResultsProps {
   isLoading?: boolean;
   isEmpty?: boolean;
+  /** The active search, so an empty list can say why it is empty. */
+  searchQuery?: string;
   results: (ConnectionUser & { online: boolean })[];
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
@@ -22,6 +24,7 @@ export interface ContactResultsProps {
 export function ContactResults({
   isLoading = false,
   isEmpty = false,
+  searchQuery,
   results,
   hasNextPage,
   isFetchingNextPage,
@@ -71,7 +74,7 @@ export function ContactResults({
         />
       )}
 
-      {isEmpty && <EmptyPlaceholder />}
+      {isEmpty && <EmptyPlaceholder searchQuery={searchQuery} />}
     </div>
   );
 }

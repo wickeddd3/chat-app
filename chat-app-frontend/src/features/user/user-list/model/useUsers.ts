@@ -10,6 +10,7 @@ export function useUsers(
   query?: string,
 ): {
   users: User[];
+  appliedQuery: string;
   isLoading: boolean;
   isEmpty: boolean;
   error: unknown;
@@ -42,6 +43,7 @@ export function useUsers(
 
   return {
     users,
+    appliedQuery: debouncedQuery,
     isLoading,
     isEmpty: !isLoading && users.length === 0,
     error,

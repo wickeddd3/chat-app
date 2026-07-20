@@ -91,6 +91,7 @@ export function ChatInbox() {
             results={allInbox}
             isLoading={all.isLoading}
             isEmpty={all.isEmpty}
+            searchQuery={all.appliedQuery}
             hasNextPage={all.hasNextPage}
             isFetchingNextPage={all.isFetchingNextPage}
             fetchNextPage={all.fetchNextPage}
@@ -104,6 +105,7 @@ export function ChatInbox() {
             results={unreadInbox}
             isLoading={unread.isLoading}
             isEmpty={unread.isEmpty}
+            searchQuery={unread.appliedQuery}
             hasNextPage={unread.hasNextPage}
             isFetchingNextPage={unread.isFetchingNextPage}
             fetchNextPage={unread.fetchNextPage}
@@ -117,6 +119,7 @@ export function ChatInbox() {
             results={groupsInbox}
             isLoading={groups.isLoading}
             isEmpty={groups.isEmpty}
+            searchQuery={groups.appliedQuery}
             hasNextPage={groups.hasNextPage}
             isFetchingNextPage={groups.isFetchingNextPage}
             fetchNextPage={groups.fetchNextPage}

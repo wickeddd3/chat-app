@@ -10,6 +10,8 @@ import { fadeVariants } from "@/shared/lib/motion";
 export interface ChatInboxResultsProps {
   isLoading?: boolean;
   isEmpty?: boolean;
+  /** The active search, so an empty list can say why it is empty. */
+  searchQuery?: string;
   results: InboxChannel[];
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
@@ -19,6 +21,7 @@ export interface ChatInboxResultsProps {
 export function ChatInboxResults({
   isLoading = false,
   isEmpty = false,
+  searchQuery,
   results,
   hasNextPage,
   isFetchingNextPage,
@@ -60,7 +63,7 @@ export function ChatInboxResults({
         />
       )}
 
-      {isEmpty && <EmptyPlaceholder />}
+      {isEmpty && <EmptyPlaceholder searchQuery={searchQuery} />}
     </motion.div>
   );
 }

@@ -42,7 +42,10 @@ export function UserList({
   const [query, setQuery] = useState("");
 
   const { authUser } = useAuth();
-  const { users, isLoading, isEmpty } = useUsers(authUser?.id, query);
+  const { users, appliedQuery, isLoading, isEmpty } = useUsers(
+    authUser?.id,
+    query,
+  );
 
   return (
     <div className="flex-1 flex flex-col border-r h-full min-h-0">
@@ -109,7 +112,7 @@ export function UserList({
           />
         )}
 
-        {isEmpty && <EmptyPlaceholder />}
+        {isEmpty && <EmptyPlaceholder searchQuery={appliedQuery} />}
       </div>
     </div>
   );

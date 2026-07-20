@@ -1,6 +1,16 @@
 import { ChatsIcon } from "@phosphor-icons/react";
+import { NoSearchResults } from "@/shared/ui/NoSearchResults";
 
-export function EmptyPlaceholder() {
+export interface EmptyPlaceholderProps {
+  /** The active search, if the list is empty because of one. */
+  searchQuery?: string;
+}
+
+export function EmptyPlaceholder({ searchQuery }: EmptyPlaceholderProps) {
+  if (searchQuery) {
+    return <NoSearchResults query={searchQuery} noun="conversations" />;
+  }
+
   return (
     <div className="w-full h-full flex flex-col justify-center items-center gap-4 p-6 text-center">
       <ChatsIcon weight="duotone" className="size-14 text-muted-foreground" />
