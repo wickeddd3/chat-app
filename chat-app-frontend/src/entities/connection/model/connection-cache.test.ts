@@ -24,8 +24,8 @@ function connection(id: string): Connection {
   };
 }
 
-function contact(id: string): ConnectionUser {
-  return { id, name: `User ${id}`, username: `user${id}` };
+function contact(id: string, name = `User ${id}`): ConnectionUser {
+  return { id, name, username: `user${id}` };
 }
 
 function connectionsData(
@@ -137,27 +137,63 @@ describe("prependConnectionRequest", () => {
 });
 
 describe("prependContact", () => {
+  const contactsAt = (qc: QueryClient, query: string) =>
+    qc.getQueryData<InfiniteData<PaginatedContacts>>(
+      keys.connections.contacts(query),
+    )!;
+
   it("prepends the contact and increments the total", () => {
     const qc = new QueryClient();
-    const key = keys.connections.contacts("");
-    qc.setQueryData(key, contactsData([contact("a")], 7));
+    qc.setQueryData(
+      keys.connections.contacts(""),
+      contactsData([contact("a")], 7),
+    );
 
-    prependContact(qc, key, contact("new"));
+    prependContact(qc, keys, contact("new"));
 
-    const data = qc.getQueryData<InfiniteData<PaginatedContacts>>(key)!;
+    const data = contactsAt(qc, "");
     expect(data.pages[0].contacts.map((c) => c.id)).toEqual(["new", "a"]);
     expect(data.pages[0].total).toBe(8);
   });
 
   it("is a no-op when the contact is already cached", () => {
     const qc = new QueryClient();
-    const key = keys.connections.contacts("");
-    qc.setQueryData(key, contactsData([contact("a")], 7));
+    qc.setQueryData(
+      keys.connections.contacts(""),
+      contactsData([contact("a")], 7),
+    );
 
-    prependContact(qc, key, contact("a"));
+    prependContact(qc, keys, contact("a"));
 
-    const data = qc.getQueryData<InfiniteData<PaginatedContacts>>(key)!;
+    const data = contactsAt(qc, "");
     expect(data.pages[0].contacts).toHaveLength(1);
     expect(data.pages[0].total).toBe(7);
+  });
+
+  it("patches every cached search whose filter the contact matches", () => {
+    const qc = new QueryClient();
+    qc.setQueryData(keys.connections.contacts(""), contactsData([], 4));
+    qc.setQueryData(keys.connections.contacts("ali"), contactsData([], 1));
+    // Case-insensitive, mirroring the backend `contains` filter.
+    qc.setQueryData(keys.connections.contacts("ALI"), contactsData([], 1));
+
+    prependContact(qc, keys, contact("new", "Alice"));
+
+    for (const query of ["", "ali", "ALI"]) {
+      const data = contactsAt(qc, query);
+      expect(data.pages[0].contacts.map((c) => c.id)).toEqual(["new"]);
+      expect(data.pages[0].total).toBe(query === "" ? 5 : 2);
+    }
+  });
+
+  it("leaves searches the contact doesn't match untouched", () => {
+    const qc = new QueryClient();
+    qc.setQueryData(keys.connections.contacts("bob"), contactsData([], 2));
+
+    prependContact(qc, keys, contact("new", "Alice"));
+
+    const data = contactsAt(qc, "bob");
+    expect(data.pages[0].contacts).toHaveLength(0);
+    expect(data.pages[0].total).toBe(2);
   });
 });

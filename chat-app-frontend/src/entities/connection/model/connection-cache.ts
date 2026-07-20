@@ -3,6 +3,7 @@ import type {
   QueryClient,
   QueryKey,
 } from "@tanstack/react-query";
+import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 import type {
   Connection,
   ConnectionUser,
@@ -87,30 +88,65 @@ export function prependConnectionRequest(
 }
 
 /**
- * Prepends a newly accepted contact to the first page of the unfiltered contacts
- * list and increments its badge total. Idempotent on the contact id.
+ * Partial query key matching every cached contacts list for the scope — i.e. all
+ * search-query variants (`[scope, "connections", "contacts", …]`). Dropping the
+ * trailing query turns the exact key into a prefix filter that `setQueriesData`
+ * matches against.
+ */
+export function contactsListPrefix(keys: ScopedQueryKeys): unknown[] {
+  return keys.connections.contacts("").slice(0, 3);
+}
+
+/**
+ * Whether a contact belongs in the results for a search query. Mirrors the
+ * backend contacts filter (`name contains query`, case-insensitive); the empty
+ * query is the unfiltered list, which matches everyone.
+ */
+function matchesContactSearch(contact: ConnectionUser, query: string): boolean {
+  if (!query) return true;
+  return contact.name.toLowerCase().includes(query.toLowerCase());
+}
+
+/**
+ * Prepends a newly accepted contact to the first page of every cached contacts
+ * list whose search it matches, incrementing that list's badge total. Lists it
+ * doesn't match are left alone — the contact isn't part of their result set, so
+ * neither their rows nor their total should move. Idempotent on the contact id.
  */
 export function prependContact(
   queryClient: QueryClient,
-  queryKey: QueryKey,
+  keys: ScopedQueryKeys,
   contact: ConnectionUser,
 ): void {
-  queryClient.setQueryData<ContactsInfiniteData>(queryKey, (data) => {
-    if (!data) return data;
+  // The `setQueriesData` updater isn't handed the query it's updating, and the
+  // search term we filter on lives in the key — so walk the matching queries and
+  // patch each one by its own key.
+  const matching = queryClient
+    .getQueryCache()
+    .findAll({ queryKey: contactsListPrefix(keys) });
 
-    const alreadyPresent = data.pages.some((page) =>
-      page.contacts.some((c) => c.id === contact.id),
-    );
-    if (alreadyPresent) return data;
+  for (const { queryKey } of matching) {
+    const search = queryKey[3];
+    if (typeof search !== "string") continue;
+    if (!matchesContactSearch(contact, search)) continue;
 
-    const [firstPage, ...restPages] = data.pages;
-    if (!firstPage) return data;
+    queryClient.setQueryData<ContactsInfiniteData>(queryKey, (data) => {
+      if (!data) return data;
 
-    const pages = [
-      { ...firstPage, contacts: [contact, ...firstPage.contacts] },
-      ...restPages,
-    ];
+      const alreadyPresent = data.pages.some((page) =>
+        page.contacts.some((c) => c.id === contact.id),
+      );
+      if (alreadyPresent) return data;
 
-    return { ...data, pages: withTotalDelta(pages, 1) };
-  });
+      const [firstPage, ...restPages] = data.pages;
+      if (!firstPage) return data;
+
+      const pages = [
+        { ...firstPage, contacts: [contact, ...firstPage.contacts] },
+        ...restPages,
+      ];
+
+      return { ...data, pages: withTotalDelta(pages, 1) };
+    });
+  }
 }

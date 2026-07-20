@@ -5,7 +5,7 @@ import {
   type Connection,
   type ConnectionUser,
 } from "@/entities/connection";
-import type { User } from "@/entities/user";
+import { patchRecommendedUser } from "@/entities/user";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 
 export type AcceptedRequestPayload = Connection;
@@ -33,23 +33,11 @@ export const handleAcceptedRequest = (
     updatedAt: new Date().toISOString(),
   };
 
-  // Update contacts list (and its tab total) to include the new contact
-  prependContact(queryClient, queryKeys.connections.contacts(""), newContact);
+  // Update contacts lists (and their tab totals) to include the new contact
+  prependContact(queryClient, queryKeys, newContact);
 
-  // Update users list to update user connectionStatus
-  queryClient.setQueryData(queryKeys.users.recommended(""), (old: User[]) => {
-    if (!old) return old;
-
-    const currentUsers = [...old];
-    const userIndex = currentUsers.findIndex(
-      (user) => user.id === newContact.id,
-    );
-
-    currentUsers[userIndex] = {
-      ...currentUsers[userIndex],
-      connectionStatus: "CONTACT",
-    };
-
-    return currentUsers;
+  // Update users lists to update user connectionStatus
+  patchRecommendedUser(queryClient, queryKeys, newContact.id, {
+    connectionStatus: "CONTACT",
   });
 };

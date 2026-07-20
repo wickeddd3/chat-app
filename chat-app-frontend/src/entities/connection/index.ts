@@ -7,6 +7,7 @@ export type {
 } from "./model/connection.types";
 
 export {
+  contactsListPrefix,
   prependConnectionRequest,
   prependContact,
   removeConnectionRequest,

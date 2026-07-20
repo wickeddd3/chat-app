@@ -1,5 +1,5 @@
 import { removeConnectionRequest } from "@/entities/connection";
-import type { User } from "@/entities/user";
+import { patchRecommendedUser } from "@/entities/user";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 import type { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -70,24 +70,16 @@ export function onSuccess(
 
   const connectionRequestUserId: string = variables.connectionRequestUserId;
 
-  // Update users list to update user connectionStatus
-  context?.client.setQueryData(
-    context.keys.users.recommended(""),
-    (old: User[]) => {
-      if (!old) return old;
-
-      const currentUsers = [...old];
-      const userIndex = currentUsers.findIndex(
-        (user) => user.id === connectionRequestUserId,
-      );
-
-      currentUsers[userIndex] = {
-        ...currentUsers[userIndex],
+  // Update users lists to update user connectionStatus
+  if (context) {
+    patchRecommendedUser(
+      context.client,
+      context.keys,
+      connectionRequestUserId,
+      {
         connectionStatus: "STRANGER",
         connectionId: null,
-      };
-
-      return currentUsers;
-    },
-  );
+      },
+    );
+  }
 }
