@@ -36,7 +36,7 @@ export class ConnectionsController extends BaseController {
     const limit = 20;
     const cursor = typeof req.query.cursor === "string" ? req.query.cursor : "";
 
-    const { connections, nextCursor, hasMore } = await this.connectionsService.getSentConnections({
+    const { connections, nextCursor, hasMore, total } = await this.connectionsService.getSentConnections({
       authUserId,
       limit,
       cursor,
@@ -47,6 +47,7 @@ export class ConnectionsController extends BaseController {
       limit,
       nextCursor,
       hasMore,
+      total,
     });
   };
 
@@ -54,7 +55,7 @@ export class ConnectionsController extends BaseController {
     const authUserId = req.authId ?? "";
     const limit = 20;
     const cursor = typeof req.query.cursor === "string" ? req.query.cursor : "";
-    const { connections, nextCursor, hasMore } = await this.connectionsService.getReceivedConnections({
+    const { connections, nextCursor, hasMore, total } = await this.connectionsService.getReceivedConnections({
       authUserId,
       limit,
       cursor,
@@ -65,6 +66,7 @@ export class ConnectionsController extends BaseController {
       limit,
       nextCursor,
       hasMore,
+      total,
     });
   };
 
