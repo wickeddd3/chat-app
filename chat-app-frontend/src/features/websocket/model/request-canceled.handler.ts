@@ -4,7 +4,7 @@ import {
   invalidateNotificationFilters,
   removeNotificationsByReference,
 } from "@/entities/notification";
-import type { User } from "@/entities/user";
+import { patchRecommendedUser } from "@/entities/user";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 
 export interface CanceledRequestPayload {
@@ -33,22 +33,10 @@ export const handleCanceledRequest = (
     payload.connectionId,
   );
 
-  // Update users list to update user connectionStatus
-  queryClient.setQueryData(queryKeys.users.recommended(""), (old: User[]) => {
-    if (!old) return old;
-
-    const currentUsers = [...old];
-    const userIndex = currentUsers.findIndex(
-      (user) => user.id === payload.senderId,
-    );
-
-    currentUsers[userIndex] = {
-      ...currentUsers[userIndex],
-      connectionId: null,
-      connectionStatus: "STRANGER",
-    };
-
-    return currentUsers;
+  // Update users lists to update user connectionStatus
+  patchRecommendedUser(queryClient, queryKeys, payload.senderId, {
+    connectionId: null,
+    connectionStatus: "STRANGER",
   });
 
   // Decrement pending request count and unread notifications count

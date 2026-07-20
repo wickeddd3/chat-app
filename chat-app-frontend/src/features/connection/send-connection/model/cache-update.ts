@@ -2,7 +2,7 @@ import {
   prependConnectionRequest,
   type Connection,
 } from "@/entities/connection";
-import type { User } from "@/entities/user";
+import { patchRecommendedUser } from "@/entities/user";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 import type { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -57,24 +57,11 @@ export function onSuccess(
     );
   }
 
-  // Update users list to update user connectionStatus
-  context?.client.setQueryData(
-    context.keys.users.recommended(""),
-    (old: User[]) => {
-      if (!old) return old;
-
-      const currentUsers = [...old];
-      const userIndex = currentUsers.findIndex(
-        (user) => user.id === newRequest.user.id,
-      );
-
-      currentUsers[userIndex] = {
-        ...currentUsers[userIndex],
-        connectionStatus: "PENDING_SENT",
-        connectionId: newRequest.id,
-      };
-
-      return currentUsers;
-    },
-  );
+  // Update users lists to update user connectionStatus
+  if (context) {
+    patchRecommendedUser(context.client, context.keys, newRequest.user.id, {
+      connectionStatus: "PENDING_SENT",
+      connectionId: newRequest.id,
+    });
+  }
 }

@@ -3,7 +3,7 @@ import {
   prependConnectionRequest,
   type Connection,
 } from "@/entities/connection";
-import type { User } from "@/entities/user";
+import { patchRecommendedUser } from "@/entities/user";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 
 export type NewRequestPayload = Connection;
@@ -37,21 +37,9 @@ export const handleNewRequest = (
     },
   );
 
-  // Update users list to update user connectionStatus
-  queryClient.setQueryData(queryKeys.users.recommended(""), (old: User[]) => {
-    if (!old) return old;
-
-    const currentUsers = [...old];
-    const userIndex = currentUsers.findIndex(
-      (user) => user.id === connection.user.id,
-    );
-
-    currentUsers[userIndex] = {
-      ...currentUsers[userIndex],
-      connectionId: connection.id,
-      connectionStatus: "PENDING_RECEIVED",
-    };
-
-    return currentUsers;
+  // Update users lists to update user connectionStatus
+  patchRecommendedUser(queryClient, queryKeys, connection.user.id, {
+    connectionId: connection.id,
+    connectionStatus: "PENDING_RECEIVED",
   });
 };

@@ -4,7 +4,7 @@ import {
   type Connection,
   type ConnectionUser,
 } from "@/entities/connection";
-import type { User } from "@/entities/user";
+import { patchRecommendedUser } from "@/entities/user";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 import type { QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -78,34 +78,15 @@ export function onSuccess(
     updatedAt: data?.updatedAt || "",
   };
 
-  // Update contacts list (and its tab total) to include the new contact
+  // Update contacts lists (and their tab totals) to include the new contact
   if (context) {
-    prependContact(
-      context.client,
-      context.keys.connections.contacts(""),
-      newContact,
-    );
+    prependContact(context.client, context.keys, newContact);
+
+    // Update users lists to update user connectionStatus
+    patchRecommendedUser(context.client, context.keys, newContact.id, {
+      connectionStatus: "CONTACT",
+    });
   }
-
-  // Update users list to update user connectionStatus
-  context?.client.setQueryData(
-    context.keys.users.recommended(""),
-    (old: User[]) => {
-      if (!old) return old;
-
-      const currentUsers = [...old];
-      const userIndex = currentUsers.findIndex(
-        (user) => user.id === newContact.id,
-      );
-
-      currentUsers[userIndex] = {
-        ...currentUsers[userIndex],
-        connectionStatus: "CONTACT",
-      };
-
-      return currentUsers;
-    },
-  );
 
   // Decrement pending request count
   context?.client.setQueryData(
