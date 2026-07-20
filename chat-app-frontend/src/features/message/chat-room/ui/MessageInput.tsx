@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { FaPaperPlane } from "react-icons/fa6";
+import { PaperPlaneRightIcon } from "@phosphor-icons/react";
 import { EmojiPicker } from "@/shared/ui/emoji-picker/EmojiPicker";
 import { useSendMessage } from "../model/useSendMessage";
 
@@ -49,7 +49,7 @@ export function MessageInput({ channelId }: MessageInputProps) {
         aria-label="Send message"
         className="text-primary px-4 rounded-full cursor-pointer hover:text-primary"
       >
-        <FaPaperPlane className="size-6" />
+        <PaperPlaneRightIcon weight="fill" className="size-6" />
       </button>
     </form>
   );

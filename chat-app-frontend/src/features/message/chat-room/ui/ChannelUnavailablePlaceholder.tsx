@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { FaTriangleExclamation } from "react-icons/fa6";
+import { WarningIcon } from "@phosphor-icons/react";
 import { Button } from "@/shared/ui/shadcn/button";
 
 /**
@@ -12,7 +12,7 @@ export function ChannelUnavailablePlaceholder() {
 
   return (
     <div className="flex-1 w-full h-full flex flex-col items-center justify-center gap-4 p-6 text-center bg-background">
-      <FaTriangleExclamation className="text-muted-foreground" size={40} />
+      <WarningIcon className="size-10 text-muted-foreground" />
       <div className="flex flex-col gap-1">
         <h1 className="text-lg font-semibold text-foreground">
           Channel unavailable

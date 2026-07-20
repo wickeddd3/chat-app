@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router";
-import { FaCheckDouble } from "react-icons/fa6";
+import { ChecksIcon } from "@phosphor-icons/react";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { dateToNow } from "@/shared/utils/date-format";
 import { cn } from "@/shared/lib/utils";
@@ -56,11 +56,11 @@ export function ChatInboxItem({
               <span className="text-[11px] whitespace-nowrap">
                 {dateToNow(lastMessage.createdAt)}
               </span>
-              <FaCheckDouble
+              <ChecksIcon
                 className={cn(
+                  "size-3",
                   unreadCount === 0 ? "text-primary" : "opacity-40",
                 )}
-                size={12}
               />
             </div>
           )}

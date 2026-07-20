@@ -1,8 +1,8 @@
-import type { ComponentType } from "react";
+import type { Icon } from "@phosphor-icons/react";
 
 export interface NavItem {
   title: string;
   url: string;
-  icon: ComponentType<{ className?: string }>;
+  icon: Icon;
   badgeName?: string;
 }

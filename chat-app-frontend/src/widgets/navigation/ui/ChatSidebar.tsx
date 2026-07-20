@@ -1,4 +1,4 @@
-import { FaCommentDots } from "react-icons/fa6";
+import { ChatCircleDotsIcon } from "@phosphor-icons/react";
 import { useLocation } from "react-router";
 import { UserNav } from "./UserNav";
 import { SidebarLink } from "./SidebarLink";
@@ -39,7 +39,7 @@ export function ChatSidebar() {
             shadow-sm shadow-primary/30 shrink-0
           `}
         >
-          <FaCommentDots className="size-6" />
+          <ChatCircleDotsIcon weight="fill" className="size-6" />
         </section>
         <nav
           aria-label="Primary"

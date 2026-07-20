@@ -1,9 +1,9 @@
 import {
-  FaCircleUser,
-  FaBell,
-  FaGear,
-  FaRightFromBracket,
-} from "react-icons/fa6";
+  UserCircleIcon,
+  BellIcon,
+  GearIcon,
+  SignOutIcon,
+} from "@phosphor-icons/react";
 import { Button } from "@/shared/ui/shadcn/button";
 import {
   Dialog,
@@ -63,7 +63,10 @@ export function UserNav() {
               to={"/profile"}
               className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-muted transition-colors cursor-pointer"
             >
-              <FaCircleUser className="size-4 text-muted-foreground" />
+              <UserCircleIcon
+                weight="duotone"
+                className="size-5 text-muted-foreground"
+              />
               Account
             </Link>
           </DialogClose>
@@ -73,7 +76,10 @@ export function UserNav() {
               to={"/notifications"}
               className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-muted transition-colors cursor-pointer"
             >
-              <FaBell className="size-4 text-muted-foreground" />
+              <BellIcon
+                weight="duotone"
+                className="size-5 text-muted-foreground"
+              />
               Notifications
               {unreadNotificationBadge > 0 && (
                 <Badge
@@ -91,7 +97,10 @@ export function UserNav() {
               to={"/settings"}
               className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-muted transition-colors cursor-pointer"
             >
-              <FaGear className="size-4 text-muted-foreground" />
+              <GearIcon
+                weight="duotone"
+                className="size-5 text-muted-foreground"
+              />
               Settings
             </Link>
           </DialogClose>
@@ -104,7 +113,10 @@ export function UserNav() {
               onClick={logout}
               className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-muted transition-colors cursor-pointer text-left"
             >
-              <FaRightFromBracket className="size-4 text-muted-foreground" />
+              <SignOutIcon
+                weight="duotone"
+                className="size-5 text-muted-foreground"
+              />
               Sign Out
             </button>
           </DialogClose>

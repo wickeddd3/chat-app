@@ -41,7 +41,7 @@ export function SidebarLink({
           )}
         >
           <span className="relative">
-            <Icon className="size-5 md:size-6" />
+            <Icon weight="duotone" className="size-5 md:size-6" />
             {badgeCount > 0 && (
               <Badge className="border-4 py-2.5 rounded-full border-sidebar bg-red-500 text-gray-50 absolute top-0 inset-e-0 -mt-4 -me-7">
                 {badgeCount}

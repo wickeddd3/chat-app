@@ -5,7 +5,7 @@ import {
   type NewMessage,
 } from "@/entities/message";
 import { useAuth } from "@/entities/auth";
-import { FaCircleNotch } from "react-icons/fa6";
+import { CircleNotchIcon } from "@phosphor-icons/react";
 import { useMemo } from "react";
 import { useScrollToBottom } from "../model/useScrollToBottom";
 import {
@@ -75,7 +75,7 @@ export function Messages({
         Header: () =>
           isFetchingNextPage ? (
             <div className="py-4 flex justify-center w-full">
-              <FaCircleNotch size={20} className="text-primary animate-spin" />
+              <CircleNotchIcon className="size-5 text-primary animate-spin" />
             </div>
           ) : null,
       }}

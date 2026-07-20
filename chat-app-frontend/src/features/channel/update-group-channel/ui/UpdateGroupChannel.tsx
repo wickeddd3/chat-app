@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shared/ui/shadcn/dialog";
-import { FaPenToSquare } from "react-icons/fa6";
+import { PencilSimpleLineIcon } from "@phosphor-icons/react";
 import { GroupChannelForm } from "./GroupChannelForm";
 import { useState } from "react";
 import type { InboxChannel } from "@/entities/channel";
@@ -27,7 +27,7 @@ export function UpdateGroupChannel({ channel }: UpdateGroupChannelProps) {
           size="icon"
           className="rounded-full cursor-pointer"
         >
-          <FaPenToSquare />
+          <PencilSimpleLineIcon weight="duotone" />
         </Button>
       </DialogTrigger>
       <DialogContent

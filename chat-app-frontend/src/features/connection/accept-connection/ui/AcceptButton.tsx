@@ -1,4 +1,4 @@
-import { FaUserCheck } from "react-icons/fa6";
+import { UserCheckIcon } from "@phosphor-icons/react";
 import { useAcceptConnection } from "../model/useAcceptConnection";
 import { useAuth } from "@/entities/auth";
 
@@ -19,7 +19,7 @@ export function AcceptButton({ text, connectionRequestId }: AcceptButtonProps) {
       role="button"
       title="Accept connection request"
     >
-      <FaUserCheck size={18} className="text-gray-50" />
+      <UserCheckIcon className="size-4 text-gray-50" />
       <span className="text-xs font-medium text-gray-50 hidden sm:inline-block">
         {text}
       </span>
