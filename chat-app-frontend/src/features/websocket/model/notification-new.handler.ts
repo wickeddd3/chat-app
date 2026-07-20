@@ -1,6 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import {
   invalidateNotificationFilters,
+  prependNotification,
   type Notification,
 } from "@/entities/notification";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
@@ -15,23 +16,11 @@ export const handleIncomingNotification = (
 ) => {
   const notification = payload;
 
-  // Append new notification to exisitng notification cache
-  queryClient.setQueryData(
+  // Append new notification to exisitng notification cache (and its tab total)
+  prependNotification(
+    queryClient,
     queryKeys.notifications.list(),
-    (oldData: { pages: { notifications: Notification[] }[] }) => {
-      if (!oldData) return oldData;
-
-      const updatedPages = [...oldData.pages];
-
-      if (updatedPages[0]) {
-        updatedPages[0] = {
-          ...updatedPages[0],
-          notifications: [notification, ...updatedPages[0].notifications],
-        };
-      }
-
-      return { ...oldData, pages: updatedPages };
-    },
+    notification,
   );
 
   // Increment unread notification count

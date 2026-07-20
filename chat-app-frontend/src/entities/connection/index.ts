@@ -6,6 +6,12 @@ export type {
   PaginatedContacts,
 } from "./model/connection.types";
 
+export {
+  prependConnectionRequest,
+  prependContact,
+  removeConnectionRequest,
+} from "./model/connection-cache";
+
 export { useContacts } from "./model/useContacts";
 export { MemberListField } from "./ui/MemberListField";
 

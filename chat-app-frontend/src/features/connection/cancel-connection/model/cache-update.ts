@@ -1,4 +1,4 @@
-import type { Connection } from "@/entities/connection";
+import { removeConnectionRequest } from "@/entities/connection";
 import type { User } from "@/entities/user";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 import type { QueryClient } from "@tanstack/react-query";
@@ -32,23 +32,11 @@ export async function onMutate(
     context.keys.connections.sent(),
   );
 
-  // 3. Optimistically update the cache by filtering out the item
-  context.client.setQueryData(
+  // 3. Optimistically drop the canceled request from the list and its tab total
+  removeConnectionRequest(
+    context.client,
     context.keys.connections.sent(),
-    (old: { pages: { connections: Connection[] }[] }) => {
-      if (!old) return old;
-
-      return {
-        ...old,
-        // Map through each paginated page and filter out the canceled request
-        pages: old.pages.map((page: { connections: Connection[] }) => ({
-          ...page,
-          connections: page.connections.filter(
-            (req: Connection) => req.id !== connectionRequestId,
-          ),
-        })),
-      };
-    },
+    connectionRequestId,
   );
 
   // 4. Return the context object containing the rollback snapshot data

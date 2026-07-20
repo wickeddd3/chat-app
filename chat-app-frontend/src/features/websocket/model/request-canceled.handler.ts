@@ -1,8 +1,8 @@
 import type { QueryClient } from "@tanstack/react-query";
-import type { Connection } from "@/entities/connection";
+import { removeConnectionRequest } from "@/entities/connection";
 import {
   invalidateNotificationFilters,
-  type Notification,
+  removeNotificationsByReference,
 } from "@/entities/notification";
 import type { User } from "@/entities/user";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
@@ -17,44 +17,20 @@ export const handleCanceledRequest = (
   queryKeys: ScopedQueryKeys,
   payload: CanceledRequestPayload,
 ) => {
-  // Remove new connection request from existing received connection requests cache
-  queryClient.setQueryData(
+  // Remove new connection request from existing received connection requests
+  // cache (and drop the Received tab total)
+  removeConnectionRequest(
+    queryClient,
     queryKeys.connections.received(),
-    (old: { pages: { connections: Connection[] }[] }) => {
-      if (!old) return old;
-
-      return {
-        ...old,
-        // Map through each paginated page and filter out the canceled request
-        pages: old.pages.map((page: { connections: Connection[] }) => ({
-          ...page,
-          connections: page.connections.filter(
-            (req: Connection) => req.id !== payload.connectionId,
-          ),
-        })),
-      };
-    },
+    payload.connectionId,
   );
 
   // Remove new connection request notification from existing notifications cache
-  queryClient.setQueryData(
+  // (and drop its tab total)
+  removeNotificationsByReference(
+    queryClient,
     queryKeys.notifications.list(),
-    (old: { pages: { notifications: Notification[] }[] }) => {
-      if (!old) return old;
-
-      return {
-        ...old,
-        pages: old.pages.map((page: { notifications: Notification[] }) => {
-          return {
-            ...page,
-            notifications: page.notifications.filter(
-              (notif: Notification) =>
-                notif.referenceId !== payload.connectionId,
-            ),
-          };
-        }),
-      };
-    },
+    payload.connectionId,
   );
 
   // Update users list to update user connectionStatus

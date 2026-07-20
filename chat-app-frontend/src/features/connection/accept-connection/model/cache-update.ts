@@ -1,4 +1,9 @@
-import type { Connection, ConnectionUser } from "@/entities/connection";
+import {
+  prependContact,
+  removeConnectionRequest,
+  type Connection,
+  type ConnectionUser,
+} from "@/entities/connection";
 import type { User } from "@/entities/user";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 import type { QueryClient } from "@tanstack/react-query";
@@ -29,23 +34,11 @@ export async function onMutate(
     context.keys.connections.received(),
   );
 
-  // 3. Optimistically update the cache by filtering out the item
-  context.client.setQueryData(
+  // 3. Optimistically drop the accepted request from the list and its tab total
+  removeConnectionRequest(
+    context.client,
     context.keys.connections.received(),
-    (old: { pages: { connections: Connection[] }[] }) => {
-      if (!old) return old;
-
-      return {
-        ...old,
-        // Map through each paginated page and filter out the accepted request
-        pages: old.pages.map((page: { connections: Connection[] }) => ({
-          ...page,
-          connections: page.connections.filter(
-            (req: Connection) => req.id !== connectionId,
-          ),
-        })),
-      };
-    },
+    connectionId,
   );
 
   // 4. Return the context object containing the rollback snapshot data
@@ -85,27 +78,14 @@ export function onSuccess(
     updatedAt: data?.updatedAt || "",
   };
 
-  // Update contacts list to include the new contact
-  context?.client.setQueryData(
-    context.keys.connections.contacts(""),
-    (old: { pages: { contacts: ConnectionUser[] }[] }) => {
-      if (!old) return old;
-
-      return {
-        ...old,
-        pages: old.pages.map((page: { contacts: ConnectionUser[] }, index) => {
-          // Prepend only to page index 0 (the initial loaded batch view)
-          if (index === 0) {
-            return {
-              ...page,
-              contacts: [newContact, ...page.contacts],
-            };
-          }
-          return page;
-        }),
-      };
-    },
-  );
+  // Update contacts list (and its tab total) to include the new contact
+  if (context) {
+    prependContact(
+      context.client,
+      context.keys.connections.contacts(""),
+      newContact,
+    );
+  }
 
   // Update users list to update user connectionStatus
   context?.client.setQueryData(

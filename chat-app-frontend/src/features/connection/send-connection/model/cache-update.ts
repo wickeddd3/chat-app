@@ -1,4 +1,7 @@
-import type { Connection } from "@/entities/connection";
+import {
+  prependConnectionRequest,
+  type Connection,
+} from "@/entities/connection";
 import type { User } from "@/entities/user";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 import type { QueryClient } from "@tanstack/react-query";
@@ -45,27 +48,14 @@ export function onSuccess(
 
   const newRequest: Connection = data;
 
-  // Update sent requests list to include the new request
-  context?.client.setQueryData(
-    context.keys.connections.sent(),
-    (old: { pages: { connections: Connection[] }[] }) => {
-      if (!old) return old;
-
-      return {
-        ...old,
-        pages: old.pages.map((page: { connections: Connection[] }, index) => {
-          // Prepend only to page index 0 (the initial loaded batch view)
-          if (index === 0) {
-            return {
-              ...page,
-              connections: [newRequest, ...page.connections],
-            };
-          }
-          return page;
-        }),
-      };
-    },
-  );
+  // Update sent requests list (and its tab total) to include the new request
+  if (context) {
+    prependConnectionRequest(
+      context.client,
+      context.keys.connections.sent(),
+      newRequest,
+    );
+  }
 
   // Update users list to update user connectionStatus
   context?.client.setQueryData(
