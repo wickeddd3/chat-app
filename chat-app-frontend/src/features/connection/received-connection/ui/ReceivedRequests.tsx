@@ -1,5 +1,5 @@
 import { useReceivedConnectionRequests } from "../model/useReceivedConnectionRequests";
-import { FaCircleNotch } from "react-icons/fa6";
+import { CircleNotchIcon } from "@phosphor-icons/react";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { Virtuoso } from "react-virtuoso";
@@ -74,10 +74,7 @@ export function ReceivedRequests({
             Footer: () =>
               isFetchingNextPage ? (
                 <div className="py-4 flex justify-center">
-                  <FaCircleNotch
-                    size={20}
-                    className="text-primary animate-spin"
-                  />
+                  <CircleNotchIcon className="size-5 text-primary animate-spin" />
                 </div>
               ) : null,
           }}

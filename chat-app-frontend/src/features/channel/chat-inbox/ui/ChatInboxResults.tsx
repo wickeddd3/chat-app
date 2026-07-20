@@ -3,7 +3,7 @@ import { ChatInboxItem } from "./ChatInboxItem";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { Virtuoso } from "react-virtuoso";
-import { FaCircleNotch } from "react-icons/fa6";
+import { CircleNotchIcon } from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import { fadeVariants } from "@/shared/lib/motion";
 
@@ -53,10 +53,7 @@ export function ChatInboxResults({
             Footer: () =>
               isFetchingNextPage ? (
                 <div className="py-4 flex justify-center">
-                  <FaCircleNotch
-                    size={20}
-                    className="text-primary animate-spin"
-                  />
+                  <CircleNotchIcon className="size-5 text-primary animate-spin" />
                 </div>
               ) : null,
           }}

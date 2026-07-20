@@ -25,9 +25,8 @@ export function NotificationItem({
       onClick={onClick}
     >
       <Icon
-        size={22}
         className={cn(
-          "text-primary/70 shrink-0",
+          "size-5 text-primary/70 shrink-0",
           notification.isRead ? "" : "text-primary",
         )}
       />

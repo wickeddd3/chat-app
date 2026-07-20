@@ -1,9 +1,12 @@
-import { FaRegPaperPlane } from "react-icons/fa6";
+import { PaperPlaneRightIcon } from "@phosphor-icons/react";
 
 export function EmptyPlaceholder() {
   return (
     <div className="w-full h-full flex flex-col justify-center items-center gap-4 p-6 text-center">
-      <FaRegPaperPlane size={56} className="text-muted-foreground" />
+      <PaperPlaneRightIcon
+        weight="duotone"
+        className="size-14 text-muted-foreground"
+      />
       <div className="flex flex-col gap-1">
         <p className="text-lg font-semibold text-foreground">
           No requests sent

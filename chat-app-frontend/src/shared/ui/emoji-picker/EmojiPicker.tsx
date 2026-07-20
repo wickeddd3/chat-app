@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaRegFaceSmile } from "react-icons/fa6";
+import { SmileyIcon } from "@phosphor-icons/react";
 import {
   Popover,
   PopoverContent,
@@ -37,7 +37,7 @@ export function EmojiPicker({ onSelect, className }: EmojiPickerProps) {
             className,
           )}
         >
-          <FaRegFaceSmile className="size-6" />
+          <SmileyIcon className="size-6" />
         </button>
       </PopoverTrigger>
       <PopoverContent

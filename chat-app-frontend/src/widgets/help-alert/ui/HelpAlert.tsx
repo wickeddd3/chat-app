@@ -1,11 +1,11 @@
 import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/shadcn/alert";
-import { FaCircleInfo } from "react-icons/fa6";
+import { InfoIcon } from "@phosphor-icons/react";
 
 export function HelpAlert() {
   return (
     <>
       <Alert className="max-w-md border-cyan-200 bg-cyan-50 text-cyan-900 dark:border-cyan-900 dark:bg-cyan-950 dark:text-cyan-50">
-        <FaCircleInfo />
+        <InfoIcon />
         <AlertTitle className="text-xs">Demo credentials</AlertTitle>
         <AlertDescription className="text-xs">
           <p className="text-pretty">

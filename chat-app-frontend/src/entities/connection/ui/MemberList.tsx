@@ -1,6 +1,6 @@
 import type { ConnectionUser } from "../model/connection.types";
 import { Virtuoso } from "react-virtuoso";
-import { FaCircleNotch } from "react-icons/fa6";
+import { CircleNotchIcon } from "@phosphor-icons/react";
 import { MemberListItem } from "./MemberListItem";
 
 export interface MemberListProps {
@@ -45,7 +45,7 @@ export function MemberList({
         Footer: () =>
           isFetchingNextPage ? (
             <div className="py-4 flex justify-center">
-              <FaCircleNotch size={20} className="text-primary animate-spin" />
+              <CircleNotchIcon className="size-5 text-primary animate-spin" />
             </div>
           ) : null,
       }}

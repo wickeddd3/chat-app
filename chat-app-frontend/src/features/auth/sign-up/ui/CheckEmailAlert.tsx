@@ -4,7 +4,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/shared/ui/shadcn/alert";
-import { FaEnvelope, FaXmark } from "react-icons/fa6";
+import { EnvelopeIcon, XIcon } from "@phosphor-icons/react";
 
 export interface CheckEmailAlertProps {
   email: string;
@@ -22,7 +22,7 @@ export function CheckEmailAlert({ email, onDismiss }: CheckEmailAlertProps) {
       role="status"
       className="border-cyan-200 bg-cyan-50 text-cyan-900 dark:border-cyan-900 dark:bg-cyan-950 dark:text-cyan-50"
     >
-      <FaEnvelope />
+      <EnvelopeIcon />
       <AlertTitle className="text-xs">Confirm your email</AlertTitle>
       <AlertDescription className="text-xs text-cyan-900/90 dark:text-cyan-50/90">
         <p className="text-pretty">
@@ -39,7 +39,7 @@ export function CheckEmailAlert({ email, onDismiss }: CheckEmailAlertProps) {
             onClick={onDismiss}
             className="cursor-pointer rounded p-1 text-current/70 hover:text-current"
           >
-            <FaXmark size={14} />
+            <XIcon className="size-4" />
           </button>
         </AlertAction>
       )}

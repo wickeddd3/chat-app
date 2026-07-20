@@ -6,7 +6,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/shared/ui/shadcn/drawer";
-import { FaEllipsisVertical } from "react-icons/fa6";
+import { DotsThreeOutlineVerticalIcon } from "@phosphor-icons/react";
 import {
   ChannelDetails,
   isChannelAdmin,
@@ -40,7 +40,7 @@ export function ChannelDetailsDrawer({ channel }: ChannelDetailsDrawerProps) {
           role="button"
           title="Channel info"
         >
-          <FaEllipsisVertical className="h-4 w-4 text-muted-foreground" />
+          <DotsThreeOutlineVerticalIcon weight="duotone" className="size-5" />
         </button>
       </DrawerTrigger>
       <DrawerContent>

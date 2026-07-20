@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/shared/ui/shadcn/dialog";
-import { FaPenToSquare } from "react-icons/fa6";
+import { NotePencilIcon } from "@phosphor-icons/react";
 import { GroupChannelForm } from "./GroupChannelForm";
 import { useState } from "react";
 
@@ -22,7 +22,7 @@ export function CreateGroupChannel() {
           size="icon"
           className="rounded-full cursor-pointer"
         >
-          <FaPenToSquare />
+          <NotePencilIcon weight="duotone" />
         </Button>
       </DialogTrigger>
       <DialogContent

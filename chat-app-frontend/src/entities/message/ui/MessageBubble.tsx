@@ -1,6 +1,6 @@
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { dateToNow } from "@/shared/utils/date-format";
-import { FaCheckDouble } from "react-icons/fa6";
+import { ChecksIcon } from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import { messageBubbleVariants } from "@/shared/lib/motion";
 import type { Message, NewMessage } from "../model/message.types";
@@ -67,9 +67,8 @@ export function MessageBubble({
 
         {isAuthorsMessage && (
           <div className="flex justify-end w-full mt-0.5 shrink-0">
-            <FaCheckDouble
-              size={12}
-              className={isSending ? "opacity-40 animate-pulse" : "opacity-90"}
+            <ChecksIcon
+              className={`size-3 ${isSending ? "opacity-40 animate-pulse" : "opacity-90"}`}
             />
           </div>
         )}

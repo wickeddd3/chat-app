@@ -1,4 +1,4 @@
-import { FaCircleCheck } from "react-icons/fa6";
+import { CheckCircleIcon } from "@phosphor-icons/react";
 import { useTheme, type Theme } from "@/shared/lib/theme";
 import { cn } from "@/shared/lib/utils";
 
@@ -74,7 +74,10 @@ export function ThemeSelector() {
                 )}
               </div>
               {selected && (
-                <FaCircleCheck className="absolute right-2 top-2 size-4 text-primary" />
+                <CheckCircleIcon
+                  weight="fill"
+                  className="absolute right-2 top-2 size-4 text-primary"
+                />
               )}
             </div>
             <div className="mt-2 text-center text-sm font-medium">{label}</div>

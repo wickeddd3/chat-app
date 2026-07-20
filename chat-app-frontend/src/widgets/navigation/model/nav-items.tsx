@@ -1,32 +1,32 @@
 import {
-  FaComments,
-  FaAddressBook,
-  FaUsers,
-  FaHandshake,
-} from "react-icons/fa6";
+  ChatsCircleIcon,
+  AddressBookIcon,
+  UsersIcon,
+  HandshakeIcon,
+} from "@phosphor-icons/react";
 import type { NavItem } from "./nav.types";
 
 export const navItems: NavItem[] = [
   {
     title: "Messages",
     url: "/messages",
-    icon: FaComments,
+    icon: ChatsCircleIcon,
     badgeName: "unreadMessagesCount",
   },
   {
     title: "Contacts",
     url: "/contacts",
-    icon: FaAddressBook,
+    icon: AddressBookIcon,
   },
   {
     title: "People",
     url: "/people",
-    icon: FaUsers,
+    icon: UsersIcon,
   },
   {
     title: "Requests",
     url: "/contact-requests",
-    icon: FaHandshake,
+    icon: HandshakeIcon,
     badgeName: "pendingRequestsCount",
   },
 ];
