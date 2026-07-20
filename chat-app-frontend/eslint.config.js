@@ -169,4 +169,14 @@ export default defineConfig([
       "react-refresh/only-export-components": "off",
     },
   },
+  {
+    // Colocated tests import the module they cover, which for a page means a
+    // pages -> pages import. The layer rules describe the runtime dependency
+    // graph, and a test is not part of it, so exempt specs only. Production
+    // source is still fully constrained.
+    files: ["src/**/*.test.{ts,tsx}"],
+    rules: {
+      "boundaries/dependencies": "off",
+    },
+  },
 ]);
