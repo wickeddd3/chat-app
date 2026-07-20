@@ -1,4 +1,5 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { receivedConnectionRequestsApi } from "../api/connections.api";
 import type { Connection, PaginatedConnections } from "@/entities/connection";
 import { createQueryKeys } from "@/shared/config/react-query-keys";
@@ -7,6 +8,7 @@ export function useReceivedConnectionRequests(authId?: string): {
   receivedRequests: Connection[];
   isLoading: boolean;
   isEmpty: boolean;
+  total: number;
   error: unknown;
   fetchNextPage: () => void;
   hasNextPage: boolean;
@@ -21,7 +23,7 @@ export function useReceivedConnectionRequests(authId?: string): {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteQuery<PaginatedConnections, unknown, Connection[]>({
+  } = useInfiniteQuery<PaginatedConnections>({
     queryKey: keys.connections.received(),
     queryFn: ({ pageParam }) =>
       receivedConnectionRequestsApi({
@@ -31,15 +33,21 @@ export function useReceivedConnectionRequests(authId?: string): {
       }),
     initialPageParam: null,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
-    select: (data) => data.pages.flatMap((page) => page.connections),
   });
 
-  const receivedRequests = data ?? [];
+  const receivedRequests = useMemo(
+    () => data?.pages.flatMap((page) => page.connections) ?? [],
+    [data],
+  );
+
+  // Every page reports the same total; read it off the first page.
+  const total = data?.pages[0]?.total ?? 0;
 
   return {
     receivedRequests,
     isLoading,
     isEmpty: !isLoading && receivedRequests.length === 0,
+    total,
     error,
     fetchNextPage,
     hasNextPage,

@@ -20,6 +20,8 @@ export interface PaginatedConnections {
   connections: Connection[];
   hasMore: boolean;
   nextCursor: string | null;
+  /** Total pending requests in this direction, across all pages (for tab badges). */
+  total: number;
 }
 
 export interface PaginatedContacts {
