@@ -1,5 +1,5 @@
 import type { QueryClient } from "@tanstack/react-query";
-import type { Connection } from "@/entities/connection";
+import { removeConnectionRequest } from "@/entities/connection";
 import type { User } from "@/entities/user";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 
@@ -14,22 +14,11 @@ export const handleDeclinedRequest = (
   payload: DeclinedRequestPayload,
 ) => {
   // Remove sent connection request from existing sent connection requests cache
-  queryClient.setQueryData(
+  // (and drop the Sent tab total)
+  removeConnectionRequest(
+    queryClient,
     queryKeys.connections.sent(),
-    (old: { pages: { connections: Connection[] }[] }) => {
-      if (!old) return old;
-
-      return {
-        ...old,
-        // Map through each paginated page and filter out the canceled request
-        pages: old.pages.map((page: { connections: Connection[] }) => ({
-          ...page,
-          connections: page.connections.filter(
-            (req: Connection) => req.id !== payload.connectionId,
-          ),
-        })),
-      };
-    },
+    payload.connectionId,
   );
 
   // Update users list to update user connectionStatus

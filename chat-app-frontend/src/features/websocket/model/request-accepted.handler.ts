@@ -1,5 +1,10 @@
 import type { QueryClient } from "@tanstack/react-query";
-import type { Connection, ConnectionUser } from "@/entities/connection";
+import {
+  prependContact,
+  removeConnectionRequest,
+  type Connection,
+  type ConnectionUser,
+} from "@/entities/connection";
 import type { User } from "@/entities/user";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 
@@ -13,22 +18,11 @@ export const handleAcceptedRequest = (
   const connection = payload;
 
   // Remove sent connection request from existing sent connection requests cache
-  queryClient.setQueryData(
+  // (and drop the Sent tab total)
+  removeConnectionRequest(
+    queryClient,
     queryKeys.connections.sent(),
-    (old: { pages: { connections: Connection[] }[] }) => {
-      if (!old) return old;
-
-      return {
-        ...old,
-        // Map through each paginated page and filter out the canceled request
-        pages: old.pages.map((page: { connections: Connection[] }) => ({
-          ...page,
-          connections: page.connections.filter(
-            (req: Connection) => req.id !== connection.id,
-          ),
-        })),
-      };
-    },
+    connection.id,
   );
 
   const newContact: ConnectionUser = {
@@ -39,27 +33,8 @@ export const handleAcceptedRequest = (
     updatedAt: new Date().toISOString(),
   };
 
-  // Update contacts list to include the new contact
-  queryClient.setQueryData(
-    queryKeys.connections.contacts(""),
-    (old: { pages: { contacts: ConnectionUser[] }[] }) => {
-      if (!old) return old;
-
-      return {
-        ...old,
-        pages: old.pages.map((page: { contacts: ConnectionUser[] }, index) => {
-          // Prepend only to page index 0 (the initial loaded batch view)
-          if (index === 0) {
-            return {
-              ...page,
-              contacts: [newContact, ...page.contacts],
-            };
-          }
-          return page;
-        }),
-      };
-    },
-  );
+  // Update contacts list (and its tab total) to include the new contact
+  prependContact(queryClient, queryKeys.connections.contacts(""), newContact);
 
   // Update users list to update user connectionStatus
   queryClient.setQueryData(queryKeys.users.recommended(""), (old: User[]) => {

@@ -1,5 +1,8 @@
 import type { QueryClient } from "@tanstack/react-query";
-import type { Connection } from "@/entities/connection";
+import {
+  prependConnectionRequest,
+  type Connection,
+} from "@/entities/connection";
 import type { User } from "@/entities/user";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
 
@@ -13,25 +16,11 @@ export const handleNewRequest = (
   const connection = payload;
 
   // Append new connection request to existing received connection requests cache
-  queryClient.setQueryData(
+  // (and bump the Received tab total)
+  prependConnectionRequest(
+    queryClient,
     queryKeys.connections.received(),
-    (old: { pages: { connections: Connection[] }[] }) => {
-      if (!old) return old;
-
-      return {
-        ...old,
-        pages: old.pages.map((page: { connections: Connection[] }, index) => {
-          // Prepend only to page index 0 (the initial loaded batch view)
-          if (index === 0) {
-            return {
-              ...page,
-              connections: [connection, ...page.connections],
-            };
-          }
-          return page;
-        }),
-      };
-    },
+    connection,
   );
 
   // Increment pending request count

@@ -6,4 +6,8 @@ export type {
 
 export { NotificationItem } from "./ui/NotificationItem";
 
-export { invalidateNotificationFilters } from "./model/notification-cache";
+export {
+  invalidateNotificationFilters,
+  prependNotification,
+  removeNotificationsByReference,
+} from "./model/notification-cache";

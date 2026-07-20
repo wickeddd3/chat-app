@@ -1,7 +1,7 @@
-import type { Connection } from "@/entities/connection";
+import { removeConnectionRequest } from "@/entities/connection";
 import {
   invalidateNotificationFilters,
-  type Notification,
+  removeNotificationsByReference,
 } from "@/entities/notification";
 import type { User } from "@/entities/user";
 import type { ScopedQueryKeys } from "@/shared/config/react-query-keys";
@@ -36,23 +36,11 @@ export async function onMutate(
     context.keys.connections.received(),
   );
 
-  // 3. Optimistically update the cache by filtering out the item
-  context.client.setQueryData(
+  // 3. Optimistically drop the declined request from the list and its tab total
+  removeConnectionRequest(
+    context.client,
     context.keys.connections.received(),
-    (old: { pages: { connections: Connection[] }[] }) => {
-      if (!old) return old;
-
-      return {
-        ...old,
-        // Map through each paginated page and filter out the canceled request
-        pages: old.pages.map((page: { connections: Connection[] }) => ({
-          ...page,
-          connections: page.connections.filter(
-            (req: Connection) => req.id !== connectionRequestId,
-          ),
-        })),
-      };
-    },
+    connectionRequestId,
   );
 
   // 4. Return the context object containing the rollback snapshot data
@@ -108,25 +96,14 @@ export function onSuccess(
   );
 
   // Remove new connection request notification from existing notifications cache
-  context?.client.setQueryData(
-    context.keys.notifications.list(),
-    (old: { pages: { notifications: Notification[] }[] }) => {
-      if (!old) return old;
-
-      return {
-        ...old,
-        pages: old.pages.map((page: { notifications: Notification[] }) => {
-          return {
-            ...page,
-            notifications: page.notifications.filter(
-              (notif: Notification) =>
-                notif.referenceId !== connectionRequestId,
-            ),
-          };
-        }),
-      };
-    },
-  );
+  // (and drop its tab total)
+  if (context) {
+    removeNotificationsByReference(
+      context.client,
+      context.keys.notifications.list(),
+      connectionRequestId,
+    );
+  }
 
   // Decrement pending request count and unread notifications count
   context?.client.setQueryData(
