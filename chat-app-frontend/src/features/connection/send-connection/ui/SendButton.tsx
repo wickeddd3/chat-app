@@ -1,4 +1,5 @@
 import { UserPlusIcon } from "@phosphor-icons/react";
+import { Button } from "@/shared/ui/shadcn/button";
 import { useSendConnection } from "../model/useSendConnection";
 import { useAuth } from "@/entities/auth";
 
@@ -12,17 +13,16 @@ export function SendButton({ text, receiverId }: SendButtonProps) {
   const { sendConnectionRequest } = useSendConnection(authUser?.id);
 
   return (
-    <button
+    <Button
       onClick={() => sendConnectionRequest({ receiverId })}
-      className="bg-primary  rounded-lg px-3 py-2 flex items-center justify-center gap-2 cursor-pointer hover:bg-primary/90"
+      variant="default"
+      size="sm"
+      className="cursor-pointer gap-2"
       aria-label="Send connection request"
-      role="button"
       title="Send connection request"
     >
-      <UserPlusIcon className="size-4 text-gray-50" />
-      <span className="text-xs font-medium text-gray-50 hidden sm:inline-block">
-        {text}
-      </span>
-    </button>
+      <UserPlusIcon className="size-4" />
+      <span className="hidden sm:inline-block">{text}</span>
+    </Button>
   );
 }

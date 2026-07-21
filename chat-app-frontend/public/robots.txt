@@ -1,0 +1,13 @@
+# Everything past the auth screens requires a session and returns the app
+# shell, so there is nothing for a crawler to index behind them.
+User-agent: *
+Allow: /$
+Allow: /auth/sign-in
+Allow: /auth/sign-up
+Disallow: /messages
+Disallow: /people
+Disallow: /contacts
+Disallow: /contact-requests
+Disallow: /notifications
+Disallow: /profile
+Disallow: /settings

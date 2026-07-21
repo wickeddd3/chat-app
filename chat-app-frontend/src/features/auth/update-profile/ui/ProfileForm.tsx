@@ -1,3 +1,4 @@
+import { Button } from "@/shared/ui/shadcn/button";
 import { TextField } from "@/shared/ui/form-fields/TextField";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -41,8 +42,7 @@ export function ProfileForm({ name, username }: ProfileFormProps) {
           id="name"
           label="Name"
           placeholder="Full Name"
-          inputClassName="rounded-xl md:rounded-2xl py-5 md:py-7 px-3 md:px-4 text-sm placeholder:font-medium"
-          labelClassName="text-md"
+          size="lg"
         />
         <TextField
           control={form.control}
@@ -50,12 +50,11 @@ export function ProfileForm({ name, username }: ProfileFormProps) {
           id="username"
           label="Username"
           placeholder="Username"
-          inputClassName="rounded-xl md:rounded-2xl py-5 md:py-7 px-3 md:px-4 text-sm placeholder:font-medium"
-          labelClassName="text-md"
+          size="lg"
         />
-        <button className="bg-primary rounded-xl p-3 text-white font-bold cursor-pointer mt-6 hover:bg-primary/90">
+        <Button type="submit" className="mt-6 cursor-pointer font-semibold">
           Save Changes
-        </button>
+        </Button>
       </div>
     </form>
   );

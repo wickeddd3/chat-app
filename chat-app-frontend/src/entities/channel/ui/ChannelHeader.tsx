@@ -23,7 +23,7 @@ export function ChannelHeader({
           isOnline={isOnline}
           badge={true}
         />
-        <h1 className="text-md font-medium">{channel.displayName}</h1>
+        <h2 className="text-md font-medium">{channel.displayName}</h2>
       </div>
       {optionSlot}
     </div>

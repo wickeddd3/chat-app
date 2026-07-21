@@ -1,10 +1,9 @@
+import { Tabs, TabsContent } from "@/shared/ui/shadcn/tabs";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/shared/ui/shadcn/tabs";
-import { Badge } from "@/shared/ui/shadcn/badge";
+  SegmentedTabsList,
+  SegmentedTabsTrigger,
+  SegmentedTabBadge,
+} from "@/shared/ui/SegmentedTabs";
 import {
   SentRequests,
   useSentConnectionRequests,
@@ -36,26 +35,16 @@ export default function ConnectionRequestsPage() {
       </div>
       <div className="flex-1 flex flex-col overflow-hidden">
         <Tabs defaultValue="received" className="flex-1 flex flex-col min-h-0">
-          <TabsList className="w-fit px-4 bg-transparent shrink-0">
-            <TabsTrigger
-              value="received"
-              className="px-8 cursor-pointer rounded-full"
-            >
+          <SegmentedTabsList className="mx-4 shrink-0">
+            <SegmentedTabsTrigger value="received">
               Received
-              <Badge className="border-4 py-2.5 rounded-full border-background bg-muted text-foreground font-bold">
-                {receivedTotal}
-              </Badge>
-            </TabsTrigger>
-            <TabsTrigger
-              value="sent"
-              className="px-8 cursor-pointer rounded-full"
-            >
+              <SegmentedTabBadge>{receivedTotal}</SegmentedTabBadge>
+            </SegmentedTabsTrigger>
+            <SegmentedTabsTrigger value="sent">
               Sent
-              <Badge className="border-4 py-2.5 rounded-full border-background bg-muted text-foreground font-bold">
-                {sentTotal}
-              </Badge>
-            </TabsTrigger>
-          </TabsList>
+              <SegmentedTabBadge>{sentTotal}</SegmentedTabBadge>
+            </SegmentedTabsTrigger>
+          </SegmentedTabsList>
           <TabsContent
             value="received"
             className="flex-1 min-h-0 data-[state=active]:flex flex-col m-0"

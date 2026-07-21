@@ -5,7 +5,7 @@ import {
   type Path,
 } from "react-hook-form";
 import { Field, FieldLabel } from "@/shared/ui/shadcn/field";
-import { Input } from "@/shared/ui/shadcn/input";
+import { SearchField } from "@/shared/ui/SearchField";
 import { useState } from "react";
 import { useContacts } from "../model/useContacts";
 import { MemberList } from "./MemberList";
@@ -25,8 +25,14 @@ export function MemberListField<T extends FieldValues>({
 }: MemberListFieldProps<T>) {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { contacts, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useContacts(authId, searchQuery);
+  const {
+    contacts,
+    isLoading,
+    appliedQuery,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useContacts(authId, searchQuery);
 
   return (
     <Controller
@@ -48,16 +54,30 @@ export function MemberListField<T extends FieldValues>({
 
         return (
           <Field>
-            <FieldLabel className="text-md">{label}</FieldLabel>
-            <Input
-              placeholder="Search and select members"
+            <div className="flex items-baseline justify-between gap-2">
+              <FieldLabel className="text-sm">{label}</FieldLabel>
+              {/* Selected members scroll out of view in a long list, so the
+                  count is the only persistent feedback that the choice stuck. */}
+              <span
+                className="text-xs text-muted-foreground tabular-nums"
+                aria-live="polite"
+              >
+                {selectedIds.length === 0
+                  ? "None selected"
+                  : `${selectedIds.length} selected`}
+              </span>
+            </div>
+            <SearchField
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="text-sm"
+              onChange={setSearchQuery}
+              ariaLabel="Search contacts to add"
+              placeholder="Search contacts"
             />
-            <div className="w-full flex flex-col h-64 overflow-y-auto mt-2 border rounded-md divide-y">
+            <div className="w-full flex flex-col h-64 overflow-y-auto mt-1 rounded-xl bg-muted/50 scrollbar-thin">
               <MemberList
                 users={contacts}
+                isLoading={isLoading}
+                searchQuery={appliedQuery}
                 hasNextPage={hasNextPage}
                 isFetchingNextPage={isFetchingNextPage}
                 fetchNextPage={fetchNextPage}

@@ -1,16 +1,31 @@
 import { Card } from "@/shared/ui/shadcn/card";
+import { Tabs, TabsContent } from "@/shared/ui/shadcn/tabs";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/shared/ui/shadcn/tabs";
+  SegmentedTabsList,
+  SegmentedTabsTrigger,
+} from "@/shared/ui/SegmentedTabs";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { ProfileForm } from "@/features/auth/update-profile";
 import { EmailForm } from "@/features/auth/update-email";
 import { PasswordForm } from "@/features/auth/update-password";
 import { UploadAvatar } from "@/features/auth/upload-avatar";
 import { useAuth, useAuthProfile, ProfilePageSkeleton } from "@/entities/auth";
+
+/** Each tab says what it covers, so the panel is not three unlabelled forms. */
+const SECTIONS = {
+  profile: {
+    title: "Profile details",
+    description: "Your name and username, as other people see them.",
+  },
+  email: {
+    title: "Email address",
+    description: "Used to sign in. Changing it needs confirmation.",
+  },
+  password: {
+    title: "Password",
+    description: "Choose something you don't use anywhere else.",
+  },
+} as const;
 
 export default function ProfilePage() {
   const { authUser } = useAuth();
@@ -21,63 +36,86 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="h-full w-full flex justify-center items-center p-4 overflow-auto">
-      <div className="h-full max-w-2xl w-full md:w-2xl flex flex-col gap-8 rounded-lg">
-        {/* Profile Header */}
-        <div className="bg-muted rounded-lg flex justify-between items-center gap-4 px-4 py-6">
-          <div className="flex-1 flex items-center gap-4 min-w-0">
-            <ProfileAvatar imageSrc={authProfile?.image || ""} />
-            <div className="flex-1 flex flex-col min-w-0">
-              <h1 className="text-md font-medium truncate">
+    // `items-start` rather than centring: a centred tall column gets clipped at
+    // the top once a panel grows past the viewport height.
+    <div className="h-full w-full flex justify-center items-start overflow-y-auto p-4 md:p-8 scrollbar-thin">
+      <div className="w-full max-w-2xl flex flex-col gap-6">
+        <header className="flex flex-col gap-1">
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
+            Account
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Manage your profile, sign-in email and password.
+          </p>
+        </header>
+
+        <Card className="flex-row items-center justify-between gap-4 rounded-2xl px-5 py-5">
+          <div className="flex min-w-0 flex-1 items-center gap-4">
+            <ProfileAvatar imageSrc={authProfile?.image || ""} size="lg" />
+            <div className="flex min-w-0 flex-1 flex-col">
+              <p className="truncate font-medium text-foreground">
                 {authProfile?.name}
-              </h1>
-              <h6 className="text-sm truncate">{`@${authProfile?.username}`}</h6>
+              </p>
+              <p className="truncate text-sm text-muted-foreground">
+                @{authProfile?.username}
+              </p>
             </div>
           </div>
-          {authProfile?.id && <UploadAvatar userId={authProfile?.id} />}
-        </div>
-
-        <div className="flex flex-col">
-          <h2 className="text-md md:text-lg font-semibold text-foreground">
-            Update Profile
-          </h2>
-          <p className="text-sm md:text-md font-light text-foreground">
-            Manage profile details and password
-          </p>
-        </div>
+          {authProfile?.id && <UploadAvatar userId={authProfile.id} />}
+        </Card>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="w-full mb-4">
-            <TabsTrigger value="profile" className="cursor-pointer">
+          <SegmentedTabsList className="w-full">
+            <SegmentedTabsTrigger value="profile" className="flex-1">
               Profile
-            </TabsTrigger>
-            <TabsTrigger value="email" className="cursor-pointer">
+            </SegmentedTabsTrigger>
+            <SegmentedTabsTrigger value="email" className="flex-1">
               Email
-            </TabsTrigger>
-            <TabsTrigger value="password" className="cursor-pointer">
+            </SegmentedTabsTrigger>
+            <SegmentedTabsTrigger value="password" className="flex-1">
               Password
-            </TabsTrigger>
-          </TabsList>
+            </SegmentedTabsTrigger>
+          </SegmentedTabsList>
+
           <TabsContent value="profile">
-            <Card className="py-10 px-6">
+            <SectionCard section={SECTIONS.profile}>
               <ProfileForm
                 name={authProfile?.name || ""}
                 username={authProfile?.username || ""}
               />
-            </Card>
+            </SectionCard>
           </TabsContent>
           <TabsContent value="email">
-            <Card className="py-10 px-6">
+            <SectionCard section={SECTIONS.email}>
               <EmailForm email={authUser?.email || ""} />
-            </Card>
+            </SectionCard>
           </TabsContent>
           <TabsContent value="password">
-            <Card className="py-10 px-6">
+            <SectionCard section={SECTIONS.password}>
               <PasswordForm />
-            </Card>
+            </SectionCard>
           </TabsContent>
         </Tabs>
       </div>
     </div>
+  );
+}
+
+function SectionCard({
+  section,
+  children,
+}: {
+  section: { title: string; description: string };
+  children: React.ReactNode;
+}) {
+  return (
+    <Card className="mt-4 gap-5 rounded-2xl px-5 py-6 md:px-6">
+      <div className="flex flex-col gap-1">
+        <h2 className="font-medium text-foreground">{section.title}</h2>
+        <p className="text-sm text-muted-foreground">{section.description}</p>
+      </div>
+      <hr className="border-border/60" />
+      {children}
+    </Card>
   );
 }

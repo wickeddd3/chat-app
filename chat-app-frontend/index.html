@@ -4,7 +4,51 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>chikamo</title>
+
+    <title>Chikamo — real-time group and direct messaging</title>
+    <meta
+      name="description"
+      content="Chikamo is a real-time messaging app for direct and group conversations. Send a connection request, start a chat, and see who is online."
+    />
+
+    <!-- Only the auth screens are reachable without signing in, so these
+         describe the product rather than any one page. The document title is
+         then set per route at runtime -- see RouteAnnouncer.
+         TODO: add <link rel="canonical"> and og:url once the production
+         domain is known; both need an absolute URL. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Chikamo" />
+    <meta
+      property="og:title"
+      content="Chikamo — real-time group and direct messaging"
+    />
+    <meta
+      property="og:description"
+      content="Real-time direct and group chat, with presence, read receipts and connection requests."
+    />
+    <meta name="twitter:card" content="summary" />
+    <meta
+      name="twitter:title"
+      content="Chikamo — real-time group and direct messaging"
+    />
+    <meta
+      name="twitter:description"
+      content="Real-time direct and group chat, with presence, read receipts and connection requests."
+    />
+
+    <!-- Matches the light and dark --background tokens, so the browser chrome
+         does not sit at a different colour than the app. -->
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: light)"
+      content="#fbf9f7"
+    />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: dark)"
+      content="#17161c"
+    />
+
     <!-- Apply the persisted theme before first paint to avoid a flash of the
          wrong theme. Mirrors next-themes (storageKey "theme", class strategy). -->
     <script>

@@ -1,10 +1,9 @@
+import { Tabs, TabsContent } from "@/shared/ui/shadcn/tabs";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/shared/ui/shadcn/tabs";
-import { Badge } from "@/shared/ui/shadcn/badge";
+  SegmentedTabsList,
+  SegmentedTabsTrigger,
+  SegmentedTabBadge,
+} from "@/shared/ui/SegmentedTabs";
 import { SearchField } from "@/shared/ui/SearchField";
 import { ChatInboxResults } from "./ChatInboxResults";
 import { useCallback, useMemo, useState } from "react";
@@ -60,29 +59,17 @@ export function ChatInbox() {
         className="px-4 pb-6 pt-1"
       />
       <Tabs defaultValue="all" className="flex-1 flex flex-col min-h-0">
-        <TabsList className="w-fit px-2 bg-transparent shrink-0">
-          <TabsTrigger value="all" className="px-3 cursor-pointer rounded-full">
-            All
-          </TabsTrigger>
-          <TabsTrigger
-            value="unread"
-            className="px-3 cursor-pointer rounded-full"
-          >
+        <SegmentedTabsList className="mx-4 shrink-0">
+          <SegmentedTabsTrigger value="all">All</SegmentedTabsTrigger>
+          <SegmentedTabsTrigger value="unread">
             Unread
-            <Badge className="border-4 py-2.5 rounded-full border-background bg-muted text-foreground font-bold">
-              {unread.total}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger
-            value="groups"
-            className="px-3 cursor-pointer rounded-full"
-          >
+            <SegmentedTabBadge>{unread.total}</SegmentedTabBadge>
+          </SegmentedTabsTrigger>
+          <SegmentedTabsTrigger value="groups">
             Groups
-            <Badge className="border-4 py-2.5 rounded-full border-background bg-muted text-foreground font-bold">
-              {groups.total}
-            </Badge>
-          </TabsTrigger>
-        </TabsList>
+            <SegmentedTabBadge>{groups.total}</SegmentedTabBadge>
+          </SegmentedTabsTrigger>
+        </SegmentedTabsList>
         <TabsContent
           value="all"
           className="flex-1 min-h-0 data-[state=active]:flex flex-col m-0"

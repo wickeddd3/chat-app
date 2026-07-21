@@ -73,4 +73,33 @@ describe("MemberList", () => {
 
     expect(onToggleMember).toHaveBeenCalledWith("2");
   });
+
+  it("tells the user to add contacts when they have none", () => {
+    render(<MemberList {...baseProps} users={[]} />);
+
+    expect(screen.getByText("No contacts yet")).toBeInTheDocument();
+    expect(screen.queryByTestId("virtuoso")).not.toBeInTheDocument();
+  });
+
+  it("shows the search-specific placeholder when a search finds nobody", () => {
+    render(<MemberList {...baseProps} users={[]} searchQuery="zzz" />);
+
+    expect(screen.getByText("No contacts found")).toBeInTheDocument();
+    expect(screen.getByText(/zzz/)).toBeInTheDocument();
+    // The outright-empty copy would wrongly claim they have no contacts.
+    expect(screen.queryByText("No contacts yet")).not.toBeInTheDocument();
+  });
+
+  it("shows a spinner while the first page is loading", () => {
+    render(<MemberList {...baseProps} users={[]} isLoading />);
+
+    expect(screen.getByText("Loading contacts")).toBeInTheDocument();
+    expect(screen.queryByText("No contacts yet")).not.toBeInTheDocument();
+  });
+
+  it("keeps rendering rows while a further page loads", () => {
+    render(<MemberList {...baseProps} users={[contact("1")]} isLoading />);
+
+    expect(screen.getByTestId("virtuoso")).toBeInTheDocument();
+  });
 });

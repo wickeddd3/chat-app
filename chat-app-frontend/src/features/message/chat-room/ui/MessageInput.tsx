@@ -26,10 +26,14 @@ export function MessageInput({ channelId }: MessageInputProps) {
     });
   };
 
+  // The hook already refuses blank sends; mirroring it here means the button
+  // shows that state rather than looking live and doing nothing.
+  const canSend = message.trim().length > 0;
+
   return (
     <form
       onSubmit={sendMessage}
-      className="w-full flex items-center gap-2 bg-muted rounded-full"
+      className="flex w-full items-center gap-1 rounded-full border border-transparent bg-muted p-1.5 transition-colors focus-within:border-ring focus-within:bg-card focus-within:ring-[3px] focus-within:ring-ring/25"
     >
       <label htmlFor="message-input" className="sr-only">
         Message
@@ -40,16 +44,21 @@ export function MessageInput({ channelId }: MessageInputProps) {
         type="text"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        placeholder="Type here"
-        className="flex-1 border p-4 border-none outline-0 placeholder:text-sm"
+        placeholder="Type a message"
+        // The ring sits on the form, so the field stays outline-free without
+        // losing the focus indicator the way a bare `outline-0` did.
+        className="min-w-0 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-muted-foreground"
       />
+
       <EmojiPicker onSelect={insertEmoji} />
+
       <button
         type="submit"
         aria-label="Send message"
-        className="text-primary px-4 rounded-full cursor-pointer hover:text-primary"
+        disabled={!canSend}
+        className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:bg-foreground/10 disabled:text-muted-foreground"
       >
-        <PaperPlaneRightIcon weight="fill" className="size-6" />
+        <PaperPlaneRightIcon weight="fill" className="size-4" />
       </button>
     </form>
   );

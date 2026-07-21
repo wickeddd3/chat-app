@@ -1,4 +1,5 @@
 import { ChatCircleIcon } from "@phosphor-icons/react";
+import { Button } from "@/shared/ui/shadcn/button";
 import { useChatNavigation } from "../model/useChatNavigation";
 
 export interface MessageButtonProps {
@@ -10,17 +11,16 @@ export function MessageButton({ text, targetUserId }: MessageButtonProps) {
   const { navigateToChannel } = useChatNavigation();
 
   return (
-    <button
+    <Button
       onClick={() => navigateToChannel(targetUserId)}
-      className="bg-primary  rounded-lg px-3 py-2 flex items-center justify-center gap-2 cursor-pointer hover:bg-primary/90"
+      variant="default"
+      size="sm"
+      className="cursor-pointer gap-2"
       aria-label="Send message"
-      role="button"
       title="Send message"
     >
-      <ChatCircleIcon className="size-4 text-gray-50" />
-      <span className="text-xs font-medium text-gray-50 hidden sm:inline-block">
-        {text}
-      </span>
-    </button>
+      <ChatCircleIcon className="size-4" />
+      <span className="hidden sm:inline-block">{text}</span>
+    </Button>
   );
 }

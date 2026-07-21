@@ -33,11 +33,12 @@ export function EmojiPicker({ onSelect, className }: EmojiPickerProps) {
           aria-label="Insert emoji"
           title="Insert emoji"
           className={cn(
-            "px-3 text-muted-foreground hover:text-foreground cursor-pointer transition-colors",
+            // Sized to match the send button beside it in the composer.
+            "flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
             className,
           )}
         >
-          <SmileyIcon className="size-6" />
+          <SmileyIcon className="size-5" />
         </button>
       </PopoverTrigger>
       <PopoverContent

@@ -1,4 +1,5 @@
 import { XCircleIcon } from "@phosphor-icons/react";
+import { Button } from "@/shared/ui/shadcn/button";
 import { useCancelConnection } from "../model/useCancelConnection";
 import { useAuth } from "@/entities/auth";
 
@@ -17,22 +18,21 @@ export function CancelButton({
   const { cancelConnectionRequest } = useCancelConnection(authUser?.id);
 
   return (
-    <button
+    <Button
       onClick={() =>
         cancelConnectionRequest({
           connectionRequestId,
           connectionRequestUserId,
         })
       }
-      className="bg-primary  rounded-lg px-3 py-2 flex items-center justify-center gap-2 cursor-pointer hover:bg-primary/90"
+      variant="outline"
+      size="sm"
+      className="cursor-pointer gap-2"
       aria-label="Cancel connection request"
-      role="button"
       title="Cancel connection request"
     >
-      <XCircleIcon className="size-4 text-gray-50" />
-      <span className="text-xs font-medium text-gray-50 hidden sm:inline-block">
-        {text}
-      </span>
-    </button>
+      <XCircleIcon className="size-4" />
+      <span className="hidden sm:inline-block">{text}</span>
+    </Button>
   );
 }

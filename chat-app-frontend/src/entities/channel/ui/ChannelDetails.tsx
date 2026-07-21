@@ -30,7 +30,7 @@ export function ChannelDetails({ channel, isOnline }: ChannelDetailsProps) {
           />
         </Avatar>
       </Card>
-      <h1 className="text-md">{channel.displayName}</h1>
+      <h2 className="text-md">{channel.displayName}</h2>
       <Accordion
         type="single"
         collapsible
