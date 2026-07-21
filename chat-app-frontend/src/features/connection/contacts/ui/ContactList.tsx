@@ -1,10 +1,9 @@
+import { Tabs, TabsContent } from "@/shared/ui/shadcn/tabs";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/shared/ui/shadcn/tabs";
-import { Badge } from "@/shared/ui/shadcn/badge";
+  SegmentedTabsList,
+  SegmentedTabsTrigger,
+  SegmentedTabBadge,
+} from "@/shared/ui/SegmentedTabs";
 import { SearchField } from "@/shared/ui/SearchField";
 import { useMemo, useState } from "react";
 import { ContactResults } from "./ContactResults";
@@ -59,23 +58,20 @@ export function ContactList({
         className="px-4 pb-6 pt-1"
       />
       <Tabs defaultValue="all" className="flex-1 flex flex-col min-h-0">
-        <TabsList className="w-fit px-4 bg-transparent shrink-0">
-          <TabsTrigger value="all" className="px-4 cursor-pointer rounded-full">
+        <SegmentedTabsList className="mx-4 shrink-0">
+          <SegmentedTabsTrigger value="all">
             All
-            <Badge className="border-4 py-2.5 rounded-full border-background bg-muted text-foreground font-bold">
-              {total}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger
-            value="online"
-            className="px-4 cursor-pointer rounded-full"
-          >
+            <SegmentedTabBadge>{total}</SegmentedTabBadge>
+          </SegmentedTabsTrigger>
+          <SegmentedTabsTrigger value="online">
             Online
-            <Badge className="border-4 py-2.5 rounded-full border-background bg-emerald-500 text-gray-50 font-bold">
+            {/* Online is a status, not a total, so it keeps a hue of its own
+                rather than promoting to the brand colour when active. */}
+            <SegmentedTabBadge className="group-data-active/tab:bg-emerald-600">
               {filteredByOnline.length}
-            </Badge>
-          </TabsTrigger>
-        </TabsList>
+            </SegmentedTabBadge>
+          </SegmentedTabsTrigger>
+        </SegmentedTabsList>
         <TabsContent
           value="all"
           className="flex-1 min-h-0 data-[state=active]:flex flex-col m-0"
