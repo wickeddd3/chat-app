@@ -4,7 +4,7 @@ export const connectionsSchemas: Record<string, OpenAPIV3.SchemaObject> = {
   ConnectionRequest: {
     type: "object",
     properties: {
-      id: { type: "string", example: "b1a23c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d" },
+      id: { type: "string", format: "uuid", example: "b1a23c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d" },
       status: { type: "string", enum: ["PENDING", "ACCEPTED", "DECLINED"], example: "PENDING" },
       createdAt: { type: "string", format: "date-time", example: "2026-06-14T12:00:00.000Z" },
       updatedAt: { type: "string", format: "date-time", example: "2026-06-14T12:00:00.000Z" },

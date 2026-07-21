@@ -4,12 +4,18 @@ export const messagesSchemas: Record<string, OpenAPIV3.SchemaObject> = {
   Message: {
     type: "object",
     properties: {
-      id: { type: "integer", example: 1024 },
-      parentId: { type: "integer", nullable: true, example: 1000 },
-      channelId: { type: "integer", example: 42 },
+      id: { type: "string", format: "uuid", example: "9f1c2b40-6f2e-4f2a-9a11-8a6a2b5f0c31" },
+      parentId: { type: "string", format: "uuid", nullable: true, example: null },
+      channelId: { type: "string", format: "uuid", example: "4b8f9a10-2c5d-4a7e-9f31-0d2b6c8e4a52" },
       authorId: { type: "string", format: "uuid", example: "d3b07384-d113-4956-a5e2-aa5913e8a213" },
       content: { type: "string", example: "Hey everyone! Check out the new API documentation architecture." },
       createdAt: { type: "string", format: "date-time", example: "2026-06-14T16:00:00.000Z" },
+      readCount: {
+        type: "integer",
+        example: 1,
+        description:
+          "Recipients who have read this message. An author never receives a receipt for their own message, so any value above zero means it has been read.",
+      },
       author: { $ref: "#/components/schemas/User" },
     },
   },
@@ -20,7 +26,7 @@ export const messagesPaths: OpenAPIV3.PathsObject = {
     get: {
       summary: "Get message history for a specific channel room",
       description:
-        "Retrieves a paginated list of historical chat messages inside a chat group or direct message channel room using sequentially indexed integer cursor lookups.",
+        "Retrieves a page of a channel's history, newest first, using an opaque keyset cursor. Pass the `nextCursor` from the previous response to walk further back; omit it to start from the latest message.",
       tags: ["Messages"],
       security: [{ bearerAuth: [] }],
       parameters: [
@@ -28,21 +34,24 @@ export const messagesPaths: OpenAPIV3.PathsObject = {
           name: "channelId",
           in: "path",
           required: true,
-          description: "The unique relational database ID of the target channel",
-          schema: { type: "integer", example: 42 },
+          description: "The channel to read",
+          schema: { type: "string", format: "uuid", example: "4b8f9a10-2c5d-4a7e-9f31-0d2b6c8e4a52" },
         },
         {
           name: "cursor",
           in: "query",
           description:
-            "The integer relational boundary token (typically the oldest message ID fetched in the current batch) used to locate the next chronological window block",
+            "Opaque base64url keyset cursor taken from the previous response's `nextCursor`. Encodes the boundary message's timestamp and id — it is not an offset or an id, and should be passed back unmodified.",
           required: false,
-          schema: { type: "integer", example: 1044 },
+          schema: {
+            type: "string",
+            example: "eyJ0IjoiMjAyNi0wNi0xNFQxNjowMDowMC4wMDBaIiwiaSI6IjlmMWMyYjQwIn0",
+          },
         },
       ],
       responses: {
         200: {
-          description: "Messages history ledger window fetched successfully",
+          description: "A page of message history, oldest first",
           content: {
             "application/json": {
               schema: {
@@ -58,7 +67,12 @@ export const messagesPaths: OpenAPIV3.PathsObject = {
                     type: "object",
                     properties: {
                       limit: { type: "integer", example: 20 },
-                      nextCursor: { type: "integer", nullable: true, example: 1024 },
+                      nextCursor: {
+                        type: "string",
+                        nullable: true,
+                        description: "Pass as `cursor` to fetch the next (older) page. Null on the last page.",
+                        example: "eyJ0IjoiMjAyNi0wNi0xNFQxNTowMDowMC4wMDBaIiwiaSI6IjdhM2QxZTIwIn0",
+                      },
                       hasMore: { type: "boolean", example: true },
                     },
                   },
@@ -68,6 +82,7 @@ export const messagesPaths: OpenAPIV3.PathsObject = {
             },
           },
         },
+        400: { description: "Bad Request - channelId is not a valid UUID" },
         401: { description: "Unauthorized - Bearer token missing, expired, or structural invalidation" },
         403: { description: "Forbidden - Authenticated principal is not an authorized group participant" },
         404: { description: "Not Found - Targeted channel room record entity does not exist" },
