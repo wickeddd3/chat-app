@@ -26,75 +26,85 @@ export function UploadAvatar({ userId }: UploadAvatarProps) {
     });
 
   return (
-    <Dialog open={open}>
-      <form id="avatar-form">
-        <DialogTrigger asChild>
-          <Button
-            className="cursor-pointer rounded-lg px-4 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90"
-            onClick={() => setOpen(true)}
-          >
-            <CameraIcon />
-            <span className="text-md font-semibold hidden md:inline-block">
-              Change avatar
-            </span>
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-sm" showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle>Upload Avatar</DialogTitle>
-          </DialogHeader>
+    // Controlled both ways: with only `open` set, Escape and the overlay could
+    // not close the dialog and Cancel was the sole way out.
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button type="button" className="cursor-pointer gap-2">
+          <CameraIcon />
+          <span className="hidden font-semibold md:inline-block">
+            Change avatar
+          </span>
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="sm:max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Change avatar</DialogTitle>
           <DialogDescription>
-            JPG or PNG (Recommended. 100x100px)
+            A square JPG or PNG works best — around 100×100 pixels.
           </DialogDescription>
-          <div className="flex flex-col items-center justify-center gap-4 w-full py-3">
-            {previewUrl && (
+        </DialogHeader>
+
+        {/* The dropzone doubles as the preview, so picking a second image
+            happens in the same place as picking the first. */}
+        <label
+          htmlFor="dropzone-file"
+          className="flex w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border bg-muted/60 px-6 py-8 transition-colors hover:bg-accent has-[input:focus-visible]:ring-[3px] has-[input:focus-visible]:ring-ring/40"
+        >
+          {previewUrl ? (
+            <>
               <img
                 src={previewUrl}
-                alt="avatar-preview-url"
-                className="max-w-32 max-h-32 rounded-2xl"
+                alt="Preview of the avatar you selected"
+                className="size-28 rounded-full object-cover ring-2 ring-background"
               />
-            )}
-            <label
-              htmlFor="dropzone-file"
-              className="w-full h-fit flex flex-col items-center justify-center bg-muted border border-dashed border-border rounded-lg cursor-pointer hover:bg-accent"
-            >
-              <div className="flex flex-col items-center justify-center text-body pt-5 pb-6">
-                <CloudArrowUpIcon className="size-10 text-muted-foreground" />
-                <p className="mb-2 text-sm font-semibold">Click to import</p>
-              </div>
-              <input
-                id="dropzone-file"
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={handleImportAvatar}
+              <span className="text-sm font-medium text-muted-foreground">
+                Choose a different image
+              </span>
+            </>
+          ) : (
+            <>
+              <CloudArrowUpIcon
+                weight="duotone"
+                className="size-10 text-muted-foreground"
               />
-            </label>
-          </div>
+              <span className="text-sm font-semibold">Click to choose</span>
+            </>
+          )}
+          <input
+            id="dropzone-file"
+            type="file"
+            // `sr-only` rather than `hidden`: display:none takes the input out
+            // of the tab order, which left the dropzone keyboard-unreachable.
+            className="sr-only"
+            accept="image/*"
+            onChange={handleImportAvatar}
+          />
+        </label>
 
-          <DialogFooter>
-            <div className="w-full flex flex-col gap-2">
-              <Button
-                className="w-full font-semibold bg-primary hover:bg-primary/90 cursor-pointer"
-                disabled={!previewUrl || isUploading}
-                onClick={() =>
-                  handleUploadAvatar({ onSuccessUpload: () => setOpen(false) })
-                }
-              >
-                {isUploading && <Spinner data-icon="inline-start" />}
-                Upload
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full font-semibold cursor-pointer"
-                onClick={() => setOpen(false)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </form>
+        <DialogFooter className="flex-col gap-2 sm:flex-col">
+          <Button
+            type="button"
+            className="w-full cursor-pointer font-semibold"
+            disabled={!previewUrl || isUploading}
+            onClick={() =>
+              handleUploadAvatar({ onSuccessUpload: () => setOpen(false) })
+            }
+          >
+            {isUploading && <Spinner data-icon="inline-start" />}
+            {isUploading ? "Uploading…" : "Save avatar"}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-full cursor-pointer font-semibold"
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
 }
