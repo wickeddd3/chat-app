@@ -4,7 +4,7 @@ export const channelsSchemas: Record<string, OpenAPIV3.SchemaObject> = {
   Channel: {
     type: "object",
     properties: {
-      id: { type: "integer", example: 42 },
+      id: { type: "string", format: "uuid", example: "4b8f9a10-2c5d-4a7e-9f31-0d2b6c8e4a52" },
       displayName: { type: "string", example: "Project Discussion" },
       displayImage: { type: "string", nullable: true, example: "https://example.com/avatar.png" },
       type: { type: "string", enum: ["DIRECT", "GROUP"], example: "DIRECT" },
@@ -130,7 +130,7 @@ export const channelsPaths: OpenAPIV3.PathsObject = {
           in: "path",
           required: true,
           description: "The unique relational ID of the channel room",
-          schema: { type: "integer", example: 42 },
+          schema: { type: "string", format: "uuid", example: "4b8f9a10-2c5d-4a7e-9f31-0d2b6c8e4a52" },
         },
       ],
       responses: {
@@ -252,7 +252,7 @@ export const channelsPaths: OpenAPIV3.PathsObject = {
           in: "path",
           required: true,
           description: "Target group room ID",
-          schema: { type: "integer", example: 42 },
+          schema: { type: "string", format: "uuid", example: "4b8f9a10-2c5d-4a7e-9f31-0d2b6c8e4a52" },
         },
       ],
       requestBody: {
