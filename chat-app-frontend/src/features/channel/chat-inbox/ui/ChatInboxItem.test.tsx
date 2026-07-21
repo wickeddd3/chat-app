@@ -4,10 +4,21 @@ import { MemoryRouter } from "react-router";
 import { ChatInboxItem } from "./ChatInboxItem";
 import type { InboxChannel } from "@/entities/channel";
 
-const { markAsReadMock } = vi.hoisted(() => ({ markAsReadMock: vi.fn() }));
+const { markAsReadMock, useTypingUsersMock } = vi.hoisted(() => ({
+  markAsReadMock: vi.fn(),
+  useTypingUsersMock: vi.fn(),
+}));
 
 vi.mock("../model/useMarkAsRead", () => ({
   useMarkAsRead: () => ({ markAsRead: markAsReadMock }),
+}));
+
+vi.mock("@/entities/auth", () => ({
+  useAuth: () => ({ authUser: { id: "auth-user" } }),
+}));
+
+vi.mock("@/entities/message", () => ({
+  useTypingUsers: useTypingUsersMock,
 }));
 
 function inboxItem(overrides: Partial<InboxChannel> = {}): InboxChannel {
@@ -39,6 +50,10 @@ function renderItem(item: InboxChannel) {
 }
 
 describe("ChatInboxItem", () => {
+  beforeEach(() => {
+    useTypingUsersMock.mockReturnValue({ isTyping: false, label: "" });
+  });
+
   it("renders the display name and last message when read", () => {
     renderItem(inboxItem());
 
@@ -60,6 +75,69 @@ describe("ChatInboxItem", () => {
     expect(screen.getByText("3 unread messages")).toBeInTheDocument();
     expect(screen.queryByText("See you soon")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Unread indicator")).toBeInTheDocument();
+  });
+
+  it("replaces the preview with the typing label", () => {
+    useTypingUsersMock.mockReturnValue({
+      isTyping: true,
+      label: "Jane is typing",
+    });
+
+    renderItem(inboxItem());
+
+    expect(screen.getByText("Jane is typing")).toBeInTheDocument();
+    expect(screen.queryByText("See you soon")).not.toBeInTheDocument();
+  });
+
+  it("outranks the unread summary but keeps the unread indicator", () => {
+    useTypingUsersMock.mockReturnValue({
+      isTyping: true,
+      label: "Jane is typing",
+    });
+
+    renderItem(inboxItem({ unreadCount: 3 }));
+
+    expect(screen.getByText("Jane is typing")).toBeInTheDocument();
+    expect(screen.queryByText("3 unread messages")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Unread indicator")).toBeInTheDocument();
+  });
+
+  it("shows typing in a channel that has no messages yet", () => {
+    useTypingUsersMock.mockReturnValue({
+      isTyping: true,
+      label: "Jane is typing",
+    });
+
+    renderItem(inboxItem({ lastMessage: null }));
+
+    expect(screen.getByText("Jane is typing")).toBeInTheDocument();
+  });
+
+  it("resolves typists against the members the row already holds", () => {
+    renderItem(
+      inboxItem({
+        channelMembers: [
+          {
+            id: "membership-1",
+            role: "MEMBER",
+            user: {
+              id: "user-2",
+              name: "Jane",
+              image: null,
+              username: "jane",
+            },
+          },
+        ],
+      }),
+    );
+
+    expect(useTypingUsersMock).toHaveBeenCalledWith({
+      channelId: "chan-1",
+      authId: "auth-user",
+      participants: [
+        { id: "user-2", name: "Jane", image: null, username: "jane" },
+      ],
+    });
   });
 
   it("links to the channel and marks it read on click", async () => {

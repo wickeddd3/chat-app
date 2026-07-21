@@ -31,6 +31,10 @@ export const createQueryKeys = (authId: string | undefined) => {
     messages: {
       timeline: (channelId: string) =>
         [scope, "messages", "timeline", channelId] as const,
+      // Ephemeral "who is typing" roster — never fetched, only patched by the
+      // socket handler, so it lives in the cache purely as a shared store.
+      typing: (channelId: string) =>
+        [scope, "messages", "typing", channelId] as const,
     },
     connections: {
       sent: () => [scope, "connections", "sent"] as const,

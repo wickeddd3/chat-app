@@ -11,6 +11,7 @@ import { JoinChannelCommand } from "@/web-socket/commands/join-channel.command";
 import { LeaveChannelCommand } from "@/web-socket/commands/leave-channel.command";
 import { DisconnectCommand } from "@/web-socket/commands/disconnect.command";
 import { HeartbeatCommand } from "@/web-socket/commands/heartbeat.command";
+import { TypingCommand } from "@/web-socket/commands/typing.command";
 
 import { PresenceService } from "@/services/presence.service";
 import { PresencePruneWorker } from "@/services/presence-prune.worker";
@@ -41,4 +42,5 @@ export const realtimeModule = new ContainerModule(({ bind }) => {
   bind<WebSocketCommand>(TYPES.WebSocketCommand).to(LeaveChannelCommand);
   bind<WebSocketCommand>(TYPES.WebSocketCommand).to(DisconnectCommand);
   bind<WebSocketCommand>(TYPES.WebSocketCommand).to(HeartbeatCommand);
+  bind<WebSocketCommand>(TYPES.WebSocketCommand).to(TypingCommand);
 });

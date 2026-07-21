@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { PaperPlaneRightIcon } from "@phosphor-icons/react";
 import { EmojiPicker } from "@/shared/ui/emoji-picker/EmojiPicker";
 import { useSendMessage } from "../model/useSendMessage";
+import { useTypingBroadcast } from "../model/useTypingBroadcast";
 
 export interface MessageInputProps {
   channelId: string;
@@ -9,7 +10,19 @@ export interface MessageInputProps {
 
 export function MessageInput({ channelId }: MessageInputProps) {
   const { message, setMessage, sendMessage } = useSendMessage({ channelId });
+  const { notifyTyping, stopTyping } = useTypingBroadcast(channelId);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Clearing the field back to empty is a retraction, not a keystroke — the
+  // user visibly abandoned the draft, so don't make the other side wait it out.
+  const handleChange = (value: string) => {
+    setMessage(value);
+    if (value.trim()) {
+      notifyTyping();
+    } else {
+      stopTyping();
+    }
+  };
 
   // Insert at the caret (text inputs retain selectionStart while blurred, so the
   // picker can stay open); fall back to appending when the input was never focused.
@@ -18,7 +31,7 @@ export function MessageInput({ channelId }: MessageInputProps) {
     const start = input?.selectionStart ?? message.length;
     const end = input?.selectionEnd ?? start;
 
-    setMessage(message.slice(0, start) + emoji + message.slice(end));
+    handleChange(message.slice(0, start) + emoji + message.slice(end));
 
     const caret = start + emoji.length;
     requestAnimationFrame(() => {
@@ -30,9 +43,15 @@ export function MessageInput({ channelId }: MessageInputProps) {
   // shows that state rather than looking live and doing nothing.
   const canSend = message.trim().length > 0;
 
+  // Sending ends the burst — the draft is gone, so retract before it lands.
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+    stopTyping();
+    sendMessage(e);
+  };
+
   return (
     <form
-      onSubmit={sendMessage}
+      onSubmit={handleSubmit}
       className="flex w-full items-center gap-1 rounded-full border border-transparent bg-muted p-1.5 transition-colors focus-within:border-ring focus-within:bg-card focus-within:ring-[3px] focus-within:ring-ring/25"
     >
       <label htmlFor="message-input" className="sr-only">
@@ -43,7 +62,7 @@ export function MessageInput({ channelId }: MessageInputProps) {
         ref={inputRef}
         type="text"
         value={message}
-        onChange={(e) => setMessage(e.target.value)}
+        onChange={(e) => handleChange(e.target.value)}
         placeholder="Type a message"
         // The ring sits on the form, so the field stays outline-free without
         // losing the focus indicator the way a bare `outline-0` did.
