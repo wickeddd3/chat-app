@@ -11,7 +11,7 @@ export class MessagesRepository {
 
   public async create(data: { content: string; channelId: string; authorId: string }): Promise<MessageWithAuthor> {
     try {
-      return await this.db.message.create({
+      const message = await this.db.message.create({
         data,
         include: {
           author: {
@@ -23,6 +23,10 @@ export class MessagesRepository {
           },
         },
       });
+
+      // A message this new cannot have been read, so the count is known
+      // without asking the database for it.
+      return { ...message, readCount: 0 };
     } catch (error) {
       throw new HttpException(500, "Failed to create message.", null, { cause: error });
     }
@@ -57,6 +61,9 @@ export class MessagesRepository {
               image: true,
             },
           },
+          // The individual readers are never rendered, so send the total rather
+          // than rows the client would only count.
+          _count: { select: { readBy: true } },
         },
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         // Fetch one extra to reliably determine hasMore.
@@ -73,7 +80,10 @@ export class MessagesRepository {
 
       return {
         // Reverse to ascending (oldest first) for display.
-        messages: [...pageItems].reverse(),
+        messages: [...pageItems].reverse().map(({ _count, ...message }) => ({
+          ...message,
+          readCount: _count.readBy,
+        })),
         hasMore,
         nextCursor,
       };
@@ -90,7 +100,7 @@ export class MessagesRepository {
           authorId: { not: userId },
           readBy: { none: { userId } },
         },
-        select: { id: true },
+        select: { id: true, authorId: true },
       });
 
       return messages;

@@ -50,6 +50,27 @@ export class ReadMessageCommand implements WebSocketCommand<ReadMessagePayload> 
       const { count } = await this.messageReceiptsService.createMessageReceipts(authId, unreadMessagesIds);
 
       readMessageCount = count;
+
+      // 2b. Report the read back to whoever sent those messages, so their own
+      // bubbles can show it. Grouped per author so nobody learns about reads on
+      // messages that aren't theirs — and the reader is never among them, since
+      // the unread query already excludes self-authored messages.
+      const idsByAuthor = new Map<string, string[]>();
+      for (const { id, authorId } of unreadMessages) {
+        const authored = idsByAuthor.get(authorId);
+        if (authored) authored.push(id);
+        else idsByAuthor.set(authorId, [id]);
+      }
+
+      await Promise.all(
+        [...idsByAuthor].map(([authorId, messageIds]) =>
+          this.broadcaster.emitToUser(authorId, "message:read_receipt", {
+            channelId: targetChannelId,
+            messageIds,
+            readerId: authId,
+          }),
+        ),
+      );
     }
 
     // 3. Tell the user's frontend to clear the badge locally
