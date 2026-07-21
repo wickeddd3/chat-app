@@ -1,4 +1,9 @@
-import { dateToString, dateToNow, isLessThanADayOld } from "./date-format";
+import {
+  dateToString,
+  dateToNow,
+  dayLabel,
+  isLessThanADayOld,
+} from "./date-format";
 
 describe("dateToString", () => {
   it("formats a valid date as a locale time string", () => {
@@ -31,6 +36,51 @@ describe("dateToNow", () => {
     ).toISOString();
 
     expect(dateToNow(fiveMinutesAgo)).toBe("5 minutes ago");
+  });
+});
+
+describe("dayLabel", () => {
+  // Midday local time, so shifting by whole days can't cross a boundary
+  // differently depending on the machine's timezone.
+  const now = new Date(2026, 0, 15, 12, 0, 0);
+  const daysBefore = (days: number) =>
+    new Date(2026, 0, 15 - days, 12, 0, 0).toISOString();
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(now);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("returns an empty string for an invalid date", () => {
+    expect(dayLabel("not-a-date")).toBe("");
+  });
+
+  it("names today rather than dating it", () => {
+    expect(dayLabel(daysBefore(0))).toBe("Today");
+  });
+
+  it("names yesterday rather than dating it", () => {
+    expect(dayLabel(daysBefore(1))).toBe("Yesterday");
+  });
+
+  it("leads an earlier day with its weekday, and drops the current year", () => {
+    // 10 January 2026 was a Saturday.
+    const label = dayLabel(daysBefore(5));
+
+    expect(label).toMatch(/Saturday|Sat/i);
+    expect(label).toMatch(/10/);
+    expect(label).toMatch(/January|Jan/i);
+    expect(label).not.toMatch(/2026/);
+  });
+
+  it("includes the year once the date falls outside it", () => {
+    expect(dayLabel(new Date(2025, 10, 3, 12, 0, 0).toISOString())).toMatch(
+      /2025/,
+    );
   });
 });
 
