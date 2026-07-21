@@ -16,6 +16,10 @@ import {
   type UnreadMessagePayload,
 } from "./message-read.handler";
 import {
+  handleReadReceipt,
+  type ReadReceiptPayload,
+} from "./message-read-receipt.handler";
+import {
   handleTypingStatus,
   resetTypingExpiries,
   type TypingStatusPayload,
@@ -94,6 +98,9 @@ export function SocketOrchestrator({ authId }: SocketOrchestratorProps) {
     const onClearUnread = (payload: UnreadMessagePayload) =>
       handleClearUnread(queryClient, queryKeys, payload);
 
+    const onReadReceipt = (payload: ReadReceiptPayload) =>
+      handleReadReceipt(queryClient, queryKeys, payload);
+
     const onTypingStatus = (payload: TypingStatusPayload) =>
       handleTypingStatus(queryClient, queryKeys, payload);
 
@@ -116,6 +123,7 @@ export function SocketOrchestrator({ authId }: SocketOrchestratorProps) {
     webSocketClient.on("connection:status_change", onStatusChange);
     webSocketClient.on("message:receive_message", onIncomingMessage);
     webSocketClient.on("message:read", onClearUnread);
+    webSocketClient.on("message:read_receipt", onReadReceipt);
     webSocketClient.on("message:typing_status", onTypingStatus);
     webSocketClient.on("notification:new", onIncomingNotification);
     webSocketClient.on("request:new", onNewRequest);
@@ -128,6 +136,7 @@ export function SocketOrchestrator({ authId }: SocketOrchestratorProps) {
       webSocketClient.off("connection:status_change", onStatusChange);
       webSocketClient.off("message:receive_message", onIncomingMessage);
       webSocketClient.off("message:read", onClearUnread);
+      webSocketClient.off("message:read_receipt", onReadReceipt);
       webSocketClient.off("message:typing_status", onTypingStatus);
       webSocketClient.off("notification:new", onIncomingNotification);
       webSocketClient.off("request:new", onNewRequest);

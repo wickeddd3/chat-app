@@ -1,6 +1,8 @@
 export { MessageBubble } from "./ui/MessageBubble";
 export { DayDivider } from "./ui/DayDivider";
 export { MessageContent } from "./ui/MessageContent";
+export { DeliveryStatus } from "./ui/DeliveryStatus";
+export type { DeliveryState } from "./ui/DeliveryStatus";
 
 export { tokenizeMessageLinks } from "./model/message-links";
 export type {
