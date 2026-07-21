@@ -99,8 +99,6 @@ export function SignUpForm({
                 id="name"
                 label="Full Name"
                 placeholder="John Doe"
-                inputClassName="text-sm"
-                labelClassName="text-md"
               />
               <TextField
                 control={form.control}
@@ -108,8 +106,6 @@ export function SignUpForm({
                 id="email"
                 label="Email"
                 placeholder="johndoe@gmail.com"
-                inputClassName="text-sm"
-                labelClassName="text-md"
               />
               <TextField
                 control={form.control}
@@ -117,8 +113,6 @@ export function SignUpForm({
                 id="username"
                 label="Username"
                 placeholder="johndoe888"
-                inputClassName="text-sm"
-                labelClassName="text-md"
               />
               <Field>
                 <Field className="grid grid-cols-2 gap-4">
@@ -126,21 +120,19 @@ export function SignUpForm({
                     type="password"
                     control={form.control}
                     name="password"
+                    autoComplete="new-password"
                     id="password"
                     label="Password"
                     placeholder="********"
-                    inputClassName="text-sm"
-                    labelClassName="text-md"
                   />
                   <TextField
                     type="password"
                     control={form.control}
                     name="confirmPassword"
+                    autoComplete="new-password"
                     id="confirmPassword"
                     label="Confirm Password"
                     placeholder="********"
-                    inputClassName="text-sm"
-                    labelClassName="text-md"
                   />
                 </Field>
               </Field>

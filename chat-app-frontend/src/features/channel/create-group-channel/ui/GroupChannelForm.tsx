@@ -47,8 +47,6 @@ export function GroupChannelForm({ onSuccess }: GroupChannelFormProps) {
           id="name"
           label="Name"
           placeholder="Group Name"
-          inputClassName="text-sm"
-          labelClassName="text-md"
         />
         <MemberListField
           control={form.control}

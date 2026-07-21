@@ -75,8 +75,6 @@ export function SignInForm({
               id="email"
               label="Email"
               placeholder="johndoe@gmail.com"
-              inputClassName="text-sm"
-              labelClassName="text-md"
             />
             <TextField
               type="password"
@@ -85,8 +83,6 @@ export function SignInForm({
               id="password"
               label="Password"
               placeholder="********"
-              inputClassName="text-sm"
-              labelClassName="text-md"
             />
             <Field>
               <Button

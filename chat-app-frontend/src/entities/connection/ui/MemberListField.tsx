@@ -55,7 +55,7 @@ export function MemberListField<T extends FieldValues>({
         return (
           <Field>
             <div className="flex items-baseline justify-between gap-2">
-              <FieldLabel className="text-md">{label}</FieldLabel>
+              <FieldLabel className="text-sm">{label}</FieldLabel>
               {/* Selected members scroll out of view in a long list, so the
                   count is the only persistent feedback that the choice stuck. */}
               <span
