@@ -1,4 +1,5 @@
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
+import { MessageContent } from "./MessageContent";
 import { dateToString } from "@/shared/utils/date-format";
 import { cn } from "@/shared/lib/utils";
 import { ChecksIcon } from "@phosphor-icons/react";
@@ -86,7 +87,10 @@ export function MessageBubble({
               : "bg-muted text-foreground rounded-tl-[6px]",
           )}
         >
-          {content}
+          <MessageContent
+            content={content}
+            isAuthorsMessage={isAuthorsMessage}
+          />
         </div>
 
         {closesRun && (
