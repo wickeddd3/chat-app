@@ -1,6 +1,9 @@
+import { useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useAuth } from "@/entities/auth";
+import { useChannel } from "@/entities/channel";
+import { useTypingUsers } from "@/entities/message";
 import { fadeVariants } from "@/shared/lib/motion";
-import { useTypingUsers } from "../model/useTypingUsers";
 
 export interface TypingIndicatorProps {
   channelId: string;
@@ -11,7 +14,20 @@ export interface TypingIndicatorProps {
  * messages above never shift when someone starts or stops typing.
  */
 export function TypingIndicator({ channelId }: TypingIndicatorProps) {
-  const { isTyping, label } = useTypingUsers(channelId);
+  const { authUser } = useAuth();
+  // Already fetched by the page around us — this resolves from cache.
+  const { channel } = useChannel(channelId, authUser?.id);
+
+  const participants = useMemo(
+    () => channel?.channelMembers?.map(({ user }) => user),
+    [channel?.channelMembers],
+  );
+
+  const { isTyping, label } = useTypingUsers({
+    channelId,
+    authId: authUser?.id,
+    participants,
+  });
 
   return (
     <div className="h-5 px-4" aria-live="polite" aria-atomic="true">

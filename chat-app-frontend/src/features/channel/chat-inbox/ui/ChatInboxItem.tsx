@@ -1,9 +1,12 @@
+import { useMemo } from "react";
 import { Link, useParams } from "react-router";
 import { ChecksIcon } from "@phosphor-icons/react";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { dateToNow } from "@/shared/utils/date-format";
 import { cn } from "@/shared/lib/utils";
 import { useMarkAsRead } from "../model/useMarkAsRead";
+import { useAuth } from "@/entities/auth";
+import { useTypingUsers } from "@/entities/message";
 import type { InboxChannel } from "@/entities/channel";
 
 export interface ChatInboxItemProps {
@@ -15,6 +18,7 @@ export function ChatInboxItem({
     id,
     displayName,
     displayImage,
+    channelMembers,
     lastMessage,
     online,
     unreadCount = 0,
@@ -24,6 +28,19 @@ export function ChatInboxItem({
   const isActive = channelId === id;
 
   const { markAsRead } = useMarkAsRead();
+  const { authUser } = useAuth();
+
+  // The row already carries its members, so naming a typist costs no request.
+  const participants = useMemo(
+    () => channelMembers?.map(({ user }) => user),
+    [channelMembers],
+  );
+
+  const { isTyping, label } = useTypingUsers({
+    channelId: id,
+    authId: authUser?.id,
+    participants,
+  });
 
   const displayMessage =
     unreadCount > 1
@@ -67,15 +84,23 @@ export function ChatInboxItem({
         </div>
 
         <div className="flex w-full items-center justify-between gap-2 min-w-0">
-          {lastMessage && (
-            <p
-              className={cn(
-                "text-xs text-muted-foreground truncate flex-1 min-w-0",
-                unreadCount > 0 ? "font-semibold text-foreground" : "",
-              )}
-            >
-              {displayMessage}
+          {/* Typing outranks the preview, and shows even in a channel that has
+              no messages yet — where there'd otherwise be nothing to replace. */}
+          {isTyping ? (
+            <p className="text-xs text-primary truncate flex-1 min-w-0">
+              {label}
             </p>
+          ) : (
+            lastMessage && (
+              <p
+                className={cn(
+                  "text-xs text-muted-foreground truncate flex-1 min-w-0",
+                  unreadCount > 0 ? "font-semibold text-foreground" : "",
+                )}
+              >
+                {displayMessage}
+              </p>
+            )
           )}
 
           {unreadCount > 0 && (
