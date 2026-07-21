@@ -1,6 +1,8 @@
 import { Virtuoso } from "react-virtuoso";
 import {
   MessageBubble,
+  DayDivider,
+  groupMessages,
   type Message,
   type NewMessage,
 } from "@/entities/message";
@@ -18,6 +20,8 @@ export interface MessagesProps {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   fetchNextPage: () => void;
+  /** Name the author on incoming runs — only meaningful in a group channel. */
+  showAuthorNames?: boolean;
 }
 
 export function Messages({
@@ -25,10 +29,16 @@ export function Messages({
   hasNextPage,
   isFetchingNextPage,
   fetchNextPage,
+  showAuthorNames = false,
 }: MessagesProps) {
   const { authUser } = useAuth();
   const { virtuosoRef, maxIndex } = useScrollToBottom({ messages });
   const { isNew, markAnimated } = useNewMessageAnimation(messages);
+
+  // Each row needs to know its neighbours to render as part of a run, and
+  // Virtuoso's item index is offset by `firstItemIndex` — so the run position
+  // travels with the item rather than being derived from the index.
+  const groupedMessages = useMemo(() => groupMessages(messages), [messages]);
 
   // Dynamically calculate the starting index based on data size.
   // As 'messages' grows, firstItemIndex gets smaller, meaning the older
@@ -45,7 +55,7 @@ export function Messages({
         height: "100%",
         width: "100%",
       }}
-      data={messages}
+      data={groupedMessages}
       // Starts the view container at the bottom item on mount/refresh
       // Context-aware anchors for scrolling up
       firstItemIndex={firstItemIndex}
@@ -59,16 +69,23 @@ export function Messages({
           fetchNextPage();
         }
       }}
-      itemContent={(_, message) => {
+      itemContent={(_, { message, position, startsDay }) => {
         const key = messageKey(message);
         return (
-          <MessageBubble
-            key={key}
-            message={message}
-            isAuthorsMessage={message.author.id === authUser?.id}
-            animate={isNew(key)}
-            onAnimationComplete={() => markAnimated(key)}
-          />
+          // The divider rides along with the day's first message rather than
+          // being its own row, so the list stays one item per message — the
+          // `firstItemIndex` arithmetic above counts on that.
+          <div key={key}>
+            {startsDay && <DayDivider date={message.createdAt} />}
+            <MessageBubble
+              message={message}
+              isAuthorsMessage={message.author.id === authUser?.id}
+              position={position}
+              showAuthorName={showAuthorNames}
+              animate={isNew(key)}
+              onAnimationComplete={() => markAnimated(key)}
+            />
+          </div>
         );
       }}
       components={{

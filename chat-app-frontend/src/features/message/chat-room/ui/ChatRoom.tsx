@@ -6,6 +6,7 @@ import { TypingIndicator } from "./TypingIndicator";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { useAuth } from "@/entities/auth";
+import { useChannel } from "@/entities/channel";
 
 export interface ChatRoomProps {
   channelId: string;
@@ -13,6 +14,8 @@ export interface ChatRoomProps {
 
 export function ChatRoom({ channelId }: ChatRoomProps) {
   const { authUser } = useAuth();
+  // Already fetched by the page around us — this resolves from cache.
+  const { channel } = useChannel(channelId, authUser?.id);
   const {
     messages,
     isLoading,
@@ -34,6 +37,9 @@ export function ChatRoom({ channelId }: ChatRoomProps) {
             hasNextPage={hasNextPage}
             isFetchingNextPage={isFetchingNextPage}
             fetchNextPage={fetchNextPage}
+            // A direct thread has one other person, already named in the
+            // header — only a group needs each run attributed.
+            showAuthorNames={channel?.type === "GROUP"}
           />
         )}
         {!isLoading && !messages.length && <EmptyPlaceholder />}
