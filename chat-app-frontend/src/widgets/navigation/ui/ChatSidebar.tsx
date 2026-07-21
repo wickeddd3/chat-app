@@ -35,7 +35,7 @@ export function ChatSidebar() {
         <section
           className={`
             hidden md:flex aspect-square size-12 items-center justify-center
-            rounded-2xl bg-linear-to-br from-primary to-primary text-gray-50
+            rounded-2xl bg-linear-to-br from-primary to-primary text-primary-foreground
             shadow-sm shadow-primary/30 shrink-0
           `}
         >
