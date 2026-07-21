@@ -24,7 +24,19 @@ vi.mock("../model/useSendMessage", () => ({
   useSendMessage: useSendMessageMock,
 }));
 
+/** The send button reflects whether the draft has content, so tests set it. */
+function withDraft(message: string) {
+  useSendMessageMock.mockReturnValue({
+    message,
+    setMessage: setMessageMock,
+    sendMessage: sendMessageMock,
+  });
+}
+
 describe("MessageInput", () => {
+  beforeEach(() => {
+    withDraft("");
+  });
   it("renders the labelled input and send button", () => {
     render(<MessageInput channelId="c-1" />);
 
@@ -51,11 +63,33 @@ describe("MessageInput", () => {
 
   it("submits the message when the send button is clicked", async () => {
     const user = userEvent.setup();
+    withDraft("hello");
     render(<MessageInput channelId="c-1" />);
 
     await user.click(screen.getByRole("button", { name: "Send message" }));
 
     expect(sendMessageMock).toHaveBeenCalled();
+  });
+
+  it("disables sending while the draft is empty", () => {
+    render(<MessageInput channelId="c-1" />);
+
+    expect(screen.getByRole("button", { name: "Send message" })).toBeDisabled();
+  });
+
+  it("treats a whitespace-only draft as empty", () => {
+    withDraft("   ");
+    render(<MessageInput channelId="c-1" />);
+
+    // Matches the hook, which refuses to send a blank message.
+    expect(screen.getByRole("button", { name: "Send message" })).toBeDisabled();
+  });
+
+  it("enables sending once the draft has content", () => {
+    withDraft("hi");
+    render(<MessageInput channelId="c-1" />);
+
+    expect(screen.getByRole("button", { name: "Send message" })).toBeEnabled();
   });
 
   it("inserts a picked emoji into the draft", async () => {
