@@ -16,6 +16,11 @@ import {
   type UnreadMessagePayload,
 } from "./message-read.handler";
 import {
+  handleTypingStatus,
+  resetTypingExpiries,
+  type TypingStatusPayload,
+} from "./message-typing.handler";
+import {
   handleIncomingNotification,
   type IncomingNotificationPayload,
 } from "./notification-new.handler";
@@ -55,6 +60,9 @@ export function SocketOrchestrator({ authId }: SocketOrchestratorProps) {
 
     return () => {
       webSocketClient.disconnect();
+      // Tied to the socket's life, not the listener effect below — that one
+      // re-runs on every parent render and would drop live typing expiries.
+      resetTypingExpiries();
     };
   }, [authId]);
 
@@ -86,6 +94,9 @@ export function SocketOrchestrator({ authId }: SocketOrchestratorProps) {
     const onClearUnread = (payload: UnreadMessagePayload) =>
       handleClearUnread(queryClient, queryKeys, payload);
 
+    const onTypingStatus = (payload: TypingStatusPayload) =>
+      handleTypingStatus(queryClient, queryKeys, payload);
+
     const onIncomingNotification = (payload: IncomingNotificationPayload) =>
       handleIncomingNotification(queryClient, queryKeys, payload);
 
@@ -105,6 +116,7 @@ export function SocketOrchestrator({ authId }: SocketOrchestratorProps) {
     webSocketClient.on("connection:status_change", onStatusChange);
     webSocketClient.on("message:receive_message", onIncomingMessage);
     webSocketClient.on("message:read", onClearUnread);
+    webSocketClient.on("message:typing_status", onTypingStatus);
     webSocketClient.on("notification:new", onIncomingNotification);
     webSocketClient.on("request:new", onNewRequest);
     webSocketClient.on("request:accepted", onAcceptedRequest);
@@ -116,6 +128,7 @@ export function SocketOrchestrator({ authId }: SocketOrchestratorProps) {
       webSocketClient.off("connection:status_change", onStatusChange);
       webSocketClient.off("message:receive_message", onIncomingMessage);
       webSocketClient.off("message:read", onClearUnread);
+      webSocketClient.off("message:typing_status", onTypingStatus);
       webSocketClient.off("notification:new", onIncomingNotification);
       webSocketClient.off("request:new", onNewRequest);
       webSocketClient.off("request:accepted", onAcceptedRequest);

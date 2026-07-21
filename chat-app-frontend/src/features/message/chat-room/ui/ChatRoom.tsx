@@ -2,6 +2,7 @@ import { useChatRoom } from "../model/useChatRoom";
 import { useMessages } from "../model/useMessages";
 import { Messages } from "./Messages";
 import { MessageInput } from "./MessageInput";
+import { TypingIndicator } from "./TypingIndicator";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { useAuth } from "@/entities/auth";
@@ -37,6 +38,8 @@ export function ChatRoom({ channelId }: ChatRoomProps) {
         )}
         {!isLoading && !messages.length && <EmptyPlaceholder />}
       </div>
+      <TypingIndicator channelId={channelId} />
+
       <div className="w-full p-4">
         <MessageInput channelId={channelId} />
       </div>
