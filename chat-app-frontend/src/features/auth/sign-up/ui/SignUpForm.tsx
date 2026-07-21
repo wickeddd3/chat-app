@@ -64,7 +64,9 @@ export function SignUpForm({
       )}
       <Card className={cn("flex flex-col gap-6", className)} {...props}>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Create your account</CardTitle>
+          <CardTitle className="text-xl">
+            <h1>Create your account</h1>
+          </CardTitle>
           <CardDescription>
             Enter your email below to create your account
           </CardDescription>

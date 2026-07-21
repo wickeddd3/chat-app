@@ -32,7 +32,7 @@ export function MessageHeader({ channel, authId }: MessageHeaderProps) {
           isOnline={online}
           badge={true}
         />
-        <h1 className="text-md font-medium">{channel?.displayName}</h1>
+        <h2 className="text-md font-medium">{channel?.displayName}</h2>
       </div>
     </div>
   );
