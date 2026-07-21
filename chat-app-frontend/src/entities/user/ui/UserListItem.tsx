@@ -19,7 +19,7 @@ export function UserListItem({
   return (
     <article
       className={`
-        flex items-center gap-4 border-b px-4 py-3 text-sm leading-tight last:border-b-0
+        flex items-center gap-4 px-4 py-3 text-sm leading-tight
         hover:bg-sidebar-accent hover:text-sidebar-accent-foreground w-full overflow-hidden
       `}
     >

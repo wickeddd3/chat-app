@@ -34,7 +34,7 @@ export function ChatInboxItem({
     <Link
       to={`/messages/${id}`}
       className={cn(
-        `flex items-center gap-4 border-b p-4 text-sm leading-tight last:border-b-0 
+        `flex items-center gap-4 p-4 text-sm leading-tight 
         hover:bg-sidebar-accent hover:text-sidebar-accent-foreground w-full 
         overflow-hidden transition-colors`,
         isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "",
