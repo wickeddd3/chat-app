@@ -13,47 +13,63 @@ export function NotificationItem({
   onClick,
 }: NotificationItemProps) {
   const Icon = iconType[notification.type];
+  const isUnread = !notification.isRead;
 
   return (
     <button
       type="button"
-      className={cn(
-        `flex justify-between items-center gap-4 px-4 py-2 border-b text-left
-        hover:bg-sidebar-accent cursor-pointer w-full overflow-hidden`,
-        notification.isRead ? "" : "bg-sidebar-accent/50",
-      )}
       onClick={onClick}
+      className={cn(
+        "group/notification relative w-full overflow-hidden text-left",
+        "flex items-start gap-3 px-4 py-3 cursor-pointer",
+        "transition-colors hover:bg-accent",
+        isUnread && "bg-primary/6",
+      )}
     >
-      <Icon
+      {/* Unread reads three ways at once — a brand rail, a tinted ground and
+          weighted text — so it survives both themes and colour-blind viewing,
+          where a hue shift alone would not. */}
+      {isUnread && (
+        <span
+          aria-hidden="true"
+          className="absolute inset-y-0 start-0 w-0.5 bg-primary"
+        />
+      )}
+
+      <span
+        aria-hidden="true"
         className={cn(
-          "size-5 text-primary/70 shrink-0",
-          notification.isRead ? "" : "text-primary",
+          "flex size-9 shrink-0 items-center justify-center rounded-full transition-colors",
+          isUnread
+            ? "bg-primary/15 text-primary"
+            : "bg-muted text-muted-foreground",
         )}
-      />
-      <div className="flex-1 flex justify-between items-center min-w-0 gap-2">
-        <div className="flex flex-col gap-1 flex-1 min-w-0">
+      >
+        <Icon weight="duotone" className="size-5" />
+      </span>
+
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <div className="flex items-baseline gap-2">
           <p
             className={cn(
-              "text-sm text-muted-foreground truncate w-full",
-              notification.isRead ? "" : "font-medium text-foreground",
+              "min-w-0 flex-1 truncate text-sm",
+              isUnread ? "font-semibold text-foreground" : "text-foreground/80",
             )}
           >
             {notification.title}
           </p>
-          <p
-            className={cn(
-              "text-xs text-muted-foreground truncate w-full",
-              notification.isRead ? "" : "font-medium text-foreground",
-            )}
-          >
-            {notification.content}
-          </p>
+          <span className="shrink-0 whitespace-nowrap text-xs tabular-nums text-muted-foreground">
+            {dateToNow(notification.createdAt)}
+          </span>
         </div>
-
-        <span className="text-xs text-muted-foreground shrink-0 whitespace-nowrap self-start pt-0.5">
-          {dateToNow(notification.createdAt)}
-        </span>
+        <p className="truncate text-xs text-muted-foreground">
+          {notification.content}
+        </p>
       </div>
+
+      {/* The visual unread cues are all decorative, so the state is named here
+          for assistive tech rather than left to colour and weight. */}
+      {isUnread && <span className="sr-only">Unread</span>}
     </button>
   );
 }

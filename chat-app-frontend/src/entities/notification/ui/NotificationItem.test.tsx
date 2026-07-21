@@ -56,4 +56,26 @@ describe("NotificationItem", () => {
       unmount();
     });
   });
+
+  it("names the unread state for assistive tech, not just in colour", () => {
+    render(
+      <NotificationItem
+        notification={notification({ isRead: false })}
+        onClick={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Unread")).toBeInTheDocument();
+  });
+
+  it("drops the unread marker once read", () => {
+    render(
+      <NotificationItem
+        notification={notification({ isRead: true })}
+        onClick={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByText("Unread")).not.toBeInTheDocument();
+  });
 });
