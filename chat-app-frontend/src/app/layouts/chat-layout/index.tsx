@@ -4,6 +4,8 @@ import { ChatSidebar } from "@/widgets/navigation";
 import { useParams } from "react-router";
 import { SocketOrchestrator } from "@/features/websocket";
 import { AnimatedOutlet } from "@/shared/ui/AnimatedOutlet";
+import { SkipLink, MAIN_CONTENT_ID } from "@/shared/ui/SkipLink";
+import { RouteAnnouncer } from "@/shared/ui/RouteAnnouncer";
 
 // Animate per top-level section so navigating between chat rooms within
 // /messages keeps the shared MessagesPage mounted (no re-animate / re-mount).
@@ -16,6 +18,8 @@ export function ChatLayout() {
 
   return (
     <div className="flex flex-col-reverse md:flex-row h-screen w-full overflow-hidden bg-background">
+      <SkipLink />
+      <RouteAnnouncer />
       <aside
         className={`
           flex w-full h-16 border-t flex-col bg-sidebar shrink-0
@@ -26,7 +30,11 @@ export function ChatLayout() {
         <ChatSidebar />
       </aside>
 
-      <main className="flex flex-1 w-full min-w-0 overflow-hidden">
+      <main
+        id={MAIN_CONTENT_ID}
+        tabIndex={-1}
+        className="flex flex-1 w-full min-w-0 overflow-hidden focus:outline-none"
+      >
         <AnimatedOutlet
           getKey={sectionKey}
           className="flex flex-1 w-full min-w-0 h-full overflow-hidden"
