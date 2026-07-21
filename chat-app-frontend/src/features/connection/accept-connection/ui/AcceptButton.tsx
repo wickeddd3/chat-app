@@ -1,4 +1,5 @@
 import { UserCheckIcon } from "@phosphor-icons/react";
+import { Button } from "@/shared/ui/shadcn/button";
 import { useAcceptConnection } from "../model/useAcceptConnection";
 import { useAuth } from "@/entities/auth";
 
@@ -12,17 +13,16 @@ export function AcceptButton({ text, connectionRequestId }: AcceptButtonProps) {
   const { acceptConnectionRequest } = useAcceptConnection(authUser?.id);
 
   return (
-    <button
+    <Button
       onClick={() => acceptConnectionRequest(connectionRequestId)}
-      className="bg-primary  rounded-lg px-3 py-2 flex items-center justify-center gap-2 cursor-pointer hover:bg-primary/90"
+      variant="default"
+      size="sm"
+      className="cursor-pointer gap-2"
       aria-label="Accept connection request"
-      role="button"
       title="Accept connection request"
     >
-      <UserCheckIcon className="size-4 text-gray-50" />
-      <span className="text-xs font-medium text-gray-50 hidden sm:inline-block">
-        {text}
-      </span>
-    </button>
+      <UserCheckIcon className="size-4" />
+      <span className="hidden sm:inline-block">{text}</span>
+    </Button>
   );
 }
