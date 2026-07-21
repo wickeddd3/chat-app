@@ -1,5 +1,5 @@
 import { useAuth } from "@/entities/auth";
-import { Toaster } from "@/shared/ui/shadcn/sonner";
+import { Toaster } from "@/shared/ui/Toaster";
 import { ChatSidebar } from "@/widgets/navigation";
 import { useParams } from "react-router";
 import { SocketOrchestrator } from "@/features/websocket";

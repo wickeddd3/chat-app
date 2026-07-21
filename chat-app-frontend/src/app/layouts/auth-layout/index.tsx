@@ -1,4 +1,4 @@
-import { Toaster } from "@/shared/ui/shadcn/sonner";
+import { Toaster } from "@/shared/ui/Toaster";
 import { AnimatedOutlet } from "@/shared/ui/AnimatedOutlet";
 
 export function AuthLayout() {
