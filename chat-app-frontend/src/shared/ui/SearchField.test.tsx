@@ -36,4 +36,36 @@ describe("SearchField", () => {
 
     expect(onChange).toHaveBeenCalledWith("a");
   });
+
+  it("offers no clear button while the field is empty", () => {
+    render(<SearchField value="" onChange={vi.fn()} />);
+
+    expect(
+      screen.queryByRole("button", { name: "Clear search" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("clears the field back to empty", async () => {
+    const onChange = vi.fn();
+    const user = userEvent.setup();
+    render(<SearchField value="alice" onChange={onChange} />);
+
+    await user.click(screen.getByRole("button", { name: "Clear search" }));
+
+    expect(onChange).toHaveBeenCalledWith("");
+  });
+
+  it("gives each field its own control id", () => {
+    render(
+      <>
+        <SearchField value="" onChange={vi.fn()} ariaLabel="Search people" />
+        <SearchField value="" onChange={vi.fn()} ariaLabel="Search contacts" />
+      </>,
+    );
+
+    const first = screen.getByRole("textbox", { name: "Search people" });
+    const second = screen.getByRole("textbox", { name: "Search contacts" });
+
+    expect(first.id).not.toBe(second.id);
+  });
 });
