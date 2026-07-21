@@ -5,22 +5,13 @@ import { PORT } from "@/config/app.config";
 import { createLogger } from "@/lib/logger";
 import { App } from "@/app";
 import { container } from "@/config/inversify.config";
-import { TYPES } from "@/config/types";
+import { ROUTER_TYPES } from "@/config/routers";
 import { HttpRouter } from "@/interfaces/router.interface";
 
 const log = createLogger("Bootstrap");
 
 // Dynamically resolve routers out from the central DI container instance.
-const activeRouters: HttpRouter[] = [
-  container.get<HttpRouter>(TYPES.AuthRouter),
-  container.get<HttpRouter>(TYPES.UsersRouter),
-  container.get<HttpRouter>(TYPES.ChannelsRouter),
-  container.get<HttpRouter>(TYPES.MessagesRouter),
-  container.get<HttpRouter>(TYPES.ConnectionsRouter),
-  container.get<HttpRouter>(TYPES.NotificationsRouter),
-  container.get<HttpRouter>(TYPES.PresenceRouter),
-  container.get<HttpRouter>(TYPES.StatsRouter),
-];
+const activeRouters: HttpRouter[] = ROUTER_TYPES.map((type) => container.get<HttpRouter>(type));
 
 async function main(): Promise<void> {
   const app = new App(activeRouters, PORT);
