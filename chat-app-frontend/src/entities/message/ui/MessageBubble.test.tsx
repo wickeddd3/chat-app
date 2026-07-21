@@ -39,25 +39,57 @@ describe("MessageBubble", () => {
     expect(other.querySelector("svg")).not.toBeInTheDocument();
   });
 
-  it("pulses the check icon while the message is still sending", () => {
-    const { container } = render(
-      <MessageBubble message={message({ isSending: true })} isAuthorsMessage />,
-    );
+  describe("delivery state", () => {
+    it("reports a message still in flight as sending", () => {
+      render(
+        <MessageBubble
+          message={message({ isSending: true })}
+          isAuthorsMessage
+        />,
+      );
 
-    expect(container.querySelector("svg.animate-pulse")).toBeInTheDocument();
-  });
+      expect(screen.getByRole("img", { name: "Sending" })).toBeInTheDocument();
+    });
 
-  it("stops pulsing once the message is delivered", () => {
-    const { container } = render(
-      <MessageBubble
-        message={message({ isSending: false })}
-        isAuthorsMessage
-      />,
-    );
+    it("reports a stored but unread message as delivered", () => {
+      render(
+        <MessageBubble
+          message={message({ isSending: false, readCount: 0 })}
+          isAuthorsMessage
+        />,
+      );
 
-    expect(
-      container.querySelector("svg.animate-pulse"),
-    ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("img", { name: "Delivered" }),
+      ).toBeInTheDocument();
+    });
+
+    it("reports a message as read once a recipient has seen it", () => {
+      render(
+        <MessageBubble message={message({ readCount: 1 })} isAuthorsMessage />,
+      );
+
+      expect(screen.getByRole("img", { name: "Read" })).toBeInTheDocument();
+    });
+
+    it("treats a message with no tally as delivered rather than read", () => {
+      render(<MessageBubble message={message()} isAuthorsMessage />);
+
+      expect(
+        screen.getByRole("img", { name: "Delivered" }),
+      ).toBeInTheDocument();
+    });
+
+    it("keeps showing sending until the send settles, however it was read", () => {
+      render(
+        <MessageBubble
+          message={message({ isSending: true, readCount: 2 })}
+          isAuthorsMessage
+        />,
+      );
+
+      expect(screen.getByRole("img", { name: "Sending" })).toBeInTheDocument();
+    });
   });
 
   it("renders with the entrance animation enabled without crashing", () => {

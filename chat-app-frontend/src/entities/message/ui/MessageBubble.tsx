@@ -1,8 +1,8 @@
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { MessageContent } from "./MessageContent";
+import { DeliveryStatus, type DeliveryState } from "./DeliveryStatus";
 import { dateToString } from "@/shared/utils/date-format";
 import { cn } from "@/shared/lib/utils";
-import { ChecksIcon } from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import { messageBubbleVariants } from "@/shared/lib/motion";
 import {
@@ -42,6 +42,14 @@ export function MessageBubble({
 
   const opensRun = startsRun(position);
   const closesRun = endsRun(position);
+
+  // An optimistic message is still in flight; anything the server has handed
+  // back is at least stored, and a receipt from a recipient makes it read.
+  const deliveryState: DeliveryState = isSending
+    ? "sending"
+    : "readCount" in message && (message.readCount ?? 0) > 0
+      ? "read"
+      : "delivered";
 
   return (
     <motion.div
@@ -98,15 +106,7 @@ export function MessageBubble({
             {/* A bare clock time reads cleanly because the day dividers above
                 keep it unambiguous. */}
             <span className="whitespace-nowrap">{dateToString(createdAt)}</span>
-            {isAuthorsMessage && (
-              <ChecksIcon
-                aria-hidden="true"
-                className={cn(
-                  "size-3",
-                  isSending ? "opacity-40 animate-pulse" : "text-primary",
-                )}
-              />
-            )}
+            {isAuthorsMessage && <DeliveryStatus state={deliveryState} />}
           </div>
         )}
       </div>
