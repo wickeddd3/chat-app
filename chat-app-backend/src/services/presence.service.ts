@@ -2,13 +2,32 @@ import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import type { Redis } from "ioredis";
 
+/** A single user's presence in the aggregated snapshot. */
+export interface PresenceEntry {
+  status: "online" | "offline";
+  // ISO timestamp of when an offline user was last seen; null while online, or
+  // when no last-seen has been recorded yet (cold cache with no Postgres copy).
+  lastSeen: string | null;
+}
+
+/** A lapsed user evicted by a prune sweep, with the moment they went offline. */
+export interface ExpiredPresence {
+  userId: string;
+  lastSeen: number; // ms epoch
+}
+
 @injectable()
 export class PresenceService {
   private readonly globalRegistryKey = "presence:global";
   private readonly leasePrefix = "presence:status:";
+  private readonly lastSeenPrefix = "presence:last_seen:";
   private readonly contactPrefix = "presence:contacts:";
   private readonly followersPrefix = "presence:followers_of:";
   private readonly channelPrefix = "presence:channel_members:";
+
+  // How long an offline user's last-seen timestamp is cached in Redis before it
+  // falls back to the durable Postgres copy (see PresenceController). 30 days.
+  private readonly lastSeenTtlSeconds = 2_592_000;
 
   constructor(@inject(TYPES.RedisMainClient) private redis: Redis) {}
 
@@ -143,7 +162,7 @@ export class PresenceService {
   public async getAggregatedPresenceMap(
     authUserId: string,
     activeChannelIds: string[] = [],
-  ): Promise<Record<string, "online" | "offline">> {
+  ): Promise<Record<string, PresenceEntry>> {
     const contactKey = `${this.contactPrefix}${authUserId}`;
 
     // Prepare our key collection for Redis Set Union (SUNION)
@@ -160,17 +179,30 @@ export class PresenceService {
     const cleanUserIds = targetedUserIds.filter((id) => id !== "EMPTY_MARKER" && id !== authUserId);
     if (cleanUserIds.length === 0) return {};
 
-    // 2. Query statuses instantly via an MGET batch pipeline
+    // 2. Query statuses and last-seen timestamps in two MGET batches
     const statusKeys = cleanUserIds.map((id) => `${this.leasePrefix}${id}`);
-    const results = await this.redis.mget(...statusKeys);
+    const lastSeenKeys = cleanUserIds.map((id) => `${this.lastSeenPrefix}${id}`);
+    const [statuses, lastSeens] = await Promise.all([this.redis.mget(...statusKeys), this.redis.mget(...lastSeenKeys)]);
 
-    // 3. Assemble response payload dictionary
-    const presenceMap: Record<string, "online" | "offline"> = {};
+    // 3. Assemble response payload dictionary. Last-seen is only meaningful for
+    // offline users; online users are "here now".
+    const presenceMap: Record<string, PresenceEntry> = {};
     cleanUserIds.forEach((id, index) => {
-      presenceMap[id] = results[index] === "online" ? "online" : "offline";
+      const online = statuses[index] === "online";
+      presenceMap[id] = {
+        status: online ? "online" : "offline",
+        lastSeen: online ? null : this.toIsoOrNull(lastSeens[index]),
+      };
     });
 
     return presenceMap;
+  }
+
+  /** Converts a stored ms-epoch string to an ISO timestamp, or null if absent/invalid. */
+  private toIsoOrNull(value: string | null | undefined): string | null {
+    if (!value) return null;
+    const ms = Number(value);
+    return Number.isFinite(ms) ? new Date(ms).toISOString() : null;
   }
 
   /**
@@ -194,21 +226,29 @@ export class PresenceService {
    * duplicate offline delta across a multi-instance cluster is harmless (the
    * client just re-applies the same status). Kept simple deliberately.
    */
-  public async pruneExpiredUsers(): Promise<string[]> {
-    const deadzone = Date.now() - 60000; // Missed heartbeat threshold (60s)
+  public async pruneExpiredUsers(): Promise<ExpiredPresence[]> {
+    const now = Date.now();
+    const deadzone = now - 60000; // Missed heartbeat threshold (60s)
 
     // Fetch everyone who hasn't sent a heartbeat within the last minute
     const expiredUserIds = await this.redis.zrangebyscore(this.globalRegistryKey, "-inf", deadzone);
 
-    if (expiredUserIds.length > 0) {
-      const pipeline = this.redis.pipeline();
-      // Clear out string leases just in case, and remove from sorted set
-      expiredUserIds.forEach((id) => pipeline.del(`${this.leasePrefix}${id}`));
-      pipeline.zremrangebyscore(this.globalRegistryKey, "-inf", deadzone);
+    if (expiredUserIds.length === 0) return [];
 
-      await pipeline.exec();
-    }
+    const pipeline = this.redis.pipeline();
+    expiredUserIds.forEach((id) => {
+      // Clear out string leases just in case, and stamp the moment they went
+      // offline so a subsequent snapshot can report "last seen ...". Eviction
+      // time is within one missed beat (~60s) of the true last heartbeat —
+      // imperceptible at minute display granularity, and keeps this to one pipeline.
+      pipeline.del(`${this.leasePrefix}${id}`);
+      pipeline.set(`${this.lastSeenPrefix}${id}`, String(now), "EX", this.lastSeenTtlSeconds);
+    });
+    // Remove from sorted set
+    pipeline.zremrangebyscore(this.globalRegistryKey, "-inf", deadzone);
 
-    return expiredUserIds;
+    await pipeline.exec();
+
+    return expiredUserIds.map((userId) => ({ userId, lastSeen: now }));
   }
 }
