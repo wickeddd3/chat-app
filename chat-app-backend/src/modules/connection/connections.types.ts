@@ -44,6 +44,12 @@ export interface ConnectionRequestResponse {
   notification: Notification;
 }
 
+/** The two endpoints of a connection — a single edge of the contact graph. */
+export interface ContactEdge {
+  senderId: string;
+  receiverId: string;
+}
+
 /** A connection row loaded with both parties' profiles, as the write paths return it. */
 export interface ConnectionWithParties {
   id: string;

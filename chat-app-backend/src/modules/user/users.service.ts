@@ -1,18 +1,26 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
-import { UsersRepository } from "./users.repository";
-import type { User } from "@/prisma/client";
-import type { SuggestedUser } from "./users.types";
+import { UsersQuery } from "./persistence/users.query";
+import { ConnectionsQuery } from "@/modules/connection/persistence/connections.query";
+import type { SuggestedUser, UserProfile } from "./users.types";
 import {
   getSuggestedUserIdsFromContacts,
   sortSuggestedUsersByMutualConnections,
   transformUsersIntoSuggestedUsers,
 } from "./users.utils";
-import { HttpException } from "@/utils/http.exception";
 
+/**
+ * User discovery. Orchestrates the "people you may know" ranking over the
+ * contact graph (owned by the connection module) and the user search (owned
+ * here), then lets pure helpers derive status badges and mutual-connection
+ * ordering. Domain errors from the queries propagate unchanged.
+ */
 @injectable()
 export class UsersService {
-  constructor(@inject(TYPES.UsersRepository) private usersRepository: UsersRepository) {}
+  constructor(
+    @inject(TYPES.UsersQuery) private usersQuery: UsersQuery,
+    @inject(TYPES.ConnectionsQuery) private connectionsQuery: ConnectionsQuery,
+  ) {}
 
   public async getSuggestedUsers({
     authUserId,
@@ -23,53 +31,35 @@ export class UsersService {
     limit?: number;
     query?: string;
   }): Promise<SuggestedUser[]> {
-    try {
-      const isInitialLoad = !query;
-      let suggestedUserIds: string[] = [];
+    const isInitialLoad = !query;
+    let suggestedUserIds: string[] = [];
 
-      // 1. Calculate Mutual Connections for Suggestions on initial load
-      if (isInitialLoad) {
-        // Find authenticated user's direct contact IDs
-        const directContactIds = await this.usersRepository.getContactIds(authUserId);
-        if (directContactIds.length > 0) {
-          // Find all contact IDs of people my direct contacts are connected with
-          const contactsOfContacts = await this.usersRepository.getContactIdsContacts(authUserId, directContactIds);
-          // Derive a ranked list of suggested user IDs based on mutual connection counts
-          suggestedUserIds = getSuggestedUserIdsFromContacts({
-            contacts: contactsOfContacts,
-            directContactIds,
-            userId: authUserId,
-          });
-        }
+    // Rank friend-of-a-friend suggestions on the initial (unsearched) load.
+    if (isInitialLoad) {
+      const directContactIds = await this.connectionsQuery.getContactIds(authUserId);
+      if (directContactIds.length > 0) {
+        const contactsOfContacts = await this.connectionsQuery.getContactsOfContacts(authUserId, directContactIds);
+        suggestedUserIds = getSuggestedUserIdsFromContacts({
+          contacts: contactsOfContacts,
+          directContactIds,
+          userId: authUserId,
+        });
       }
-
-      // 2. Search for users matching query and pagination, excluding self and leveraging connections for status flags
-      const users = await this.usersRepository.search({ userId: authUserId, limit, query });
-
-      // 3. Transform and Enrich with Status Flag State Data
-      let suggestedUsers: SuggestedUser[] = transformUsersIntoSuggestedUsers({
-        users,
-        authUserId,
-        isInitialLoad,
-        suggestedUserIds,
-      });
-
-      // 4. Sort local payload if suggested IDs list exists
-      if (isInitialLoad && suggestedUserIds.length > 0) {
-        suggestedUsers = sortSuggestedUsersByMutualConnections(suggestedUsers, suggestedUserIds);
-      }
-
-      return suggestedUsers;
-    } catch (error) {
-      throw new HttpException(500, "Failed to retrieve suggested users.", null, { cause: error });
     }
+
+    // Candidate users (excluding self), carrying the caller's edges for badges.
+    const users = await this.usersQuery.search({ userId: authUserId, limit, query });
+
+    let suggestedUsers = transformUsersIntoSuggestedUsers({ users, authUserId, isInitialLoad, suggestedUserIds });
+
+    if (isInitialLoad && suggestedUserIds.length > 0) {
+      suggestedUsers = sortSuggestedUsersByMutualConnections(suggestedUsers, suggestedUserIds);
+    }
+
+    return suggestedUsers;
   }
 
-  public async getUserByUsername(username: string): Promise<Partial<User> | null> {
-    try {
-      return await this.usersRepository.getByUsername(username);
-    } catch (error) {
-      throw new HttpException(500, "Failed to retrieve user.", null, { cause: error });
-    }
+  public async getUserByUsername(username: string): Promise<UserProfile | null> {
+    return this.usersQuery.getByUsername(username);
   }
 }

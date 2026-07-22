@@ -6,7 +6,7 @@ import { withPersistence } from "@/shared/persistence/prisma-error.mapper";
 import { buildKeysetPage, keysetFilter, keysetTake } from "@/shared/persistence/keyset-pagination";
 import { USER_PROFILE_SELECT } from "@/shared/persistence/selectors";
 import { toConnectionRequest, toContact } from "../connections.mapper";
-import type { PaginatedConnections, PaginatedContacts } from "../connections.types";
+import type { ContactEdge, PaginatedConnections, PaginatedContacts } from "../connections.types";
 
 /** Descending keyset order: the sort column, then id as a deterministic tiebreaker. */
 const BY_UPDATED_AT_DESC = [{ updatedAt: "desc" as const }, { id: "desc" as const }];
@@ -97,6 +97,26 @@ export class ConnectionsQuery {
 
       return connections.map((conn) => (conn.senderId === authUserId ? conn.receiverId : conn.senderId));
     });
+  }
+
+  /**
+   * Accepted connections among `contactIds` that don't involve `userId` — the
+   * second-degree edges of the contact graph, used to rank friend-of-a-friend
+   * suggestions. Returns just the endpoints; the caller derives mutual counts.
+   */
+  public async getContactsOfContacts(userId: string, contactIds: string[]): Promise<ContactEdge[]> {
+    return withPersistence("Failed to retrieve contacts of contacts.", () =>
+      this.db.connection.findMany({
+        where: {
+          status: "ACCEPTED",
+          OR: [{ senderId: { in: contactIds } }, { receiverId: { in: contactIds } }],
+          // Exclude edges that touch the user directly — those are direct
+          // contacts, not suggestions.
+          NOT: [{ senderId: userId }, { receiverId: userId }],
+        },
+        select: { senderId: true, receiverId: true },
+      }),
+    );
   }
 
   /** Requests sent BY the user, projected onto the target receiver's profile. */

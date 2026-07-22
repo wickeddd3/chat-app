@@ -286,6 +286,32 @@ describe("ConnectionsQuery (integration, real DB)", () => {
     });
   });
 
+  describe("getContactsOfContacts", () => {
+    it("returns accepted edges among my contacts that don't involve me (friend-of-a-friend)", async () => {
+      const me = await createUser();
+      const [a, b, fof] = [await createUser(), await createUser(), await createUser()];
+      // My direct contacts.
+      await createConnection({ senderId: me.id, receiverId: a.id, status: "ACCEPTED" });
+      await createConnection({ senderId: me.id, receiverId: b.id, status: "ACCEPTED" });
+      // A friend-of-a-friend edge (a—fof) — the suggestion signal.
+      await createConnection({ senderId: a.id, receiverId: fof.id, status: "ACCEPTED" });
+
+      const edges = await query.getContactsOfContacts(me.id, [a.id, b.id]);
+
+      // Only the a—fof edge qualifies: it's among my contacts and doesn't touch me.
+      expect(edges).toEqual([{ senderId: a.id, receiverId: fof.id }]);
+    });
+
+    it("excludes edges that touch me directly and non-accepted edges", async () => {
+      const me = await createUser();
+      const [a, other] = [await createUser(), await createUser()];
+      await createConnection({ senderId: me.id, receiverId: a.id, status: "ACCEPTED" }); // touches me
+      await createConnection({ senderId: a.id, receiverId: other.id, status: "PENDING" }); // not accepted
+
+      expect(await query.getContactsOfContacts(me.id, [a.id])).toEqual([]);
+    });
+  });
+
   describe("sent/received filtering", () => {
     it("separates sent vs received pending requests and counts received", async () => {
       const me = await createUser();

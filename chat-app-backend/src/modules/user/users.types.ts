@@ -1,5 +1,13 @@
 import type { Connection } from "@/prisma/client";
 
+/** The public profile fields projected for a user (matches USER_PROFILE_SELECT). */
+export interface UserProfile {
+  id: string;
+  name: string;
+  username: string | null;
+  image: string | null;
+}
+
 export interface SuggestedUser {
   id: string;
   name: string;

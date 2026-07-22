@@ -11,7 +11,7 @@ export const TYPES = {
   UsersRouter: Symbol.for("UsersRouter"),
   UsersController: Symbol.for("UsersController"),
   UsersService: Symbol.for("UsersService"),
-  UsersRepository: Symbol.for("UsersRepository"),
+  UsersQuery: Symbol.for("UsersQuery"), // reads (user table); the module has no writes
 
   ChannelsRouter: Symbol.for("ChannelsRouter"),
   ChannelsController: Symbol.for("ChannelsController"),

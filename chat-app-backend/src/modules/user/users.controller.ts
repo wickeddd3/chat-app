@@ -3,7 +3,7 @@ import { TYPES } from "@/config/types";
 import { BaseController } from "@/utils/base.controller";
 import { UsersService } from "./users.service";
 import type { Request, Response } from "express";
-import { NotFoundException } from "@/utils/http.exception";
+import { NotFoundError } from "@/shared/errors/domain.error";
 
 @injectable()
 export class UsersController extends BaseController {
@@ -25,7 +25,7 @@ export class UsersController extends BaseController {
     const user = await this.usersService.getUserByUsername(username);
 
     if (!user) {
-      throw new NotFoundException(`User profile '@${username}' could not be found`);
+      throw new NotFoundError(`User profile '@${username}' could not be found`);
     }
 
     this.sendSuccess(res, user, "User profile retrieved successfully");
