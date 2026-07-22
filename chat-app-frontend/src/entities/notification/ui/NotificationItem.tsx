@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { Notification } from "../model/notification.types";
 import { iconType } from "../model/notification-icons";
 import { dateToNow } from "@/shared/utils/date-format";
@@ -8,7 +9,7 @@ export interface NotificationItemProps {
   onClick: () => void;
 }
 
-export function NotificationItem({
+export const NotificationItem = memo(function NotificationItem({
   notification,
   onClick,
 }: NotificationItemProps) {
@@ -72,4 +73,4 @@ export function NotificationItem({
       {isUnread && <span className="sr-only">Unread</span>}
     </button>
   );
-}
+});

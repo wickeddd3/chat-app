@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { ChecksIcon, ClockIcon } from "@phosphor-icons/react";
 import { cn } from "@/shared/lib/utils";
 
@@ -21,7 +22,9 @@ const LABELS: Record<DeliveryState, string> = {
  * can't separate the hues, so each carries a label for assistive tech — and the
  * in-flight state changes shape rather than just tone.
  */
-export function DeliveryStatus({ state }: DeliveryStatusProps) {
+export const DeliveryStatus = memo(function DeliveryStatus({
+  state,
+}: DeliveryStatusProps) {
   const Icon = state === "sending" ? ClockIcon : ChecksIcon;
 
   return (
@@ -36,4 +39,4 @@ export function DeliveryStatus({ state }: DeliveryStatusProps) {
       )}
     />
   );
-}
+});

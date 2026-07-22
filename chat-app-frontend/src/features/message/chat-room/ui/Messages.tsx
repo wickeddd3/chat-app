@@ -9,6 +9,8 @@ import {
 import { useAuth } from "@/entities/auth";
 import { CircleNotchIcon } from "@phosphor-icons/react";
 import { useMemo } from "react";
+import type { Components } from "react-virtuoso";
+import type { GroupedMessage } from "@/entities/message";
 import { useScrollToBottom } from "../model/useScrollToBottom";
 import {
   useNewMessageAnimation,
@@ -48,6 +50,20 @@ export function Messages({
     [messages.length, maxIndex],
   );
 
+  // Stable across renders so Virtuoso doesn't remount the loading header (which
+  // would restart the spinner); only its identity would otherwise change.
+  const components = useMemo<Components<GroupedMessage>>(
+    () => ({
+      Header: () =>
+        isFetchingNextPage ? (
+          <div className="py-4 flex justify-center w-full">
+            <CircleNotchIcon className="size-5 text-primary animate-spin" />
+          </div>
+        ) : null,
+    }),
+    [isFetchingNextPage],
+  );
+
   return (
     <Virtuoso
       ref={virtuosoRef}
@@ -83,19 +99,15 @@ export function Messages({
               position={position}
               showAuthorName={showAuthorNames}
               animate={isNew(key)}
-              onAnimationComplete={() => markAnimated(key)}
+              // `markAnimated` is referentially stable, so the memoized bubble
+              // keeps skipping re-renders as the list around it churns.
+              messageKey={key}
+              onAnimated={markAnimated}
             />
           </div>
         );
       }}
-      components={{
-        Header: () =>
-          isFetchingNextPage ? (
-            <div className="py-4 flex justify-center w-full">
-              <CircleNotchIcon className="size-5 text-primary animate-spin" />
-            </div>
-          ) : null,
-      }}
+      components={components}
     />
   );
 }

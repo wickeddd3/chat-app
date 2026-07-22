@@ -3,6 +3,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/shared/ui/shadcn/tooltip";
+import { memo } from "react";
 import { cn } from "@/shared/lib/utils";
 import { Link } from "react-router";
 import { motion } from "framer-motion";
@@ -18,7 +19,7 @@ export interface SidebarLinkProps {
   badgeCount: number;
 }
 
-export function SidebarLink({
+export const SidebarLink = memo(function SidebarLink({
   nav: { title, url, icon: Icon },
   isActive,
   badgeCount,
@@ -61,4 +62,4 @@ export function SidebarLink({
       </TooltipContent>
     </Tooltip>
   );
-}
+});

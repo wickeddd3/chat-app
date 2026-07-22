@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { MessageContent } from "./MessageContent";
 import { DeliveryStatus, type DeliveryState } from "./DeliveryStatus";
@@ -21,17 +22,24 @@ export interface MessageBubbleProps {
   showAuthorName?: boolean;
   /** Play the entrance animation (only for messages that just arrived). */
   animate?: boolean;
-  /** Fired once the entrance animation settles, so the owner can retire the flag. */
-  onAnimationComplete?: () => void;
+  /** Stable identity for this row, echoed back through `onAnimated`. */
+  messageKey?: string;
+  /**
+   * Fired once the entrance animation settles, so the owner can retire the flag.
+   * Takes the row's `messageKey` so the callback can stay referentially stable
+   * across every row — which is what lets the memoized bubble skip re-renders.
+   */
+  onAnimated?: (key: string) => void;
 }
 
-export function MessageBubble({
+export const MessageBubble = memo(function MessageBubble({
   message,
   isAuthorsMessage,
   position = "solo",
   showAuthorName = false,
   animate = false,
-  onAnimationComplete,
+  messageKey,
+  onAnimated,
 }: MessageBubbleProps) {
   const {
     content,
@@ -56,7 +64,11 @@ export function MessageBubble({
       variants={messageBubbleVariants}
       initial={animate ? "initial" : false}
       animate="animate"
-      onAnimationComplete={animate ? onAnimationComplete : undefined}
+      onAnimationComplete={
+        animate && onAnimated && messageKey
+          ? () => onAnimated(messageKey)
+          : undefined
+      }
       className={cn(
         "flex w-full min-w-0 gap-2 px-4",
         isAuthorsMessage ? "flex-row-reverse" : "",
@@ -112,4 +124,4 @@ export function MessageBubble({
       </div>
     </motion.div>
   );
-}
+});

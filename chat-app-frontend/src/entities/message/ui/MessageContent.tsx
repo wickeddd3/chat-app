@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { cn } from "@/shared/lib/utils";
 import { tokenizeMessageLinks } from "../model/message-links";
 
@@ -15,7 +15,7 @@ export interface MessageContentProps {
  * exactly as it was before — the only thing this adds is an anchor around runs
  * that already passed the scheme check.
  */
-export function MessageContent({
+export const MessageContent = memo(function MessageContent({
   content,
   isAuthorsMessage,
 }: MessageContentProps) {
@@ -48,4 +48,4 @@ export function MessageContent({
       )}
     </>
   );
-}
+});
