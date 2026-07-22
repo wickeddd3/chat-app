@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { PrismaClient } from "@/prisma/client";
 import { pubClient, redisClient, subClient } from "@/lib/redis";
 import type { Redis } from "ioredis";
+import { supabase } from "@/lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { eventDispatcher } from "@/lib/event-dispatcher";
 import { TransactionManager } from "@/shared/persistence/transaction";
 
@@ -15,6 +17,7 @@ import { TransactionManager } from "@/shared/persistence/transaction";
  */
 export const infrastructureModule = new ContainerModule(({ bind }) => {
   bind<PrismaClient>(TYPES.PrismaClient).toConstantValue(prisma);
+  bind<SupabaseClient>(TYPES.SupabaseClient).toConstantValue(supabase);
   bind(TYPES.EventDispatcher).toConstantValue(eventDispatcher);
   // Resolved from the container (not pre-constructed) so it picks up the bound
   // Prisma client — including the test client in integration runs.

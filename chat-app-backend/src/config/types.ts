@@ -1,5 +1,7 @@
 export const TYPES = {
   PrismaClient: Symbol.for("PrismaClient"),
+  /** Supabase client (auth identity provider), injected rather than imported. */
+  SupabaseClient: Symbol.for("SupabaseClient"),
   /** Unit of Work: lets a service span one transaction across repositories. */
   TransactionManager: Symbol.for("TransactionManager"),
 
