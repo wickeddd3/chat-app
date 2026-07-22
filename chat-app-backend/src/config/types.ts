@@ -1,5 +1,7 @@
 export const TYPES = {
   PrismaClient: Symbol.for("PrismaClient"),
+  /** Unit of Work: lets a service span one transaction across repositories. */
+  TransactionManager: Symbol.for("TransactionManager"),
 
   AuthRouter: Symbol.for("AuthRouter"),
   AuthController: Symbol.for("AuthController"),
@@ -27,7 +29,8 @@ export const TYPES = {
   ConnectionsRouter: Symbol.for("ConnectionsRouter"),
   ConnectionsController: Symbol.for("ConnectionsController"),
   ConnectionsService: Symbol.for("ConnectionsService"),
-  ConnectionsRepository: Symbol.for("ConnectionsRepository"),
+  ConnectionsRepository: Symbol.for("ConnectionsRepository"), // writes
+  ConnectionsQuery: Symbol.for("ConnectionsQuery"), // reads
 
   NotificationsRouter: Symbol.for("NotificationsRouter"),
   NotificationsController: Symbol.for("NotificationsController"),
