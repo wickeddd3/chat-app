@@ -16,6 +16,7 @@ describe("ChannelMembers", () => {
       <ChannelMembers
         members={[member("1"), member("2")]}
         isOnline={() => false}
+        getLastSeen={() => null}
       />,
     );
 
@@ -30,6 +31,7 @@ describe("ChannelMembers", () => {
       <ChannelMembers
         members={[member("1"), member("2")]}
         isOnline={isOnline}
+        getLastSeen={() => null}
       />,
     );
 
@@ -37,5 +39,17 @@ describe("ChannelMembers", () => {
     expect(isOnline).toHaveBeenCalledWith("user-2");
     // Only the online member surfaces the Online label.
     expect(screen.getByText("Online")).toBeInTheDocument();
+  });
+
+  it("shows a last-seen line for offline members with a known timestamp", () => {
+    render(
+      <ChannelMembers
+        members={[member("1")]}
+        isOnline={() => false}
+        getLastSeen={() => "2026-07-23T10:00:00.000Z"}
+      />,
+    );
+
+    expect(screen.getByText(/last seen/i)).toBeInTheDocument();
   });
 });

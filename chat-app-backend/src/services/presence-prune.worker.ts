@@ -2,6 +2,7 @@ import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { PresenceService } from "@/services/presence.service";
 import { BroadcasterService } from "@/services/broadcaster.service";
+import { AuthRepository } from "@/modules/auth/persistence/auth.repository";
 import { createLogger } from "@/lib/logger";
 
 const log = createLogger("PresencePruneWorker");
@@ -37,6 +38,7 @@ export class PresencePruneWorker {
   constructor(
     @inject(TYPES.PresenceService) private presenceService: PresenceService,
     @inject(TYPES.BroadcasterService) private broadcaster: BroadcasterService,
+    @inject(TYPES.AuthRepository) private authRepository: AuthRepository,
   ) {}
 
   /**
@@ -97,17 +99,27 @@ export class PresencePruneWorker {
    * interval wrapper `tick()` catches them instead).
    */
   public async runOnce(): Promise<void> {
-    const expiredUserIds = await this.presenceService.pruneExpiredUsers();
-    if (expiredUserIds.length === 0) return;
+    const expired = await this.presenceService.pruneExpiredUsers();
+    if (expired.length === 0) return;
 
-    for (const userId of expiredUserIds) {
+    // Durably persist last-seen so it survives a Redis flush (Postgres is the
+    // snapshot's fallback source). One batched write for the whole sweep.
+    await this.authRepository.updateLastSeen(
+      expired.map((entry) => entry.userId),
+      new Date(),
+    );
+
+    for (const { userId, lastSeen } of expired) {
       const observerIds = await this.presenceService.getFollowers(userId);
-      const payload = { userId, status: "offline" };
+      const payload = { userId, status: "offline", lastSeen: new Date(lastSeen).toISOString() };
       await Promise.all(
         observerIds.map((observerId) => this.broadcaster.emitToUser(observerId, "connection:status_change", payload)),
       );
     }
 
-    log.info({ userIds: expiredUserIds }, `🧹 Pruned ${String(expiredUserIds.length)} lapsed presence lease(s)`);
+    log.info(
+      { userIds: expired.map((entry) => entry.userId) },
+      `🧹 Pruned ${String(expired.length)} lapsed presence lease(s)`,
+    );
   }
 }

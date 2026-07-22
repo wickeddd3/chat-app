@@ -10,13 +10,21 @@ export const PresenceProvider: React.FC<{ children: React.ReactNode }> = ({
   const { presenceMap } = usePresenceMap(authUser?.id);
 
   const isOnline = useCallback(
-    (userId: string) => presenceMap[userId] === "online",
+    (userId: string) => presenceMap[userId]?.status === "online",
+    [presenceMap],
+  );
+
+  const getLastSeen = useCallback(
+    (userId: string) => {
+      const entry = presenceMap[userId];
+      return entry && entry.status === "offline" ? entry.lastSeen : null;
+    },
     [presenceMap],
   );
 
   const value = useMemo(
-    () => ({ presenceMap, isOnline }),
-    [presenceMap, isOnline],
+    () => ({ presenceMap, isOnline, getLastSeen }),
+    [presenceMap, isOnline, getLastSeen],
   );
 
   return (

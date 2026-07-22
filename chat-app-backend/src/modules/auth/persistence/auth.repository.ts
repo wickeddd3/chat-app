@@ -48,4 +48,17 @@ export class AuthRepository {
       this.client(executor).user.update({ where: { id: authId }, data }),
     );
   }
+
+  /**
+   * Durably records when users were last seen (the presence-activity slice of the
+   * `user` table). Called by the presence prune worker when heartbeat leases lapse,
+   * so last-seen survives a Redis flush. Batched — one write per sweep — and a no-op
+   * for an empty batch.
+   */
+  public async updateLastSeen(userIds: string[], lastSeen: Date, executor?: Executor): Promise<void> {
+    if (userIds.length === 0) return;
+    await withPersistence("Failed to update last seen.", () =>
+      this.client(executor).user.updateMany({ where: { id: { in: userIds } }, data: { lastSeen } }),
+    );
+  }
 }

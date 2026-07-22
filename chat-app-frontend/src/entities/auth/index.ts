@@ -10,3 +10,4 @@ export { useAuth } from "./model/useAuth";
 export { PresenceProvider } from "./model/PresenceProvider";
 export { usePresence } from "./model/usePresence";
 export { usePresenceMap } from "./model/usePresenceMap";
+export type { PresenceEntry } from "./model/presence-context";

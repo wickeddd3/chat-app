@@ -29,14 +29,14 @@ function channel(overrides: Partial<InboxChannel> = {}): InboxChannel {
 describe("ChannelDetails", () => {
   it("renders nothing when there is no channel", () => {
     const { container } = render(
-      <ChannelDetails channel={null} isOnline={() => false} />,
+      <ChannelDetails channel={null} isOnline={() => false} getLastSeen={() => null} />,
     );
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it("renders the channel name and its members by default", () => {
-    render(<ChannelDetails channel={channel()} isOnline={() => false} />);
+    render(<ChannelDetails channel={channel()} isOnline={() => false} getLastSeen={() => null} />);
 
     expect(
       screen.getByRole("heading", { name: "Weekend Trip" }),
@@ -47,7 +47,7 @@ describe("ChannelDetails", () => {
 
   it("reveals the attachments placeholder when its section is opened", async () => {
     const user = userEvent.setup();
-    render(<ChannelDetails channel={channel()} isOnline={() => false} />);
+    render(<ChannelDetails channel={channel()} isOnline={() => false} getLastSeen={() => null} />);
 
     // Attachments accordion starts collapsed.
     expect(screen.queryByText("Coming soon")).not.toBeInTheDocument();

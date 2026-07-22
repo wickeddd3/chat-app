@@ -7,7 +7,10 @@ import type { ConnectionUser } from "@/entities/connection";
 vi.mock("@/entities/auth", () => ({
   useAuth: () => ({ authUser: { id: "auth-1" } }),
   // Only "user-1" is online.
-  usePresence: () => ({ isOnline: (id: string) => id === "user-1" }),
+  usePresence: () => ({
+    isOnline: (id: string) => id === "user-1",
+    getLastSeen: () => null,
+  }),
 }));
 
 vi.mock("@/entities/connection", async (importOriginal) => {

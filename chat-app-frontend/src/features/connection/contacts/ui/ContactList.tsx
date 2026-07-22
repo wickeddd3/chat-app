@@ -9,6 +9,7 @@ import { useMemo, useState } from "react";
 import { ContactResults } from "./ContactResults";
 import { useAuth, usePresence } from "@/entities/auth";
 import { useContacts } from "@/entities/connection";
+import { lastSeenLabel } from "@/shared/utils/date-format";
 
 export interface ContactListProps {
   messageButton: React.ComponentType<{
@@ -34,14 +35,21 @@ export function ContactList({
     appliedQuery,
   } = useContacts(authUser?.id, query);
 
-  const { isOnline } = usePresence();
+  const { isOnline, getLastSeen } = usePresence();
 
   const allContacts = useMemo(() => {
-    return contacts.map((item) => ({
-      ...item,
-      online: isOnline(item.id),
-    }));
-  }, [contacts, isOnline]);
+    return contacts.map((item) => {
+      const online = isOnline(item.id);
+      const lastSeen = online ? null : getLastSeen(item.id);
+      return {
+        ...item,
+        online,
+        // Only offline contacts with a known timestamp get a "last seen" line;
+        // otherwise the presence dot alone carries the state.
+        lastSeenText: lastSeen ? lastSeenLabel(lastSeen) : undefined,
+      };
+    });
+  }, [contacts, isOnline, getLastSeen]);
 
   // Online has no server-side equivalent — presence lives in Redis and is pushed
   // to the client live — so this stays derived from the loaded pages. It trades

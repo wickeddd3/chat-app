@@ -61,4 +61,25 @@ export class UsersQuery {
       this.db.user.findUnique({ where: { username }, select: USER_PROFILE_SELECT }),
     );
   }
+
+  /**
+   * The durable last-seen for the given users, as ISO strings keyed by id.
+   * The presence snapshot uses this to fill entries whose Redis last-seen has
+   * expired (or was flushed). Ids with no recorded last-seen are omitted.
+   */
+  public async getLastSeenByIds(userIds: string[]): Promise<Record<string, string>> {
+    if (userIds.length === 0) return {};
+
+    const rows = await withPersistence("Failed to retrieve last seen.", () =>
+      this.db.user.findMany({
+        where: { id: { in: userIds }, lastSeen: { not: null } },
+        select: { id: true, lastSeen: true },
+      }),
+    );
+
+    return rows.reduce<Record<string, string>>((acc, row) => {
+      if (row.lastSeen) acc[row.id] = row.lastSeen.toISOString();
+      return acc;
+    }, {});
+  }
 }

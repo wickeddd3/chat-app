@@ -4,14 +4,18 @@ export const presenceSchemas: Record<string, OpenAPIV3.SchemaObject> = {
   PresenceMap: {
     type: "object",
     description:
-      "Online state keyed by user id, covering the caller's contacts plus the members of the channel they're viewing. Users the caller can't see are absent rather than reported offline.",
+      "Presence keyed by user id, covering the caller's contacts plus the members of the channel they're viewing. Each entry carries an online/offline status and, for offline users, the ISO timestamp they were last seen (null while online, or when no last-seen has been recorded). Users the caller can't see are absent rather than reported offline.",
     additionalProperties: {
-      type: "string",
-      enum: ["online", "offline"],
+      type: "object",
+      properties: {
+        status: { type: "string", enum: ["online", "offline"] },
+        lastSeen: { type: "string", format: "date-time", nullable: true },
+      },
+      required: ["status", "lastSeen"],
     },
     example: {
-      "d3b07384-d113-4956-a5e2-aa5913e8a213": "online",
-      "f8c2a917-4b6d-42e1-9c33-7e1b5d9a2f04": "offline",
+      "d3b07384-d113-4956-a5e2-aa5913e8a213": { status: "online", lastSeen: null },
+      "f8c2a917-4b6d-42e1-9c33-7e1b5d9a2f04": { status: "offline", lastSeen: "2026-06-14T16:10:00.000Z" },
     },
   },
 };

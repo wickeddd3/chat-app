@@ -3,22 +3,28 @@ jest.mock("@/lib/redis", () => ({ redisClient: {}, pubClient: {}, subClient: {},
 jest.mock("@/prisma/client", () => ({ PrismaClient: class {} }));
 
 import { PresencePruneWorker } from "@/services/presence-prune.worker";
-import type { PresenceService } from "@/services/presence.service";
+import type { PresenceService, ExpiredPresence } from "@/services/presence.service";
 import type { BroadcasterService } from "@/services/broadcaster.service";
+import type { AuthRepository } from "@/modules/auth/persistence/auth.repository";
 
-const offline = (userId: string) => ({ userId, status: "offline" });
+const TS = 1_700_000_000_000; // fixed eviction time for deterministic ISO assertions
+const expired = (userId: string): ExpiredPresence => ({ userId, lastSeen: TS });
+const offline = (userId: string) => ({ userId, status: "offline", lastSeen: new Date(TS).toISOString() });
 
 describe("PresencePruneWorker", () => {
   let presence: { pruneExpiredUsers: jest.Mock; getFollowers: jest.Mock };
   let broadcaster: { emitToUser: jest.Mock };
+  let authRepository: { updateLastSeen: jest.Mock };
   let worker: PresencePruneWorker;
 
   beforeEach(() => {
     presence = { pruneExpiredUsers: jest.fn(), getFollowers: jest.fn() };
     broadcaster = { emitToUser: jest.fn().mockResolvedValue(undefined) };
+    authRepository = { updateLastSeen: jest.fn().mockResolvedValue(undefined) };
     worker = new PresencePruneWorker(
       presence as unknown as PresenceService,
       broadcaster as unknown as BroadcasterService,
+      authRepository as unknown as AuthRepository,
     );
   });
 
@@ -27,12 +33,23 @@ describe("PresencePruneWorker", () => {
 
     await worker.runOnce();
 
+    expect(authRepository.updateLastSeen).not.toHaveBeenCalled();
     expect(presence.getFollowers).not.toHaveBeenCalled();
     expect(broadcaster.emitToUser).not.toHaveBeenCalled();
   });
 
-  it("broadcasts an offline delta to each observer of every evicted user", async () => {
-    presence.pruneExpiredUsers.mockResolvedValue(["u1", "u2"]);
+  it("persists last-seen once for the whole batch of evicted users", async () => {
+    presence.pruneExpiredUsers.mockResolvedValue([expired("u1"), expired("u2")]);
+    presence.getFollowers.mockResolvedValue([]);
+
+    await worker.runOnce();
+
+    expect(authRepository.updateLastSeen).toHaveBeenCalledTimes(1);
+    expect(authRepository.updateLastSeen).toHaveBeenCalledWith(["u1", "u2"], expect.any(Date));
+  });
+
+  it("broadcasts an offline delta with last-seen to each observer of every evicted user", async () => {
+    presence.pruneExpiredUsers.mockResolvedValue([expired("u1"), expired("u2")]);
     presence.getFollowers.mockImplementation((id: string) => Promise.resolve(id === "u1" ? ["a", "b"] : ["c"]));
 
     await worker.runOnce();
@@ -62,7 +79,7 @@ describe("PresencePruneWorker", () => {
   it("tick does not re-enter an in-flight sweep", async () => {
     let release!: () => void;
     presence.pruneExpiredUsers.mockReturnValue(
-      new Promise<string[]>((resolve) => {
+      new Promise<ExpiredPresence[]>((resolve) => {
         release = () => resolve([]);
       }),
     );

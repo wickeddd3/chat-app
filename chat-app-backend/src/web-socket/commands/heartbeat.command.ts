@@ -38,7 +38,9 @@ export class HeartbeatCommand implements WebSocketCommand {
         }
       }
 
-      const deltaPayload = { userId: authId, status: "online" };
+      // lastSeen is null while online (the user is here now); it's only populated
+      // on the offline delta the prune worker emits.
+      const deltaPayload = { userId: authId, status: "online", lastSeen: null };
 
       // Route delta updates directly to the private rooms of active observers
       for (const observerId of observerIds) {

@@ -7,6 +7,7 @@ import {
   ChannelUnavailablePlaceholder,
 } from "@/features/message/chat-room";
 import { Skeleton } from "@/shared/ui/shadcn/skeleton";
+import { lastSeenLabel } from "@/shared/utils/date-format";
 
 // The channel-info drawer pulls in the drawer runtime and the group-edit form,
 // none of which the chat room itself needs — code-split it so it loads only
@@ -31,7 +32,7 @@ export default function ChatRoomPage() {
     channelId || "",
     authUser?.id,
   );
-  const { isOnline } = usePresence();
+  const { isOnline, getLastSeen } = usePresence();
 
   usePresenceMap(authUser?.id, channelId);
 
@@ -47,6 +48,22 @@ export default function ChatRoomPage() {
       return isOnline(member.user.id);
     });
   }, [channel, authUser?.id, isOnline]);
+
+  // The presence line under the name is only meaningful for a 1:1 chat — a
+  // group has no single "last seen". Online wins; otherwise show when the other
+  // person was last around.
+  const subtitle = useMemo(() => {
+    if (channel?.type !== "DIRECT") return undefined;
+
+    const other = channel.channelMembers.find(
+      (member) => member.user.id !== authUser?.id,
+    );
+    if (!other) return undefined;
+
+    return isOnline(other.user.id)
+      ? "Online"
+      : lastSeenLabel(getLastSeen(other.user.id));
+  }, [channel, authUser?.id, isOnline, getLastSeen]);
 
   if (isUnavailable) {
     return (
@@ -68,6 +85,7 @@ export default function ChatRoomPage() {
           <ChannelHeader
             channel={channel}
             isOnline={online}
+            subtitle={subtitle}
             optionSlot={
               <Suspense fallback={<DrawerTriggerFallback />}>
                 <ChannelDetailsDrawer channel={channel} />

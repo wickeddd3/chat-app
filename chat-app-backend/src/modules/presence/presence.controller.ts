@@ -5,6 +5,7 @@ import { BaseController } from "@/utils/base.controller";
 import { PresenceService } from "@/services/presence.service";
 import { ConnectionsQuery } from "@/modules/connection/persistence/connections.query";
 import { ChannelMembersRepository } from "@/modules/channel/persistence/channel-members.repository";
+import { UsersQuery } from "@/modules/user/persistence/users.query";
 import { createLogger } from "@/lib/logger";
 
 const log = createLogger("Presence");
@@ -15,6 +16,7 @@ export class PresenceController extends BaseController {
     @inject(TYPES.PresenceService) private presenceService: PresenceService,
     @inject(TYPES.ConnectionsQuery) private connectionsQuery: ConnectionsQuery,
     @inject(TYPES.ChannelMembersRepository) private channelMembersRepository: ChannelMembersRepository,
+    @inject(TYPES.UsersQuery) private usersQuery: UsersQuery,
   ) {
     super();
   }
@@ -55,6 +57,21 @@ export class PresenceController extends BaseController {
     // 3. Compile and pull the consolidated map out of pure Redis
     const channelsToAggregate = activeChannelId ? [activeChannelId] : [];
     const data = await this.presenceService.getAggregatedPresenceMap(authUserId, channelsToAggregate);
+
+    // 4. Durability fallback: any offline user whose Redis last-seen has expired
+    // (or was flushed) gets it from the persisted Postgres copy — one query, cold
+    // entries only.
+    const coldOfflineIds = Object.entries(data)
+      .filter(([, entry]) => entry.status === "offline" && entry.lastSeen === null)
+      .map(([userId]) => userId);
+
+    if (coldOfflineIds.length > 0) {
+      const persisted = await this.usersQuery.getLastSeenByIds(coldOfflineIds);
+      for (const [userId, lastSeen] of Object.entries(persisted)) {
+        const entry = data[userId];
+        if (entry) entry.lastSeen = lastSeen;
+      }
+    }
 
     this.sendSuccess(res, data, "Presence view state synced successfully", 200);
   };

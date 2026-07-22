@@ -20,7 +20,7 @@ export interface ChannelDetailsDrawerProps {
 }
 
 export function ChannelDetailsDrawer({ channel }: ChannelDetailsDrawerProps) {
-  const { isOnline } = usePresence();
+  const { isOnline, getLastSeen } = usePresence();
   const { authUser } = useAuth();
 
   if (!channel) return;
@@ -53,7 +53,11 @@ export function ChannelDetailsDrawer({ channel }: ChannelDetailsDrawerProps) {
             )}
           </DrawerDescription>
         </DrawerHeader>
-        <ChannelDetails channel={channel} isOnline={isOnline} />
+        <ChannelDetails
+          channel={channel}
+          isOnline={isOnline}
+          getLastSeen={getLastSeen}
+        />
       </DrawerContent>
     </Drawer>
   );
