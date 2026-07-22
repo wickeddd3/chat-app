@@ -11,14 +11,17 @@ jest.mock("@/prisma/client", () => ({ PrismaClient: class {} }));
 describe("MessagesService (DI container + mocked persistence)", () => {
   let repo: { create: jest.Mock };
   let query: { getMessages: jest.Mock; getUnreadMessages: jest.Mock };
+  let receipts: { createMessageReceipts: jest.Mock };
   let service: MessagesService;
 
   beforeEach(() => {
     repo = { create: jest.fn() };
     query = { getMessages: jest.fn(), getUnreadMessages: jest.fn() };
+    receipts = { createMessageReceipts: jest.fn() };
     const container = buildTestContainer([
       [TYPES.MessagesRepository, repo],
       [TYPES.MessagesQuery, query],
+      [TYPES.MessageReceiptsRepository, receipts],
     ]);
     container.bind<MessagesService>(TYPES.MessagesService).to(MessagesService);
     service = container.get<MessagesService>(TYPES.MessagesService);
@@ -53,5 +56,12 @@ describe("MessagesService (DI container + mocked persistence)", () => {
 
     await expect(service.getUnreadMessages("c1", "u1")).resolves.toEqual([{ id: "m1", authorId: "u2" }]);
     expect(query.getUnreadMessages).toHaveBeenCalledWith("c1", "u1");
+  });
+
+  it("recordReads delegates to the receipt repository (receipts are part of this module)", async () => {
+    receipts.createMessageReceipts.mockResolvedValue({ count: 2 });
+
+    await expect(service.recordReads("u1", ["m1", "m2"])).resolves.toEqual({ count: 2 });
+    expect(receipts.createMessageReceipts).toHaveBeenCalledWith("u1", ["m1", "m2"]);
   });
 });

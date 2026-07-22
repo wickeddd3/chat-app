@@ -25,8 +25,7 @@ export const TYPES = {
   MessagesService: Symbol.for("MessagesService"),
   MessagesRepository: Symbol.for("MessagesRepository"), // writes
   MessagesQuery: Symbol.for("MessagesQuery"), // reads
-
-  MessageReceiptsService: Symbol.for("MessageReceiptsService"),
+  // Read receipts are part of the message aggregate (a child table of message).
   MessageReceiptsRepository: Symbol.for("MessageReceiptsRepository"),
 
   ConnectionsRouter: Symbol.for("ConnectionsRouter"),

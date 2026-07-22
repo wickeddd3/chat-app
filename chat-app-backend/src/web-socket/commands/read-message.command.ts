@@ -4,7 +4,6 @@ import { TYPES } from "@/config/types";
 import type { Socket } from "socket.io";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import { MessagesService } from "@/modules/message/messages.service";
-import { MessageReceiptsService } from "@/modules/message-receipt/message-receipts.service";
 import { ChannelsService } from "@/modules/channel/channels.service";
 import { BroadcasterService } from "@/services/broadcaster.service";
 
@@ -20,7 +19,6 @@ export class ReadMessageCommand implements WebSocketCommand<ReadMessagePayload> 
 
   constructor(
     @inject(TYPES.MessagesService) private messagesService: MessagesService,
-    @inject(TYPES.MessageReceiptsService) private messageReceiptsService: MessageReceiptsService,
     @inject(TYPES.ChannelsService) private channelsService: ChannelsService,
     @inject(TYPES.BroadcasterService) private broadcaster: BroadcasterService,
   ) {}
@@ -47,7 +45,7 @@ export class ReadMessageCommand implements WebSocketCommand<ReadMessagePayload> 
 
     if (unreadMessages.length > 0) {
       // 2. Bulk create receipts
-      const { count } = await this.messageReceiptsService.createMessageReceipts(authId, unreadMessagesIds);
+      const { count } = await this.messagesService.recordReads(authId, unreadMessagesIds);
 
       readMessageCount = count;
 

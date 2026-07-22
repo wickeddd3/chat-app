@@ -9,7 +9,6 @@ import { authModule } from "@/modules/auth/auth.container";
 import { usersModule } from "@/modules/user/users.container";
 import { channelsModule } from "@/modules/channel/channels.container";
 import { messagesModule } from "@/modules/message/messages.container";
-import { messageReceiptsModule } from "@/modules/message-receipt/message-receipts.container";
 import { connectionsModule } from "@/modules/connection/connections.container";
 import { notificationsModule } from "@/modules/notification/notifications.container";
 import { presenceModule } from "@/modules/presence/presence.container";
@@ -32,7 +31,6 @@ container.load(
   usersModule,
   channelsModule,
   messagesModule,
-  messageReceiptsModule,
   connectionsModule,
   notificationsModule,
   presenceModule,

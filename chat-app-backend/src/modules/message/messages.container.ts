@@ -5,6 +5,7 @@ import { MessagesController } from "./messages.controller";
 import { MessagesService } from "./messages.service";
 import { MessagesRepository } from "./persistence/messages.repository";
 import { MessagesQuery } from "./persistence/messages.query";
+import { MessageReceiptsRepository } from "./persistence/message-receipts.repository";
 
 export const messagesModule = new ContainerModule(({ bind }) => {
   bind<MessagesRouter>(TYPES.MessagesRouter).to(MessagesRouter);
@@ -12,4 +13,6 @@ export const messagesModule = new ContainerModule(({ bind }) => {
   bind<MessagesService>(TYPES.MessagesService).to(MessagesService);
   bind<MessagesRepository>(TYPES.MessagesRepository).to(MessagesRepository);
   bind<MessagesQuery>(TYPES.MessagesQuery).to(MessagesQuery);
+  // Read receipts are part of the message aggregate (see MessagesService).
+  bind<MessageReceiptsRepository>(TYPES.MessageReceiptsRepository).to(MessageReceiptsRepository);
 });
