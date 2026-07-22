@@ -39,7 +39,8 @@ export const TYPES = {
   NotificationsRouter: Symbol.for("NotificationsRouter"),
   NotificationsController: Symbol.for("NotificationsController"),
   NotificationsService: Symbol.for("NotificationsService"),
-  NotificationsRepository: Symbol.for("NotificationsRepository"),
+  NotificationsRepository: Symbol.for("NotificationsRepository"), // writes
+  NotificationsQuery: Symbol.for("NotificationsQuery"), // reads (feed + unread count)
 
   PresenceRouter: Symbol.for("PresenceRouter"),
   PresenceController: Symbol.for("PresenceController"),

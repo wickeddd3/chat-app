@@ -3,14 +3,14 @@ import { TYPES } from "@/config/types";
 import type { Request, Response } from "express";
 import { BaseController } from "@/utils/base.controller";
 import { ChannelsQuery } from "@/modules/channel/persistence/channels.query";
-import { NotificationsRepository } from "../notification/notifications.repository";
+import { NotificationsQuery } from "../notification/persistence/notifications.query";
 import { ConnectionsQuery } from "../connection/persistence/connections.query";
 
 @injectable()
 export class StatsController extends BaseController {
   constructor(
     @inject(TYPES.ChannelsQuery) private channelsQuery: ChannelsQuery,
-    @inject(TYPES.NotificationsRepository) private notificationsRepository: NotificationsRepository,
+    @inject(TYPES.NotificationsQuery) private notificationsQuery: NotificationsQuery,
     @inject(TYPES.ConnectionsQuery) private connectionsQuery: ConnectionsQuery,
   ) {
     super();
@@ -21,7 +21,7 @@ export class StatsController extends BaseController {
 
     const [unreadMessagesCount, unreadNotificationsCount, pendingRequestsCount] = await Promise.all([
       this.channelsQuery.getUnreadMessagesCount({ authUserId }),
-      this.notificationsRepository.getUnreadNotificationsCount({ authUserId }),
+      this.notificationsQuery.getUnreadNotificationsCount({ authUserId }),
       this.connectionsQuery.getReceivedConnectionsCount({ authUserId }),
     ]);
 

@@ -1,4 +1,4 @@
-import { NotificationsRepository } from "@/modules/notification/notifications.repository";
+import { NotificationsQuery } from "@/modules/notification/persistence/notifications.query";
 
 // The generated Prisma client connects/loads heavy code on import; it is never
 // used here — a faithful in-memory findMany is injected instead.
@@ -35,6 +35,11 @@ function matchesWhere(row: Row, where: Record<string, unknown>): boolean {
     if (key === "OR") {
       const clauses = condition as Record<string, unknown>[];
       if (!clauses.some((clause) => matchesWhere(row, clause))) return false;
+      continue;
+    }
+    if (key === "AND") {
+      const clauses = condition as Record<string, unknown>[];
+      if (!clauses.every((clause) => matchesWhere(row, clause))) return false;
       continue;
     }
     if (!matchesCondition((row as unknown as Record<string, unknown>)[key], condition)) return false;
@@ -81,10 +86,10 @@ function buildRows(count: number, sharedTimestampGroups: number, isRead = false)
   return rows;
 }
 
-describe("NotificationsRepository keyset pagination (no skips / no duplicates)", () => {
+describe("NotificationsQuery keyset pagination (no skips / no duplicates)", () => {
   async function paginateAll(rows: Row[], limit: number, isRead?: boolean) {
     const db = makeDb(rows);
-    const repo = new NotificationsRepository(db as never);
+    const repo = new NotificationsQuery(db as never);
 
     const seenIds: string[] = [];
     const seenOrder: Date[] = [];
@@ -151,7 +156,7 @@ describe("NotificationsRepository keyset pagination (no skips / no duplicates)",
   it("reports hasMore=false and a null cursor on a single full page", async () => {
     const rows = buildRows(15, 3);
     const db = makeDb(rows);
-    const repo = new NotificationsRepository(db as never);
+    const repo = new NotificationsQuery(db as never);
 
     const first = await repo.getByUserId({ userId: "me", limit: 20 });
 

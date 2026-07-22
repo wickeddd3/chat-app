@@ -4,7 +4,7 @@ import { TYPES } from "@/config/types";
 import type { ConnectionStatus } from "@/prisma/client";
 import { PresenceService } from "@/services/presence.service";
 import { createLogger } from "@/lib/logger";
-import { NotificationsRepository } from "@/modules/notification/notifications.repository";
+import { NotificationsRepository } from "@/modules/notification/persistence/notifications.repository";
 import { TransactionManager } from "@/shared/persistence/transaction";
 import { ConnectionsQuery } from "./persistence/connections.query";
 import { ConnectionsRepository } from "./persistence/connections.repository";

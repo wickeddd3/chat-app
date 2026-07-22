@@ -1,103 +1,48 @@
-import { NotificationsRepository } from "@/modules/notification/notifications.repository";
+import { randomUUID } from "crypto";
+import { NotificationsRepository } from "@/modules/notification/persistence/notifications.repository";
 import { prisma } from "@/test/helpers/db.helper";
 import { createNotification, createUser } from "@/test/factories";
 
 const repo = new NotificationsRepository(prisma);
 
 describe("NotificationsRepository (integration, real DB)", () => {
-  describe("getByUserId (keyset pagination + filter)", () => {
-    it("returns a user's notifications newest-first and pages with no skips", async () => {
+  describe("create", () => {
+    it("persists a notification composed by another module", async () => {
       const user = await createUser();
-      const base = Date.UTC(2026, 0, 1);
-      for (let i = 0; i < 25; i++) {
-        await createNotification({ userId: user.id, createdAt: new Date(base + i * 60_000) });
-      }
 
-      const seen = new Set<string>();
-      let cursor: string | undefined;
-      let pages = 0;
-      let prevTime = Infinity;
-      for (;;) {
-        const page = await repo.getByUserId({ userId: user.id, limit: 10, cursor });
-        for (const n of page.notifications) {
-          expect(n.id).toBeDefined();
-          expect(n.createdAt).toBeDefined();
-          if (!n.id || !n.createdAt) continue;
-          seen.add(n.id);
-          // Descending by createdAt.
-          expect(n.createdAt.getTime()).toBeLessThanOrEqual(prevTime);
-          prevTime = n.createdAt.getTime();
-        }
-        pages++;
-        if (!page.hasMore || !page.nextCursor) break;
-        cursor = page.nextCursor;
-      }
+      const notification = await repo.create({
+        userId: user.id,
+        type: "CONNECTION_REQUEST",
+        title: "New Connection Request",
+        content: "Someone wants to connect.",
+        referenceId: "conn-1",
+      });
 
-      expect(seen.size).toBe(25);
-      expect(pages).toBe(3);
-    });
-
-    it("applies the isRead filter", async () => {
-      const user = await createUser();
-      await createNotification({ userId: user.id, isRead: false });
-      await createNotification({ userId: user.id, isRead: false });
-      await createNotification({ userId: user.id, isRead: true });
-
-      expect((await repo.getByUserId({ userId: user.id, isRead: false })).notifications).toHaveLength(2);
-      expect((await repo.getByUserId({ userId: user.id, isRead: true })).notifications).toHaveLength(1);
-      expect((await repo.getByUserId({ userId: user.id })).notifications).toHaveLength(3);
-    });
-
-    it("only returns the requested user's notifications", async () => {
-      const [me, other] = [await createUser(), await createUser()];
-      await createNotification({ userId: me.id });
-      await createNotification({ userId: other.id });
-
-      const mine = await repo.getByUserId({ userId: me.id });
-      expect(mine.notifications).toHaveLength(1);
-    });
-
-    it("reports a total that matches the isRead filter", async () => {
-      const user = await createUser();
-      await createNotification({ userId: user.id, isRead: false });
-      await createNotification({ userId: user.id, isRead: false });
-      await createNotification({ userId: user.id, isRead: true });
-
-      expect((await repo.getByUserId({ userId: user.id })).total).toBe(3);
-      expect((await repo.getByUserId({ userId: user.id, isRead: false })).total).toBe(2);
-      expect((await repo.getByUserId({ userId: user.id, isRead: true })).total).toBe(1);
-    });
-
-    it("reports the full filtered total even when a page is capped by the limit", async () => {
-      const user = await createUser();
-      for (let i = 0; i < 3; i++) {
-        await createNotification({ userId: user.id, isRead: false });
-      }
-
-      const firstPage = await repo.getByUserId({ userId: user.id, isRead: false, limit: 2 });
-      expect(firstPage.notifications).toHaveLength(2);
-      expect(firstPage.hasMore).toBe(true);
-      expect(firstPage.total).toBe(3);
-    });
-
-    it("excludes another user's notifications from the total", async () => {
-      const [me, other] = [await createUser(), await createUser()];
-      await createNotification({ userId: me.id });
-      await createNotification({ userId: other.id });
-
-      expect((await repo.getByUserId({ userId: me.id })).total).toBe(1);
+      expect(notification).toMatchObject({ userId: user.id, type: "CONNECTION_REQUEST", isRead: false });
+      expect(await prisma.notification.findUnique({ where: { id: notification.id } })).not.toBeNull();
     });
   });
 
-  describe("getUnreadNotificationsCount", () => {
-    it("counts only the user's unread notifications", async () => {
-      const [me, other] = [await createUser(), await createUser()];
-      await createNotification({ userId: me.id, isRead: false });
-      await createNotification({ userId: me.id, isRead: false });
-      await createNotification({ userId: me.id, isRead: true });
-      await createNotification({ userId: other.id, isRead: false });
+  describe("markReadByReference", () => {
+    it("marks the user's notifications for a subject as read", async () => {
+      const user = await createUser();
+      await createNotification({ userId: user.id, referenceId: "conn-1", isRead: false });
 
-      expect(await repo.getUnreadNotificationsCount({ authUserId: me.id })).toBe(2);
+      await repo.markReadByReference({ referenceId: "conn-1", userId: user.id });
+
+      const rows = await prisma.notification.findMany({ where: { referenceId: "conn-1" } });
+      expect(rows.every((n) => n.isRead)).toBe(true);
+    });
+  });
+
+  describe("deleteByReference", () => {
+    it("removes the user's notifications of a given type for a subject", async () => {
+      const user = await createUser();
+      await createNotification({ userId: user.id, type: "CONNECTION_REQUEST", referenceId: "conn-1" });
+
+      await repo.deleteByReference({ referenceId: "conn-1", userId: user.id, type: "CONNECTION_REQUEST" });
+
+      expect(await prisma.notification.count({ where: { referenceId: "conn-1" } })).toBe(0);
     });
   });
 
@@ -125,6 +70,12 @@ describe("NotificationsRepository (integration, real DB)", () => {
       expect((await repo.markAsRead({ userId: me.id, notificationIds: [alreadyRead.id] })).count).toBe(0);
       // A mixed batch counts only the ones actually flipped.
       expect((await repo.markAsRead({ userId: me.id, notificationIds: [alreadyRead.id, unread.id] })).count).toBe(1);
+    });
+
+    it("ignores unknown ids", async () => {
+      const me = await createUser();
+
+      expect((await repo.markAsRead({ userId: me.id, notificationIds: [randomUUID()] })).count).toBe(0);
     });
   });
 });

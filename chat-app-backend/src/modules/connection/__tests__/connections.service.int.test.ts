@@ -2,7 +2,7 @@ import type { EventEmitter } from "events";
 import { ConnectionsService } from "@/modules/connection/connections.service";
 import { ConnectionsQuery } from "@/modules/connection/persistence/connections.query";
 import { ConnectionsRepository } from "@/modules/connection/persistence/connections.repository";
-import { NotificationsRepository } from "@/modules/notification/notifications.repository";
+import { NotificationsRepository } from "@/modules/notification/persistence/notifications.repository";
 import { TransactionManager } from "@/shared/persistence/transaction";
 import type { PresenceService } from "@/services/presence.service";
 import { prisma } from "@/test/helpers/db.helper";
