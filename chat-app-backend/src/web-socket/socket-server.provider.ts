@@ -29,7 +29,7 @@ export class SocketServerProvider {
 
     this.instance.use(socketAuthMiddleware);
 
-    log.info("⚡ Socket.io engine successfully initialized");
+    log.info("⚡ Socket.io engine ready");
     return this.instance;
   }
 

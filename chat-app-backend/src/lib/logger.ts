@@ -32,7 +32,10 @@ export const logger: Logger = pino({
           options: {
             colorize: true,
             translateTime: "SYS:HH:MM:ss.l",
-            ignore: "pid,hostname",
+            // Hide the noisy per-request blobs so HTTP logs render as the single
+            // line built by pino-http's customSuccessMessage/customErrorMessage.
+            // (They remain in the structured JSON emitted in production.)
+            ignore: "pid,hostname,req,res,responseTime",
           },
         },
       }),

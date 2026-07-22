@@ -25,9 +25,9 @@ export const connectRedis = async (): Promise<void> => {
       // Only call .connect() if the specific instance state is 'wait'
       if (client.instance.status === "wait") {
         await client.instance.connect();
-        log.info(`📡 ${client.name} successfully connected`);
+        log.info(`📡 ${client.name} connected`);
       } else {
-        log.info(`ℹ️ ${client.name} bypasses manual trigger (Status: ${client.instance.status})`);
+        log.info(`📡 ${client.name} already connected (${client.instance.status})`);
       }
     }
   } catch (error) {

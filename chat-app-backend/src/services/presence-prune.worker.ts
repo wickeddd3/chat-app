@@ -108,6 +108,6 @@ export class PresencePruneWorker {
       );
     }
 
-    log.info({ count: expiredUserIds.length, userIds: expiredUserIds }, "🧹 Pruned lapsed presence leases");
+    log.info({ userIds: expiredUserIds }, `🧹 Pruned ${String(expiredUserIds.length)} lapsed presence lease(s)`);
   }
 }
