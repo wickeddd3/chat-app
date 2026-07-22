@@ -16,7 +16,9 @@ export const TYPES = {
   ChannelsRouter: Symbol.for("ChannelsRouter"),
   ChannelsController: Symbol.for("ChannelsController"),
   ChannelsService: Symbol.for("ChannelsService"),
-  ChannelsRepository: Symbol.for("ChannelsRepository"),
+  ChannelsRepository: Symbol.for("ChannelsRepository"), // channel table writes
+  ChannelsQuery: Symbol.for("ChannelsQuery"), // inbox/list reads
+  ChannelMembersRepository: Symbol.for("ChannelMembersRepository"), // channel_member table
 
   MessagesRouter: Symbol.for("MessagesRouter"),
   MessagesController: Symbol.for("MessagesController"),

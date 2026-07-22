@@ -2,14 +2,14 @@ import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import type { Request, Response } from "express";
 import { BaseController } from "@/utils/base.controller";
-import { ChannelsRepository } from "@/modules/channel/channels.repository";
+import { ChannelsQuery } from "@/modules/channel/persistence/channels.query";
 import { NotificationsRepository } from "../notification/notifications.repository";
 import { ConnectionsQuery } from "../connection/persistence/connections.query";
 
 @injectable()
 export class StatsController extends BaseController {
   constructor(
-    @inject(TYPES.ChannelsRepository) private channelsRepository: ChannelsRepository,
+    @inject(TYPES.ChannelsQuery) private channelsQuery: ChannelsQuery,
     @inject(TYPES.NotificationsRepository) private notificationsRepository: NotificationsRepository,
     @inject(TYPES.ConnectionsQuery) private connectionsQuery: ConnectionsQuery,
   ) {
@@ -20,7 +20,7 @@ export class StatsController extends BaseController {
     const authUserId = req.authId ?? "";
 
     const [unreadMessagesCount, unreadNotificationsCount, pendingRequestsCount] = await Promise.all([
-      this.channelsRepository.getUnreadMessagesCount({ authUserId }),
+      this.channelsQuery.getUnreadMessagesCount({ authUserId }),
       this.notificationsRepository.getUnreadNotificationsCount({ authUserId }),
       this.connectionsQuery.getReceivedConnectionsCount({ authUserId }),
     ]);

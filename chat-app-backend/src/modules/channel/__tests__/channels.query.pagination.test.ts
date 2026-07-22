@@ -1,4 +1,4 @@
-import { ChannelsRepository } from "@/modules/channel/channels.repository";
+import { ChannelsQuery } from "@/modules/channel/persistence/channels.query";
 
 // The generated Prisma client connects/loads heavy code on import; it is never
 // used here — a faithful in-memory findMany is injected instead.
@@ -107,10 +107,10 @@ function buildRows(count: number, sharedTimestampGroups: number): Row[] {
   return rows;
 }
 
-describe("ChannelsRepository keyset pagination (no skips / no duplicates)", () => {
+describe("ChannelsQuery keyset pagination (no skips / no duplicates)", () => {
   async function paginateAll(rows: Row[], limit: number, query?: string) {
     const db = makeDb(rows);
-    const repo = new ChannelsRepository(db as never);
+    const repo = new ChannelsQuery(db as never);
 
     const seenIds: string[] = [];
     const seenOrder: Date[] = [];
@@ -175,7 +175,7 @@ describe("ChannelsRepository keyset pagination (no skips / no duplicates)", () =
   it("reports hasMore=false and a null cursor on a single full page", async () => {
     const rows = buildRows(15, 3);
     const db = makeDb(rows);
-    const repo = new ChannelsRepository(db as never);
+    const repo = new ChannelsQuery(db as never);
 
     const first = await repo.getChannels({ authUserId: "me", limit: 20 });
 

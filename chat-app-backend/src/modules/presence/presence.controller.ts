@@ -4,7 +4,7 @@ import type { Request, Response } from "express";
 import { BaseController } from "@/utils/base.controller";
 import { PresenceService } from "@/services/presence.service";
 import { ConnectionsQuery } from "@/modules/connection/persistence/connections.query";
-import { ChannelsRepository } from "@/modules/channel/channels.repository";
+import { ChannelMembersRepository } from "@/modules/channel/persistence/channel-members.repository";
 import { createLogger } from "@/lib/logger";
 
 const log = createLogger("Presence");
@@ -14,7 +14,7 @@ export class PresenceController extends BaseController {
   constructor(
     @inject(TYPES.PresenceService) private presenceService: PresenceService,
     @inject(TYPES.ConnectionsQuery) private connectionsQuery: ConnectionsQuery,
-    @inject(TYPES.ChannelsRepository) private channelsRepository: ChannelsRepository,
+    @inject(TYPES.ChannelMembersRepository) private channelMembersRepository: ChannelMembersRepository,
   ) {
     super();
   }
@@ -46,7 +46,7 @@ export class PresenceController extends BaseController {
       if (!channelCacheExists) {
         log.warn({ channelId: activeChannelId }, "Rebuilding channel cache");
         // Fetch raw string member IDs from your channel/prisma repository layer
-        const channelMemberIds = await this.channelsRepository.getRawMemberIds(authUserId, activeChannelId);
+        const channelMemberIds = await this.channelMembersRepository.getMemberIds(authUserId, activeChannelId);
 
         await this.presenceService.setChannelMembersLookup(activeChannelId, channelMemberIds);
       }
