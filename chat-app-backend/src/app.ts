@@ -82,7 +82,7 @@ export class App {
     // 5. Start listening.
     await new Promise<void>((resolve) => {
       this.server.listen(this.port, () => {
-        log.info({ port: this.port }, "🚀 Server running");
+        log.info(`🚀 Server listening on port ${String(this.port)}`);
         resolve();
       });
     });
@@ -161,6 +161,12 @@ export class App {
           if (res.statusCode >= 400) return "warn";
           return "info";
         },
+        // Collapse each request into one readable line: "GET /api/users 200 (45ms)".
+        // The full req/res objects stay in the structured payload (shipped as JSON
+        // in prod); dev's pino-pretty hides them so the message is all you see.
+        customSuccessMessage: (req, res, responseTime) =>
+          `${req.method} ${req.url} ${String(res.statusCode)} (${String(responseTime)}ms)`,
+        customErrorMessage: (req, res, err) => `${req.method} ${req.url} ${String(res.statusCode)} — ${err.message}`,
       }),
     );
     this.express.use(compression());
@@ -224,6 +230,6 @@ export class App {
     dispatcher.on("request:canceled", requestSubscriber.handleRequestCanceled);
     dispatcher.on("request:declined", requestSubscriber.handleRequestDeclined);
 
-    log.info("🔔 Successfully registered domain event subscribers");
+    log.info(`🔔 Registered ${String(dispatcher.eventNames().length)} domain event subscribers`);
   }
 }

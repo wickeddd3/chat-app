@@ -38,7 +38,7 @@ export function errorMiddleware(error: Error, req: Request, res: Response, _next
   // preserved `cause` chain — so nothing is silently swallowed. Client errors
   // (4xx) are expected/operational and already captured by request logging.
   if (statusCode >= 500) {
-    log.error({ err: error, method: req.method, url: req.url }, "💥 Request failed");
+    log.error({ err: error }, `💥 ${req.method} ${req.url} failed (500)`);
   }
 
   res.status(statusCode).json({
