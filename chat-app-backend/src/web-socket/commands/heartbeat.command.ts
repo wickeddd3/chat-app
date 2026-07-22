@@ -4,7 +4,7 @@ import type { Socket } from "socket.io";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import { PresenceService } from "@/services/presence.service";
 import { BroadcasterService } from "@/services/broadcaster.service";
-import { ConnectionsRepository } from "@/modules/connection/connections.repository";
+import { ConnectionsQuery } from "@/modules/connection/persistence/connections.query";
 
 @injectable()
 export class HeartbeatCommand implements WebSocketCommand {
@@ -13,7 +13,7 @@ export class HeartbeatCommand implements WebSocketCommand {
   constructor(
     @inject(TYPES.PresenceService) private presenceService: PresenceService,
     @inject(TYPES.BroadcasterService) private broadcaster: BroadcasterService,
-    @inject(TYPES.ConnectionsRepository) private connectionsRepository: ConnectionsRepository,
+    @inject(TYPES.ConnectionsQuery) private connectionsQuery: ConnectionsQuery,
   ) {}
 
   public async execute(socket: Socket, authId: string, _data: unknown): Promise<void> {
@@ -27,7 +27,7 @@ export class HeartbeatCommand implements WebSocketCommand {
       // 2. CRITICAL HEARTBEAT SELF-HEALING BRIDGE:
       // If the followers index set is missing/empty, look up relational bounds in Postgres
       if (observerIds.length === 0) {
-        const persistedContacts = await this.connectionsRepository.getRawContactIds(authId);
+        const persistedContacts = await this.connectionsQuery.getContactIds(authId);
 
         if (persistedContacts.length > 0) {
           // Rebuild relationship keys cleanly in Redis

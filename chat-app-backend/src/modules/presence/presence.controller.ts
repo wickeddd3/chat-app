@@ -3,7 +3,7 @@ import { TYPES } from "@/config/types";
 import type { Request, Response } from "express";
 import { BaseController } from "@/utils/base.controller";
 import { PresenceService } from "@/services/presence.service";
-import { ConnectionsRepository } from "@/modules/connection/connections.repository";
+import { ConnectionsQuery } from "@/modules/connection/persistence/connections.query";
 import { ChannelsRepository } from "@/modules/channel/channels.repository";
 import { createLogger } from "@/lib/logger";
 
@@ -13,7 +13,7 @@ const log = createLogger("Presence");
 export class PresenceController extends BaseController {
   constructor(
     @inject(TYPES.PresenceService) private presenceService: PresenceService,
-    @inject(TYPES.ConnectionsRepository) private connectionsRepository: ConnectionsRepository,
+    @inject(TYPES.ConnectionsQuery) private connectionsQuery: ConnectionsQuery,
     @inject(TYPES.ChannelsRepository) private channelsRepository: ChannelsRepository,
   ) {
     super();
@@ -28,7 +28,7 @@ export class PresenceController extends BaseController {
 
     if (!baseCacheExists) {
       log.warn({ authId: authUserId }, "Rebuilding contacts cache");
-      const databaseContacts = await this.connectionsRepository.getRawContactIds(authUserId);
+      const databaseContacts = await this.connectionsQuery.getContactIds(authUserId);
 
       if (databaseContacts.length > 0) {
         for (const friendId of databaseContacts) {

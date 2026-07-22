@@ -1,4 +1,4 @@
-import { ConnectionsRepository } from "@/modules/connection/connections.repository";
+import { ConnectionsQuery } from "@/modules/connection/persistence/connections.query";
 import type { PaginatedConnections } from "@/modules/connection/connections.types";
 
 // The generated Prisma client connects/loads heavy code on import; it is never
@@ -114,10 +114,10 @@ function buildRows(count: number, sharedTimestampGroups: number): Row[] {
   return rows;
 }
 
-describe("ConnectionsRepository keyset pagination (no skips / no duplicates)", () => {
+describe("ConnectionsQuery keyset pagination (no skips / no duplicates)", () => {
   function paginateAll(rows: Row[], method: "getSentConnections" | "getReceivedConnections", limit: number) {
     const db = makeDb(rows);
-    const repo = new ConnectionsRepository(db as never);
+    const repo = new ConnectionsQuery(db as never);
 
     return (async () => {
       const seenIds: string[] = [];
@@ -177,7 +177,7 @@ describe("ConnectionsRepository keyset pagination (no skips / no duplicates)", (
   it("reports hasMore=false and a null cursor on the final page", async () => {
     const rows = buildRows(15, 3);
     const db = makeDb(rows);
-    const repo = new ConnectionsRepository(db as never);
+    const repo = new ConnectionsQuery(db as never);
 
     const first = await repo.getSentConnections({ authUserId: "me", limit: 20 });
 
@@ -211,7 +211,7 @@ describe("ConnectionsRepository keyset pagination (no skips / no duplicates)", (
   // it needs its own walk; the no-skip guarantee is asserted on the contact id.
   async function paginateContacts(rows: Row[], limit: number) {
     const db = makeDb(rows);
-    const repo = new ConnectionsRepository(db as never);
+    const repo = new ConnectionsQuery(db as never);
 
     const seenIds: string[] = [];
     let cursor: string | undefined = undefined;
