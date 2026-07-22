@@ -1,4 +1,5 @@
-import { MessagesRepository } from "@/modules/message/messages.repository";
+import { MessagesQuery } from "@/modules/message/persistence/messages.query";
+import { MessagesRepository } from "@/modules/message/persistence/messages.repository";
 import { prisma } from "@/test/helpers/db.helper";
 import {
   addMember,
@@ -10,10 +11,11 @@ import {
 } from "@/test/factories";
 
 const repo = new MessagesRepository(prisma);
+const query = new MessagesQuery(prisma);
 
 describe("MessagesRepository (integration, real DB)", () => {
   describe("create", () => {
-    it("persists a message and returns it with the author profile", async () => {
+    it("persists a message and returns it with the author profile and a zero read count", async () => {
       const author = await createUser({ name: "Author" });
       const channel = await createChannel({ authorId: author.id });
 
@@ -22,12 +24,15 @@ describe("MessagesRepository (integration, real DB)", () => {
       expect(message.id).toBeDefined();
       expect(message.content).toBe("hello");
       expect(message.author).toMatchObject({ id: author.id, name: "Author" });
+      expect(message.readCount).toBe(0);
 
       const persisted = await prisma.message.findUnique({ where: { id: message.id } });
       expect(persisted).not.toBeNull();
     });
   });
+});
 
+describe("MessagesQuery (integration, real DB)", () => {
   describe("getMessages (keyset pagination)", () => {
     it("returns the page oldest-first and walks every message with no skips/dupes", async () => {
       const author = await createUser();
@@ -47,15 +52,11 @@ describe("MessagesRepository (integration, real DB)", () => {
       let cursor: string | undefined;
       let pages = 0;
       for (;;) {
-        const page = await repo.getMessages({ channelId: channel.id, limit: 10, ...(cursor && { cursor }) });
+        const page = await query.getMessages({ channelId: channel.id, limit: 10, ...(cursor && { cursor }) });
         // Each page is ascending (oldest first) for display.
-        const times: number[] = [];
-        for (const m of page.messages) {
-          if (!m.id || !m.createdAt) throw new Error("message missing id/createdAt");
-          times.push(m.createdAt.getTime());
-          seen.push(m.id);
-        }
+        const times = page.messages.map((m) => m.createdAt.getTime());
         expect([...times].sort((a, b) => a - b)).toEqual(times);
+        page.messages.forEach((m) => seen.push(m.id));
         pages++;
         if (!page.hasMore || !page.nextCursor) break;
         cursor = page.nextCursor;
@@ -83,13 +84,23 @@ describe("MessagesRepository (integration, real DB)", () => {
       const seen = new Set<string>();
       let cursor: string | undefined;
       for (;;) {
-        const page = await repo.getMessages({ channelId: channel.id, limit: 6, ...(cursor && { cursor }) });
-        page.messages.forEach((m) => m.id && seen.add(m.id));
+        const page = await query.getMessages({ channelId: channel.id, limit: 6, ...(cursor && { cursor }) });
+        page.messages.forEach((m) => seen.add(m.id));
         if (!page.hasMore || !page.nextCursor) break;
         cursor = page.nextCursor;
       }
 
       expect(seen.size).toBe(15);
+    });
+
+    it("carries the recipient read count on each message", async () => {
+      const [alice, bob] = [await createUser(), await createUser()];
+      const channel = await createDirectChannel(alice.id, bob.id);
+      const message = await createMessage({ channelId: channel.id, authorId: alice.id });
+      await createReceipt(message.id, bob.id);
+
+      const page = await query.getMessages({ channelId: channel.id });
+      expect(page.messages.find((m) => m.id === message.id)?.readCount).toBe(1);
     });
   });
 
@@ -103,7 +114,7 @@ describe("MessagesRepository (integration, real DB)", () => {
       const unreadMsg = await createMessage({ channelId: channel.id, authorId: bob.id });
       await createReceipt(readMsg.id, alice.id); // alice already read this one
 
-      const unread = await repo.getUnreadMessages(channel.id, alice.id);
+      const unread = await query.getUnreadMessages(channel.id, alice.id);
       const ids = unread.map((m) => m.id);
 
       expect(ids).toContain(unreadMsg.id);
@@ -122,7 +133,7 @@ describe("MessagesRepository (integration, real DB)", () => {
       await createMessage({ channelId: channelA.id, authorId: bob.id });
       await createMessage({ channelId: channelB.id, authorId: bob.id });
 
-      const unreadA = await repo.getUnreadMessages(channelA.id, alice.id);
+      const unreadA = await query.getUnreadMessages(channelA.id, alice.id);
       expect(unreadA).toHaveLength(1); // only channel A's message, never B's
     });
   });

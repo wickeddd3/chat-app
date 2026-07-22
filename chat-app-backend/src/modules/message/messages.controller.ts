@@ -3,7 +3,7 @@ import { TYPES } from "@/config/types";
 import { BaseController } from "@/utils/base.controller";
 import { MessagesService } from "./messages.service";
 import { ChannelsService } from "@/modules/channel/channels.service";
-import { HttpException } from "@/utils/http.exception";
+import { ForbiddenError } from "@/shared/errors/domain.error";
 import type { Request, Response } from "express";
 
 @injectable()
@@ -21,9 +21,11 @@ export class MessagesController extends BaseController {
     const limit = 20;
     const cursor = typeof req.query.cursor === "string" ? req.query.cursor : "";
 
-    // Authorization: only members may read a channel's message history.
+    // Authorization: only members may read a channel's message history. Enforced
+    // here (not in the service) because the socket read path reports the same
+    // check over a different error channel.
     if (!(await this.channelsService.isMember(authUserId, channelId))) {
-      throw new HttpException(403, "You do not have access to this channel.");
+      throw new ForbiddenError("You do not have access to this channel.");
     }
 
     const { messages, nextCursor, hasMore } = await this.messagesService.getMessages({

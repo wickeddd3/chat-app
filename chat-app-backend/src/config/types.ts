@@ -23,7 +23,8 @@ export const TYPES = {
   MessagesRouter: Symbol.for("MessagesRouter"),
   MessagesController: Symbol.for("MessagesController"),
   MessagesService: Symbol.for("MessagesService"),
-  MessagesRepository: Symbol.for("MessagesRepository"),
+  MessagesRepository: Symbol.for("MessagesRepository"), // writes
+  MessagesQuery: Symbol.for("MessagesQuery"), // reads
 
   MessageReceiptsService: Symbol.for("MessageReceiptsService"),
   MessageReceiptsRepository: Symbol.for("MessageReceiptsRepository"),
