@@ -62,15 +62,26 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
+        // Group vendor code into a handful of logical, cache-stable chunks
+        // rather than one-per-package (which fans out into dozens of tiny
+        // requests). Buckets are ordered most-specific first.
         manualChunks(id) {
-          // Creates a separate chunk for everything in node_modules
-          if (id.includes("node_modules")) {
-            return id
-              .toString()
-              .split("node_modules/")[1]
-              .split("/")[0]
-              .toString();
-          }
+          if (!id.includes("node_modules")) return;
+
+          if (/[\\/]node_modules[\\/](react|react-dom|react-router|scheduler)[\\/]/.test(id))
+            return "react-vendor";
+          if (id.includes("@tanstack")) return "query-vendor";
+          if (/framer-motion|motion-dom|motion-utils/.test(id))
+            return "motion-vendor";
+          if (id.includes("react-virtuoso")) return "virtuoso-vendor";
+          if (/radix-ui|@base-ui|vaul|cmdk|sonner/.test(id)) return "ui-vendor";
+          if (/@phosphor-icons|lucide-react/.test(id)) return "icons-vendor";
+          if (/react-hook-form|@hookform|zod/.test(id)) return "form-vendor";
+          if (/socket\.io|engine\.io/.test(id)) return "socket-vendor";
+          if (id.includes("@supabase")) return "supabase-vendor";
+          if (id.includes("date-fns")) return "date-vendor";
+
+          return "vendor";
         },
       },
     },
