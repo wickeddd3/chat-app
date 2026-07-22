@@ -1,13 +1,61 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { PrismaClient } from "@/prisma/client";
-import type { PaginatedNotifications } from "./notifications.types";
+import type { Notification, NotificationType } from "@/prisma/client";
+import type { NewNotification, PaginatedNotifications } from "./notifications.types";
 import { HttpException } from "@/utils/http.exception";
 import { decodeCursor, encodeCursor } from "@/utils/cursor";
+import { withPersistence } from "@/shared/persistence/prisma-error.mapper";
+import type { Executor } from "@/shared/persistence/transaction";
 
 @injectable()
 export class NotificationsRepository {
   constructor(@inject(TYPES.PrismaClient) private db: PrismaClient) {}
+
+  /** Falls back to the pooled client when the caller isn't inside a transaction. */
+  private client(executor?: Executor): Executor {
+    return executor ?? this.db;
+  }
+
+  /**
+   * Persists a notification composed by another module.
+   *
+   * The `executor` parameter is what lets a caller write a notification in the
+   * same transaction as the event that caused it, without reaching into this
+   * table directly.
+   */
+  public async create(data: NewNotification, executor?: Executor): Promise<Notification> {
+    return withPersistence("Failed to create the notification.", () =>
+      this.client(executor).notification.create({ data }),
+    );
+  }
+
+  /**
+   * Marks a user's notifications for a given subject as read — used to retire an
+   * alert once its subject has been acted on (e.g. accepting a request clears the
+   * incoming-request alert).
+   */
+  public async markReadByReference(
+    { referenceId, userId }: { referenceId: string; userId: string },
+    executor?: Executor,
+  ): Promise<void> {
+    await withPersistence("Failed to mark the notification as read.", () =>
+      this.client(executor).notification.updateMany({
+        where: { referenceId, userId },
+        data: { isRead: true },
+      }),
+    );
+  }
+
+  /** Removes a user's notifications for a subject that no longer exists. */
+  public async deleteByReference(
+    { referenceId, userId, type }: { referenceId: string; userId: string; type: NotificationType },
+    executor?: Executor,
+  ): Promise<void> {
+    await withPersistence("Failed to delete the notification.", () =>
+      this.client(executor).notification.deleteMany({ where: { referenceId, userId, type } }),
+    );
+  }
 
   public async getUnreadNotificationsCount({ authUserId }: { authUserId: string }): Promise<number> {
     try {
