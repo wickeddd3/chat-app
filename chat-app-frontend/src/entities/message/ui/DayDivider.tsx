@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { dayLabel } from "@/shared/utils/date-format";
 
 export interface DayDividerProps {
@@ -9,7 +10,7 @@ export interface DayDividerProps {
  * Marks where one day's messages end and the next begin, so the clock times on
  * each run stay unambiguous as the timeline scrolls back.
  */
-export function DayDivider({ date }: DayDividerProps) {
+export const DayDivider = memo(function DayDivider({ date }: DayDividerProps) {
   const label = dayLabel(date);
 
   if (!label) return null;
@@ -21,4 +22,4 @@ export function DayDivider({ date }: DayDividerProps) {
       </span>
     </div>
   );
-}
+});

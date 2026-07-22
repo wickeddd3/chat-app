@@ -1,5 +1,5 @@
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
-import type { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 
 export interface UserListItemProps {
   user: { name: string; username: string; image?: string | null };
@@ -9,7 +9,7 @@ export interface UserListItemProps {
   optionSlot?: ReactNode;
 }
 
-export function UserListItem({
+export const UserListItem = memo(function UserListItem({
   user: { name, username, image },
   isOnline,
   isNew = false,
@@ -61,4 +61,4 @@ export function UserListItem({
       )}
     </article>
   );
-}
+});

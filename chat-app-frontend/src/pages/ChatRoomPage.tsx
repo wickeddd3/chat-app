@@ -1,12 +1,28 @@
 import { useParams } from "react-router";
-import { useMemo } from "react";
+import { lazy, Suspense, useMemo } from "react";
 import { BackButton, ChannelHeader, useChannel } from "@/entities/channel";
 import { useAuth, usePresence, usePresenceMap } from "@/entities/auth";
 import {
   ChatRoom,
   ChannelUnavailablePlaceholder,
 } from "@/features/message/chat-room";
-import { ChannelDetailsDrawer } from "@/widgets/channel-details-drawer";
+import { Skeleton } from "@/shared/ui/shadcn/skeleton";
+
+// The channel-info drawer pulls in the drawer runtime and the group-edit form,
+// none of which the chat room itself needs — code-split it so it loads only
+// when the header is first shown, keeping the room's critical path lean.
+const ChannelDetailsDrawer = lazy(() =>
+  import("@/widgets/channel-details-drawer").then((module) => ({
+    default: module.ChannelDetailsDrawer,
+  })),
+);
+
+// A pulsing skeleton shaped like the drawer's trigger button (p-2 + size-5
+// icon → size-9), so the header shows a loading affordance and keeps its layout
+// steady until the lazy drawer swaps in.
+const DrawerTriggerFallback = () => (
+  <Skeleton className="size-9 rounded-lg" aria-hidden />
+);
 
 export default function ChatRoomPage() {
   const { channelId } = useParams();
@@ -52,7 +68,11 @@ export default function ChatRoomPage() {
           <ChannelHeader
             channel={channel}
             isOnline={online}
-            optionSlot={<ChannelDetailsDrawer channel={channel} />}
+            optionSlot={
+              <Suspense fallback={<DrawerTriggerFallback />}>
+                <ChannelDetailsDrawer channel={channel} />
+              </Suspense>
+            }
           />
         </div>
       </div>

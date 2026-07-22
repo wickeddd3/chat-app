@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { Link, useParams } from "react-router";
 import { ChecksIcon } from "@phosphor-icons/react";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
@@ -13,7 +13,7 @@ export interface ChatInboxItemProps {
   inboxItem: InboxChannel;
 }
 
-export function ChatInboxItem({
+export const ChatInboxItem = memo(function ChatInboxItem({
   inboxItem: {
     id,
     displayName,
@@ -115,4 +115,4 @@ export function ChatInboxItem({
       </div>
     </Link>
   );
-}
+});

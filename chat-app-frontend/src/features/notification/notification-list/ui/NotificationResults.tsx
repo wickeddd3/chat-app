@@ -1,8 +1,9 @@
-import { Virtuoso } from "react-virtuoso";
+import { Virtuoso, type Components } from "react-virtuoso";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
 import { CircleNotchIcon } from "@phosphor-icons/react";
 import { NotificationItem, type Notification } from "@/entities/notification";
+import { useMemo } from "react";
 
 export interface NotificationResultsProps {
   isLoading?: boolean;
@@ -23,6 +24,20 @@ export function NotificationResults({
   fetchNextPage,
   onClick,
 }: NotificationResultsProps) {
+  // Stable identity so Virtuoso keeps the footer mounted instead of remounting
+  // it (and restarting the spinner) each render.
+  const components = useMemo<Components<Notification>>(
+    () => ({
+      Footer: () =>
+        isFetchingNextPage ? (
+          <div className="py-4 flex justify-center w-full">
+            <CircleNotchIcon className="size-5 text-primary animate-spin" />
+          </div>
+        ) : null,
+    }),
+    [isFetchingNextPage],
+  );
+
   return (
     <div className="flex-1 w-full overflow-hidden relative">
       {isLoading && <LoadingPlaceholder />}
@@ -47,14 +62,7 @@ export function NotificationResults({
               }}
             />
           )}
-          components={{
-            Footer: () =>
-              isFetchingNextPage ? (
-                <div className="py-4 flex justify-center w-full">
-                  <CircleNotchIcon className="size-5 text-primary animate-spin" />
-                </div>
-              ) : null,
-          }}
+          components={components}
         />
       )}
 

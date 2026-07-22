@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { cn } from "@/shared/lib/utils";
 import { Avatar, AvatarBadge, AvatarImage } from "@/shared/ui/shadcn/avatar";
 
@@ -8,7 +9,7 @@ export interface ProfileAvatarProps {
   badge?: boolean;
 }
 
-export function ProfileAvatar({
+export const ProfileAvatar = memo(function ProfileAvatar({
   imageSrc,
   size = "lg",
   isOnline = false,
@@ -27,4 +28,4 @@ export function ProfileAvatar({
       )}
     </Avatar>
   );
-}
+});

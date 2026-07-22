@@ -18,10 +18,15 @@ function channel(overrides: Partial<InboxChannel> = {}): InboxChannel {
 }
 
 describe("ChannelHeader", () => {
-  it("renders nothing when there is no channel", () => {
+  it("renders a skeleton placeholder while the channel loads", () => {
     const { container } = render(<ChannelHeader channel={null} />);
 
-    expect(container).toBeEmptyDOMElement();
+    // The row keeps its shape (avatar + name) as a skeleton so it doesn't
+    // collapse and pop the real header in once the channel resolves.
+    expect(
+      container.querySelectorAll('[data-slot="skeleton"]').length,
+    ).toBeGreaterThan(0);
+    expect(screen.queryByRole("heading")).not.toBeInTheDocument();
   });
 
   it("renders the channel display name", () => {
