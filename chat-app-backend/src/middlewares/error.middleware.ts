@@ -1,13 +1,31 @@
 import type { Request, Response, NextFunction } from "express";
 import { HttpException } from "@/utils/http.exception";
+import { DomainError } from "@/shared/errors/domain.error";
+
+/**
+ * The single domain → HTTP mapping. Layers below the boundary throw domain
+ * errors; only this table knows what they mean over HTTP.
+ */
+const STATUS_BY_DOMAIN_CODE: Record<string, number> = {
+  NOT_FOUND: 404,
+  FORBIDDEN: 403,
+  CONFLICT: 409,
+  VALIDATION: 422,
+  PERSISTENCE: 500,
+};
 
 export function errorMiddleware(error: Error, req: Request, res: Response, _next: NextFunction): void {
   let statusCode = 500;
   let message = "An unexpected internal server error occurred";
   let details: unknown = null;
 
-  // If it's an expected operational domain exception, unpack it.
-  if (error instanceof HttpException) {
+  if (error instanceof DomainError) {
+    statusCode = STATUS_BY_DOMAIN_CODE[error.code] ?? 500;
+    message = error.message;
+    details = error.details;
+  } else if (error instanceof HttpException) {
+    // Boundary-level failures that are genuinely about HTTP (zod validation in
+    // `validate`) still carry their own status.
     statusCode = error.statusCode;
     message = error.message;
     details = error.details;

@@ -4,7 +4,7 @@ import { BaseController } from "@/utils/base.controller";
 import { AuthService } from "./auth.service";
 import type { ProfileSchemaType, SignUpSchemaType } from "./auth.schema";
 import type { Request, Response } from "express";
-import { NotFoundException } from "@/utils/http.exception";
+import { NotFoundError } from "@/shared/errors/domain.error";
 
 @injectable()
 export class AuthController extends BaseController {
@@ -24,7 +24,7 @@ export class AuthController extends BaseController {
     const user = await this.authService.getUserById(authUserId);
 
     if (!user) {
-      throw new NotFoundException(`User profile not found.`);
+      throw new NotFoundError(`User profile not found.`);
     }
 
     this.sendSuccess(res, user, "User profile retrieved successfully");

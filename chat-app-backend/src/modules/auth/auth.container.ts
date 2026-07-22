@@ -3,7 +3,7 @@ import { TYPES } from "@/config/types";
 import { AuthRouter } from "./auth.router";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
-import { AuthRepository } from "./auth.repository";
+import { AuthRepository } from "./persistence/auth.repository";
 
 export const authModule = new ContainerModule(({ bind }) => {
   bind<AuthRouter>(TYPES.AuthRouter).to(AuthRouter);

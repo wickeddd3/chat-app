@@ -3,8 +3,7 @@ import { TYPES } from "@/config/types";
 import { BaseController } from "@/utils/base.controller";
 import { ChannelsService } from "./channels.service";
 import type { Request, Response } from "express";
-import { channelToChannelDetails, channelToInboxChannel } from "./channels.transformer";
-import { HttpException } from "@/utils/http.exception";
+import { channelToChannelDetails, channelToInboxChannel } from "./channels.mapper";
 
 @injectable()
 export class ChannelsController extends BaseController {
@@ -69,11 +68,7 @@ export class ChannelsController extends BaseController {
     const name = typeof body.name === "string" ? body.name : "";
     const memberIds = Array.isArray(body.memberIds) ? (body.memberIds as string[]) : [];
 
-    // Authorization: only a group ADMIN may update the channel.
-    if (!(await this.channelsService.isChannelAdmin(authUserId, channelId))) {
-      throw new HttpException(403, "Only group admins can update this channel.");
-    }
-
+    // Authorization (admin-only) is enforced in the service via the channel policy.
     const channel = await this.channelsService.updateGroupChannel(authUserId, channelId, {
       name,
       memberIds,

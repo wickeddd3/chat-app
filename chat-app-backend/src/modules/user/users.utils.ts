@@ -1,4 +1,4 @@
-import type { Connection } from "@/prisma/client";
+import type { ContactEdge } from "@/modules/connection/connections.types";
 import { SuggestedUser, UserWithConnections } from "./users.types";
 
 export function getSuggestedUserIdsFromContacts({
@@ -6,7 +6,7 @@ export function getSuggestedUserIdsFromContacts({
   directContactIds,
   userId,
 }: {
-  contacts: Connection[];
+  contacts: ContactEdge[];
   directContactIds: string[];
   userId: string;
 }): string[] {

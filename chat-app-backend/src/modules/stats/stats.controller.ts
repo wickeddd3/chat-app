@@ -2,16 +2,16 @@ import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import type { Request, Response } from "express";
 import { BaseController } from "@/utils/base.controller";
-import { ChannelsRepository } from "@/modules/channel/channels.repository";
-import { NotificationsRepository } from "../notification/notifications.repository";
-import { ConnectionsRepository } from "../connection/connections.repository";
+import { ChannelsQuery } from "@/modules/channel/persistence/channels.query";
+import { NotificationsQuery } from "../notification/persistence/notifications.query";
+import { ConnectionsQuery } from "../connection/persistence/connections.query";
 
 @injectable()
 export class StatsController extends BaseController {
   constructor(
-    @inject(TYPES.ChannelsRepository) private channelsRepository: ChannelsRepository,
-    @inject(TYPES.NotificationsRepository) private notificationsRepository: NotificationsRepository,
-    @inject(TYPES.ConnectionsRepository) private connectionsRepository: ConnectionsRepository,
+    @inject(TYPES.ChannelsQuery) private channelsQuery: ChannelsQuery,
+    @inject(TYPES.NotificationsQuery) private notificationsQuery: NotificationsQuery,
+    @inject(TYPES.ConnectionsQuery) private connectionsQuery: ConnectionsQuery,
   ) {
     super();
   }
@@ -20,9 +20,9 @@ export class StatsController extends BaseController {
     const authUserId = req.authId ?? "";
 
     const [unreadMessagesCount, unreadNotificationsCount, pendingRequestsCount] = await Promise.all([
-      this.channelsRepository.getUnreadMessagesCount({ authUserId }),
-      this.notificationsRepository.getUnreadNotificationsCount({ authUserId }),
-      this.connectionsRepository.getReceivedConnectionsCount({ authUserId }),
+      this.channelsQuery.getUnreadMessagesCount({ authUserId }),
+      this.notificationsQuery.getUnreadNotificationsCount({ authUserId }),
+      this.connectionsQuery.getReceivedConnectionsCount({ authUserId }),
     ]);
 
     const stats = { unreadMessagesCount, unreadNotificationsCount, pendingRequestsCount };
