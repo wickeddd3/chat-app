@@ -11,7 +11,7 @@ export interface ContactResultsProps {
   isEmpty?: boolean;
   /** The active search, so an empty list can say why it is empty. */
   searchQuery?: string;
-  results: (ConnectionUser & { online: boolean })[];
+  results: (ConnectionUser & { online: boolean; lastSeenText?: string })[];
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   fetchNextPage: () => void;
@@ -58,6 +58,7 @@ export function ContactResults({
               }}
               isNew={isLessThanADayOld(contact?.updatedAt || "")}
               isOnline={contact?.online}
+              date={contact?.lastSeenText}
               optionSlot={
                 <MessageButton text="Message" targetUserId={contact.id} />
               }

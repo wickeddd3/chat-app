@@ -1,19 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { getPresenceMapApi } from "../api/presence.api";
 import { createQueryKeys } from "@/shared/config/react-query-keys";
+import type { PresenceEntry } from "./presence-context";
 
 export function usePresenceMap(
   authId?: string,
   channelId?: string,
 ): {
-  presenceMap: Record<string, "online" | "offline">;
+  presenceMap: Record<string, PresenceEntry>;
 } {
   const keys = createQueryKeys(authId);
 
   // Fetch presence context dictionary
-  const { data: presenceMap = {} } = useQuery<
-    Record<string, "online" | "offline">
-  >({
+  const { data: presenceMap = {} } = useQuery<Record<string, PresenceEntry>>({
     queryKey: keys.presence.matrix(channelId),
     queryFn: () =>
       getPresenceMapApi({

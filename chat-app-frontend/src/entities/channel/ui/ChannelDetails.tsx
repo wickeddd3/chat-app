@@ -15,9 +15,14 @@ export interface ChannelDetailsProps {
   // Presence is injected from a higher layer so this entity stays decoupled
   // from the auth/presence entity (entities may only depend on shared).
   isOnline: (userId: string) => boolean;
+  getLastSeen: (userId: string) => string | null;
 }
 
-export function ChannelDetails({ channel, isOnline }: ChannelDetailsProps) {
+export function ChannelDetails({
+  channel,
+  isOnline,
+  getLastSeen,
+}: ChannelDetailsProps) {
   if (!channel) return;
 
   return (
@@ -45,6 +50,7 @@ export function ChannelDetails({ channel, isOnline }: ChannelDetailsProps) {
             <ChannelMembers
               members={channel.channelMembers}
               isOnline={isOnline}
+              getLastSeen={getLastSeen}
             />
           </AccordionContent>
         </AccordionItem>

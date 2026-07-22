@@ -30,8 +30,8 @@ describe("usePresenceMap", () => {
 
   it("fetches the global presence map once authId is provided", async () => {
     mockedGetPresenceMapApi.mockResolvedValue({
-      "user-1": "online",
-      "user-2": "offline",
+      "user-1": { status: "online", lastSeen: null },
+      "user-2": { status: "offline", lastSeen: "2026-07-23T10:00:00.000Z" },
     });
     const { Wrapper } = createQueryClientWrapper();
 
@@ -41,8 +41,8 @@ describe("usePresenceMap", () => {
 
     await waitFor(() =>
       expect(result.current.presenceMap).toEqual({
-        "user-1": "online",
-        "user-2": "offline",
+        "user-1": { status: "online", lastSeen: null },
+        "user-2": { status: "offline", lastSeen: "2026-07-23T10:00:00.000Z" },
       }),
     );
     expect(mockedGetPresenceMapApi).toHaveBeenCalledWith({
@@ -51,7 +51,9 @@ describe("usePresenceMap", () => {
   });
 
   it("scopes the request to a channel when channelId is provided", async () => {
-    mockedGetPresenceMapApi.mockResolvedValue({ "user-1": "online" });
+    mockedGetPresenceMapApi.mockResolvedValue({
+      "user-1": { status: "online", lastSeen: null },
+    });
     const { Wrapper } = createQueryClientWrapper();
 
     renderHook(() => usePresenceMap("auth-user", "channel-1"), {

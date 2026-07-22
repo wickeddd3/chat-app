@@ -6,12 +6,15 @@ import { Skeleton } from "@/shared/ui/shadcn/skeleton";
 export interface ChannelHeaderProps {
   channel: InboxChannel | null;
   isOnline?: boolean;
+  /** Presence line under the name — e.g. "Online" or "last seen 5 minutes ago". */
+  subtitle?: string;
   optionSlot?: ReactNode;
 }
 
 export function ChannelHeader({
   channel,
   isOnline = false,
+  subtitle,
   optionSlot,
 }: ChannelHeaderProps) {
   return (
@@ -31,7 +34,16 @@ export function ChannelHeader({
           <Skeleton className="size-10 shrink-0 rounded-full" />
         )}
         {channel ? (
-          <h2 className="text-md font-medium">{channel.displayName}</h2>
+          <div className="flex flex-col">
+            <h2 className="text-md font-medium leading-tight">
+              {channel.displayName}
+            </h2>
+            {subtitle && (
+              <span className="text-xs text-muted-foreground leading-tight">
+                {subtitle}
+              </span>
+            )}
+          </div>
         ) : (
           <Skeleton className="h-4 w-32" />
         )}

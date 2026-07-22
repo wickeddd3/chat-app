@@ -26,6 +26,17 @@ export function dateToNow(date: string): string {
 }
 
 /**
+ * The presence subtitle for an offline user: "last seen 5 minutes ago", or a
+ * plain "Offline" when no last-seen timestamp is known (never recorded / cold).
+ */
+export function lastSeenLabel(lastSeen: string | null): string {
+  if (!lastSeen) return "Offline";
+
+  const relative = dateToNow(lastSeen);
+  return relative ? `last seen ${relative}` : "Offline";
+}
+
+/**
  * Names the day a message belongs to, for the timeline's date dividers.
  *
  * The two most recent days are named rather than dated — nobody reads "20 July"
