@@ -2,6 +2,7 @@ import { useChatRoom } from "../model/useChatRoom";
 import { useMessages } from "../model/useMessages";
 import { Messages } from "./Messages";
 import { MessageInput } from "./MessageInput";
+import { MessagingClosedNotice } from "./MessagingClosedNotice";
 import { TypingIndicator } from "./TypingIndicator";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { EmptyPlaceholder } from "./EmptyPlaceholder";
@@ -26,6 +27,11 @@ export function ChatRoom({ channelId }: ChatRoomProps) {
 
   useChatRoom(channelId);
 
+  // Only a removed contact closes a thread, and only the details endpoint reports
+  // it — an undefined flag (or a channel still loading) means "open", so the
+  // composer never flickers into a notice while the fetch settles.
+  const isClosed = channel?.canMessage === false;
+
   return (
     <div className="flex-1 flex flex-col h-full min-h-0 w-full overflow-hidden">
       {/* Messages Viewport Container */}
@@ -44,10 +50,14 @@ export function ChatRoom({ channelId }: ChatRoomProps) {
         )}
         {!isLoading && !messages.length && <EmptyPlaceholder />}
       </div>
-      <TypingIndicator channelId={channelId} />
+      {!isClosed && <TypingIndicator channelId={channelId} />}
 
       <div className="w-full p-4">
-        <MessageInput channelId={channelId} />
+        {isClosed ? (
+          <MessagingClosedNotice recipientName={channel?.recipient?.name} />
+        ) : (
+          <MessageInput channelId={channelId} />
+        )}
       </div>
     </div>
   );
