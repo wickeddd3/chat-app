@@ -166,3 +166,37 @@ export function closeDirectChannelWith(
     },
   );
 }
+
+/**
+ * Drops a channel from every cached inbox list and decrements that list's total.
+ *
+ * Used when the viewer leaves a group: their membership is gone, so the channel
+ * is no longer theirs to see. A no-op for lists that don't hold it, so a
+ * duplicate event can't decrement a total twice.
+ */
+export function removeInboxChannel(
+  queryClient: QueryClient,
+  keys: ScopedQueryKeys,
+  channelId: string,
+): void {
+  queryClient.setQueriesData<InboxInfiniteData>(
+    { queryKey: inboxListPrefix(keys) },
+    (data) => {
+      if (!data) return data;
+
+      const present = data.pages.some((page) =>
+        page.channels.some((channel) => channel.id === channelId),
+      );
+      if (!present) return data;
+
+      return {
+        ...data,
+        pages: data.pages.map((page) => ({
+          ...page,
+          channels: page.channels.filter((channel) => channel.id !== channelId),
+          total: Math.max(0, page.total - 1),
+        })),
+      };
+    },
+  );
+}
