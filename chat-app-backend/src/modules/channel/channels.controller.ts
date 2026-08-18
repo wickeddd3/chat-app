@@ -36,7 +36,10 @@ export class ChannelsController extends BaseController {
     const channelId = typeof req.params.channelId === "string" ? req.params.channelId : "";
     const channel = await this.channelsService.getChannel(authUserId, channelId);
 
-    const transformedChannel = channel ? channelToChannelDetails(channel, authUserId) : null;
+    // Only meaningful for a channel the user can actually see; skip the extra
+    // connection read when there is nothing to render.
+    const canMessage = channel ? await this.channelsService.canMessage(authUserId, channelId) : false;
+    const transformedChannel = channel ? channelToChannelDetails(channel, authUserId, canMessage) : null;
 
     this.sendSuccess(res, transformedChannel, "Channel retrieved successfully");
   };

@@ -40,6 +40,17 @@ export class SendMessageCommand implements WebSocketCommand<SendMessagePayload> 
       return;
     }
 
+    // 0b. A direct channel outlives the connection that opened it — the history
+    // stays readable after a contact is removed, but it stops taking new messages.
+    if (!(await this.channelsService.canMessage(authId, targetChannelId))) {
+      socket.emit("error", {
+        code: "FORBIDDEN",
+        event: this.eventName,
+        message: "You can no longer message this user.",
+      });
+      return;
+    }
+
     // 1. Persist to Database
     const savedMessage = await this.messagesService.saveMessage({
       content: data.content,
