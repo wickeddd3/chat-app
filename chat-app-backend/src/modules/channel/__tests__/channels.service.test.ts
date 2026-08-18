@@ -7,34 +7,60 @@ jest.mock("@/lib/redis", () => ({ redisClient: {}, pubClient: {}, subClient: {},
 jest.mock("@/prisma/client", () => ({ PrismaClient: class {} }));
 
 describe("ChannelsService (DI container + mocked collaborators)", () => {
-  let query: { getChannels: jest.Mock; getDirectCounterpartId: jest.Mock };
+  let query: {
+    getChannels: jest.Mock;
+    getDirectCounterpartId: jest.Mock;
+    getChannelSummary: jest.Mock;
+  };
   let repo: {
     findExistingDirect: jest.Mock;
     createDirect: jest.Mock;
     createGroup: jest.Mock;
     rename: jest.Mock;
     touch: jest.Mock;
+    delete: jest.Mock;
   };
-  let members: { isAdmin: jest.Mock; addMembers: jest.Mock; replaceMembers: jest.Mock };
+  let members: {
+    isAdmin: jest.Mock;
+    isMember: jest.Mock;
+    addMembers: jest.Mock;
+    replaceMembers: jest.Mock;
+    listMembers: jest.Mock;
+    removeMember: jest.Mock;
+    promoteToAdmin: jest.Mock;
+  };
+  let messages: { create: jest.Mock };
+  let dispatcher: { emit: jest.Mock };
   let connections: { areConnected: jest.Mock };
   let transaction: { run: jest.Mock };
   let presence: { refreshChannelMembersLookup: jest.Mock };
   let service: ChannelsService;
 
   beforeEach(() => {
-    query = { getChannels: jest.fn(), getDirectCounterpartId: jest.fn().mockResolvedValue(null) };
+    query = {
+      getChannels: jest.fn(),
+      getDirectCounterpartId: jest.fn().mockResolvedValue(null),
+      getChannelSummary: jest.fn().mockResolvedValue({ id: "c1", type: "GROUP" }),
+    };
     repo = {
       findExistingDirect: jest.fn(),
       createDirect: jest.fn().mockResolvedValue({ id: "c1", type: "DIRECT" }),
       createGroup: jest.fn().mockResolvedValue({ id: "c1", type: "GROUP" }),
       rename: jest.fn().mockResolvedValue({ id: "c1", name: "Renamed" }),
       touch: jest.fn(),
+      delete: jest.fn().mockResolvedValue(undefined),
     };
     members = {
       isAdmin: jest.fn().mockResolvedValue(true),
+      isMember: jest.fn().mockResolvedValue(true),
       addMembers: jest.fn().mockResolvedValue(undefined),
       replaceMembers: jest.fn().mockResolvedValue(undefined),
+      listMembers: jest.fn().mockResolvedValue([]),
+      removeMember: jest.fn().mockResolvedValue(undefined),
+      promoteToAdmin: jest.fn().mockResolvedValue(undefined),
     };
+    messages = { create: jest.fn().mockResolvedValue({ id: "m1", content: "Ada left the group" }) };
+    dispatcher = { emit: jest.fn() };
     connections = { areConnected: jest.fn().mockResolvedValue(true) };
     // Runs the unit of work inline; the executor object is never inspected.
     transaction = { run: jest.fn((work: (tx: unknown) => Promise<unknown>) => work({})) };
@@ -45,7 +71,9 @@ describe("ChannelsService (DI container + mocked collaborators)", () => {
       [TYPES.ChannelsRepository, repo],
       [TYPES.ChannelMembersRepository, members],
       [TYPES.ConnectionsQuery, connections],
+      [TYPES.MessagesRepository, messages],
       [TYPES.TransactionManager, transaction],
+      [TYPES.EventDispatcher, dispatcher],
       [TYPES.PresenceService, presence],
     ]);
     container.bind<ChannelsService>(TYPES.ChannelsService).to(ChannelsService);

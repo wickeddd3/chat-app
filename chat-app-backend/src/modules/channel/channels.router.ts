@@ -51,5 +51,11 @@ export class ChannelsRouter implements HttpRouter {
       [authMiddleware, validate({ params: channelIdParamsSchema, body: groupChannelBodySchema })],
       this.channelsController.updateGroupChannel,
     );
+
+    this.router.delete(
+      `${this.path}/group/:channelId/members/me`,
+      [authMiddleware, validate({ params: channelIdParamsSchema })],
+      this.channelsController.leaveGroupChannel,
+    );
   }
 }

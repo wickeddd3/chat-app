@@ -1,5 +1,6 @@
 export { MessageBubble } from "./ui/MessageBubble";
 export { DayDivider } from "./ui/DayDivider";
+export { SystemMessage } from "./ui/SystemMessage";
 export { MessageContent } from "./ui/MessageContent";
 export { DeliveryStatus } from "./ui/DeliveryStatus";
 export type { DeliveryState } from "./ui/DeliveryStatus";
@@ -15,6 +16,7 @@ export {
   groupMessages,
   startsRun,
   endsRun,
+  isSystemMessage,
   RUN_GAP_MS,
 } from "./model/message-grouping";
 export type { RunPosition, GroupedMessage } from "./model/message-grouping";
@@ -28,6 +30,7 @@ export type {
 export type {
   MessageAuthor,
   Message,
+  MessageKind,
   NewMessage,
   PaginatedMessage,
 } from "./model/message.types";

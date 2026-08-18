@@ -18,6 +18,7 @@ export {
   prependInboxChannel,
   patchInboxChannel,
   closeDirectChannelWith,
+  removeInboxChannel,
 } from "./model/inbox-cache";
 
 export { isChannelAdmin } from "./model/channel-permissions";

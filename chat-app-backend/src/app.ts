@@ -30,6 +30,7 @@ import type { Server as SocketServer } from "socket.io";
 
 import { NotificationSubscriber } from "@/subscribers/notification.subscriber";
 import { RequestSubscriber } from "@/subscribers/request.subscriber";
+import { ChannelSubscriber } from "@/subscribers/channel.subscriber";
 
 // How long to wait for in-flight work to drain before forcing exit.
 const SHUTDOWN_TIMEOUT_MS = 10_000;
@@ -223,6 +224,7 @@ export class App {
     const dispatcher = container.get<EventEmitter>(TYPES.EventDispatcher);
     const notificationSubscriber = container.get<NotificationSubscriber>(TYPES.NotificationSubscriber);
     const requestSubscriber = container.get<RequestSubscriber>(TYPES.RequestSubscriber);
+    const channelSubscriber = container.get<ChannelSubscriber>(TYPES.ChannelSubscriber);
 
     dispatcher.on("notification:new", notificationSubscriber.handleNotificationCreated);
     dispatcher.on("request:new", requestSubscriber.handleRequestSent);
@@ -230,6 +232,7 @@ export class App {
     dispatcher.on("request:canceled", requestSubscriber.handleRequestCanceled);
     dispatcher.on("request:declined", requestSubscriber.handleRequestDeclined);
     dispatcher.on("contact:removed", requestSubscriber.handleContactRemoved);
+    dispatcher.on("channel:member_left", channelSubscriber.handleMemberLeft);
 
     log.info(`🔔 Registered ${String(dispatcher.eventNames().length)} domain event subscribers`);
   }

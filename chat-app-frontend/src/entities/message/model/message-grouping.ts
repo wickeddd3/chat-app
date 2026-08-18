@@ -22,8 +22,17 @@ export const RUN_GAP_MS = 5 * 60 * 1000;
 
 const dateOf = (message: ChatMessage) => new Date(message.createdAt);
 
+/**
+ * A system line is narration, not correspondence. It renders on its own row, so
+ * it must never absorb into an author's run — nor let the messages either side
+ * of it merge across it.
+ */
+export const isSystemMessage = (message: ChatMessage): boolean =>
+  "type" in message && message.type === "SYSTEM";
+
 /** Do these two adjacent messages belong to the same run? */
 function isSameRun(previous: ChatMessage, next: ChatMessage): boolean {
+  if (isSystemMessage(previous) || isSystemMessage(next)) return false;
   if (previous.author.id !== next.author.id) return false;
 
   const previousDate = dateOf(previous);

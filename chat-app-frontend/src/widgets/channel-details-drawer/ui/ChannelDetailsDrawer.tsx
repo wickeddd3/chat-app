@@ -14,6 +14,7 @@ import {
 } from "@/entities/channel";
 import { UpdateGroupChannel } from "@/features/channel/update-group-channel";
 import { RemoveContactButton } from "@/features/connection/remove-contact";
+import { LeaveGroupButton } from "@/features/channel/leave-group-channel";
 import { useAuth, usePresence } from "@/entities/auth";
 
 export interface ChannelDetailsDrawerProps {
@@ -36,6 +37,16 @@ export function ChannelDetailsDrawer({ channel }: ChannelDetailsDrawerProps) {
   // the channel is read-only and there is nothing left to remove.
   const canRemoveContact =
     !isGroupChannel && !!channel.recipient && channel.canMessage !== false;
+
+  // Any member may leave a group, admin or not. The two edge cases change what
+  // the confirmation warns about, so work them out here where the roster is.
+  const memberCount = channel.channelMembers.length;
+  const isLastMember = memberCount <= 1;
+  const isSoleAdmin =
+    isAdmin &&
+    !isLastMember &&
+    channel.channelMembers.filter((member) => member.role === "ADMIN")
+      .length === 1;
 
   return (
     <Drawer direction="right">
@@ -70,6 +81,16 @@ export function ChannelDetailsDrawer({ channel }: ChannelDetailsDrawerProps) {
               targetUserId={channel.recipient.id}
               targetName={channel.recipient.name}
               layout="full"
+            />
+          </div>
+        )}
+        {isGroupChannel && (
+          <div className="mt-auto border-t px-4 py-4">
+            <LeaveGroupButton
+              channelId={channel.id}
+              channelName={channel.displayName}
+              isLastMember={isLastMember}
+              isSoleAdmin={isSoleAdmin}
             />
           </div>
         )}

@@ -6,6 +6,7 @@ import {
   patchInboxChannel,
   invalidateInboxFilters,
   closeDirectChannelWith,
+  removeInboxChannel,
 } from "./inbox-cache";
 import type { InboxChannel, PaginatedInboxChannel } from "./channel.types";
 
@@ -186,5 +187,58 @@ describe("closeDirectChannelWith", () => {
     closeDirectChannelWith(qc, "them");
 
     expect(readDetails(qc, "c1")).toBe(closed);
+  });
+});
+
+describe("removeInboxChannel", () => {
+  it("drops the channel and decrements the total on every page", () => {
+    const qc = new QueryClient();
+    qc.setQueryData(
+      keys.inbox.list(""),
+      inboxData([channel("a"), channel("b")]),
+    );
+
+    removeInboxChannel(qc, keys, "a");
+
+    const page = readInbox(qc)?.pages[0];
+    expect(page?.channels.map((c) => c.id)).toEqual(["b"]);
+    expect(page?.total).toBe(1);
+  });
+
+  it("removes it from every cached filter variant at once", () => {
+    const qc = new QueryClient();
+    qc.setQueryData(keys.inbox.list(""), inboxData([channel("a")]));
+    qc.setQueryData(keys.inbox.list("", "groups"), inboxData([channel("a")]));
+
+    removeInboxChannel(qc, keys, "a");
+
+    expect(readInbox(qc)?.pages[0]?.channels).toHaveLength(0);
+    expect(
+      qc.getQueryData<InboxData>(keys.inbox.list("", "groups"))?.pages[0]
+        ?.channels,
+    ).toHaveLength(0);
+  });
+
+  it("is idempotent — a duplicate removal cannot decrement the total twice", () => {
+    const qc = new QueryClient();
+    qc.setQueryData(
+      keys.inbox.list(""),
+      inboxData([channel("a"), channel("b")]),
+    );
+
+    removeInboxChannel(qc, keys, "a");
+    removeInboxChannel(qc, keys, "a");
+
+    expect(readInbox(qc)?.pages[0]?.total).toBe(1);
+  });
+
+  it("leaves lists that never held the channel untouched", () => {
+    const qc = new QueryClient();
+    qc.setQueryData(keys.inbox.list(""), inboxData([channel("b")]));
+
+    removeInboxChannel(qc, keys, "a");
+
+    expect(readInbox(qc)?.pages[0]?.channels).toHaveLength(1);
+    expect(readInbox(qc)?.pages[0]?.total).toBe(1);
   });
 });

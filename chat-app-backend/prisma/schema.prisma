@@ -37,6 +37,11 @@ enum ChannelRole {
   MEMBER
 }
 
+enum MessageType {
+  USER
+  SYSTEM
+}
+
 model User {
   id              String   @id
   name            String
@@ -131,6 +136,11 @@ model ChannelMember {
 model Message {
   id        String   @id @default(uuid())
   content   String
+  // SYSTEM marks a line the app wrote about a membership event ("X left the
+  // group"). It still carries the author it is about, so `authorId` stays
+  // required and every author read keeps working; the type is what excludes it
+  // from unread counts and read receipts.
+  type      MessageType @default(USER)
   createdAt DateTime @default(now())
   channelId String
   channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)

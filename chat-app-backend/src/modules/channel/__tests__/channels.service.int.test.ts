@@ -1,9 +1,12 @@
 import { randomUUID } from "crypto";
+import type { EventEmitter } from "events";
+import type { User } from "@/prisma/client";
 import { ChannelsService } from "@/modules/channel/channels.service";
 import { ChannelsQuery } from "@/modules/channel/persistence/channels.query";
 import { ChannelsRepository } from "@/modules/channel/persistence/channels.repository";
 import { ChannelMembersRepository } from "@/modules/channel/persistence/channel-members.repository";
 import { ConnectionsQuery } from "@/modules/connection/persistence/connections.query";
+import { MessagesRepository } from "@/modules/message/persistence/messages.repository";
 import { TransactionManager } from "@/shared/persistence/transaction";
 import type { PresenceService } from "@/services/presence.service";
 import { prisma } from "@/test/helpers/db.helper";
@@ -16,7 +19,9 @@ const query = new ChannelsQuery(prisma);
 const channelsRepo = new ChannelsRepository(prisma);
 const membersRepo = new ChannelMembersRepository(prisma);
 const connectionsQuery = new ConnectionsQuery(prisma);
+const messagesRepo = new MessagesRepository(prisma);
 const transactions = new TransactionManager(prisma);
+const dispatcher = { emit: jest.fn() };
 const presence = { refreshChannelMembersLookup: jest.fn().mockResolvedValue(undefined) };
 
 const service = new ChannelsService(
@@ -24,11 +29,16 @@ const service = new ChannelsService(
   channelsRepo,
   membersRepo,
   connectionsQuery,
+  messagesRepo,
   transactions,
+  dispatcher as unknown as EventEmitter,
   presence as unknown as PresenceService,
 );
 
-beforeEach(() => presence.refreshChannelMembersLookup.mockClear());
+beforeEach(() => {
+  presence.refreshChannelMembersLookup.mockClear();
+  dispatcher.emit.mockClear();
+});
 
 describe("ChannelsService (integration, real DB)", () => {
   describe("findChannelOrCreate", () => {
@@ -98,6 +108,133 @@ describe("ChannelsService (integration, real DB)", () => {
       const unchanged = await prisma.channel.findUniqueOrThrow({ where: { id: channel.id } });
       expect(unchanged.name).toBe("Team");
       expect(presence.refreshChannelMembersLookup).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("leaveGroupChannel", () => {
+    /** A group with `creator` as ADMIN and the given members, in join order. */
+    async function buildGroup(memberCount: number) {
+      const creator = await createUser({ name: "Ada" });
+      const members: User[] = [];
+      for (let i = 0; i < memberCount; i++) members.push(await createUser());
+
+      const channel = await service.createGroupChannel(creator.id, {
+        name: "Team",
+        memberIds: members.map((m) => m.id),
+      });
+
+      // Indexed access is `T | undefined` under strict mode; fail loudly on a
+      // miscounted fixture rather than propagating an undefined id into a query.
+      const memberAt = (index: number) => {
+        const member = members[index];
+        if (!member) throw new Error(`Fixture has no member at index ${index}`);
+        return member;
+      };
+
+      return { creator, members, channel, memberAt };
+    }
+
+    it("drops the membership and narrates the departure to those who stayed", async () => {
+      const { creator, channel, memberAt } = await buildGroup(2);
+      const leaver = memberAt(0);
+
+      const result = await service.leaveGroupChannel(leaver.id, channel.id);
+
+      expect(await service.isMember(leaver.id, channel.id)).toBe(false);
+      expect(await service.isMember(creator.id, channel.id)).toBe(true);
+      expect(result.channelDeleted).toBe(false);
+      expect(result.remainingMemberIds.sort()).toEqual([creator.id, memberAt(1).id].sort());
+
+      const system = await prisma.message.findFirst({ where: { channelId: channel.id, type: "SYSTEM" } });
+      expect(system?.content).toContain("left the group");
+      expect(system?.authorId).toBe(leaver.id);
+    });
+
+    it("keeps the group's history intact for the members who stayed", async () => {
+      const { creator, channel, memberAt } = await buildGroup(1);
+      await createMessage({ channelId: channel.id, authorId: creator.id, content: "hello" });
+
+      await service.leaveGroupChannel(memberAt(0).id, channel.id);
+
+      const stillThere = await service.getChannel(creator.id, channel.id);
+      expect(stillThere).not.toBeNull();
+      expect(await prisma.message.count({ where: { channelId: channel.id, type: "USER" } })).toBe(1);
+    });
+
+    it("hands ADMIN to the longest-standing member when the admin leaves", async () => {
+      const { creator, members, channel } = await buildGroup(2);
+
+      const result = await service.leaveGroupChannel(creator.id, channel.id);
+
+      // Which of the two inherits is settled by `nextAdminId` (unit-tested against
+      // explicit join times); here the point is that someone who stayed did, and
+      // that the promotion actually reached the database.
+      expect(members.map((m) => m.id)).toContain(result.promotedAdminId);
+      expect(await service.isChannelAdmin(result.promotedAdminId ?? "", channel.id)).toBe(true);
+      // The group is manageable again by exactly one person.
+      const admins = await prisma.channelMember.findMany({ where: { channelId: channel.id, role: "ADMIN" } });
+      expect(admins).toHaveLength(1);
+    });
+
+    it("promotes nobody when a plain member leaves", async () => {
+      const { creator, channel, memberAt } = await buildGroup(2);
+
+      const result = await service.leaveGroupChannel(memberAt(0).id, channel.id);
+
+      expect(result.promotedAdminId).toBeNull();
+      expect(await service.isChannelAdmin(creator.id, channel.id)).toBe(true);
+    });
+
+    it("deletes the channel and its messages when the last member leaves", async () => {
+      // A group of one: the creator is both its only admin and its only member.
+      const { creator, channel } = await buildGroup(0);
+      await createMessage({ channelId: channel.id, authorId: creator.id, content: "alone here" });
+
+      const result = await service.leaveGroupChannel(creator.id, channel.id);
+
+      expect(result.channelDeleted).toBe(true);
+      expect(result.systemMessage).toBeNull();
+      expect(await prisma.channel.findUnique({ where: { id: channel.id } })).toBeNull();
+      expect(await prisma.message.count({ where: { channelId: channel.id } })).toBe(0);
+      expect(await prisma.channelMember.count({ where: { channelId: channel.id } })).toBe(0);
+    });
+
+    it("drops the group out of the leaver's inbox but not the others'", async () => {
+      const { creator, channel, memberAt } = await buildGroup(1);
+      const leaver = memberAt(0);
+
+      await service.leaveGroupChannel(leaver.id, channel.id);
+
+      const leaverInbox = await service.getChannels({ authUserId: leaver.id });
+      const stayerInbox = await service.getChannels({ authUserId: creator.id });
+      expect(leaverInbox.channels.map((c) => c.id)).not.toContain(channel.id);
+      expect(stayerInbox.channels.map((c) => c.id)).toContain(channel.id);
+    });
+
+    it("refuses a non-member", async () => {
+      const { channel } = await buildGroup(1);
+      const outsider = await createUser();
+
+      await expect(service.leaveGroupChannel(outsider.id, channel.id)).rejects.toMatchObject({ code: "FORBIDDEN" });
+    });
+
+    it("refuses a direct channel — that is dissolved by removing the contact", async () => {
+      const [a, b] = [await createUser(), await createUser()];
+      const direct = await service.findChannelOrCreate(a.id, b.id);
+
+      await expect(service.leaveGroupChannel(a.id, direct.id)).rejects.toMatchObject({ code: "VALIDATION" });
+      expect(await service.isMember(a.id, direct.id)).toBe(true);
+    });
+
+    it("does not let the system line inflate anyone's unread badge", async () => {
+      const { creator, channel, memberAt } = await buildGroup(2);
+
+      await service.leaveGroupChannel(memberAt(0).id, channel.id);
+
+      // The only message in the channel is the SYSTEM line, which is narration.
+      const inbox = await service.getChannels({ authUserId: creator.id });
+      const row = inbox.channels.find((c) => c.id === channel.id);
+      expect(row?._count.messages).toBe(0);
     });
   });
 

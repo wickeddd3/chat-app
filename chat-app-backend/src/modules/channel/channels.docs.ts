@@ -304,4 +304,57 @@ export const channelsPaths: OpenAPIV3.PathsObject = {
       },
     },
   },
+
+  "/api/channels/group/{channelId}/members/me": {
+    delete: {
+      summary: "Leave a group channel",
+      description:
+        "Removes the caller from the group. If they were its last admin, the longest-standing remaining member " +
+        "inherits ADMIN; if they were its last member, the channel and its messages are deleted. Otherwise a " +
+        "system message records the departure for the members who stayed.",
+      tags: ["Channels"],
+      security: [{ bearerAuth: [] }],
+      parameters: [
+        {
+          name: "channelId",
+          in: "path",
+          required: true,
+          description: "The unique group channel ID",
+          schema: { type: "string", example: "b1a23c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d" },
+        },
+      ],
+      responses: {
+        200: {
+          description: "Left group successfully",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", example: true },
+                  message: { type: "string", example: "Left group successfully" },
+                  data: {
+                    type: "object",
+                    properties: {
+                      channelId: { type: "string", example: "b1a23c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d" },
+                      channelDeleted: {
+                        type: "boolean",
+                        description: "True when the caller was the last member and the channel was removed",
+                        example: false,
+                      },
+                    },
+                  },
+                  timestamp: { type: "string", format: "date-time" },
+                },
+              },
+            },
+          },
+        },
+        401: { description: "Unauthorized" },
+        403: { description: "Not a member of this channel" },
+        404: { description: "Channel not found" },
+        422: { description: "Not a group channel - a direct channel is dissolved by removing the contact" },
+      },
+    },
+  },
 };

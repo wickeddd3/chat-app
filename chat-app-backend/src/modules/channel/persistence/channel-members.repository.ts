@@ -3,7 +3,7 @@ import { TYPES } from "@/config/types";
 import { PrismaClient } from "@/prisma/client";
 import { withPersistence } from "@/shared/persistence/prisma-error.mapper";
 import type { Executor } from "@/shared/persistence/transaction";
-import type { ChannelMemberRow } from "../channels.members";
+import type { ChannelMemberRow, ExistingMember } from "../channels.members";
 
 /**
  * The `channel_member` table: membership questions (used as authorization guards
@@ -56,6 +56,38 @@ export class ChannelMembersRepository {
       });
       return channel?.channelMembers.map((member) => member.userId) ?? [];
     });
+  }
+
+  /**
+   * The full roster with roles and join times — what the leave path needs to
+   * decide whether the group is now empty and who should inherit ADMIN.
+   */
+  public async listMembers(channelId: string, executor?: Executor): Promise<ExistingMember[]> {
+    return withPersistence("Failed to retrieve channel members.", async () => {
+      const rows = await this.client(executor).channelMember.findMany({
+        where: { channelId },
+        select: { userId: true, role: true, joinedAt: true, user: { select: { name: true } } },
+      });
+
+      return rows.map(({ user, ...member }) => ({ ...member, name: user.name }));
+    });
+  }
+
+  /** Drops one membership row. Idempotent — leaving twice is not an error. */
+  public async removeMember(channelId: string, userId: string, executor?: Executor): Promise<void> {
+    await withPersistence("Failed to remove the channel member.", () =>
+      this.client(executor).channelMember.deleteMany({ where: { channelId, userId } }),
+    );
+  }
+
+  /** Hands ADMIN to a remaining member when the last admin leaves. */
+  public async promoteToAdmin(channelId: string, userId: string, executor?: Executor): Promise<void> {
+    await withPersistence("Failed to promote the channel member.", () =>
+      this.client(executor).channelMember.update({
+        where: { channelId_userId: { channelId, userId } },
+        data: { role: "ADMIN" },
+      }),
+    );
   }
 
   public async addMembers(rows: ChannelMemberRow[], executor?: Executor): Promise<void> {

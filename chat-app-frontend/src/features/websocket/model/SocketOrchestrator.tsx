@@ -48,6 +48,10 @@ import {
   handleContactRemoved,
   type ContactRemovedPayload,
 } from "./contact-removed.handler";
+import {
+  handleChannelMemberLeft,
+  type ChannelMemberLeftPayload,
+} from "./channel-member-left.handler";
 
 export interface SocketOrchestratorProps {
   authId: string | undefined;
@@ -126,6 +130,9 @@ export function SocketOrchestrator({ authId }: SocketOrchestratorProps) {
     const onContactRemoved = (payload: ContactRemovedPayload) =>
       handleContactRemoved(queryClient, queryKeys, payload);
 
+    const onChannelMemberLeft = (payload: ChannelMemberLeftPayload) =>
+      handleChannelMemberLeft(queryClient, queryKeys, payload);
+
     // Mount Listeners securely
     webSocketClient.on("connection:status_change", onStatusChange);
     webSocketClient.on("message:receive_message", onIncomingMessage);
@@ -138,6 +145,7 @@ export function SocketOrchestrator({ authId }: SocketOrchestratorProps) {
     webSocketClient.on("request:canceled", onCanceledRequest);
     webSocketClient.on("request:declined", onDeclinedRequest);
     webSocketClient.on("contact:removed", onContactRemoved);
+    webSocketClient.on("channel:member_left", onChannelMemberLeft);
 
     // Explicit function reference tear-down to avoid silent memory leaks
     return () => {
@@ -152,6 +160,7 @@ export function SocketOrchestrator({ authId }: SocketOrchestratorProps) {
       webSocketClient.off("request:canceled", onCanceledRequest);
       webSocketClient.off("request:declined", onDeclinedRequest);
       webSocketClient.off("contact:removed", onContactRemoved);
+      webSocketClient.off("channel:member_left", onChannelMemberLeft);
     };
   }, [authId, queryClient, queryKeys]);
 
