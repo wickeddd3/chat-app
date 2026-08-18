@@ -65,11 +65,15 @@ export class MessagesQuery {
     });
   }
 
-  /** Messages in a channel authored by someone else that this user has not yet read. */
+  /**
+   * Messages in a channel authored by someone else that this user has not yet
+   * read. System lines are excluded: nobody sent them, so there is no one to
+   * report a receipt back to.
+   */
   public async getUnreadMessages(channelId: string, userId: string): Promise<UnreadMessage[]> {
     return withPersistence("Failed to retrieve unread messages.", () =>
       this.db.message.findMany({
-        where: { channelId, authorId: { not: userId }, readBy: { none: { userId } } },
+        where: { channelId, type: "USER", authorId: { not: userId }, readBy: { none: { userId } } },
         select: { id: true, authorId: true },
       }),
     );

@@ -2,6 +2,7 @@ import {
   groupMessages,
   endsRun,
   startsRun,
+  isSystemMessage,
   RUN_GAP_MS,
 } from "./message-grouping";
 import type { Message } from "./message.types";
@@ -166,5 +167,45 @@ describe("run edges", () => {
     expect(endsRun("solo")).toBe(true);
     expect(endsRun("mid")).toBe(false);
     expect(endsRun("first")).toBe(false);
+  });
+});
+
+describe("system messages in a run", () => {
+  const systemLine = (authorId: string, offsetMs: number): Message => ({
+    ...message(authorId, offsetMs, `system-${offsetMs}`),
+    type: "SYSTEM",
+    content: `${authorId} left the group`,
+  });
+
+  it("recognises a system line, and treats an absent type as a normal message", () => {
+    expect(isSystemMessage(systemLine("ada", 0))).toBe(true);
+    expect(isSystemMessage(message("ada", 0))).toBe(false);
+  });
+
+  it("stands alone rather than joining its author's run", () => {
+    const grouped = groupMessages([
+      message("ada", 0),
+      systemLine("ada", 1000),
+      message("ada", 2000),
+    ]);
+
+    // Every row is its own run: the system line can't absorb into either side.
+    expect(grouped.map((g) => g.position)).toEqual(["solo", "solo", "solo"]);
+  });
+
+  it("breaks a run that would otherwise close over it", () => {
+    const grouped = groupMessages([
+      message("ada", 0),
+      message("ada", 1000),
+      systemLine("bob", 2000),
+      message("ada", 3000),
+    ]);
+
+    expect(grouped.map((g) => g.position)).toEqual([
+      "first",
+      "last",
+      "solo",
+      "solo",
+    ]);
   });
 });

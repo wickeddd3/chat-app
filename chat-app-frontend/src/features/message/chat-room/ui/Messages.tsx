@@ -2,7 +2,9 @@ import { Virtuoso } from "react-virtuoso";
 import {
   MessageBubble,
   DayDivider,
+  SystemMessage,
   groupMessages,
+  isSystemMessage,
   type Message,
   type NewMessage,
 } from "@/entities/message";
@@ -93,17 +95,23 @@ export function Messages({
           // `firstItemIndex` arithmetic above counts on that.
           <div key={key}>
             {startsDay && <DayDivider date={message.createdAt} />}
-            <MessageBubble
-              message={message}
-              isAuthorsMessage={message.author.id === authUser?.id}
-              position={position}
-              showAuthorName={showAuthorNames}
-              animate={isNew(key)}
-              // `markAnimated` is referentially stable, so the memoized bubble
-              // keeps skipping re-renders as the list around it churns.
-              messageKey={key}
-              onAnimated={markAnimated}
-            />
+            {isSystemMessage(message) ? (
+              // Narration, not correspondence — it gets no bubble, no side and
+              // no delivery state.
+              <SystemMessage content={message.content} />
+            ) : (
+              <MessageBubble
+                message={message}
+                isAuthorsMessage={message.author.id === authUser?.id}
+                position={position}
+                showAuthorName={showAuthorNames}
+                animate={isNew(key)}
+                // `markAnimated` is referentially stable, so the memoized bubble
+                // keeps skipping re-renders as the list around it churns.
+                messageKey={key}
+                onAnimated={markAnimated}
+              />
+            )}
           </div>
         );
       }}

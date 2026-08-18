@@ -12,15 +12,23 @@ const INBOX_INCLUDE = {
   messages: { orderBy: { createdAt: "desc" as const }, take: 1 },
 } as const;
 
-/** Unread = messages authored by someone else that this user has no receipt for. */
+/**
+ * Unread = messages authored by someone else that this user has no receipt for.
+ * System lines never count: they are narration, not correspondence, so a member
+ * leaving must not light up everyone's badge.
+ */
+function unreadMessagesWhere(authUserId: string) {
+  return {
+    type: "USER" as const,
+    authorId: { not: authUserId },
+    readBy: { none: { userId: authUserId } },
+  };
+}
+
 function unreadCountSelect(authUserId: string) {
   return {
     _count: {
-      select: {
-        messages: {
-          where: { authorId: { not: authUserId }, readBy: { none: { userId: authUserId } } },
-        },
-      },
+      select: { messages: { where: unreadMessagesWhere(authUserId) } },
     },
   } as const;
 }
@@ -64,9 +72,7 @@ export class ChannelsQuery {
         },
         // Tab filters narrow the base set.
         ...(filter === "groups" ? [{ type: "GROUP" as const }] : []),
-        ...(filter === "unread"
-          ? [{ messages: { some: { authorId: { not: authUserId }, readBy: { none: { userId: authUserId } } } } }]
-          : []),
+        ...(filter === "unread" ? [{ messages: { some: unreadMessagesWhere(authUserId) } }] : []),
       ],
     };
   }
