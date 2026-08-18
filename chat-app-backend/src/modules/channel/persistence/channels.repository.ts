@@ -55,6 +55,17 @@ export class ChannelsRepository {
     );
   }
 
+  /**
+   * Deletes the channel outright — used when its last member leaves, since
+   * nobody could ever reach it again. Members, messages and receipts go with it
+   * via the schema's cascades.
+   */
+  public async delete(channelId: string, executor?: Executor): Promise<void> {
+    await withPersistence("Failed to delete the channel.", () =>
+      this.client(executor).channel.delete({ where: { id: channelId } }),
+    );
+  }
+
   /** Bumps `updatedAt` so the channel resurfaces to the top of the inbox (e.g. on a new message). */
   public async touch(channelId: string, executor?: Executor): Promise<Channel> {
     return withPersistence("Failed to update channel.", () =>

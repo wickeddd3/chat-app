@@ -53,6 +53,19 @@ export class ChannelsController extends BaseController {
     this.sendSuccess(res, channel, "Channel retrieved successfully");
   };
 
+  public leaveGroupChannel = async (req: Request, res: Response): Promise<void> => {
+    const authUserId = req.authId ?? "";
+    const channelId = typeof req.params.channelId === "string" ? req.params.channelId : "";
+
+    const result = await this.channelsService.leaveGroupChannel(authUserId, channelId);
+
+    this.sendSuccess(
+      res,
+      { channelId: result.channelId, channelDeleted: result.channelDeleted },
+      "Left group successfully",
+    );
+  };
+
   public createGroupChannel = async (req: Request, res: Response): Promise<void> => {
     const authUserId = req.authId ?? "";
     const body = req.body as { name?: unknown; memberIds?: unknown };

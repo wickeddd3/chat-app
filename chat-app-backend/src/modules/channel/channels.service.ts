@@ -1,16 +1,19 @@
 import { injectable, inject } from "inversify";
+import { EventEmitter } from "events";
 import { TYPES } from "@/config/types";
 import type { Channel } from "@/prisma/client";
 import { PresenceService } from "@/services/presence.service";
 import { createLogger } from "@/lib/logger";
 import { ConnectionsQuery } from "@/modules/connection/persistence/connections.query";
+import { MessagesRepository } from "@/modules/message/persistence/messages.repository";
 import { TransactionManager } from "@/shared/persistence/transaction";
 import { ChannelsQuery } from "./persistence/channels.query";
 import { ChannelsRepository } from "./persistence/channels.repository";
 import { ChannelMembersRepository } from "./persistence/channel-members.repository";
-import { directMemberRows, groupMemberRows } from "./channels.members";
-import { assertIsChannelAdmin } from "./channels.policy";
-import type { ChannelFilter, InboxChannel, PaginatedChannels } from "./channels.types";
+import { directMemberRows, groupMemberRows, nextAdminId } from "./channels.members";
+import { memberLeftMessage } from "./channels.messages";
+import { assertCanLeaveGroup, assertIsChannelAdmin } from "./channels.policy";
+import type { ChannelFilter, InboxChannel, LeaveChannelResult, PaginatedChannels } from "./channels.types";
 
 const log = createLogger("Channels");
 
@@ -30,7 +33,12 @@ export class ChannelsService {
     // The connection table is read through its owning module's query, never with
     // a Prisma call of our own.
     @inject(TYPES.ConnectionsQuery) private connectionsQuery: ConnectionsQuery,
+    // Leaving narrates itself in the channel; the message table keeps its single
+    // owner, so this service composes the copy and hands it to that repository
+    // inside its own transaction.
+    @inject(TYPES.MessagesRepository) private messagesRepository: MessagesRepository,
     @inject(TYPES.TransactionManager) private transaction: TransactionManager,
+    @inject(TYPES.EventDispatcher) private dispatcher: EventEmitter,
     @inject(TYPES.PresenceService) private presenceService: PresenceService,
   ) {}
 
@@ -123,6 +131,69 @@ export class ChannelsService {
     }
 
     return updated;
+  }
+
+  /**
+   * Removes the caller from a group.
+   *
+   * Three outcomes, decided from the roster in one transaction:
+   *  - **last one out** — the channel is deleted, since nobody could reach it
+   *    again; its messages and receipts go with it via the schema's cascades.
+   *  - **last admin out** — the longest-standing remaining member inherits ADMIN,
+   *    so the group is never left unmanageable.
+   *  - **otherwise** — a plain departure.
+   *
+   * Unless the channel is gone, the exit is narrated by a SYSTEM message so the
+   * remaining members see who left. Returns what happened; the caller broadcasts.
+   */
+  public async leaveGroupChannel(userId: string, channelId: string): Promise<LeaveChannelResult> {
+    const channel = await this.channelsQuery.getChannelSummary(channelId);
+    assertCanLeaveGroup(channel, await this.membersRepository.isMember(userId, channelId));
+
+    const members = await this.membersRepository.listMembers(channelId);
+    const leaver = members.find((member) => member.userId === userId);
+    const remainingIds = members.filter((member) => member.userId !== userId).map((member) => member.userId);
+    const successorId = nextAdminId(members, userId);
+    const isLastMember = remainingIds.length === 0;
+
+    const result = await this.transaction.run(async (tx) => {
+      await this.membersRepository.removeMember(channelId, userId, tx);
+
+      if (isLastMember) {
+        await this.channelsRepository.delete(channelId, tx);
+        return { channelId, remainingMemberIds: [], promotedAdminId: null, channelDeleted: true, systemMessage: null };
+      }
+
+      if (successorId) {
+        await this.membersRepository.promoteToAdmin(channelId, successorId, tx);
+      }
+
+      const systemMessage = await this.messagesRepository.create(
+        memberLeftMessage(channelId, userId, leaver?.name ?? "Someone"),
+        tx,
+      );
+
+      return {
+        channelId,
+        remainingMemberIds: remainingIds,
+        promotedAdminId: successorId,
+        channelDeleted: false,
+        systemMessage,
+      };
+    });
+
+    // The cached roster drives message fan-out, so it must stop including the
+    // leaver immediately. Awaited so it is correct before we respond, but a Redis
+    // failure must not fail the already-committed departure.
+    try {
+      await this.presenceService.refreshChannelMembersLookup(channelId, remainingIds);
+    } catch (error) {
+      log.error({ err: error, channelId }, "Failed to refresh channel members cache");
+    }
+
+    this.dispatcher.emit("channel:member_left", { ...result, leaverId: userId });
+
+    return result;
   }
 
   /** Bumps the channel to the top of the inbox (e.g. after a new message). */

@@ -1,6 +1,7 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "@/config/types";
 import { PrismaClient, Prisma } from "@/prisma/client";
+import type { ChannelType } from "@/prisma/enums";
 import type { ChannelFilter, InboxChannel, PaginatedChannels } from "../channels.types";
 import { withPersistence } from "@/shared/persistence/prisma-error.mapper";
 import { buildKeysetPage, keysetFilter, keysetTake } from "@/shared/persistence/keyset-pagination";
@@ -125,6 +126,18 @@ export class ChannelsQuery {
         where: { id: channelId, channelMembers: { some: { userId } } },
         include: { ...INBOX_INCLUDE, ...unreadCountSelect(userId) },
       }),
+    );
+  }
+
+  /**
+   * The channel's identity without any of the inbox relations — enough for a
+   * policy check that only asks "does it exist, and is it a group?". Deliberately
+   * not `getChannel`, which loads members, the last message and an unread count
+   * that a membership decision has no use for.
+   */
+  public async getChannelSummary(channelId: string): Promise<{ id: string; type: ChannelType } | null> {
+    return withPersistence("Failed to retrieve the channel.", () =>
+      this.db.channel.findUnique({ where: { id: channelId }, select: { id: true, type: true } }),
     );
   }
 
