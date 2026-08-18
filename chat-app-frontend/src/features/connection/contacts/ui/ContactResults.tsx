@@ -19,6 +19,14 @@ export interface ContactResultsProps {
     text: string;
     targetUserId: string;
   }>;
+  /**
+   * Optional per-row action rendered beside "Message" (contact removal). Injected
+   * from the page so this slice stays free of feature-to-feature imports.
+   */
+  contactAction?: React.ComponentType<{
+    targetUserId: string;
+    targetName?: string;
+  }>;
 }
 
 export function ContactResults({
@@ -30,6 +38,7 @@ export function ContactResults({
   isFetchingNextPage,
   fetchNextPage,
   messageButton: MessageButton,
+  contactAction: ContactAction,
 }: ContactResultsProps) {
   return (
     <div className="flex-1 h-full overflow-y-auto min-h-0 scrollbar-thin">
@@ -60,7 +69,15 @@ export function ContactResults({
               isOnline={contact?.online}
               date={contact?.lastSeenText}
               optionSlot={
-                <MessageButton text="Message" targetUserId={contact.id} />
+                <>
+                  <MessageButton text="Message" targetUserId={contact.id} />
+                  {ContactAction && (
+                    <ContactAction
+                      targetUserId={contact.id}
+                      targetName={contact.name}
+                    />
+                  )}
+                </>
               }
             />
           )}

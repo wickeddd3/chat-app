@@ -17,6 +17,7 @@ export {
   buildOptimisticGroupChannel,
   prependInboxChannel,
   patchInboxChannel,
+  closeDirectChannelWith,
 } from "./model/inbox-cache";
 
 export { isChannelAdmin } from "./model/channel-permissions";

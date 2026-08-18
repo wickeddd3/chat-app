@@ -16,10 +16,16 @@ export interface ContactListProps {
     text: string;
     targetUserId: string;
   }>;
+  /** Optional per-row action rendered beside "Message" (contact removal). */
+  contactAction?: React.ComponentType<{
+    targetUserId: string;
+    targetName?: string;
+  }>;
 }
 
 export function ContactList({
   messageButton: MessageButton,
+  contactAction: ContactAction,
 }: ContactListProps) {
   const [query, setQuery] = useState("");
 
@@ -93,6 +99,7 @@ export function ContactList({
             isFetchingNextPage={isFetchingNextPage}
             fetchNextPage={fetchNextPage}
             messageButton={MessageButton}
+            contactAction={ContactAction}
           />
         </TabsContent>
         <TabsContent
@@ -108,6 +115,7 @@ export function ContactList({
             isFetchingNextPage={isFetchingNextPage}
             fetchNextPage={fetchNextPage}
             messageButton={MessageButton}
+            contactAction={ContactAction}
           />
         </TabsContent>
       </Tabs>

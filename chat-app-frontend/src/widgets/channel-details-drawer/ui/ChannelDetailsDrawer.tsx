@@ -13,6 +13,7 @@ import {
   type InboxChannel,
 } from "@/entities/channel";
 import { UpdateGroupChannel } from "@/features/channel/update-group-channel";
+import { RemoveContactButton } from "@/features/connection/remove-contact";
 import { useAuth, usePresence } from "@/entities/auth";
 
 export interface ChannelDetailsDrawerProps {
@@ -30,6 +31,11 @@ export function ChannelDetailsDrawer({ channel }: ChannelDetailsDrawerProps) {
   // Only a group ADMIN may edit the channel; hide the control for everyone else
   // (the backend enforces this too, returning 403).
   const isAdmin = isChannelAdmin(channel, authUser?.id);
+
+  // Offered only on a 1:1 thread that is still open — once the contact is gone
+  // the channel is read-only and there is nothing left to remove.
+  const canRemoveContact =
+    !isGroupChannel && !!channel.recipient && channel.canMessage !== false;
 
   return (
     <Drawer direction="right">
@@ -58,6 +64,15 @@ export function ChannelDetailsDrawer({ channel }: ChannelDetailsDrawerProps) {
           isOnline={isOnline}
           getLastSeen={getLastSeen}
         />
+        {canRemoveContact && channel.recipient && (
+          <div className="mt-auto border-t px-4 py-4">
+            <RemoveContactButton
+              targetUserId={channel.recipient.id}
+              targetName={channel.recipient.name}
+              layout="full"
+            />
+          </div>
+        )}
       </DrawerContent>
     </Drawer>
   );

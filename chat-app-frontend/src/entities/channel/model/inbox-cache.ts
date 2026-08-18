@@ -133,3 +133,36 @@ export function patchInboxChannel(
     },
   );
 }
+
+/**
+ * Closes the direct thread with `userId` to new messages, wherever it is cached.
+ *
+ * Removing a contact is keyed on the *user*, not the channel, so the caller has
+ * no channel id to aim at — but a channel-detail payload names its `recipient`,
+ * which is exactly the direct thread's other party. Walking the
+ * `[scope, "channel", "details", …]` family and matching on that leaves every
+ * other conversation (and every group) untouched.
+ */
+export function closeDirectChannelWith(
+  queryClient: QueryClient,
+  userId: string,
+): void {
+  queryClient.setQueriesData<InboxChannel>(
+    {
+      predicate: (query) => {
+        const key = query.queryKey;
+        return (
+          Array.isArray(key) && key[1] === "channel" && key[2] === "details"
+        );
+      },
+    },
+    (channel) => {
+      if (!channel || channel.type !== "DIRECT") return channel;
+      if (channel.recipient?.id !== userId) return channel;
+      // Already closed — don't churn a new object for nothing.
+      if (channel.canMessage === false) return channel;
+
+      return { ...channel, canMessage: false };
+    },
+  );
+}

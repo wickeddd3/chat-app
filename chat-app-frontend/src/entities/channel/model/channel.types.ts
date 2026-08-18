@@ -33,6 +33,13 @@ export interface InboxChannel extends Channel {
   recipient: ChannelRecipient | null;
   unreadCount?: number;
   online?: boolean;
+  /**
+   * Whether the viewer may still post here. Always true for groups; false for a
+   * direct channel whose members are no longer connected — the history stays
+   * readable, but the composer is replaced by a notice. Only the channel-details
+   * endpoint sends it, so inbox rows leave it undefined (treated as allowed).
+   */
+  canMessage?: boolean;
 }
 
 export interface PaginatedInboxChannel {

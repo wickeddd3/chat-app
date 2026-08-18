@@ -5,6 +5,7 @@ import {
   prependInboxChannel,
   patchInboxChannel,
   invalidateInboxFilters,
+  closeDirectChannelWith,
 } from "./inbox-cache";
 import type { InboxChannel, PaginatedInboxChannel } from "./channel.types";
 
@@ -88,8 +89,7 @@ describe("invalidateInboxFilters", () => {
     invalidateInboxFilters(qc, ["unread"]);
 
     const predicate = spy.mock.calls[0][0]?.predicate as
-      | ((q: { queryKey: readonly unknown[] }) => boolean)
-      | undefined;
+      ((q: { queryKey: readonly unknown[] }) => boolean) | undefined;
     expect(predicate).toBeTypeOf("function");
 
     const matches = (key: readonly unknown[]) => predicate!({ queryKey: key });
@@ -117,5 +117,74 @@ describe("patchInboxChannel", () => {
       displayName: "New",
     });
     expect(channels.find((c) => c.id === "c2")?.name).toBe("Other");
+  });
+});
+
+describe("closeDirectChannelWith", () => {
+  /** A channel-details payload as the detail endpoint returns it. */
+  function details(
+    id: string,
+    overrides: Partial<InboxChannel> = {},
+  ): InboxChannel {
+    return {
+      ...buildOptimisticGroupChannel(id, id),
+      type: "DIRECT",
+      recipient: { id: "them", name: "Them", username: "them", image: null },
+      canMessage: true,
+      ...overrides,
+    };
+  }
+
+  const readDetails = (qc: QueryClient, id: string) =>
+    qc.getQueryData<InboxChannel>(keys.channel.details(id));
+
+  it("closes the direct thread with the removed user", () => {
+    const qc = new QueryClient();
+    qc.setQueryData(keys.channel.details("c1"), details("c1"));
+
+    closeDirectChannelWith(qc, "them");
+
+    expect(readDetails(qc, "c1")?.canMessage).toBe(false);
+  });
+
+  it("leaves other people's threads open", () => {
+    const qc = new QueryClient();
+    qc.setQueryData(
+      keys.channel.details("c2"),
+      details("c2", {
+        recipient: {
+          id: "someone-else",
+          name: "Other",
+          username: "other",
+          image: null,
+        },
+      }),
+    );
+
+    closeDirectChannelWith(qc, "them");
+
+    expect(readDetails(qc, "c2")?.canMessage).toBe(true);
+  });
+
+  it("never closes a group — membership is the permission there", () => {
+    const qc = new QueryClient();
+    qc.setQueryData(
+      keys.channel.details("g1"),
+      details("g1", { type: "GROUP", recipient: null }),
+    );
+
+    closeDirectChannelWith(qc, "them");
+
+    expect(readDetails(qc, "g1")?.canMessage).toBe(true);
+  });
+
+  it("leaves an already-closed thread byte-identical", () => {
+    const qc = new QueryClient();
+    const closed = details("c1", { canMessage: false });
+    qc.setQueryData(keys.channel.details("c1"), closed);
+
+    closeDirectChannelWith(qc, "them");
+
+    expect(readDetails(qc, "c1")).toBe(closed);
   });
 });
