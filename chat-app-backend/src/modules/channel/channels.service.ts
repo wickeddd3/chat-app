@@ -3,6 +3,7 @@ import { TYPES } from "@/config/types";
 import type { Channel } from "@/prisma/client";
 import { PresenceService } from "@/services/presence.service";
 import { createLogger } from "@/lib/logger";
+import { ConnectionsQuery } from "@/modules/connection/persistence/connections.query";
 import { TransactionManager } from "@/shared/persistence/transaction";
 import { ChannelsQuery } from "./persistence/channels.query";
 import { ChannelsRepository } from "./persistence/channels.repository";
@@ -26,6 +27,9 @@ export class ChannelsService {
     @inject(TYPES.ChannelsQuery) private channelsQuery: ChannelsQuery,
     @inject(TYPES.ChannelsRepository) private channelsRepository: ChannelsRepository,
     @inject(TYPES.ChannelMembersRepository) private membersRepository: ChannelMembersRepository,
+    // The connection table is read through its owning module's query, never with
+    // a Prisma call of our own.
+    @inject(TYPES.ConnectionsQuery) private connectionsQuery: ConnectionsQuery,
     @inject(TYPES.TransactionManager) private transaction: TransactionManager,
     @inject(TYPES.PresenceService) private presenceService: PresenceService,
   ) {}
@@ -52,6 +56,21 @@ export class ChannelsService {
   /** Authorization guard: is `userId` an ADMIN of `channelId`? (group management) */
   public async isChannelAdmin(userId: string, channelId: string): Promise<boolean> {
     return this.membersRepository.isAdmin(userId, channelId);
+  }
+
+  /**
+   * Authorization guard: may `userId` still post to `channelId`?
+   *
+   * Membership alone stopped being sufficient once contacts became removable: a
+   * direct channel outlives the connection that opened it so the history stays
+   * readable, but it accepts no new messages while the two aren't connected.
+   * Groups are unaffected — their membership *is* the permission.
+   */
+  public async canMessage(userId: string, channelId: string): Promise<boolean> {
+    const counterpartId = await this.channelsQuery.getDirectCounterpartId(channelId, userId);
+    if (!counterpartId) return true;
+
+    return this.connectionsQuery.areConnected(userId, counterpartId);
   }
 
   /** Every member id of a channel the requester belongs to (used for realtime fan-out). */

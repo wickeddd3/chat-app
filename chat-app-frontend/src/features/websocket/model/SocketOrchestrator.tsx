@@ -44,6 +44,10 @@ import {
   handleDeclinedRequest,
   type DeclinedRequestPayload,
 } from "./request-declined.handler";
+import {
+  handleContactRemoved,
+  type ContactRemovedPayload,
+} from "./contact-removed.handler";
 
 export interface SocketOrchestratorProps {
   authId: string | undefined;
@@ -119,6 +123,9 @@ export function SocketOrchestrator({ authId }: SocketOrchestratorProps) {
     const onDeclinedRequest = (payload: DeclinedRequestPayload) =>
       handleDeclinedRequest(queryClient, queryKeys, payload);
 
+    const onContactRemoved = (payload: ContactRemovedPayload) =>
+      handleContactRemoved(queryClient, queryKeys, payload);
+
     // Mount Listeners securely
     webSocketClient.on("connection:status_change", onStatusChange);
     webSocketClient.on("message:receive_message", onIncomingMessage);
@@ -130,6 +137,7 @@ export function SocketOrchestrator({ authId }: SocketOrchestratorProps) {
     webSocketClient.on("request:accepted", onAcceptedRequest);
     webSocketClient.on("request:canceled", onCanceledRequest);
     webSocketClient.on("request:declined", onDeclinedRequest);
+    webSocketClient.on("contact:removed", onContactRemoved);
 
     // Explicit function reference tear-down to avoid silent memory leaks
     return () => {
@@ -143,6 +151,7 @@ export function SocketOrchestrator({ authId }: SocketOrchestratorProps) {
       webSocketClient.off("request:accepted", onAcceptedRequest);
       webSocketClient.off("request:canceled", onCanceledRequest);
       webSocketClient.off("request:declined", onDeclinedRequest);
+      webSocketClient.off("contact:removed", onContactRemoved);
     };
   }, [authId, queryClient, queryKeys]);
 

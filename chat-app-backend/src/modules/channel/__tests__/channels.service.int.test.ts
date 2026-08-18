@@ -3,10 +3,11 @@ import { ChannelsService } from "@/modules/channel/channels.service";
 import { ChannelsQuery } from "@/modules/channel/persistence/channels.query";
 import { ChannelsRepository } from "@/modules/channel/persistence/channels.repository";
 import { ChannelMembersRepository } from "@/modules/channel/persistence/channel-members.repository";
+import { ConnectionsQuery } from "@/modules/connection/persistence/connections.query";
 import { TransactionManager } from "@/shared/persistence/transaction";
 import type { PresenceService } from "@/services/presence.service";
 import { prisma } from "@/test/helpers/db.helper";
-import { addMember, createChannel, createMessage, createReceipt, createUser } from "@/test/factories";
+import { addMember, createChannel, createConnection, createMessage, createReceipt, createUser } from "@/test/factories";
 
 // Reads run through the query, membership guards through the member repository,
 // and the two-table writes through the service (which orchestrates the real
@@ -14,6 +15,7 @@ import { addMember, createChannel, createMessage, createReceipt, createUser } fr
 const query = new ChannelsQuery(prisma);
 const channelsRepo = new ChannelsRepository(prisma);
 const membersRepo = new ChannelMembersRepository(prisma);
+const connectionsQuery = new ConnectionsQuery(prisma);
 const transactions = new TransactionManager(prisma);
 const presence = { refreshChannelMembersLookup: jest.fn().mockResolvedValue(undefined) };
 
@@ -21,6 +23,7 @@ const service = new ChannelsService(
   query,
   channelsRepo,
   membersRepo,
+  connectionsQuery,
   transactions,
   presence as unknown as PresenceService,
 );
@@ -95,6 +98,62 @@ describe("ChannelsService (integration, real DB)", () => {
       const unchanged = await prisma.channel.findUniqueOrThrow({ where: { id: channel.id } });
       expect(unchanged.name).toBe("Team");
       expect(presence.refreshChannelMembersLookup).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("canMessage", () => {
+    /** A direct channel between two users, plus one message of history. */
+    async function buildDirectThread(status?: "PENDING" | "ACCEPTED") {
+      const [a, b] = [await createUser(), await createUser()];
+      if (status) await createConnection({ senderId: a.id, receiverId: b.id, status });
+
+      const channel = await service.findChannelOrCreate(a.id, b.id);
+      await createMessage({ channelId: channel.id, authorId: a.id, content: "hello" });
+
+      return { a, b, channel };
+    }
+
+    it("allows a direct channel while the two are connected", async () => {
+      const { a, channel } = await buildDirectThread("ACCEPTED");
+
+      await expect(service.canMessage(a.id, channel.id)).resolves.toBe(true);
+    });
+
+    it("closes the channel once the connection is gone, but keeps the history readable", async () => {
+      const { a, b, channel } = await buildDirectThread("ACCEPTED");
+      await prisma.connection.deleteMany({});
+
+      await expect(service.canMessage(a.id, channel.id)).resolves.toBe(false);
+      await expect(service.canMessage(b.id, channel.id)).resolves.toBe(false);
+
+      // The point of the feature: the thread survives the removal.
+      const stillThere = await service.getChannel(a.id, channel.id);
+      expect(stillThere?.messages).toHaveLength(1);
+      expect(await prisma.message.count({ where: { channelId: channel.id } })).toBe(1);
+    });
+
+    it("does not open on a merely pending request", async () => {
+      const { a, channel } = await buildDirectThread("PENDING");
+
+      await expect(service.canMessage(a.id, channel.id)).resolves.toBe(false);
+    });
+
+    it("leaves groups alone — membership is the permission there", async () => {
+      const [creator, member] = [await createUser(), await createUser()];
+      const channel = await service.createGroupChannel(creator.id, { name: "Team", memberIds: [member.id] });
+
+      // No connection row exists between them at all.
+      await expect(service.canMessage(creator.id, channel.id)).resolves.toBe(true);
+      await expect(service.canMessage(member.id, channel.id)).resolves.toBe(true);
+    });
+
+    it("treats a non-member as unable to post", async () => {
+      const { channel } = await buildDirectThread("ACCEPTED");
+      const outsider = await createUser();
+
+      // getDirectCounterpartId is membership-scoped, so an outsider resolves to
+      // no counterpart — but `isMember` is the guard that actually rejects them.
+      await expect(service.isMember(outsider.id, channel.id)).resolves.toBe(false);
     });
   });
 });

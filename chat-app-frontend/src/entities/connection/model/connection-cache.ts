@@ -108,6 +108,37 @@ function matchesContactSearch(contact: ConnectionUser, query: string): boolean {
 }
 
 /**
+ * Removes a contact from every cached contacts list that holds them, decrementing
+ * each list's badge total. Keyed on the *user* id — a contact row is a person,
+ * not a connection — and a no-op for lists they aren't in, so a duplicate socket
+ * event can't decrement a total twice.
+ */
+export function removeContactFromLists(
+  queryClient: QueryClient,
+  keys: ScopedQueryKeys,
+  userId: string,
+): void {
+  queryClient.setQueriesData<ContactsInfiniteData>(
+    { queryKey: contactsListPrefix(keys) },
+    (data) => {
+      if (!data) return data;
+
+      const present = data.pages.some((page) =>
+        page.contacts.some((contact) => contact.id === userId),
+      );
+      if (!present) return data;
+
+      const pages = data.pages.map((page) => ({
+        ...page,
+        contacts: page.contacts.filter((contact) => contact.id !== userId),
+      }));
+
+      return { ...data, pages: withTotalDelta(pages, -1) };
+    },
+  );
+}
+
+/**
  * Prepends a newly accepted contact to the first page of every cached contacts
  * list whose search it matches, incrementing that list's badge total. Lists it
  * doesn't match are left alone — the contact isn't part of their result set, so

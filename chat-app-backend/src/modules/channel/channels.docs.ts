@@ -14,6 +14,13 @@ export const channelsSchemas: Record<string, OpenAPIV3.SchemaObject> = {
         items: { $ref: "#/components/schemas/ChannelMember" },
       },
       lastMessage: { $ref: "#/components/schemas/LastMessage" },
+      canMessage: {
+        type: "boolean",
+        description:
+          "Whether the viewer may post here. Always true for groups; false for a direct channel whose members " +
+          "are no longer connected — the history stays readable, but the composer is closed.",
+        example: true,
+      },
       recipient: {
         type: "object",
         nullable: true,

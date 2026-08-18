@@ -14,6 +14,7 @@ import {
   assertCanAccept,
   assertCanCancel,
   assertCanDecline,
+  assertCanRemoveContact,
   assertNoExistingConnection,
   assertNotSelfConnection,
 } from "./connections.policy";
@@ -157,6 +158,48 @@ export class ConnectionsService {
     });
 
     this.dispatcher.emit("request:canceled", { receiverId, senderId, connectionId });
+
+    return connectionId;
+  }
+
+  /**
+   * REMOVE CONTACT: dissolves an accepted connection from either side.
+   *
+   * Deliberately keyed on the *other user's* id rather than a connection id — the
+   * contacts list and the chat room both know who they are looking at, not which
+   * row joins them.
+   *
+   * The connection row is deleted rather than flagged, so both parties fall back
+   * to strangers and may reconnect later. Their channel and its messages are
+   * untouched: the conversation stays readable, it just stops accepting new
+   * messages (see `ChannelsService.canMessage`).
+   */
+  public async removeContact(authUserId: string, contactUserId: string): Promise<string> {
+    const existing = await this.connectionsRepository.findBetween(authUserId, contactUserId);
+    assertCanRemoveContact(existing, authUserId);
+    const connectionId = existing.id;
+
+    await this.transaction.run(async (tx) => {
+      await this.connectionsRepository.delete(connectionId, tx);
+      // Both parties' alerts point at a connection that no longer exists — drop
+      // them rather than leaving dead links in either inbox.
+      await this.notificationsRepository.deleteByReference(
+        { referenceId: connectionId, userId: authUserId, type: "CONNECTION_ACCEPTED" },
+        tx,
+      );
+      await this.notificationsRepository.deleteByReference(
+        { referenceId: connectionId, userId: contactUserId, type: "CONNECTION_ACCEPTED" },
+        tx,
+      );
+    });
+
+    // Fire-and-forget presence graph teardown: a Redis failure must not fail the
+    // (already-committed) removal, but shouldn't be silent either.
+    this.presenceService.removePresenceLookup(authUserId, contactUserId).catch((error: unknown) => {
+      log.error({ err: error, authUserId, contactUserId }, "Failed to prune presence cache");
+    });
+
+    this.dispatcher.emit("contact:removed", { authUserId, contactUserId, connectionId });
 
     return connectionId;
   }

@@ -25,7 +25,12 @@ function buildSavedMessage() {
 
 describe("SendMessageCommand", () => {
   let messagesService: { saveMessage: jest.Mock };
-  let channelsService: { isMember: jest.Mock; updateChannel: jest.Mock; getMemberIds: jest.Mock };
+  let channelsService: {
+    isMember: jest.Mock;
+    canMessage: jest.Mock;
+    updateChannel: jest.Mock;
+    getMemberIds: jest.Mock;
+  };
   let broadcaster: { emitToUser: jest.Mock };
   let presence: { setChannelMembersLookup: jest.Mock; getChannelMembersLookup: jest.Mock };
   let socket: { emit: jest.Mock };
@@ -35,6 +40,7 @@ describe("SendMessageCommand", () => {
     messagesService = { saveMessage: jest.fn().mockResolvedValue(buildSavedMessage()) };
     channelsService = {
       isMember: jest.fn(),
+      canMessage: jest.fn().mockResolvedValue(true),
       updateChannel: jest.fn().mockResolvedValue(undefined),
       getMemberIds: jest.fn(),
     };
@@ -55,6 +61,19 @@ describe("SendMessageCommand", () => {
 
   it("rejects a non-member with a FORBIDDEN error and never persists", async () => {
     channelsService.isMember.mockResolvedValue(false);
+
+    await command.execute(socket as unknown as Socket, "u1", payload);
+
+    expect(socket.emit).toHaveBeenCalledWith("error", expect.objectContaining({ code: "FORBIDDEN" }));
+    expect(messagesService.saveMessage).not.toHaveBeenCalled();
+    expect(broadcaster.emitToUser).not.toHaveBeenCalled();
+  });
+
+  it("rejects a removed contact with a FORBIDDEN error and never persists", async () => {
+    // Membership survives the removal — the channel and its history are kept —
+    // so only the connection check stands between them and a new message.
+    channelsService.isMember.mockResolvedValue(true);
+    channelsService.canMessage.mockResolvedValue(false);
 
     await command.execute(socket as unknown as Socket, "u1", payload);
 

@@ -4,6 +4,7 @@ import {
   prependConnectionRequest,
   prependContact,
   removeConnectionRequest,
+  removeContactFromLists,
 } from "./connection-cache";
 import type {
   Connection,
@@ -195,5 +196,71 @@ describe("prependContact", () => {
     const data = contactsAt(qc, "bob");
     expect(data.pages[0].contacts).toHaveLength(0);
     expect(data.pages[0].total).toBe(2);
+  });
+});
+
+describe("removeContactFromLists", () => {
+  const contactsAt = (qc: QueryClient, query: string) =>
+    qc.getQueryData<InfiniteData<PaginatedContacts>>(
+      keys.connections.contacts(query),
+    )!;
+
+  it("drops the contact and decrements the total on every page holding them", () => {
+    const qc = new QueryClient();
+    qc.setQueryData(
+      keys.connections.contacts(""),
+      contactsData([contact("a", "Alice"), contact("b", "Bob")], 5),
+    );
+
+    removeContactFromLists(qc, keys, "a");
+
+    const data = contactsAt(qc, "");
+    expect(data.pages[0].contacts.map((c) => c.id)).toEqual(["b"]);
+    expect(data.pages[0].total).toBe(4);
+  });
+
+  it("removes them from every cached search variant at once", () => {
+    const qc = new QueryClient();
+    for (const query of ["", "ali"]) {
+      qc.setQueryData(
+        keys.connections.contacts(query),
+        contactsData([contact("a", "Alice")], 3),
+      );
+    }
+
+    removeContactFromLists(qc, keys, "a");
+
+    for (const query of ["", "ali"]) {
+      const data = contactsAt(qc, query);
+      expect(data.pages[0].contacts).toHaveLength(0);
+      expect(data.pages[0].total).toBe(2);
+    }
+  });
+
+  it("leaves lists that never held the contact untouched", () => {
+    const qc = new QueryClient();
+    qc.setQueryData(
+      keys.connections.contacts("bob"),
+      contactsData([contact("b", "Bob")], 2),
+    );
+
+    removeContactFromLists(qc, keys, "a");
+
+    const data = contactsAt(qc, "bob");
+    expect(data.pages[0].contacts).toHaveLength(1);
+    expect(data.pages[0].total).toBe(2);
+  });
+
+  it("is idempotent — a duplicate event cannot decrement the total twice", () => {
+    const qc = new QueryClient();
+    qc.setQueryData(
+      keys.connections.contacts(""),
+      contactsData([contact("a", "Alice")], 4),
+    );
+
+    removeContactFromLists(qc, keys, "a");
+    removeContactFromLists(qc, keys, "a");
+
+    expect(contactsAt(qc, "").pages[0].total).toBe(3);
   });
 });

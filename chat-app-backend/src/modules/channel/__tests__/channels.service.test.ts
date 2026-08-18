@@ -7,7 +7,7 @@ jest.mock("@/lib/redis", () => ({ redisClient: {}, pubClient: {}, subClient: {},
 jest.mock("@/prisma/client", () => ({ PrismaClient: class {} }));
 
 describe("ChannelsService (DI container + mocked collaborators)", () => {
-  let query: { getChannels: jest.Mock };
+  let query: { getChannels: jest.Mock; getDirectCounterpartId: jest.Mock };
   let repo: {
     findExistingDirect: jest.Mock;
     createDirect: jest.Mock;
@@ -16,12 +16,13 @@ describe("ChannelsService (DI container + mocked collaborators)", () => {
     touch: jest.Mock;
   };
   let members: { isAdmin: jest.Mock; addMembers: jest.Mock; replaceMembers: jest.Mock };
+  let connections: { areConnected: jest.Mock };
   let transaction: { run: jest.Mock };
   let presence: { refreshChannelMembersLookup: jest.Mock };
   let service: ChannelsService;
 
   beforeEach(() => {
-    query = { getChannels: jest.fn() };
+    query = { getChannels: jest.fn(), getDirectCounterpartId: jest.fn().mockResolvedValue(null) };
     repo = {
       findExistingDirect: jest.fn(),
       createDirect: jest.fn().mockResolvedValue({ id: "c1", type: "DIRECT" }),
@@ -34,6 +35,7 @@ describe("ChannelsService (DI container + mocked collaborators)", () => {
       addMembers: jest.fn().mockResolvedValue(undefined),
       replaceMembers: jest.fn().mockResolvedValue(undefined),
     };
+    connections = { areConnected: jest.fn().mockResolvedValue(true) };
     // Runs the unit of work inline; the executor object is never inspected.
     transaction = { run: jest.fn((work: (tx: unknown) => Promise<unknown>) => work({})) };
     presence = { refreshChannelMembersLookup: jest.fn().mockResolvedValue(undefined) };
@@ -42,6 +44,7 @@ describe("ChannelsService (DI container + mocked collaborators)", () => {
       [TYPES.ChannelsQuery, query],
       [TYPES.ChannelsRepository, repo],
       [TYPES.ChannelMembersRepository, members],
+      [TYPES.ConnectionsQuery, connections],
       [TYPES.TransactionManager, transaction],
       [TYPES.PresenceService, presence],
     ]);
@@ -62,6 +65,30 @@ describe("ChannelsService (DI container + mocked collaborators)", () => {
     query.getChannels.mockRejectedValue(underlying);
 
     await expect(service.getChannels({ authUserId: "u1" })).rejects.toBe(underlying);
+  });
+
+  describe("canMessage", () => {
+    it("lets a group through without consulting the connection graph", async () => {
+      query.getDirectCounterpartId.mockResolvedValue(null);
+
+      await expect(service.canMessage("u1", "c1")).resolves.toBe(true);
+      expect(connections.areConnected).not.toHaveBeenCalled();
+    });
+
+    it("allows a direct channel while the two are still connected", async () => {
+      query.getDirectCounterpartId.mockResolvedValue("u2");
+      connections.areConnected.mockResolvedValue(true);
+
+      await expect(service.canMessage("u1", "c1")).resolves.toBe(true);
+      expect(connections.areConnected).toHaveBeenCalledWith("u1", "u2");
+    });
+
+    it("closes a direct channel once the contact has been removed", async () => {
+      query.getDirectCounterpartId.mockResolvedValue("u2");
+      connections.areConnected.mockResolvedValue(false);
+
+      await expect(service.canMessage("u1", "c1")).resolves.toBe(false);
+    });
   });
 
   describe("findChannelOrCreate", () => {

@@ -122,6 +122,24 @@ export class ChannelsQuery {
     );
   }
 
+  /**
+   * The id of the other member of a DIRECT channel, or null for a GROUP (and for
+   * a channel that doesn't exist or that `userId` isn't in).
+   *
+   * A narrow projection on purpose: the "may these two still message?" check runs
+   * on every send, and pulling the full inbox `include` for it would be wasteful.
+   */
+  public async getDirectCounterpartId(channelId: string, userId: string): Promise<string | null> {
+    return withPersistence("Failed to resolve the direct channel counterpart.", async () => {
+      const channel = await this.db.channel.findFirst({
+        where: { id: channelId, type: "DIRECT", channelMembers: { some: { userId } } },
+        select: { channelMembers: { where: { userId: { not: userId } }, select: { userId: true }, take: 1 } },
+      });
+
+      return channel?.channelMembers[0]?.userId ?? null;
+    });
+  }
+
   /** Total unread messages across all of the user's channels, for the global badge. */
   public async getUnreadMessagesCount({ authUserId }: { authUserId: string }): Promise<number> {
     return withPersistence("Failed to retrieve unread messages count.", async () => {

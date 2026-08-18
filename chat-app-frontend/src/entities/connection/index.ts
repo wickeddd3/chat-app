@@ -11,6 +11,7 @@ export {
   prependConnectionRequest,
   prependContact,
   removeConnectionRequest,
+  removeContactFromLists,
 } from "./model/connection-cache";
 
 export { useContacts } from "./model/useContacts";

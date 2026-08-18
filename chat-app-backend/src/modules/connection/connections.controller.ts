@@ -70,6 +70,15 @@ export class ConnectionsController extends BaseController {
     });
   };
 
+  public removeContact = async (req: Request, res: Response): Promise<void> => {
+    const authUserId = req.authId ?? "";
+    const contactUserId = typeof req.params.userId === "string" ? req.params.userId : "";
+
+    const connectionId = await this.connectionsService.removeContact(authUserId, contactUserId);
+
+    this.sendSuccess(res, connectionId, "Contact removed successfully");
+  };
+
   public sendRequest = async (req: Request, res: Response): Promise<void> => {
     const authUserId = req.authId ?? "";
     const body = req.body as { receiverId?: unknown };

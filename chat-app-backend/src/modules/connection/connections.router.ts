@@ -9,6 +9,7 @@ import {
   connectionIdParamsSchema,
   connectionRequestBodySchema,
   connectionsListQuerySchema,
+  contactUserIdParamsSchema,
 } from "./connections.schema";
 
 @injectable()
@@ -37,6 +38,12 @@ export class ConnectionsRouter implements HttpRouter {
       `${this.path}/received`,
       [authMiddleware, validate({ query: connectionsListQuerySchema })],
       this.connectionsController.getReceivedConnections,
+    );
+
+    this.router.delete(
+      `${this.path}/contacts/:userId`,
+      [authMiddleware, validate({ params: contactUserIdParamsSchema })],
+      this.connectionsController.removeContact,
     );
 
     this.router.post(

@@ -46,7 +46,7 @@ describe("ConnectionsService (DI container + mocked collaborators)", () => {
   let notifications: { create: jest.Mock; markReadByReference: jest.Mock; deleteByReference: jest.Mock };
   let transaction: { run: jest.Mock };
   let dispatcher: { emit: jest.Mock };
-  let presence: { setPresenceLookup: jest.Mock };
+  let presence: { setPresenceLookup: jest.Mock; removePresenceLookup: jest.Mock };
   let service: ConnectionsService;
 
   beforeEach(() => {
@@ -66,7 +66,10 @@ describe("ConnectionsService (DI container + mocked collaborators)", () => {
     // Runs the unit of work inline; the executor is never touched by the mocks.
     transaction = { run: jest.fn((work: (tx: unknown) => Promise<unknown>) => work({})) };
     dispatcher = { emit: jest.fn() };
-    presence = { setPresenceLookup: jest.fn().mockResolvedValue(undefined) };
+    presence = {
+      setPresenceLookup: jest.fn().mockResolvedValue(undefined),
+      removePresenceLookup: jest.fn().mockResolvedValue(undefined),
+    };
 
     // Build a throwaway container: real service, mocked collaborators.
     const container = new Container();
@@ -221,6 +224,64 @@ describe("ConnectionsService (DI container + mocked collaborators)", () => {
 
       await expect(service.declineRequest("receiver", "c1")).rejects.toMatchObject({ code: "CONFLICT" });
       expect(repo.delete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("removeContact", () => {
+    beforeEach(() => {
+      repo.findBetween.mockResolvedValue(buildConnection({ status: "ACCEPTED" }));
+    });
+
+    it("looks the pair up by user id, deletes the row, and clears both inboxes", async () => {
+      await expect(service.removeContact("sender", "receiver")).resolves.toBe("c1");
+
+      expect(repo.findBetween).toHaveBeenCalledWith("sender", "receiver");
+      expect(repo.delete).toHaveBeenCalledWith("c1", {});
+      expect(notifications.deleteByReference).toHaveBeenCalledWith(
+        { referenceId: "c1", userId: "sender", type: "CONNECTION_ACCEPTED" },
+        {},
+      );
+      expect(notifications.deleteByReference).toHaveBeenCalledWith(
+        { referenceId: "c1", userId: "receiver", type: "CONNECTION_ACCEPTED" },
+        {},
+      );
+    });
+
+    it("tears the pair out of the presence graph and announces to the other party", async () => {
+      await service.removeContact("sender", "receiver");
+
+      expect(presence.removePresenceLookup).toHaveBeenCalledWith("sender", "receiver");
+      expect(dispatcher.emit).toHaveBeenCalledWith("contact:removed", {
+        authUserId: "sender",
+        contactUserId: "receiver",
+        connectionId: "c1",
+      });
+    });
+
+    it("works from the receiving side too — either party may remove", async () => {
+      await expect(service.removeContact("receiver", "sender")).resolves.toBe("c1");
+      expect(repo.delete).toHaveBeenCalledWith("c1", {});
+    });
+
+    it("reports a stranger as not found without opening a transaction", async () => {
+      repo.findBetween.mockResolvedValue(null);
+
+      await expect(service.removeContact("sender", "receiver")).rejects.toMatchObject({ code: "NOT_FOUND" });
+      expect(transaction.run).not.toHaveBeenCalled();
+    });
+
+    it("refuses to remove a still-pending request as a conflict", async () => {
+      repo.findBetween.mockResolvedValue(buildConnection({ status: "PENDING" }));
+
+      await expect(service.removeContact("sender", "receiver")).rejects.toMatchObject({ code: "CONFLICT" });
+      expect(repo.delete).not.toHaveBeenCalled();
+    });
+
+    it("commits the removal even when the presence teardown fails", async () => {
+      presence.removePresenceLookup.mockRejectedValue(new Error("redis down"));
+
+      await expect(service.removeContact("sender", "receiver")).resolves.toBe("c1");
+      expect(repo.delete).toHaveBeenCalled();
     });
   });
 });
