@@ -12,3 +12,8 @@ export const connectionRequestBodySchema = z.object({
 export const connectionIdParamsSchema = z.object({
   id: z.string().min(1, "connection id is required"),
 });
+
+/** Removing a contact addresses the other *user*, not the connection row. */
+export const contactUserIdParamsSchema = z.object({
+  userId: z.string().min(1, "user id is required"),
+});

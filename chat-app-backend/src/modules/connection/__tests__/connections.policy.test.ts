@@ -3,6 +3,7 @@ import {
   assertCanAccept,
   assertCanCancel,
   assertCanDecline,
+  assertCanRemoveContact,
   assertNoExistingConnection,
   assertNotSelfConnection,
 } from "@/modules/connection/connections.policy";
@@ -97,6 +98,31 @@ describe("connections policy", () => {
 
     it("refuses once the request has been accepted", () => {
       expect(() => assertCanCancel(buildConnection({ status: "ACCEPTED" }), "sender")).toThrow(
+        expect.objectContaining({ code: "CONFLICT" }),
+      );
+    });
+  });
+
+  describe("assertCanRemoveContact", () => {
+    const accepted = buildConnection({ status: "ACCEPTED" });
+
+    it("allows either party to dissolve an accepted connection", () => {
+      expect(() => assertCanRemoveContact(accepted, "sender")).not.toThrow();
+      expect(() => assertCanRemoveContact(accepted, "receiver")).not.toThrow();
+    });
+
+    it("forbids an outsider from removing someone else's contact", () => {
+      expect(() => assertCanRemoveContact(accepted, "stranger")).toThrow(
+        expect.objectContaining({ code: "FORBIDDEN" }),
+      );
+    });
+
+    it("reports strangers as not found", () => {
+      expect(() => assertCanRemoveContact(null, "sender")).toThrow(expect.objectContaining({ code: "NOT_FOUND" }));
+    });
+
+    it("refuses a pending request — that is cancelled or declined, not removed", () => {
+      expect(() => assertCanRemoveContact(buildConnection(), "sender")).toThrow(
         expect.objectContaining({ code: "CONFLICT" }),
       );
     });

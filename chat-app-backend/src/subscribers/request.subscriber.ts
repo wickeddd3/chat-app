@@ -10,6 +10,7 @@ export class RequestSubscriber {
     this.handleRequestAccepted = this.handleRequestAccepted.bind(this);
     this.handleRequestCanceled = this.handleRequestCanceled.bind(this);
     this.handleRequestDeclined = this.handleRequestDeclined.bind(this);
+    this.handleContactRemoved = this.handleContactRemoved.bind(this);
   }
 
   public handleRequestSent = async ({
@@ -54,5 +55,21 @@ export class RequestSubscriber {
     connectionId: string;
   }): Promise<void> => {
     await this.broadcaster.emitToUser(senderId, "request:declined", { receiverId, connectionId });
+  };
+
+  /**
+   * Only the *other* party is notified — the remover already applied the change
+   * optimistically from their own mutation.
+   */
+  public handleContactRemoved = async ({
+    authUserId,
+    contactUserId,
+    connectionId,
+  }: {
+    authUserId: string;
+    contactUserId: string;
+    connectionId: string;
+  }): Promise<void> => {
+    await this.broadcaster.emitToUser(contactUserId, "contact:removed", { userId: authUserId, connectionId });
   };
 }

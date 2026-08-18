@@ -48,6 +48,26 @@ export function assertCanDecline(connection: Connection | null, receiverId: stri
 }
 
 /**
+ * Removing a contact dissolves an *accepted* connection, and either party may do
+ * it. A pending request is withdrawn by cancelling or declining instead, so those
+ * states are rejected here rather than silently deleting the request.
+ */
+export function assertCanRemoveContact(
+  connection: Connection | null,
+  authUserId: string,
+): asserts connection is Connection {
+  if (!connection) {
+    throw new NotFoundError("You are not connected to this user.");
+  }
+  if (connection.senderId !== authUserId && connection.receiverId !== authUserId) {
+    throw new ForbiddenError("You cannot remove a connection you are not part of.");
+  }
+  if (connection.status !== "ACCEPTED") {
+    throw new ConflictError("This user is not one of your contacts.");
+  }
+}
+
+/**
  * Cancelling is the author's action, and only while the request is pending —
  * once accepted, the relationship is dissolved by disconnecting, not cancelling.
  */

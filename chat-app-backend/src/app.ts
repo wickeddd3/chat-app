@@ -229,6 +229,7 @@ export class App {
     dispatcher.on("request:accepted", requestSubscriber.handleRequestAccepted);
     dispatcher.on("request:canceled", requestSubscriber.handleRequestCanceled);
     dispatcher.on("request:declined", requestSubscriber.handleRequestDeclined);
+    dispatcher.on("contact:removed", requestSubscriber.handleContactRemoved);
 
     log.info(`🔔 Registered ${String(dispatcher.eventNames().length)} domain event subscribers`);
   }

@@ -329,4 +329,50 @@ export const connectionsPaths: OpenAPIV3.PathsObject = {
       },
     },
   },
+
+  "/api/connections/contacts/{userId}": {
+    delete: {
+      summary: "Remove a contact, dissolving the accepted connection",
+      description:
+        "Deletes the connection between the two users. Their direct channel and its message history are kept, " +
+        "but the channel stops accepting new messages until they connect again.",
+      tags: ["Connections"],
+      security: [{ bearerAuth: [] }],
+      parameters: [
+        {
+          name: "userId",
+          in: "path",
+          required: true,
+          description: "The unique ID of the contact to remove",
+          schema: { type: "string", example: "b1a23c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d" },
+        },
+      ],
+      responses: {
+        200: {
+          description: "Contact removed successfully",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", example: true },
+                  message: { type: "string", example: "Contact removed successfully" },
+                  data: {
+                    type: "string",
+                    description: "The ID of the deleted connection",
+                    example: "b1a23c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+                  },
+                  timestamp: { type: "string", format: "date-time" },
+                },
+              },
+            },
+          },
+        },
+        401: { description: "Unauthorized" },
+        403: { description: "Not a party to this connection" },
+        404: { description: "Not connected to this user" },
+        409: { description: "This user is not one of your contacts" },
+      },
+    },
+  },
 };

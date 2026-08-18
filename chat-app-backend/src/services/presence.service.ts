@@ -78,6 +78,25 @@ export class PresenceService {
   }
 
   /**
+   * Tears the pair back out of the presence graph — the inverse of
+   * `setPresenceLookup`, run when a contact is removed.
+   *
+   * Without this the two would keep observing each other's online/offline deltas
+   * until the 24-hour TTL happened to expire. Shared group channels re-seed the
+   * follower edge on their next roster warm, so dropping it here is safe.
+   */
+  public async removePresenceLookup(userId: string, otherUserId: string): Promise<void> {
+    const pipeline = this.redis.pipeline();
+
+    pipeline.srem(`${this.contactPrefix}${userId}`, otherUserId);
+    pipeline.srem(`${this.contactPrefix}${otherUserId}`, userId);
+    pipeline.srem(`${this.followersPrefix}${userId}`, otherUserId);
+    pipeline.srem(`${this.followersPrefix}${otherUserId}`, userId);
+
+    await pipeline.exec();
+  }
+
+  /**
    * Seeds/Updates the full roster mapping of a channel inside Redis.
    */
   public async setChannelMembersLookup(channelId: string, memberIds: string[]): Promise<void> {

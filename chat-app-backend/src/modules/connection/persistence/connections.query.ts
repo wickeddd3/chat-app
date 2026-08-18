@@ -83,6 +83,29 @@ export class ConnectionsQuery {
     });
   }
 
+  /**
+   * Whether two users still hold an accepted connection, in either direction.
+   *
+   * The authorization read behind "can these two message each other?" — a direct
+   * channel outlives the connection that opened it (history is kept when a
+   * contact is removed), so membership alone no longer proves the pair may write.
+   */
+  public async areConnected(userId: string, otherUserId: string): Promise<boolean> {
+    return withPersistence("Failed to check the connection between the users.", async () => {
+      const count = await this.db.connection.count({
+        where: {
+          status: "ACCEPTED",
+          OR: [
+            { senderId: userId, receiverId: otherUserId },
+            { senderId: otherUserId, receiverId: userId },
+          ],
+        },
+      });
+
+      return count > 0;
+    });
+  }
+
   /** Every accepted counterpart's id — the fan-out set for presence lookups. */
   public async getContactIds(authUserId: string): Promise<string[]> {
     return withPersistence("Failed to retrieve contacts.", async () => {

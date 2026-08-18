@@ -17,7 +17,10 @@ const notifications = new NotificationsRepository(prisma);
 const transactions = new TransactionManager(prisma);
 
 const dispatcher = { emit: jest.fn() };
-const presence = { setPresenceLookup: jest.fn().mockResolvedValue(undefined) };
+const presence = {
+  setPresenceLookup: jest.fn().mockResolvedValue(undefined),
+  removePresenceLookup: jest.fn().mockResolvedValue(undefined),
+};
 
 const service = new ConnectionsService(
   query,
@@ -31,6 +34,7 @@ const service = new ConnectionsService(
 beforeEach(() => {
   dispatcher.emit.mockClear();
   presence.setPresenceLookup.mockClear();
+  presence.removePresenceLookup.mockClear();
 });
 
 /** Reads the payload of the first emission of `event`. */
@@ -190,6 +194,54 @@ describe("ConnectionsService (integration, real DB)", () => {
 
       await expect(service.cancelRequest(sender.id, sentConnection.id)).rejects.toMatchObject({ code: "CONFLICT" });
       expect(await prisma.connection.count()).toBe(1);
+    });
+  });
+
+  describe("removeContact", () => {
+    it("deletes the accepted connection and drops the pair from each other's contacts", async () => {
+      const [a, b] = [await createUser(), await createUser()];
+      await createConnection({ senderId: a.id, receiverId: b.id, status: "ACCEPTED" });
+
+      await service.removeContact(a.id, b.id);
+
+      expect(await prisma.connection.count()).toBe(0);
+      expect((await query.getUserContacts({ authUserId: a.id })).contacts).toHaveLength(0);
+      expect((await query.getUserContacts({ authUserId: b.id })).contacts).toHaveLength(0);
+    });
+
+    it("can be run by the receiving side, against a connection they did not open", async () => {
+      const [a, b] = [await createUser(), await createUser()];
+      await createConnection({ senderId: a.id, receiverId: b.id, status: "ACCEPTED" });
+
+      await service.removeContact(b.id, a.id);
+
+      expect(await prisma.connection.count()).toBe(0);
+      expect(emittedPayload("contact:removed")).toMatchObject({ authUserId: b.id, contactUserId: a.id });
+    });
+
+    it("leaves the pair as strangers, free to connect again", async () => {
+      const [a, b] = [await createUser(), await createUser()];
+      await createConnection({ senderId: a.id, receiverId: b.id, status: "ACCEPTED" });
+      await service.removeContact(a.id, b.id);
+
+      // The reverse-direction guard would reject this if the old row survived.
+      const reconnected = await service.sendRequest(b.id, a.id);
+
+      expect(reconnected.sentConnection.status).toBe("PENDING");
+    });
+
+    it("refuses a pending request — it is cancelled or declined, not removed", async () => {
+      const [a, b] = [await createUser(), await createUser()];
+      await createConnection({ senderId: a.id, receiverId: b.id, status: "PENDING" });
+
+      await expect(service.removeContact(a.id, b.id)).rejects.toMatchObject({ code: "CONFLICT" });
+      expect(await prisma.connection.count()).toBe(1);
+    });
+
+    it("refuses when the two were never connected", async () => {
+      const [a, b] = [await createUser(), await createUser()];
+
+      await expect(service.removeContact(a.id, b.id)).rejects.toMatchObject({ code: "NOT_FOUND" });
     });
   });
 });
