@@ -55,6 +55,13 @@ export class ChannelsRepository {
     );
   }
 
+  /** Sets (or clears, with null) a group's avatar. */
+  public async setImage(channelId: string, image: string | null, executor?: Executor): Promise<Channel> {
+    return withPersistence("Failed to update the group avatar.", () =>
+      this.client(executor).channel.update({ where: { id: channelId }, data: { image } }),
+    );
+  }
+
   /**
    * Deletes the channel outright — used when its last member leaves, since
    * nobody could ever reach it again. Members, messages and receipts go with it

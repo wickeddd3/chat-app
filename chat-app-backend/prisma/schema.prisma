@@ -107,6 +107,9 @@ model Notification {
 model Channel {
   id        String    @id @default(uuid())
   name      String
+  // Group avatar. Null for a DIRECT channel, which renders the other member's
+  // profile picture instead of one of its own.
+  image     String?
   type      ChannelType
   authorId  String
   createdBy User      @relation(fields: [authorId], references: [id])

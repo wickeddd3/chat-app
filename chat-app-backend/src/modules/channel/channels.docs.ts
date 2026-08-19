@@ -305,6 +305,65 @@ export const channelsPaths: OpenAPIV3.PathsObject = {
     },
   },
 
+  "/api/channels/group/{channelId}/image": {
+    patch: {
+      summary: "Set or clear a group's avatar",
+      description:
+        "Admin-only. Send a public storage URL to set the avatar, or null to clear it back to the initials fallback.",
+      tags: ["Channels"],
+      security: [{ bearerAuth: [] }],
+      parameters: [
+        {
+          name: "channelId",
+          in: "path",
+          required: true,
+          description: "The unique group channel ID",
+          schema: { type: "string", example: "b1a23c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d" },
+        },
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["image"],
+              properties: {
+                image: {
+                  type: "string",
+                  nullable: true,
+                  description: "Public URL of the uploaded image, or null to remove it",
+                  example: "https://example.supabase.co/storage/v1/object/public/avatars/abc.png",
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: "Group avatar updated successfully",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", example: true },
+                  message: { type: "string", example: "Group avatar updated successfully" },
+                  data: { $ref: "#/components/schemas/Channel" },
+                  timestamp: { type: "string", format: "date-time" },
+                },
+              },
+            },
+          },
+        },
+        401: { description: "Unauthorized" },
+        403: { description: "Forbidden - Only group admins can change the avatar" },
+        422: { description: "Validation failed" },
+      },
+    },
+  },
+
   "/api/channels/group/{channelId}/members/me": {
     delete: {
       summary: "Leave a group channel",

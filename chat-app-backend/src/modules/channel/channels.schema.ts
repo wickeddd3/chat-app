@@ -18,3 +18,8 @@ export const groupChannelBodySchema = z.object({
   name: z.string().trim().min(1, "Group name is required").max(100),
   memberIds: z.array(z.string().min(1)).default([]),
 });
+
+/** `null` clears the group avatar back to the initials fallback. */
+export const groupAvatarBodySchema = z.object({
+  image: z.string().trim().min(1, "Image is required").nullable(),
+});

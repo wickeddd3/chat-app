@@ -19,7 +19,8 @@ export function channelToInboxChannel(channel: InboxChannel, authUserId: string)
     name: channel.name,
     channelMembers: channel.channelMembers,
     displayName: isDirect ? (otherMember?.name ?? channel.name) : channel.name,
-    displayImage: isDirect ? (otherMember?.image ?? null) : null,
+    // A direct thread shows the other person; a group shows its own avatar.
+    displayImage: isDirect ? (otherMember?.image ?? null) : channel.image,
     lastMessage,
     unreadCount: channel._count.messages,
   };
@@ -41,7 +42,10 @@ export function channelToChannelDetails(channel: InboxChannel, authUserId: strin
     name: channel.name,
     channelMembers: channel.channelMembers,
     displayName: isDirect ? (otherMember?.name ?? channel.name) : channel.name,
-    displayImage: isDirect ? (otherMember?.image ?? null) : null,
+    displayImage: isDirect ? (otherMember?.image ?? null) : channel.image,
+    // The raw column, so an admin's upload dialog can show what is currently set
+    // (displayImage conflates the two cases).
+    image: channel.image,
     recipient: otherMember,
     canMessage,
   };

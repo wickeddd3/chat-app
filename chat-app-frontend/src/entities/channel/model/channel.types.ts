@@ -2,6 +2,12 @@ export interface Channel {
   id: string;
   name: string;
   type: string;
+  /**
+   * A group's own avatar. Null for a direct channel, which renders the other
+   * member's picture instead — `displayImage` is the resolved one to render,
+   * this is the raw column an admin's upload dialog edits.
+   */
+  image?: string | null;
 }
 
 export interface ChannelRecipient {

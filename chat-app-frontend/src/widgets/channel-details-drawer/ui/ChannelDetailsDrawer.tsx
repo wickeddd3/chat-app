@@ -13,6 +13,7 @@ import {
   type InboxChannel,
 } from "@/entities/channel";
 import { UpdateGroupChannel } from "@/features/channel/update-group-channel";
+import { UploadGroupAvatar } from "@/features/channel/upload-group-avatar";
 import { RemoveContactButton } from "@/features/connection/remove-contact";
 import { LeaveGroupButton } from "@/features/channel/leave-group-channel";
 import { useAuth, usePresence } from "@/entities/auth";
@@ -66,7 +67,14 @@ export function ChannelDetailsDrawer({ channel }: ChannelDetailsDrawerProps) {
           <DrawerDescription className="flex justify-between items-center">
             <span className="text-sm">Channel details</span>
             {isGroupChannel && isAdmin && (
-              <UpdateGroupChannel channel={channel} />
+              <span className="flex items-center gap-2">
+                <UploadGroupAvatar
+                  channelId={channel.id}
+                  channelName={channel.displayName}
+                  currentImageUrl={channel.image}
+                />
+                <UpdateGroupChannel channel={channel} />
+              </span>
             )}
           </DrawerDescription>
         </DrawerHeader>

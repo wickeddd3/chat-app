@@ -61,7 +61,12 @@ export default function ProfilePage() {
               </p>
             </div>
           </div>
-          {authProfile?.id && <UploadAvatar userId={authProfile.id} />}
+          {authProfile?.id && (
+            <UploadAvatar
+              userId={authProfile.id}
+              currentImageUrl={authProfile.image}
+            />
+          )}
         </Card>
 
         <Tabs defaultValue="profile" className="w-full">
