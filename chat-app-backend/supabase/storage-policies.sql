@@ -1,8 +1,8 @@
 -- Storage access policies for the `avatars` and `groups` buckets.
 --
 -- Run in the Supabase SQL editor (Dashboard → SQL Editor). Not a Prisma
--- migration: these live on `storage.objects`, a schema Prisma does not manage,
--- and `prisma migrate` would try to drop what it cannot see.
+-- migration: these live on `storage.objects` and in a `private` schema, neither
+-- of which Prisma manages — `prisma migrate` would try to drop what it cannot see.
 --
 -- Both buckets must be created as PUBLIC. The app stores and renders
 -- `getPublicUrl(...)`, so a private bucket yields broken images rather than an
@@ -24,6 +24,49 @@
 -- ---------------------------------------------------------------------------
 
 begin;
+
+-- ===========================================================================
+-- Admin check
+--
+-- Postgres evaluates EVERY permissive policy for a command, not only the one
+-- whose bucket matches — so an avatar upload also runs the groups policy. If
+-- that policy read `channel_members` directly, every upload would fail with
+-- "permission denied for table channel_members", because `authenticated` has no
+-- grant on the app's tables.
+--
+-- Granting one would fix the error and open a hole: the app's tables are
+-- currently unreachable through PostgREST precisely because those grants are
+-- absent, and a GRANT SELECT here would publish the whole membership graph to
+-- any signed-in user via /rest/v1/channel_members.
+--
+-- A SECURITY DEFINER function runs as its owner, so it can read the table while
+-- exposing only a boolean. It lives in `private`, a schema PostgREST does not
+-- serve, so it cannot be called as an RPC either.
+-- ===========================================================================
+
+create schema if not exists private;
+
+create or replace function private.is_channel_admin(channel_id text, user_id text)
+returns boolean
+language sql
+security definer
+-- Pinned so the function cannot be redirected at a caller-controlled schema.
+set search_path = public, pg_temp
+stable
+as $$
+  select exists (
+    select 1
+    from public.channel_members
+    where "channelId" = channel_id
+      and "userId" = user_id
+      and role = 'ADMIN'
+  );
+$$;
+
+-- Reachable by signed-in users (the policies run as them) and nobody else.
+revoke all on function private.is_channel_admin(text, text) from public, anon;
+grant usage on schema private to authenticated;
+grant execute on function private.is_channel_admin(text, text) to authenticated;
 
 -- ===========================================================================
 -- avatars
@@ -71,6 +114,10 @@ using (
 
 -- ===========================================================================
 -- groups
+--
+-- Storage enforces the same rule the API does (channels.policy), rather than
+-- trusting that nobody calls the storage endpoint directly. The folder name is
+-- the channel id, which is what makes this expressible at all.
 -- ===========================================================================
 
 drop policy if exists "groups: public read" on storage.objects;
@@ -79,24 +126,13 @@ on storage.objects for select
 to public
 using (bucket_id = 'groups');
 
--- Admin status is checked against the app's own membership table, so storage
--- enforces the same rule the API does (channels.policy) rather than trusting
--- that nobody calls the storage endpoint directly.
---
--- The folder name is the channel id, which is what makes this expressible.
 drop policy if exists "groups: admin insert" on storage.objects;
 create policy "groups: admin insert"
 on storage.objects for insert
 to authenticated
 with check (
   bucket_id = 'groups'
-  and exists (
-    select 1
-    from public.channel_members cm
-    where cm."channelId" = (storage.foldername(name))[1]
-      and cm."userId" = auth.uid()::text
-      and cm.role = 'ADMIN'
-  )
+  and private.is_channel_admin((storage.foldername(name))[1], auth.uid()::text)
 );
 
 drop policy if exists "groups: admin update" on storage.objects;
@@ -105,23 +141,11 @@ on storage.objects for update
 to authenticated
 using (
   bucket_id = 'groups'
-  and exists (
-    select 1
-    from public.channel_members cm
-    where cm."channelId" = (storage.foldername(name))[1]
-      and cm."userId" = auth.uid()::text
-      and cm.role = 'ADMIN'
-  )
+  and private.is_channel_admin((storage.foldername(name))[1], auth.uid()::text)
 )
 with check (
   bucket_id = 'groups'
-  and exists (
-    select 1
-    from public.channel_members cm
-    where cm."channelId" = (storage.foldername(name))[1]
-      and cm."userId" = auth.uid()::text
-      and cm.role = 'ADMIN'
-  )
+  and private.is_channel_admin((storage.foldername(name))[1], auth.uid()::text)
 );
 
 drop policy if exists "groups: admin delete" on storage.objects;
@@ -130,13 +154,7 @@ on storage.objects for delete
 to authenticated
 using (
   bucket_id = 'groups'
-  and exists (
-    select 1
-    from public.channel_members cm
-    where cm."channelId" = (storage.foldername(name))[1]
-      and cm."userId" = auth.uid()::text
-      and cm.role = 'ADMIN'
-  )
+  and private.is_channel_admin((storage.foldername(name))[1], auth.uid()::text)
 );
 
 commit;
@@ -150,4 +168,8 @@ commit;
 --   order by policyname;
 --
 -- Expect eight rows: four per bucket.
+--
+-- The function answers without exposing the table:
+--
+--   select private.is_channel_admin('<channelId>', '<userId>');
 -- ---------------------------------------------------------------------------
