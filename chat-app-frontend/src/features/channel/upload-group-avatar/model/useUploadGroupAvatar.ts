@@ -10,14 +10,14 @@ import { createQueryKeys } from "@/shared/config/react-query-keys";
 import { patchInboxChannel, type InboxChannel } from "@/entities/channel";
 import { updateGroupAvatarApi } from "../api/channels.api";
 
-const AVATAR_BUCKET = "avatars";
-
 /**
- * Stores a cropped group avatar and points the channel at it.
- *
- * Shares the `avatars` bucket with user avatars but keys the path by channel id,
- * so a group's images sit under their own prefix.
+ * Group avatars live in their own bucket rather than under a prefix inside
+ * `avatars`, so the two can carry different storage policies — a group's photo
+ * is written by whoever admins it, not by the user whose id owns the path.
  */
+const GROUP_AVATAR_BUCKET = "groups";
+
+/** Stores a cropped group avatar and points the channel at it. */
 export function useUploadGroupAvatar({
   channelId,
   authId,
@@ -48,12 +48,14 @@ export function useUploadGroupAvatar({
 
   const uploadAvatar = useCallback(
     async (blob: Blob, handlers: UploadWithProgressOptions) => {
-      const path = `groups/${channelId}/${String(Date.now())}.${CROPPED_IMAGE_EXTENSION}`;
+      // The bucket already scopes these to groups, so the path only needs to
+      // separate one channel from another.
+      const path = `${channelId}/${String(Date.now())}.${CROPPED_IMAGE_EXTENSION}`;
 
       const publicUrl = await uploadImageWithProgress(
         blob,
         path,
-        AVATAR_BUCKET,
+        GROUP_AVATAR_BUCKET,
         handlers,
       );
 
