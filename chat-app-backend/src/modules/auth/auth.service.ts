@@ -66,7 +66,7 @@ export class AuthService {
     return this.authRepository.updateProfile(authId, data);
   }
 
-  public async updateUserImage(authId: string, data: { image: string }): Promise<User> {
+  public async updateUserImage(authId: string, data: { image: string | null }): Promise<User> {
     return this.authRepository.updateImage(authId, data);
   }
 }

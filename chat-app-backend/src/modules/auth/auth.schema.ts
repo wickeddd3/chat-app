@@ -30,8 +30,12 @@ export const ProfileSchema = z.object({
 
 export type ProfileSchemaType = z.infer<typeof ProfileSchema>;
 
+/**
+ * `null` clears the avatar back to the initials fallback — a removal is the same
+ * write as a change, so it shares this route rather than needing a DELETE.
+ */
 export const UpdateImageSchema = z.object({
-  image: z.string().trim().min(1, "Image is required"),
+  image: z.string().trim().min(1, "Image is required").nullable(),
 });
 
 export type UpdateImageSchemaType = z.infer<typeof UpdateImageSchema>;

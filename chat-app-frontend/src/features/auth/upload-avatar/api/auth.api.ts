@@ -3,7 +3,7 @@ import type { User } from "@/entities/user";
 import type { ApiResponse } from "@/shared/types/api-response.type";
 
 export async function updateImageApi(formData: {
-  image: string;
+  image: string | null;
 }): Promise<User> {
   const url = "/api/auth/image";
 

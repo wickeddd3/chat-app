@@ -40,7 +40,7 @@ export class AuthController extends BaseController {
 
   public updateUserImage = async (req: Request, res: Response): Promise<void> => {
     const authUserId = req.authId ?? "";
-    const data = req.body as { image: string };
+    const data = req.body as { image: string | null };
     const user = await this.authService.updateUserImage(authUserId, data);
 
     this.sendSuccess(res, user, "User image updated successfully.");

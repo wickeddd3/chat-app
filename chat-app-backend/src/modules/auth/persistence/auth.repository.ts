@@ -43,7 +43,7 @@ export class AuthRepository {
     );
   }
 
-  public async updateImage(authId: string, data: { image: string }, executor?: Executor): Promise<User> {
+  public async updateImage(authId: string, data: { image: string | null }, executor?: Executor): Promise<User> {
     return withPersistence("Failed to update user image.", () =>
       this.client(executor).user.update({ where: { id: authId }, data }),
     );
