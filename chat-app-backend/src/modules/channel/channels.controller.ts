@@ -53,6 +53,18 @@ export class ChannelsController extends BaseController {
     this.sendSuccess(res, channel, "Channel retrieved successfully");
   };
 
+  public updateGroupAvatar = async (req: Request, res: Response): Promise<void> => {
+    const authUserId = req.authId ?? "";
+    const channelId = typeof req.params.channelId === "string" ? req.params.channelId : "";
+    const body = req.body as { image?: unknown };
+    const image = typeof body.image === "string" ? body.image : null;
+
+    // Authorization (admin-only) is enforced in the service via the channel policy.
+    const channel = await this.channelsService.updateGroupAvatar(authUserId, channelId, image);
+
+    this.sendSuccess(res, channel, "Group avatar updated successfully");
+  };
+
   public leaveGroupChannel = async (req: Request, res: Response): Promise<void> => {
     const authUserId = req.authId ?? "";
     const channelId = typeof req.params.channelId === "string" ? req.params.channelId : "";

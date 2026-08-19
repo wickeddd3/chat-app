@@ -134,6 +134,16 @@ export class ChannelsService {
   }
 
   /**
+   * Sets or clears a group's avatar. Admin-only, like every other group-management
+   * write — the policy is the single place that decision is made.
+   */
+  public async updateGroupAvatar(userId: string, channelId: string, image: string | null): Promise<Channel> {
+    assertIsChannelAdmin(await this.membersRepository.isAdmin(userId, channelId));
+
+    return this.channelsRepository.setImage(channelId, image);
+  }
+
+  /**
    * Removes the caller from a group.
    *
    * Three outcomes, decided from the roster in one transaction:

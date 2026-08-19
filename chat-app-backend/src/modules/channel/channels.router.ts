@@ -7,6 +7,7 @@ import { authMiddleware } from "@/middlewares/auth.middleware";
 import { validate } from "@/middlewares/request.middleware";
 import {
   channelIdParamsSchema,
+  groupAvatarBodySchema,
   groupChannelBodySchema,
   listChannelsQuerySchema,
   targetUserIdParamsSchema,
@@ -50,6 +51,12 @@ export class ChannelsRouter implements HttpRouter {
       `${this.path}/group/:channelId`,
       [authMiddleware, validate({ params: channelIdParamsSchema, body: groupChannelBodySchema })],
       this.channelsController.updateGroupChannel,
+    );
+
+    this.router.patch(
+      `${this.path}/group/:channelId/image`,
+      [authMiddleware, validate({ params: channelIdParamsSchema, body: groupAvatarBodySchema })],
+      this.channelsController.updateGroupAvatar,
     );
 
     this.router.delete(
