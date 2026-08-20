@@ -2,6 +2,7 @@ export { MessageBubble } from "./ui/MessageBubble";
 export { DayDivider } from "./ui/DayDivider";
 export { SystemMessage } from "./ui/SystemMessage";
 export { MessageContent } from "./ui/MessageContent";
+export { QuotedMessage } from "./ui/QuotedMessage";
 export { DeliveryStatus } from "./ui/DeliveryStatus";
 export type { DeliveryState } from "./ui/DeliveryStatus";
 
@@ -31,6 +32,7 @@ export type {
   MessageAuthor,
   Message,
   MessageKind,
+  MessageParent,
   NewMessage,
   PaginatedMessage,
 } from "./model/message.types";

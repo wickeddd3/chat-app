@@ -1,4 +1,5 @@
 import { useChatRoom } from "../model/useChatRoom";
+import { useReplyTarget } from "../model/useReplyTarget";
 import { useMessages } from "../model/useMessages";
 import { Messages } from "./Messages";
 import { MessageInput } from "./MessageInput";
@@ -25,6 +26,8 @@ export function ChatRoom({ channelId }: ChatRoomProps) {
     fetchNextPage,
   } = useMessages(channelId, authUser?.id);
 
+  const { replyTarget, replyTo, cancelReply } = useReplyTarget(channelId);
+
   useChatRoom(channelId);
 
   // Only a removed contact closes a thread, and only the details endpoint reports
@@ -46,6 +49,9 @@ export function ChatRoom({ channelId }: ChatRoomProps) {
             // A direct thread has one other person, already named in the
             // header — only a group needs each run attributed.
             showAuthorNames={channel?.type === "GROUP"}
+            // A closed thread takes no new messages, so it takes no replies
+            // either — without the handler the bubbles show no affordance.
+            {...(!isClosed && { onReply: replyTo })}
           />
         )}
         {!isLoading && !messages.length && <EmptyPlaceholder />}
@@ -56,7 +62,12 @@ export function ChatRoom({ channelId }: ChatRoomProps) {
         {isClosed ? (
           <MessagingClosedNotice recipientName={channel?.recipient?.name} />
         ) : (
-          <MessageInput channelId={channelId} />
+          <MessageInput
+            channelId={channelId}
+            replyTarget={replyTarget}
+            isOwnReplyTarget={replyTarget?.author.id === authUser?.id}
+            onCancelReply={cancelReply}
+          />
         )}
       </div>
     </div>
