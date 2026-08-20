@@ -33,5 +33,8 @@ export const MESSAGE_PARENT_SELECT = {
   id: true,
   content: true,
   type: true,
+  // Carried so a reply to a photo can show a thumbnail of it — a quote whose
+  // content is empty would otherwise render as a blank rail.
+  imageUrl: true,
   author: { select: MESSAGE_AUTHOR_SELECT },
 } as const;

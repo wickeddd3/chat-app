@@ -23,7 +23,16 @@ export class MessagesRepository {
    * reply; the service has already checked the target is in the same channel.
    */
   public async create(
-    data: { content: string; channelId: string; authorId: string; type?: MessageType; parentId?: string | null },
+    data: {
+      content: string;
+      channelId: string;
+      authorId: string;
+      type?: MessageType;
+      parentId?: string | null;
+      imageUrl?: string | null;
+      imageWidth?: number | null;
+      imageHeight?: number | null;
+    },
     executor?: Executor,
   ): Promise<MessageWithAuthor> {
     return withPersistence("Failed to create message.", async () => {

@@ -36,7 +36,17 @@ export class MessagesService {
     channelId: string;
     authorId: string;
     parentId?: string | null;
+    imageUrl?: string | null;
+    imageWidth?: number | null;
+    imageHeight?: number | null;
   }): Promise<MessageWithAuthor> {
+    // A message has to say something: text, a photo, or a photo with a caption.
+    // `content` is empty on an uncaptioned photo, which is why emptiness alone
+    // is not the test.
+    if (!data.content.trim() && !data.imageUrl) {
+      throw new ValidationError("A message needs text or an image.");
+    }
+
     if (data.parentId) {
       const parentChannelId = await this.messagesQuery.getChannelIdOf(data.parentId);
 

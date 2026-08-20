@@ -154,6 +154,15 @@ model Message {
   parent    Message?  @relation("MessageToMessage", fields: [parentId], references: [id])
   replies   Message[] @relation("MessageToMessage")
 
+  // An attached image, stored in Supabase Storage — only the public URL is kept
+  // here, the bytes never pass through this API. `content` doubles as the
+  // caption, and is empty on an image sent without one. The dimensions are
+  // recorded so the bubble can reserve the right box before the image loads,
+  // instead of reflowing the timeline when it arrives.
+  imageUrl    String?
+  imageWidth  Int?
+  imageHeight Int?
+
   readBy    MessageReceipt[]
 
   @@index([channelId, createdAt(sort: Asc)])

@@ -10,6 +10,9 @@ export function channelToInboxChannel(channel: InboxChannel, authUserId: string)
     ? {
         content: firstMessage.content,
         createdAt: firstMessage.createdAt,
+        // An uncaptioned photo has empty content, which would preview as a blank
+        // line — the flag lets the inbox say "Photo" instead.
+        hasImage: !!firstMessage.imageUrl,
       }
     : null;
 

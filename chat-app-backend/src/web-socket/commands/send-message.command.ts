@@ -9,15 +9,40 @@ import { ChannelsService } from "@/modules/channel/channels.service";
 import { BroadcasterService } from "@/services/broadcaster.service";
 import { PresenceService } from "@/services/presence.service";
 import { NotFoundError, ValidationError } from "@/shared/errors/domain.error";
+import { SUPABASE_URL } from "@/config/app.config";
 
-const sendMessageSchema = z.object({
-  content: z.string().min(1).max(4000),
-  channelId: z.uuid(),
-  clientId: z.string().min(1),
-  // Present when this message quotes another one. The service checks the target
-  // is in the same channel before persisting.
-  parentId: z.uuid().optional(),
-});
+/** The public Storage bucket the client uploads message photos into. */
+const MESSAGE_IMAGE_BUCKET = "message-images";
+
+/**
+ * Only our own storage bucket may be attached.
+ *
+ * The client uploads direct-to-storage and sends back a URL, so without this an
+ * arbitrary third-party URL could be attached and every member's client would
+ * fetch it — turning a message into a tracking pixel that leaks their IP. The
+ * prefix pins both the host and the bucket.
+ */
+const IMAGE_URL_PREFIX = `${SUPABASE_URL}/storage/v1/object/public/${MESSAGE_IMAGE_BUCKET}/`;
+
+const sendMessageSchema = z
+  .object({
+    // Empty when a photo is sent without a caption; the service rejects a
+    // message that carries neither text nor an image.
+    content: z.string().max(4000),
+    channelId: z.uuid(),
+    clientId: z.string().min(1),
+    // Present when this message quotes another one. The service checks the target
+    // is in the same channel before persisting.
+    parentId: z.uuid().optional(),
+    imageUrl: z.url().startsWith(IMAGE_URL_PREFIX).optional(),
+    // Natural size, used to reserve the bubble's box before the image loads.
+    imageWidth: z.int().positive().max(20000).optional(),
+    imageHeight: z.int().positive().max(20000).optional(),
+  })
+  .refine((data) => data.content.trim().length > 0 || !!data.imageUrl, {
+    message: "A message needs text or an image.",
+    path: ["content"],
+  });
 type SendMessagePayload = z.infer<typeof sendMessageSchema>;
 
 @injectable()
@@ -66,6 +91,9 @@ export class SendMessageCommand implements WebSocketCommand<SendMessagePayload> 
         channelId: targetChannelId,
         authorId: authId,
         parentId: data.parentId ?? null,
+        imageUrl: data.imageUrl ?? null,
+        imageWidth: data.imageWidth ?? null,
+        imageHeight: data.imageHeight ?? null,
       });
     } catch (error) {
       if (error instanceof NotFoundError || error instanceof ValidationError) {
@@ -93,6 +121,9 @@ export class SendMessageCommand implements WebSocketCommand<SendMessagePayload> 
       // so it can draw the quote without it being loaded.
       parentId: savedMessage.parentId,
       parent: savedMessage.parent,
+      imageUrl: savedMessage.imageUrl,
+      imageWidth: savedMessage.imageWidth,
+      imageHeight: savedMessage.imageHeight,
     };
 
     // 3. Fan-out to every channel member. Prefer the hot Redis member set; on a
@@ -113,6 +144,7 @@ export class SendMessageCommand implements WebSocketCommand<SendMessagePayload> 
             lastMessage: {
               content: savedMessage.content,
               createdAt: savedMessage.createdAt,
+              hasImage: !!savedMessage.imageUrl,
             },
           },
           messagePayload: broadcastPayload,
