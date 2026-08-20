@@ -32,6 +32,28 @@ describe("MessagesRepository (integration, real DB)", () => {
       expect(message.parent).toBeNull();
     });
 
+    it("persists a photo with its dimensions and an empty caption", async () => {
+      const author = await createUser();
+      const channel = await createChannel({ authorId: author.id });
+
+      const message = await repo.create({
+        content: "",
+        channelId: channel.id,
+        authorId: author.id,
+        imageUrl: "https://storage.test/message-images/a/b/1.webp",
+        imageWidth: 1200,
+        imageHeight: 800,
+      });
+
+      const persisted = await prisma.message.findUnique({ where: { id: message.id } });
+      expect(persisted).toMatchObject({
+        content: "",
+        imageUrl: "https://storage.test/message-images/a/b/1.webp",
+        imageWidth: 1200,
+        imageHeight: 800,
+      });
+    });
+
     it("persists a reply and returns the quoted parent with it", async () => {
       const author = await createUser({ name: "Author" });
       const channel = await createChannel({ authorId: author.id });
@@ -45,6 +67,7 @@ describe("MessagesRepository (integration, real DB)", () => {
       });
 
       expect(reply.parentId).toBe(parent.id);
+      expect(reply.imageUrl).toBeNull();
       expect(reply.parent).toMatchObject({
         id: parent.id,
         content: "original",

@@ -1,4 +1,5 @@
--- Storage access policies for the `avatars` and `groups` buckets.
+-- Storage access policies for the `avatars`, `groups` and `message-images`
+-- buckets.
 --
 -- Run in the Supabase SQL editor (Dashboard → SQL Editor). Not a Prisma
 -- migration: these live on `storage.objects`, a schema Prisma does not manage —
@@ -137,6 +138,62 @@ using (
   bucket_id = 'groups'
 );
 
+-- ===========================================================================
+-- message-images
+--
+--   message-images/<channelId>/<userId>/<timestamp>.<ext>
+--
+-- Signed-in writes, for the same reason as `groups`: channel membership lives
+-- in a table this database cannot be relied on to hold, so the rule is enforced
+-- where it can see the data — the socket command refuses to persist a message
+-- for a channel the sender is not a member of.
+--
+-- Uploading here therefore buys an attacker an orphaned object, not reach into
+-- a conversation: an image is only ever rendered through a message row, and no
+-- message row can be written without passing that membership check.
+--
+-- Deletes are restricted to the uploader, whose id is the second path segment,
+-- so one member cannot remove another's photo from a shared thread. (A uuid
+-- contains hyphens, so the id gets its own segment rather than being prefixed
+-- onto the filename — there would be no way to split it back out.)
+-- ===========================================================================
+
+drop policy if exists "message-images: public read" on storage.objects;
+create policy "message-images: public read"
+on storage.objects for select
+to public
+using (bucket_id = 'message-images');
+
+drop policy if exists "message-images: authenticated insert" on storage.objects;
+create policy "message-images: authenticated insert"
+on storage.objects for insert
+to authenticated
+with check (
+  bucket_id = 'message-images'
+);
+
+-- The client uploads with `x-upsert: true`, so a retry onto the same path is an
+-- UPDATE — see the note on the avatars policy above.
+drop policy if exists "message-images: authenticated update" on storage.objects;
+create policy "message-images: authenticated update"
+on storage.objects for update
+to authenticated
+using (
+  bucket_id = 'message-images'
+)
+with check (
+  bucket_id = 'message-images'
+);
+
+drop policy if exists "message-images: uploader delete" on storage.objects;
+create policy "message-images: uploader delete"
+on storage.objects for delete
+to authenticated
+using (
+  bucket_id = 'message-images'
+  and (storage.foldername(name))[2] = auth.uid()::text
+);
+
 commit;
 
 -- ---------------------------------------------------------------------------
@@ -147,6 +204,6 @@ commit;
 --   where schemaname = 'storage' and tablename = 'objects'
 --   order by policyname;
 --
--- Expect eight rows: four per bucket.
+-- Expect twelve rows: four per bucket.
 --
 -- ---------------------------------------------------------------------------

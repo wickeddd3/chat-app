@@ -60,6 +60,24 @@ describe("MessagesService (DI container + mocked persistence)", () => {
     expect(repo.create).not.toHaveBeenCalled();
   });
 
+  it("saveMessage stores a photo sent without a caption", async () => {
+    // `content` is empty on an uncaptioned photo, so emptiness alone must not
+    // be the test for an empty message.
+    const saved = { id: "m3" };
+    repo.create.mockResolvedValue(saved);
+
+    const data = { content: "", channelId: "c1", authorId: "u1", imageUrl: "https://storage/photo.webp" };
+    await expect(service.saveMessage(data)).resolves.toBe(saved);
+    expect(repo.create).toHaveBeenCalledWith(data);
+  });
+
+  it("saveMessage refuses a message carrying neither text nor an image", async () => {
+    await expect(service.saveMessage({ content: "   ", channelId: "c1", authorId: "u1" })).rejects.toMatchObject({
+      code: "VALIDATION",
+    });
+    expect(repo.create).not.toHaveBeenCalled();
+  });
+
   it("saveMessage refuses to quote a message that no longer exists", async () => {
     query.getChannelIdOf.mockResolvedValue(null);
 

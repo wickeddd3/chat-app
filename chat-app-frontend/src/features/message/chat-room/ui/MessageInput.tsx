@@ -1,39 +1,59 @@
 import { useEffect, useRef } from "react";
-import { PaperPlaneRightIcon } from "@phosphor-icons/react";
+import { PaperPlaneRightIcon, ImageSquareIcon } from "@phosphor-icons/react";
 import { EmojiPicker } from "@/shared/ui/emoji-picker/EmojiPicker";
-import { useSendMessage } from "../model/useSendMessage";
 import { useTypingBroadcast } from "../model/useTypingBroadcast";
 import { ReplyPreview } from "./ReplyPreview";
+import { AttachmentPreview } from "./AttachmentPreview";
+import { ACCEPTED_IMAGE_TYPES, getFileData } from "@/shared/utils/upload";
 import type { ReplyTarget } from "../model/useReplyTarget";
+import type { ImageAttachment } from "../model/useImageAttachment";
 
 export interface MessageInputProps {
   channelId: string;
+  /**
+   * The draft and its send, owned by the chat room — the timeline needs the same
+   * send state to retry a failed photo, so it cannot live in here.
+   */
+  message: string;
+  onMessageChange: (value: string) => void;
+  onSubmit: (e: React.SubmitEvent<HTMLFormElement>) => void;
   /** The message this draft replies to, staged from the timeline. */
   replyTarget?: ReplyTarget | null;
   /** The reader wrote the message being replied to. */
   isOwnReplyTarget?: boolean;
   onCancelReply?: () => void;
+  /** The photo staged for sending, if any. */
+  attachment?: ImageAttachment | null;
+  onAttachImage?: (file: File) => void;
+  onRemoveAttachment?: () => void;
 }
 
 export function MessageInput({
   channelId,
+  message,
+  onMessageChange,
+  onSubmit,
   replyTarget = null,
   isOwnReplyTarget = false,
   onCancelReply,
+  attachment = null,
+  onAttachImage,
+  onRemoveAttachment,
 }: MessageInputProps) {
-  const { message, setMessage, sendMessage } = useSendMessage({
-    channelId,
-    replyTarget,
-    ...(onCancelReply && { onSent: onCancelReply }),
-  });
   const { notifyTyping, stopTyping } = useTypingBroadcast(channelId);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Staging a reply is an invitation to type — the user picked the message from
-  // the timeline, so the caret should already be waiting in the composer.
+  // Staging a reply or a photo is an invitation to type — the user picked it
+  // from the timeline or the file dialog, so the caret should already be
+  // waiting in the composer.
   useEffect(() => {
     if (replyTarget) inputRef.current?.focus();
   }, [replyTarget]);
+
+  useEffect(() => {
+    if (attachment) inputRef.current?.focus();
+  }, [attachment]);
 
   // Escape backs out of the reply without clearing the draft text.
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -46,7 +66,7 @@ export function MessageInput({
   // Clearing the field back to empty is a retraction, not a keystroke — the
   // user visibly abandoned the draft, so don't make the other side wait it out.
   const handleChange = (value: string) => {
-    setMessage(value);
+    onMessageChange(value);
     if (value.trim()) {
       notifyTyping();
     } else {
@@ -70,13 +90,21 @@ export function MessageInput({
   };
 
   // The hook already refuses blank sends; mirroring it here means the button
-  // shows that state rather than looking live and doing nothing.
-  const canSend = message.trim().length > 0;
+  // shows that state rather than looking live and doing nothing. A photo can
+  // travel without a caption, so it is enough on its own.
+  const canSend = message.trim().length > 0 || !!attachment;
 
   // Sending ends the burst — the draft is gone, so retract before it lands.
   const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     stopTyping();
-    sendMessage(e);
+    onSubmit(e);
+  };
+
+  const handleFilePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = getFileData(e);
+    if (file) onAttachImage?.(file);
+    // Cleared so picking the same file twice in a row still fires a change.
+    e.target.value = "";
   };
 
   return (
@@ -89,10 +117,40 @@ export function MessageInput({
         />
       )}
 
+      {attachment && (
+        <AttachmentPreview
+          attachment={attachment}
+          onRemove={() => onRemoveAttachment?.()}
+        />
+      )}
+
       <form
         onSubmit={handleSubmit}
         className="flex w-full items-center gap-1 rounded-full border border-transparent bg-muted p-1.5 transition-colors focus-within:border-ring focus-within:bg-card focus-within:ring-[3px] focus-within:ring-ring/25"
       >
+        {onAttachImage && (
+          <>
+            {/* The input itself is never shown — the icon button is the control,
+                so the file dialog opens from something that matches the composer. */}
+            <input
+              ref={fileInputRef}
+              id="message-image-input"
+              type="file"
+              accept={ACCEPTED_IMAGE_TYPES.join(",")}
+              onChange={handleFilePicked}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              aria-label="Attach a photo"
+              className="flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-background hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              <ImageSquareIcon className="size-5" />
+            </button>
+          </>
+        )}
+
         <label htmlFor="message-input" className="sr-only">
           Message
         </label>

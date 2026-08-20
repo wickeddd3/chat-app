@@ -57,6 +57,12 @@ export const channelsSchemas: Record<string, OpenAPIV3.SchemaObject> = {
     properties: {
       content: { type: "string", example: "Hey, are we still meeting today?" },
       createdAt: { type: "string", format: "date-time", example: "2026-06-14T14:00:00.000Z" },
+      hasImage: {
+        type: "boolean",
+        description:
+          "Whether the last message carried a photo. An uncaptioned photo has empty content, so the inbox shows 'Photo' rather than a blank line.",
+        example: false,
+      },
     },
   },
 };

@@ -12,6 +12,25 @@ const { useChannelMock } = vi.hoisted(() => ({
 vi.mock("@/entities/channel", () => ({ useChannel: useChannelMock }));
 vi.mock("@/entities/auth", () => ({
   useAuth: () => ({ authUser: { id: "me" } }),
+  useAuthProfile: () => ({ authProfile: { id: "me", name: "Me", image: null } }),
+}));
+// The send and the staged photo are exercised by their own tests; here they
+// only need to not reach for a query client or the socket.
+vi.mock("../model/useSendMessage", () => ({
+  useSendMessage: () => ({
+    message: "",
+    setMessage: vi.fn(),
+    sendMessage: vi.fn(),
+    retryUpload: vi.fn(),
+  }),
+}));
+vi.mock("../model/useImageAttachment", () => ({
+  useImageAttachment: () => ({
+    attachment: null,
+    attachImage: vi.fn(),
+    clearAttachment: vi.fn(),
+    takeAttachment: vi.fn(),
+  }),
 }));
 vi.mock("../model/useMessages", () => ({
   useMessages: () => ({

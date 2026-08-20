@@ -102,6 +102,35 @@ describe("ChatInboxItem", () => {
     expect(screen.getByLabelText("Unread indicator")).toBeInTheDocument();
   });
 
+  it("names a photo sent without a caption, rather than leaving the row blank", () => {
+    renderItem(
+      inboxItem({
+        lastMessage: {
+          content: "",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          hasImage: true,
+        },
+      }),
+    );
+
+    expect(screen.getByText("📷 Photo")).toBeInTheDocument();
+  });
+
+  it("prefers a photo's caption over the generic label", () => {
+    renderItem(
+      inboxItem({
+        lastMessage: {
+          content: "sunset tonight",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          hasImage: true,
+        },
+      }),
+    );
+
+    expect(screen.getByText("sunset tonight")).toBeInTheDocument();
+    expect(screen.queryByText("📷 Photo")).not.toBeInTheDocument();
+  });
+
   it("shows typing in a channel that has no messages yet", () => {
     useTypingUsersMock.mockReturnValue({
       isTyping: true,

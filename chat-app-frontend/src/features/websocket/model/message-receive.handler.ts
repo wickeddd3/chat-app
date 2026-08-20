@@ -11,6 +11,7 @@ export interface IncomingMessagePayload {
     lastMessage: {
       content: string;
       createdAt: string;
+      hasImage?: boolean;
     };
   };
   messagePayload: Message;

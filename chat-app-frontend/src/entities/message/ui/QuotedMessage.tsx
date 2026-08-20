@@ -36,25 +36,40 @@ export const QuotedMessage = memo(function QuotedMessage({
   // A quoted system line has no real author to name — it is narration.
   const isSystem = parent.type === "SYSTEM";
 
+  // A photo sent without a caption has no text to excerpt — the thumbnail
+  // carries the quote, and the line names what it is.
+  const excerpt =
+    parent.content.trim() || (parent.imageUrl ? "Photo" : parent.content);
+
   const body = (
-    <>
-      <span
-        className={cn(
-          "block truncate text-[11px] font-semibold",
-          onPrimary ? "text-primary-foreground/90" : "text-primary",
-        )}
-      >
-        {isSystem ? "Update" : authorLabel}
-      </span>
-      <span
-        className={cn(
-          "block truncate",
-          onPrimary ? "text-primary-foreground/75" : "text-muted-foreground",
-        )}
-      >
-        {parent.content}
-      </span>
-    </>
+    <div className="flex min-w-0 items-center gap-2">
+      <div className="min-w-0 flex-1">
+        <span
+          className={cn(
+            "block truncate text-[11px] font-semibold",
+            onPrimary ? "text-primary-foreground/90" : "text-primary",
+          )}
+        >
+          {isSystem ? "Update" : authorLabel}
+        </span>
+        <span
+          className={cn(
+            "block truncate",
+            onPrimary ? "text-primary-foreground/75" : "text-muted-foreground",
+          )}
+        >
+          {excerpt}
+        </span>
+      </div>
+
+      {parent.imageUrl && (
+        <img
+          src={parent.imageUrl}
+          alt=""
+          className="size-8 shrink-0 rounded-sm object-cover"
+        />
+      )}
+    </div>
   );
 
   const className = cn(

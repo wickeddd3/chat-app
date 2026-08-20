@@ -10,6 +10,20 @@ export const messagesSchemas: Record<string, OpenAPIV3.SchemaObject> = {
       authorId: { type: "string", format: "uuid", example: "d3b07384-d113-4956-a5e2-aa5913e8a213" },
       content: { type: "string", example: "Hey everyone! Check out the new API documentation architecture." },
       createdAt: { type: "string", format: "date-time", example: "2026-06-14T16:00:00.000Z" },
+      imageUrl: {
+        type: "string",
+        nullable: true,
+        description:
+          "Public Storage URL of an attached photo, or null. The client uploads direct-to-storage and sends only this URL, so image bytes never pass through the API. `content` doubles as the caption and is empty when the photo was sent without one.",
+        example: null,
+      },
+      imageWidth: {
+        type: "integer",
+        nullable: true,
+        description: "Natural width of the attached photo, so the client can reserve its box before the image loads.",
+        example: null,
+      },
+      imageHeight: { type: "integer", nullable: true, example: null },
       readCount: {
         type: "integer",
         example: 1,
@@ -31,6 +45,12 @@ export const messagesSchemas: Record<string, OpenAPIV3.SchemaObject> = {
       id: { type: "string", format: "uuid", example: "7a3d1e20-4b8c-4d1f-8e22-5c9f3a1b7d64" },
       content: { type: "string", example: "Did the migration land on prod yet?" },
       type: { type: "string", enum: ["USER", "SYSTEM"], example: "USER" },
+      imageUrl: {
+        type: "string",
+        nullable: true,
+        description: "Set when the quoted message is a photo, so the quote can show a thumbnail.",
+        example: null,
+      },
       author: { $ref: "#/components/schemas/User" },
     },
   },

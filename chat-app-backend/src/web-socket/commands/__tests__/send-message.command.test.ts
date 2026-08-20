@@ -14,6 +14,9 @@ import { ValidationError } from "@/shared/errors/domain.error";
 
 const payload = { content: "hello", channelId: "c1", clientId: "tmp-1" };
 
+// Matches the prefix the command builds from SUPABASE_URL (set in test setup).
+const IMAGE_URL_BASE = "https://test.supabase.co/storage/v1/object/public/message-images";
+
 function buildSavedMessage(overrides: Record<string, unknown> = {}) {
   return {
     id: "m1",
@@ -114,6 +117,34 @@ describe("SendMessageCommand", () => {
     expect(command.schema.safeParse(payload).success).toBe(false); // c1 isn't a UUID
     expect(command.schema.safeParse({ content: "", channelId: randomUUID(), clientId: "x" }).success).toBe(false);
     expect(command.schema.safeParse({ content: "hi", channelId: randomUUID(), clientId: "x" }).success).toBe(true);
+  });
+
+  it("accepts a photo from our own storage bucket, with or without a caption", () => {
+    const base = { channelId: randomUUID(), clientId: "x" };
+    const imageUrl = `${IMAGE_URL_BASE}/c1/u1/123.webp`;
+
+    expect(command.schema.safeParse({ ...base, content: "", imageUrl }).success).toBe(true);
+    expect(command.schema.safeParse({ ...base, content: "look", imageUrl }).success).toBe(true);
+    expect(
+      command.schema.safeParse({ ...base, content: "", imageUrl, imageWidth: 800, imageHeight: 600 }).success,
+    ).toBe(true);
+  });
+
+  it("refuses an image URL that is not ours", () => {
+    // Otherwise a message could embed a third-party URL that every member's
+    // client would fetch — a tracking pixel leaking their IP.
+    const base = { channelId: randomUUID(), clientId: "x", content: "" };
+
+    expect(command.schema.safeParse({ ...base, imageUrl: "https://evil.example/pixel.gif" }).success).toBe(false);
+    // Right host, wrong bucket — the prefix pins both.
+    expect(
+      command.schema.safeParse({ ...base, imageUrl: `${IMAGE_URL_BASE.replace("message-images", "avatars")}/x.webp` })
+        .success,
+    ).toBe(false);
+  });
+
+  it("still refuses a message with neither text nor an image", () => {
+    expect(command.schema.safeParse({ content: "   ", channelId: randomUUID(), clientId: "x" }).success).toBe(false);
   });
 
   it("accepts an optional parentId, but only as a UUID", () => {

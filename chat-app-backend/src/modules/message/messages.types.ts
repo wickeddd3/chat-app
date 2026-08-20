@@ -28,7 +28,21 @@ export interface MessageParent {
   id: string;
   content: string;
   type: MessageType;
+  /** Set when the quoted message is a photo, so the quote can show a thumbnail. */
+  imageUrl: string | null;
   author: MessageAuthor;
+}
+
+/**
+ * An image attached to a message. The bytes live in Supabase Storage — the
+ * client uploads there directly and sends only the resulting public URL, so
+ * this API never handles image data. Dimensions are recorded so the bubble can
+ * reserve the right box before the image loads.
+ */
+export interface MessageImage {
+  imageUrl: string;
+  imageWidth?: number | null;
+  imageHeight?: number | null;
 }
 
 export interface MessageWithAuthor extends Message {
