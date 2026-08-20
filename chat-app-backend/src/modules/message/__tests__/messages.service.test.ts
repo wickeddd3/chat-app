@@ -10,13 +10,13 @@ jest.mock("@/prisma/client", () => ({ PrismaClient: class {} }));
 
 describe("MessagesService (DI container + mocked persistence)", () => {
   let repo: { create: jest.Mock };
-  let query: { getMessages: jest.Mock; getUnreadMessages: jest.Mock };
+  let query: { getMessages: jest.Mock; getUnreadMessages: jest.Mock; getChannelIdOf: jest.Mock };
   let receipts: { createMessageReceipts: jest.Mock };
   let service: MessagesService;
 
   beforeEach(() => {
     repo = { create: jest.fn() };
-    query = { getMessages: jest.fn(), getUnreadMessages: jest.fn() };
+    query = { getMessages: jest.fn(), getUnreadMessages: jest.fn(), getChannelIdOf: jest.fn() };
     receipts = { createMessageReceipts: jest.fn() };
     const container = buildTestContainer([
       [TYPES.MessagesRepository, repo],
@@ -34,6 +34,39 @@ describe("MessagesService (DI container + mocked persistence)", () => {
     const data = { content: "hi", channelId: "c1", authorId: "u1" };
     await expect(service.saveMessage(data)).resolves.toBe(saved);
     expect(repo.create).toHaveBeenCalledWith(data);
+    // Nothing to check when there is no quote — a plain send costs no extra read.
+    expect(query.getChannelIdOf).not.toHaveBeenCalled();
+  });
+
+  it("saveMessage persists a reply whose target is in the same channel", async () => {
+    const saved = { id: "m2" };
+    repo.create.mockResolvedValue(saved);
+    query.getChannelIdOf.mockResolvedValue("c1");
+
+    const data = { content: "agreed", channelId: "c1", authorId: "u1", parentId: "m1" };
+    await expect(service.saveMessage(data)).resolves.toBe(saved);
+    expect(query.getChannelIdOf).toHaveBeenCalledWith("m1");
+    expect(repo.create).toHaveBeenCalledWith(data);
+  });
+
+  it("saveMessage refuses to quote a message from another channel", async () => {
+    // Otherwise a crafted parentId would leak another channel's content into
+    // this one as a quote.
+    query.getChannelIdOf.mockResolvedValue("c2");
+
+    await expect(
+      service.saveMessage({ content: "hi", channelId: "c1", authorId: "u1", parentId: "m1" }),
+    ).rejects.toMatchObject({ code: "VALIDATION" });
+    expect(repo.create).not.toHaveBeenCalled();
+  });
+
+  it("saveMessage refuses to quote a message that no longer exists", async () => {
+    query.getChannelIdOf.mockResolvedValue(null);
+
+    await expect(
+      service.saveMessage({ content: "hi", channelId: "c1", authorId: "u1", parentId: "gone" }),
+    ).rejects.toMatchObject({ code: "NOT_FOUND" });
+    expect(repo.create).not.toHaveBeenCalled();
   });
 
   it("getMessages delegates to the query side unchanged", async () => {

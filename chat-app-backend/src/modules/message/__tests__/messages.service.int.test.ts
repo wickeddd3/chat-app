@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { MessagesQuery } from "@/modules/message/persistence/messages.query";
 import { MessagesRepository } from "@/modules/message/persistence/messages.repository";
 import { prisma } from "@/test/helpers/db.helper";
@@ -28,6 +29,27 @@ describe("MessagesRepository (integration, real DB)", () => {
 
       const persisted = await prisma.message.findUnique({ where: { id: message.id } });
       expect(persisted).not.toBeNull();
+      expect(message.parent).toBeNull();
+    });
+
+    it("persists a reply and returns the quoted parent with it", async () => {
+      const author = await createUser({ name: "Author" });
+      const channel = await createChannel({ authorId: author.id });
+      const parent = await createMessage({ channelId: channel.id, authorId: author.id, content: "original" });
+
+      const reply = await repo.create({
+        content: "quoting you",
+        channelId: channel.id,
+        authorId: author.id,
+        parentId: parent.id,
+      });
+
+      expect(reply.parentId).toBe(parent.id);
+      expect(reply.parent).toMatchObject({
+        id: parent.id,
+        content: "original",
+        author: { id: author.id, name: "Author" },
+      });
     });
   });
 });
@@ -101,6 +123,33 @@ describe("MessagesQuery (integration, real DB)", () => {
 
       const page = await query.getMessages({ channelId: channel.id });
       expect(page.messages.find((m) => m.id === message.id)?.readCount).toBe(1);
+    });
+
+    it("carries the quoted parent on a reply and null on everything else", async () => {
+      const [alice, bob] = [await createUser({ name: "Alice" }), await createUser()];
+      const channel = await createDirectChannel(alice.id, bob.id);
+      const parent = await createMessage({ channelId: channel.id, authorId: alice.id, content: "original" });
+      const reply = await createMessage({ channelId: channel.id, authorId: bob.id, parentId: parent.id });
+
+      const page = await query.getMessages({ channelId: channel.id });
+
+      expect(page.messages.find((m) => m.id === reply.id)?.parent).toMatchObject({
+        id: parent.id,
+        content: "original",
+        author: { name: "Alice" },
+      });
+      expect(page.messages.find((m) => m.id === parent.id)?.parent).toBeNull();
+    });
+  });
+
+  describe("getChannelIdOf", () => {
+    it("reports where a message lives, and null for one that does not exist", async () => {
+      const author = await createUser();
+      const channel = await createChannel({ authorId: author.id });
+      const message = await createMessage({ channelId: channel.id, authorId: author.id });
+
+      await expect(query.getChannelIdOf(message.id)).resolves.toBe(channel.id);
+      await expect(query.getChannelIdOf(randomUUID())).resolves.toBeNull();
     });
   });
 

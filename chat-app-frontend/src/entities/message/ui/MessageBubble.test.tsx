@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MessageBubble } from "./MessageBubble";
 import type { Message } from "../model/message.types";
 
@@ -206,6 +207,98 @@ describe("MessageBubble", () => {
 
       expect(avatarOf(container)).toBeInTheDocument();
       expect(screen.getByText("Jane")).toBeInTheDocument();
+    });
+  });
+
+  describe("replies", () => {
+    const reply = () =>
+      message({
+        content: "It did, this morning",
+        parentId: "m-0",
+        parent: {
+          id: "m-0",
+          content: "Did the migration land?",
+          author: { id: "user-2", name: "Ada", image: null },
+        },
+      });
+
+    it("renders the quote above the reply's own content", () => {
+      render(<MessageBubble message={reply()} isAuthorsMessage={false} />);
+
+      expect(screen.getByText("Did the migration land?")).toBeInTheDocument();
+      expect(screen.getByText("It did, this morning")).toBeInTheDocument();
+      expect(screen.getByText("Ada")).toBeInTheDocument();
+    });
+
+    it("renders no quote on a message that is not a reply", () => {
+      render(<MessageBubble message={message()} isAuthorsMessage={false} />);
+
+      expect(
+        screen.queryByText("Did the migration land?"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("jumps to the quoted message when the quote is activated", async () => {
+      const user = userEvent.setup();
+      const onJumpToParent = vi.fn();
+      render(
+        <MessageBubble
+          message={reply()}
+          isAuthorsMessage={false}
+          onJumpToParent={onJumpToParent}
+        />,
+      );
+
+      await user.click(screen.getByRole("button", { name: /quoted message/i }));
+
+      expect(onJumpToParent).toHaveBeenCalledWith("m-0");
+    });
+
+    it("hands the whole message back when the reply affordance is used", async () => {
+      const user = userEvent.setup();
+      const onReply = vi.fn();
+      const target = message();
+      render(
+        <MessageBubble
+          message={target}
+          isAuthorsMessage={false}
+          onReply={onReply}
+        />,
+      );
+
+      await user.click(screen.getByRole("button", { name: "Reply to message" }));
+
+      expect(onReply).toHaveBeenCalledWith(target);
+    });
+
+    it("offers no reply affordance while a message is still in flight", () => {
+      // Nothing could point at it yet — the server has not assigned an id.
+      render(
+        <MessageBubble
+          message={{
+            author: { id: "user-1", name: "Jane", image: null },
+            content: "pending",
+            createdAt: "2026-01-01T00:00:00.000Z",
+            channelId: "channel-1",
+            clientId: "tmp-1",
+            isSending: true,
+          }}
+          isAuthorsMessage
+          onReply={vi.fn()}
+        />,
+      );
+
+      expect(
+        screen.queryByRole("button", { name: "Reply to message" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("offers no reply affordance when replying is unavailable", () => {
+      render(<MessageBubble message={message()} isAuthorsMessage={false} />);
+
+      expect(
+        screen.queryByRole("button", { name: "Reply to message" }),
+      ).not.toBeInTheDocument();
     });
   });
 });

@@ -5,8 +5,21 @@ import { webSocketClient } from "@/shared/lib/socket-io.client";
 import { createQueryKeys } from "@/shared/config/react-query-keys";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import type { ReplyTarget } from "./useReplyTarget";
 
-export function useSendMessage({ channelId }: { channelId: string }) {
+export interface UseSendMessageParams {
+  channelId: string;
+  /** The message being replied to, when the composer has one staged. */
+  replyTarget?: ReplyTarget | null;
+  /** Fired after a send, so the owner can clear the staged reply. */
+  onSent?: () => void;
+}
+
+export function useSendMessage({
+  channelId,
+  replyTarget = null,
+  onSent,
+}: UseSendMessageParams) {
   const { authUser } = useAuth();
   const { authProfile } = useAuthProfile(authUser?.id);
   const queryClient = useQueryClient();
@@ -42,16 +55,20 @@ export function useSendMessage({ channelId }: { channelId: string }) {
     channelId,
     clientId,
     message,
+    parentId,
   }: {
     channelId: string;
     clientId: string;
     message: string;
+    parentId?: string;
   }) => {
-    // Emit message to websocket server
+    // Emit message to websocket server. `parentId` is omitted entirely on a
+    // plain send — the server's schema takes it as optional, not nullable.
     webSocketClient.emit("message:send_message", {
       channelId,
       clientId,
       content: message,
+      ...(parentId && { parentId }),
     });
   };
 
@@ -63,7 +80,9 @@ export function useSendMessage({ channelId }: { channelId: string }) {
     // 1. Generate a temporary unique ID
     const clientId = window.crypto.randomUUID();
 
-    // 2. Create the message object with optimistic data
+    // 2. Create the message object with optimistic data. The staged reply is
+    // carried as its own quote, so the bubble renders complete before the
+    // server echoes it back.
     const messageData = {
       clientId,
       channelId,
@@ -75,16 +94,23 @@ export function useSendMessage({ channelId }: { channelId: string }) {
       },
       createdAt: new Date().toISOString(),
       isSending: true,
+      ...(replyTarget && { parentId: replyTarget.id, parent: replyTarget }),
     };
 
     // 3. Update UI immediately
     handleOptimisticMessage(messageData);
 
     // 4. Send to server
-    handleSendMessageToServer({ channelId, clientId, message });
+    handleSendMessageToServer({
+      channelId,
+      clientId,
+      message,
+      ...(replyTarget && { parentId: replyTarget.id }),
+    });
 
-    // 5. Reset message input
+    // 5. Reset message input and retire the staged reply
     setMessage("");
+    onSent?.();
   };
 
   return {

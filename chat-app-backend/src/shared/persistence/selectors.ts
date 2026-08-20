@@ -20,3 +20,18 @@ export const MESSAGE_AUTHOR_SELECT = {
   name: true,
   image: true,
 } as const;
+
+/**
+ * The quoted message carried on a reply.
+ *
+ * A snapshot rather than a reference: the parent is usually far enough up the
+ * timeline to be unloaded, and the client renders the quote inline, so shipping
+ * it with the reply saves a fetch per bubble. It is deliberately shallow — a
+ * reply to a reply quotes only its own parent, never the whole chain.
+ */
+export const MESSAGE_PARENT_SELECT = {
+  id: true,
+  content: true,
+  type: true,
+  author: { select: MESSAGE_AUTHOR_SELECT },
+} as const;

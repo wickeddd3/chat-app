@@ -4,14 +4,19 @@ import { TYPES } from "@/config/types";
 import type { Socket } from "socket.io";
 import { WebSocketCommand } from "@/interfaces/ws-command.interface";
 import { MessagesService } from "@/modules/message/messages.service";
+import type { MessageWithAuthor } from "@/modules/message/messages.types";
 import { ChannelsService } from "@/modules/channel/channels.service";
 import { BroadcasterService } from "@/services/broadcaster.service";
 import { PresenceService } from "@/services/presence.service";
+import { NotFoundError, ValidationError } from "@/shared/errors/domain.error";
 
 const sendMessageSchema = z.object({
   content: z.string().min(1).max(4000),
   channelId: z.uuid(),
   clientId: z.string().min(1),
+  // Present when this message quotes another one. The service checks the target
+  // is in the same channel before persisting.
+  parentId: z.uuid().optional(),
 });
 type SendMessagePayload = z.infer<typeof sendMessageSchema>;
 
@@ -51,12 +56,24 @@ export class SendMessageCommand implements WebSocketCommand<SendMessagePayload> 
       return;
     }
 
-    // 1. Persist to Database
-    const savedMessage = await this.messagesService.saveMessage({
-      content: data.content,
-      channelId: targetChannelId,
-      authorId: authId,
-    });
+    // 1. Persist to Database. A bad reply target is a client-correctable
+    // failure, so report it back on this socket rather than letting the server's
+    // catch-all turn it into an opaque "internal failure".
+    let savedMessage: MessageWithAuthor;
+    try {
+      savedMessage = await this.messagesService.saveMessage({
+        content: data.content,
+        channelId: targetChannelId,
+        authorId: authId,
+        parentId: data.parentId ?? null,
+      });
+    } catch (error) {
+      if (error instanceof NotFoundError || error instanceof ValidationError) {
+        socket.emit("error", { code: error.code, event: this.eventName, message: error.message });
+        return;
+      }
+      throw error;
+    }
 
     // 2. Update Channel
     await this.channelsService.updateChannel(targetChannelId);
@@ -72,6 +89,10 @@ export class SendMessageCommand implements WebSocketCommand<SendMessagePayload> 
         image: savedMessage.author.image,
       },
       createdAt: savedMessage.createdAt,
+      // Both travel: `parentId` so the client can jump to the original, `parent`
+      // so it can draw the quote without it being loaded.
+      parentId: savedMessage.parentId,
+      parent: savedMessage.parent,
     };
 
     // 3. Fan-out to every channel member. Prefer the hot Redis member set; on a

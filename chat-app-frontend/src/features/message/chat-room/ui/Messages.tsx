@@ -18,6 +18,7 @@ import {
   useNewMessageAnimation,
   messageKey,
 } from "../model/useNewMessageAnimation";
+import { useJumpToMessage } from "../model/useJumpToMessage";
 
 export interface MessagesProps {
   messages: (Message | NewMessage)[];
@@ -26,6 +27,11 @@ export interface MessagesProps {
   fetchNextPage: () => void;
   /** Name the author on incoming runs — only meaningful in a group channel. */
   showAuthorNames?: boolean;
+  /**
+   * Stages a message as the composer's reply target. Omitted when the thread is
+   * closed to new messages, which is what hides the affordance.
+   */
+  onReply?: (message: Message | NewMessage) => void;
 }
 
 export function Messages({
@@ -34,6 +40,7 @@ export function Messages({
   isFetchingNextPage,
   fetchNextPage,
   showAuthorNames = false,
+  onReply,
 }: MessagesProps) {
   const { authUser } = useAuth();
   const { virtuosoRef, maxIndex } = useScrollToBottom({ messages });
@@ -51,6 +58,15 @@ export function Messages({
     () => maxIndex - messages.length,
     [messages.length, maxIndex],
   );
+
+  const { jumpToMessage, highlightedId } = useJumpToMessage({
+    messages,
+    virtuosoRef,
+    firstItemIndex,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  });
 
   // Stable across renders so Virtuoso doesn't remount the loading header (which
   // would restart the spinner); only its identity would otherwise change.
@@ -103,6 +119,10 @@ export function Messages({
               <MessageBubble
                 message={message}
                 isAuthorsMessage={message.author.id === authUser?.id}
+                quotesOwnMessage={message.parent?.author.id === authUser?.id}
+                isHighlighted={!!message.id && message.id === highlightedId}
+                {...(onReply && { onReply })}
+                onJumpToParent={jumpToMessage}
                 position={position}
                 showAuthorName={showAuthorNames}
                 animate={isNew(key)}
