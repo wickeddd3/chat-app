@@ -12,7 +12,9 @@ import { execSync } from "child_process";
  * is never touched).
  */
 export default async function globalSetup(): Promise<void> {
-  const testDatabaseUrl = process.env.TEST_DATABASE_URL ?? "postgresql://root:root@localhost:5432/chat_app_test";
+  // 5435 is the host port the compose stack publishes Postgres on (5432 is taken
+  // by another local project) — see docker-compose.yml.
+  const testDatabaseUrl = process.env.TEST_DATABASE_URL ?? "postgresql://root:root@localhost:5435/chat_app_test";
 
   const url = new URL(testDatabaseUrl);
   const dbName = url.pathname.replace(/^\//, "");

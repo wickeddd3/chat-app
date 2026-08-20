@@ -10,7 +10,10 @@ services:
       POSTGRES_PASSWORD: root
       POSTGRES_DB: chat_app_db
     ports:
-      - "5432:5432"
+      # Host side only — 5432 is taken by another local stack, and two projects
+      # cannot bind the same host port. The container keeps listening on 5432,
+      # which is what `db:5432` resolves to inside the compose network.
+      - "5435:5432"
     networks:
       - chat-app-network
     healthcheck:
