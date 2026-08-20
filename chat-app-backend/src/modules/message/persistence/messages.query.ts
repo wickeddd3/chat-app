@@ -4,7 +4,7 @@ import { PrismaClient, Prisma } from "@/prisma/client";
 import type { PaginatedMessages, UnreadMessage } from "../messages.types";
 import { withPersistence } from "@/shared/persistence/prisma-error.mapper";
 import { buildKeysetPage, keysetFilter, keysetTake } from "@/shared/persistence/keyset-pagination";
-import { MESSAGE_AUTHOR_SELECT } from "@/shared/persistence/selectors";
+import { MESSAGE_AUTHOR_SELECT, MESSAGE_PARENT_SELECT } from "@/shared/persistence/selectors";
 
 /**
  * Read side of the message module: chat history and the unread lookup. No
@@ -39,6 +39,9 @@ export class MessagesQuery {
         },
         include: {
           author: { select: MESSAGE_AUTHOR_SELECT },
+          // Snapshot of the quoted message, so a reply renders its quote even
+          // when the parent sits outside the loaded page.
+          parent: { select: MESSAGE_PARENT_SELECT },
           // The individual readers are never rendered, so send the total rather
           // than rows the client would only count.
           _count: { select: { readBy: true } },
@@ -62,6 +65,22 @@ export class MessagesQuery {
         hasMore: page.hasMore,
         nextCursor: page.nextCursor,
       };
+    });
+  }
+
+  /**
+   * Which channel a message belongs to, or `null` when there is no such message.
+   * Used to check a reply target before persisting the reply — the row itself is
+   * never needed, only where it lives.
+   */
+  public async getChannelIdOf(messageId: string): Promise<string | null> {
+    return withPersistence("Failed to retrieve message.", async () => {
+      const message = await this.db.message.findUnique({
+        where: { id: messageId },
+        select: { channelId: true },
+      });
+
+      return message?.channelId ?? null;
     });
   }
 

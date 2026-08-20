@@ -47,6 +47,8 @@ export interface MessageOverrides {
   authorId: string;
   content?: string;
   createdAt?: Date;
+  /** Makes the row a reply quoting the given message. */
+  parentId?: string;
 }
 
 /** Inserts a Message row. */
@@ -57,6 +59,7 @@ export async function createMessage(overrides: MessageOverrides): Promise<Messag
       channelId: overrides.channelId,
       authorId: overrides.authorId,
       ...(overrides.createdAt && { createdAt: overrides.createdAt }),
+      ...(overrides.parentId && { parentId: overrides.parentId }),
     },
   });
 }

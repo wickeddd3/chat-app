@@ -17,6 +17,21 @@ export const messagesSchemas: Record<string, OpenAPIV3.SchemaObject> = {
           "Recipients who have read this message. An author never receives a receipt for their own message, so any value above zero means it has been read.",
       },
       author: { $ref: "#/components/schemas/User" },
+      parent: {
+        nullable: true,
+        description:
+          "The quoted message, when this message is a reply. A snapshot carried on the reply so the quote renders without a second fetch; shallow, so a reply to a reply carries only its own parent.",
+        allOf: [{ $ref: "#/components/schemas/MessageParent" }],
+      },
+    },
+  },
+  MessageParent: {
+    type: "object",
+    properties: {
+      id: { type: "string", format: "uuid", example: "7a3d1e20-4b8c-4d1f-8e22-5c9f3a1b7d64" },
+      content: { type: "string", example: "Did the migration land on prod yet?" },
+      type: { type: "string", enum: ["USER", "SYSTEM"], example: "USER" },
+      author: { $ref: "#/components/schemas/User" },
     },
   },
 };

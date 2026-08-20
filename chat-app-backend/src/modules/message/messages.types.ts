@@ -1,4 +1,5 @@
 import { Message } from "@/prisma/client";
+import type { MessageType } from "@/prisma/enums";
 
 /**
  * A system line another module composed about one of its events (e.g. "X left
@@ -18,8 +19,22 @@ export interface MessageAuthor {
   image: string | null;
 }
 
+/**
+ * The message a reply quotes, snapshotted onto the reply itself so the quote
+ * renders without a second fetch (the parent is often outside the loaded page).
+ * Shallow by design: a reply to a reply carries its own parent only.
+ */
+export interface MessageParent {
+  id: string;
+  content: string;
+  type: MessageType;
+  author: MessageAuthor;
+}
+
 export interface MessageWithAuthor extends Message {
   author: MessageAuthor;
+  /** The quoted message, or `null` when this message is not a reply. */
+  parent: MessageParent | null;
   /**
    * How many other members have read this message. An author never receives a
    * receipt for their own message, so this counts recipients only — any value

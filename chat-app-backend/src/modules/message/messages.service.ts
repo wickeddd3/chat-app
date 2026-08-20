@@ -3,6 +3,7 @@ import { TYPES } from "@/config/types";
 import { MessagesRepository } from "./persistence/messages.repository";
 import { MessagesQuery } from "./persistence/messages.query";
 import { MessageReceiptsRepository } from "./persistence/message-receipts.repository";
+import { NotFoundError, ValidationError } from "@/shared/errors/domain.error";
 import type { MessageWithAuthor, PaginatedMessages, UnreadMessage } from "./messages.types";
 
 /**
@@ -21,7 +22,33 @@ export class MessagesService {
     @inject(TYPES.MessageReceiptsRepository) private messageReceiptsRepository: MessageReceiptsRepository,
   ) {}
 
-  public async saveMessage(data: { content: string; channelId: string; authorId: string }): Promise<MessageWithAuthor> {
+  /**
+   * Persists a message, optionally as a reply to `parentId`.
+   *
+   * The reply target is checked here rather than at the entry point: unlike
+   * channel membership (which the HTTP and socket surfaces report differently),
+   * "you can only quote a message from this same channel" is a domain invariant
+   * that holds for every caller — and it is what stops a crafted `parentId` from
+   * leaking one channel's content into another as a quote.
+   */
+  public async saveMessage(data: {
+    content: string;
+    channelId: string;
+    authorId: string;
+    parentId?: string | null;
+  }): Promise<MessageWithAuthor> {
+    if (data.parentId) {
+      const parentChannelId = await this.messagesQuery.getChannelIdOf(data.parentId);
+
+      if (parentChannelId === null) {
+        throw new NotFoundError("The message you replied to no longer exists.");
+      }
+
+      if (parentChannelId !== data.channelId) {
+        throw new ValidationError("You can only reply to a message in the same channel.");
+      }
+    }
+
     return this.messagesRepository.create(data);
   }
 
