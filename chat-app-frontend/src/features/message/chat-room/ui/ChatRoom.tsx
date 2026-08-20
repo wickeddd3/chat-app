@@ -1,5 +1,7 @@
 import { useChatRoom } from "../model/useChatRoom";
 import { useReplyTarget } from "../model/useReplyTarget";
+import { useImageAttachment } from "../model/useImageAttachment";
+import { useSendMessage } from "../model/useSendMessage";
 import { useMessages } from "../model/useMessages";
 import { Messages } from "./Messages";
 import { MessageInput } from "./MessageInput";
@@ -27,6 +29,17 @@ export function ChatRoom({ channelId }: ChatRoomProps) {
   } = useMessages(channelId, authUser?.id);
 
   const { replyTarget, replyTo, cancelReply } = useReplyTarget(channelId);
+  const { attachment, attachImage, clearAttachment, takeAttachment } =
+    useImageAttachment(channelId);
+
+  // The send lives here rather than in the composer: the timeline needs it too,
+  // to retry a photo whose upload failed.
+  const { message, setMessage, sendMessage, retryUpload } = useSendMessage({
+    channelId,
+    replyTarget,
+    takeAttachment,
+    onSent: cancelReply,
+  });
 
   useChatRoom(channelId);
 
@@ -52,6 +65,7 @@ export function ChatRoom({ channelId }: ChatRoomProps) {
             // A closed thread takes no new messages, so it takes no replies
             // either — without the handler the bubbles show no affordance.
             {...(!isClosed && { onReply: replyTo })}
+            onRetryUpload={retryUpload}
           />
         )}
         {!isLoading && !messages.length && <EmptyPlaceholder />}
@@ -64,9 +78,15 @@ export function ChatRoom({ channelId }: ChatRoomProps) {
         ) : (
           <MessageInput
             channelId={channelId}
+            message={message}
+            onMessageChange={setMessage}
+            onSubmit={sendMessage}
             replyTarget={replyTarget}
             isOwnReplyTarget={replyTarget?.author.id === authUser?.id}
             onCancelReply={cancelReply}
+            attachment={attachment}
+            onAttachImage={(file) => void attachImage(file)}
+            onRemoveAttachment={clearAttachment}
           />
         )}
       </div>

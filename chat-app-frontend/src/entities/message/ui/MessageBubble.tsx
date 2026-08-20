@@ -2,6 +2,7 @@ import { memo } from "react";
 import { ProfileAvatar } from "@/shared/ui/ProfileAvatar";
 import { MessageContent } from "./MessageContent";
 import { QuotedMessage } from "./QuotedMessage";
+import { MessageImage } from "./MessageImage";
 import { ArrowBendUpLeftIcon } from "@phosphor-icons/react";
 import { DeliveryStatus, type DeliveryState } from "./DeliveryStatus";
 import { dateToString } from "@/shared/utils/date-format";
@@ -31,6 +32,12 @@ export interface MessageBubbleProps {
   onReply?: (message: Message | NewMessage) => void;
   /** Scrolls to the message this one quotes. */
   onJumpToParent?: (parentId: string) => void;
+  /**
+   * Retries a photo upload that failed. Takes the client id so one stable
+   * callback serves every row, which is what lets the memoized bubble keep
+   * skipping re-renders.
+   */
+  onRetryUpload?: (clientId: string) => void;
   /** Where this message sits in its author's run of consecutive messages. */
   position?: RunPosition;
   /** Group channels need the author named; a direct thread already knows who. */
@@ -54,6 +61,7 @@ export const MessageBubble = memo(function MessageBubble({
   isHighlighted = false,
   onReply,
   onJumpToParent,
+  onRetryUpload,
   position = "solo",
   showAuthorName = false,
   animate = false,
@@ -78,6 +86,23 @@ export const MessageBubble = memo(function MessageBubble({
   const parentId = parent?.id;
   const jumpToParent =
     onJumpToParent && parentId ? () => onJumpToParent(parentId) : undefined;
+
+  // A photo still uploading renders from its local object URL, so the sender
+  // sees their own image immediately rather than an empty box.
+  const previewUrl = "previewUrl" in message ? message.previewUrl : undefined;
+  const imageSrc = message.imageUrl ?? previewUrl;
+  const uploadProgress =
+    "uploadProgress" in message ? message.uploadProgress : undefined;
+  const uploadFailed =
+    "uploadFailed" in message ? !!message.uploadFailed : false;
+
+  const clientId = message.clientId;
+  const retryUpload =
+    onRetryUpload && clientId ? () => onRetryUpload(clientId) : undefined;
+
+  // An uncaptioned photo has empty content — the caption line is dropped rather
+  // than rendered as an empty run under the image.
+  const hasCaption = content.trim().length > 0;
 
   // An optimistic message is still in flight; anything the server has handed
   // back is at least stored, and a receipt from a recipient makes it read.
@@ -136,6 +161,9 @@ export const MessageBubble = memo(function MessageBubble({
             className={cn(
               `px-3 py-2 rounded-lg min-w-0 text-xs leading-relaxed md:text-sm
                wrap-break-word whitespace-pre-wrap select-text transition-shadow`,
+              // A photo fills its bubble — the roomy text padding would frame it
+              // in a band of colour instead.
+              imageSrc && "p-1",
               // One shape for every bubble: full radius but for a notch on the
               // top corner facing its author, which points the bubble at them.
               isAuthorsMessage
@@ -157,10 +185,30 @@ export const MessageBubble = memo(function MessageBubble({
               </div>
             )}
 
-            <MessageContent
-              content={content}
-              isAuthorsMessage={isAuthorsMessage}
-            />
+            {imageSrc && (
+              <div className={cn(hasCaption && "mb-1.5")}>
+                <MessageImage
+                  src={imageSrc}
+                  width={message.imageWidth}
+                  height={message.imageHeight}
+                  uploadProgress={uploadProgress}
+                  uploadFailed={uploadFailed}
+                  onRetry={retryUpload}
+                />
+              </div>
+            )}
+
+            {/* Text always renders; only a photo is allowed to stand alone. */}
+            {(hasCaption || !imageSrc) && (
+              // The bubble drops to a thin frame when it holds a photo, so a
+              // caption under one supplies its own breathing room.
+              <div className={cn(imageSrc && "px-2 pb-1")}>
+                <MessageContent
+                  content={content}
+                  isAuthorsMessage={isAuthorsMessage}
+                />
+              </div>
+            )}
           </div>
 
           {canReply && (

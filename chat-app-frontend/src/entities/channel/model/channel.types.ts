@@ -30,6 +30,8 @@ export interface InboxChannel extends Channel {
   lastMessage: {
     content: string;
     createdAt: string;
+    /** The last message carried a photo — its content may be an empty caption. */
+    hasImage?: boolean;
   } | null;
   messages: {
     id: string;

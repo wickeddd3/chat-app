@@ -32,6 +32,8 @@ export interface MessagesProps {
    * closed to new messages, which is what hides the affordance.
    */
   onReply?: (message: Message | NewMessage) => void;
+  /** Retries a photo upload that failed, by the message's client id. */
+  onRetryUpload?: (clientId: string) => void;
 }
 
 export function Messages({
@@ -41,6 +43,7 @@ export function Messages({
   fetchNextPage,
   showAuthorNames = false,
   onReply,
+  onRetryUpload,
 }: MessagesProps) {
   const { authUser } = useAuth();
   const { virtuosoRef, maxIndex } = useScrollToBottom({ messages });
@@ -123,6 +126,7 @@ export function Messages({
                 isHighlighted={!!message.id && message.id === highlightedId}
                 {...(onReply && { onReply })}
                 onJumpToParent={jumpToMessage}
+                {...(onRetryUpload && { onRetryUpload })}
                 position={position}
                 showAuthorName={showAuthorNames}
                 animate={isNew(key)}

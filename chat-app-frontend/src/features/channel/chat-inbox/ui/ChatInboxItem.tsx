@@ -42,10 +42,13 @@ export const ChatInboxItem = memo(function ChatInboxItem({
     participants,
   });
 
+  // A photo sent without a caption has empty content, which would leave the row
+  // blank — it is named instead.
+  const lastMessagePreview =
+    lastMessage?.content.trim() || (lastMessage?.hasImage ? "📷 Photo" : "");
+
   const displayMessage =
-    unreadCount > 1
-      ? `${unreadCount} unread messages`
-      : lastMessage?.content || "";
+    unreadCount > 1 ? `${unreadCount} unread messages` : lastMessagePreview;
 
   return (
     <Link

@@ -266,7 +266,9 @@ describe("MessageBubble", () => {
         />,
       );
 
-      await user.click(screen.getByRole("button", { name: "Reply to message" }));
+      await user.click(
+        screen.getByRole("button", { name: "Reply to message" }),
+      );
 
       expect(onReply).toHaveBeenCalledWith(target);
     });
@@ -299,6 +301,92 @@ describe("MessageBubble", () => {
       expect(
         screen.queryByRole("button", { name: "Reply to message" }),
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe("photos", () => {
+    it("renders an attached photo with its caption", () => {
+      const { container } = render(
+        <MessageBubble
+          message={message({
+            content: "sunset tonight",
+            imageUrl: "https://cdn/photo.webp",
+          })}
+          isAuthorsMessage={false}
+        />,
+      );
+
+      expect(container.querySelector("img")).toHaveAttribute(
+        "src",
+        "https://cdn/photo.webp",
+      );
+      expect(screen.getByText("sunset tonight")).toBeInTheDocument();
+    });
+
+    it("renders no caption line for a photo sent without one", () => {
+      // An uncaptioned photo has empty content — a blank run under the image
+      // would just be dead space.
+      const { container } = render(
+        <MessageBubble
+          message={message({ content: "", imageUrl: "https://cdn/photo.webp" })}
+          isAuthorsMessage={false}
+        />,
+      );
+
+      expect(container.querySelector("img")).toBeInTheDocument();
+      expect(container.textContent).not.toContain("Hello there");
+    });
+
+    it("draws the local preview while the photo is still uploading", () => {
+      // The sender sees their own image immediately, not an empty box.
+      const { container } = render(
+        <MessageBubble
+          message={{
+            author: { id: "user-1", name: "Jane", image: null },
+            content: "",
+            createdAt: "2026-01-01T00:00:00.000Z",
+            channelId: "channel-1",
+            clientId: "tmp-1",
+            isSending: true,
+            previewUrl: "blob:local-preview",
+            uploadProgress: 25,
+          }}
+          isAuthorsMessage
+        />,
+      );
+
+      expect(container.querySelector("img")).toHaveAttribute(
+        "src",
+        "blob:local-preview",
+      );
+      expect(
+        screen.getByRole("progressbar", { name: "Uploading photo" }),
+      ).toHaveAttribute("aria-valuenow", "25");
+    });
+
+    it("retries the upload by client id, so one callback serves every row", async () => {
+      const user = userEvent.setup();
+      const onRetryUpload = vi.fn();
+      render(
+        <MessageBubble
+          message={{
+            author: { id: "user-1", name: "Jane", image: null },
+            content: "",
+            createdAt: "2026-01-01T00:00:00.000Z",
+            channelId: "channel-1",
+            clientId: "tmp-7",
+            isSending: true,
+            previewUrl: "blob:local-preview",
+            uploadFailed: true,
+          }}
+          isAuthorsMessage
+          onRetryUpload={onRetryUpload}
+        />,
+      );
+
+      await user.click(screen.getByRole("button", { name: "Retry" }));
+
+      expect(onRetryUpload).toHaveBeenCalledWith("tmp-7");
     });
   });
 });

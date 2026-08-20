@@ -3,6 +3,10 @@ export { DayDivider } from "./ui/DayDivider";
 export { SystemMessage } from "./ui/SystemMessage";
 export { MessageContent } from "./ui/MessageContent";
 export { QuotedMessage } from "./ui/QuotedMessage";
+export { MessageImage } from "./ui/MessageImage";
+export { fitImageBox } from "./model/image-box";
+export { ImageLightbox } from "./ui/ImageLightbox";
+export { UploadProgressRing } from "./ui/UploadProgressRing";
 export { DeliveryStatus } from "./ui/DeliveryStatus";
 export type { DeliveryState } from "./ui/DeliveryStatus";
 
@@ -33,6 +37,7 @@ export type {
   Message,
   MessageKind,
   MessageParent,
+  MessageAttachment,
   NewMessage,
   PaginatedMessage,
 } from "./model/message.types";

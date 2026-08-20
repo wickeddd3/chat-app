@@ -53,6 +53,36 @@ describe("QuotedMessage", () => {
     expect(onJump).toHaveBeenCalledTimes(1);
   });
 
+  it("names a quoted photo that had no caption, and shows its thumbnail", () => {
+    const { container } = render(
+      <QuotedMessage
+        parent={parent({ content: "", imageUrl: "https://cdn/photo.webp" })}
+        isOwnParent={false}
+      />,
+    );
+
+    expect(screen.getByText("Photo")).toBeInTheDocument();
+    expect(container.querySelector("img")).toHaveAttribute(
+      "src",
+      "https://cdn/photo.webp",
+    );
+  });
+
+  it("prefers the caption over the generic label when a photo has one", () => {
+    render(
+      <QuotedMessage
+        parent={parent({
+          content: "look at this",
+          imageUrl: "https://cdn/p.webp",
+        })}
+        isOwnParent={false}
+      />,
+    );
+
+    expect(screen.getByText("look at this")).toBeInTheDocument();
+    expect(screen.queryByText("Photo")).not.toBeInTheDocument();
+  });
+
   it("renders inert without a handler, so the composer preview is not clickable", () => {
     render(<QuotedMessage parent={parent()} isOwnParent={false} />);
 
